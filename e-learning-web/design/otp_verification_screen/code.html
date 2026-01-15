@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OTP Verification - E-Learning Platform</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700&amp;family=Manrope:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007b80",
+                        "background-light": "#f9f7f6",
+                        "background-dark": "#1c1f22",
+                        "text-dark": "#0c1c1d",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2a2d31",
+                        "border-light": "#e6f4f4",
+                        "border-dark": "#3e4246",
+                        "error": "#FF8C00",
+                    },
+                    fontFamily: {
+                        "display": ["Epilogue", "sans-serif"],
+                        "body": ["Manrope", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        "card": "0px 4px 12px rgba(0, 0, 0, 0.08)",
+                        "input-focus": "0 0 0 2px rgba(0, 123, 128, 0.2)"
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-dark dark:text-gray-100 font-body min-h-screen flex flex-col transition-colors duration-200">
+<!-- Navbar (Simplified for Authentication Context) -->
+<header class="w-full px-6 py-4 flex items-center justify-between lg:px-12 absolute top-0 left-0 z-10">
+<div class="flex items-center gap-3 text-primary dark:text-white group cursor-pointer">
+<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 dark:bg-white/10">
+<span class="material-symbols-outlined text-xl text-primary dark:text-white">school</span>
+</div>
+<h2 class="font-display font-bold text-lg tracking-tight text-text-dark dark:text-white">Lumina<span class="text-primary">Learn</span></h2>
+</div>
+<div class="hidden sm:block">
+<a class="text-sm font-medium text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-white transition-colors" href="#">Need help?</a>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+<!-- Abstract Background Pattern -->
+<div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+<!-- Top Right Gradient Blob -->
+<div class="absolute -top-[10%] -right-[5%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl"></div>
+<!-- Bottom Left Gradient Blob -->
+<div class="absolute -bottom-[10%] -left-[5%] w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-3xl"></div>
+</div>
+<!-- Authentication Card -->
+<div class="relative z-10 w-full max-w-[480px] bg-surface-light dark:bg-surface-dark shadow-card rounded-xl p-8 sm:p-10 border border-border-light dark:border-border-dark flex flex-col gap-8">
+<!-- Header Section -->
+<div class="text-center flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-primary text-2xl">lock_person</span>
+</div>
+<h1 class="font-display text-2xl sm:text-3xl font-bold text-text-dark dark:text-white tracking-tight">Verify Your Account</h1>
+<p class="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-sm">
+                    We’ve sent a 6-digit verification code to <span class="font-medium text-text-dark dark:text-gray-200">stu***@lumina.edu</span>.
+                </p>
+</div>
+<!-- Verification Form -->
+<form class="flex flex-col gap-8" onsubmit="event.preventDefault();">
+<!-- OTP Inputs -->
+<div class="flex justify-center gap-2 sm:gap-3 w-full">
+<input autofocus="" class="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-display font-bold text-text-dark dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 selection:bg-primary/20 placeholder-transparent" inputmode="numeric" maxlength="1" placeholder="-" type="text"/>
+<input class="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-display font-bold text-text-dark dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 selection:bg-primary/20 placeholder-transparent" inputmode="numeric" maxlength="1" placeholder="-" type="text"/>
+<input class="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-display font-bold text-text-dark dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 selection:bg-primary/20 placeholder-transparent" inputmode="numeric" maxlength="1" placeholder="-" type="text"/>
+<div class="flex items-center justify-center text-gray-300 dark:text-gray-600">-</div>
+<input class="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-display font-bold text-text-dark dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 selection:bg-primary/20 placeholder-transparent" inputmode="numeric" maxlength="1" placeholder="-" type="text"/>
+<input class="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-display font-bold text-text-dark dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 selection:bg-primary/20 placeholder-transparent" inputmode="numeric" maxlength="1" placeholder="-" type="text"/>
+<input class="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-display font-bold text-text-dark dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 selection:bg-primary/20 placeholder-transparent" inputmode="numeric" maxlength="1" placeholder="-" type="text"/>
+</div>
+<!-- Timer & Resend -->
+<div class="flex flex-col items-center gap-2">
+<div class="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-background-light dark:bg-gray-800/50 py-2 px-4 rounded-full border border-transparent dark:border-gray-700">
+<span class="material-symbols-outlined text-lg" style="font-size: 18px;">timer</span>
+<span class="font-mono" id="countdown">00:45</span>
+</div>
+<div class="text-sm">
+<span class="text-gray-400 dark:text-gray-500">Didn't receive the code?</span>
+<button class="font-semibold text-primary dark:text-primary-400 hover:text-primary/80 dark:hover:text-primary-300 ml-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" type="button">
+                            Resend
+                        </button>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-col gap-4 mt-2">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-display font-medium text-base h-12 rounded-lg shadow-sm transition-all duration-200 flex items-center justify-center gap-2 group">
+<span>Verify &amp; Proceed</span>
+<span class="material-symbols-outlined text-lg group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</button>
+<a class="text-sm text-center text-gray-500 hover:text-text-dark dark:text-gray-400 dark:hover:text-gray-200 transition-colors flex items-center justify-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-base group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                        Back to Log In
+                    </a>
+</div>
+</form>
+</div>
+<!-- Footer Info -->
+<div class="absolute bottom-6 text-xs text-gray-400 dark:text-gray-600 text-center w-full px-4">
+<p>© 2024 LuminaLearn Inc. Secure Verification System.</p>
+</div>
+</main>
+</body></html>

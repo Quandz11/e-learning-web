@@ -1,0 +1,45 @@
+{
+    "app": {
+        "name": "SKVILearn"
+    },
+    "auth": {
+        "welcomeBack": "Chào mừng trở lại",
+        "enterDetails": "Vui lòng nhập thông tin chi tiết để truy cập tài khoản của bạn.",
+        "email": "Email",
+        "emailPlaceholder": "Nhập email của bạn",
+        "password": "Mật khẩu",
+        "passwordPlaceholder": "••••••••",
+        "rememberMe": "Ghi nhớ tôi trong 30 ngày",
+        "forgotPassword": "Quên mật khẩu?",
+        "logIn": "Đăng nhập",
+        "orLogInWith": "Hoặc đăng nhập bằng",
+        "dontHaveAccount": "Chưa có tài khoản?",
+        "signUp": "Đăng ký",
+        "createAccount": "Tạo tài khoản",
+        "joinCommunity": "Tham gia cùng hàng ngàn học viên và giáo viên ngay hôm nay.",
+        "student": "Học viên",
+        "agent": "Đại lý",
+        "fullName": "Họ và tên",
+        "fullNamePlaceholder": "Ví dụ: Nguyễn Văn A",
+        "createPassword": "Tạo mật khẩu",
+        "passwordHint": "Phải có ít nhất 8 ký tự.",
+        "referralCode": "Mã giới thiệu",
+        "optional": "Tùy chọn",
+        "enterCode": "Nhập mã",
+        "orSignUpWith": "Hoặc đăng ký bằng",
+        "alreadyHaveAccount": "Đã có tài khoản?",
+        "sendResetLink": "Gửi liên kết đặt lại",
+        "backToLogin": "Quay lại đăng nhập",
+        "forgotPasswordTitle": "Quên mật khẩu?",
+        "forgotPasswordDesc": "Đừng lo lắng, chúng tôi sẽ gửi hướng dẫn đặt lại cho bạn. Vui lòng nhập email liên kết với tài khoản của bạn bên dưới.",
+        "verifyAccount": "Xác minh tài khoản",
+        "codeSentTo": "Chúng tôi đã gửi mã xác minh 6 chữ số đến",
+        "didntReceiveCode": "Không nhận được mã?",
+        "resend": "Gửi lại",
+        "verifyAndProceed": "Xác minh & Tiếp tục"
+    },
+    "hero": {
+        "title": "Mở khóa tiềm năng của bạn qua từng bài học.",
+        "subtitle": "Tham gia cộng đồng học tập suốt đời và làm chủ các kỹ năng mới theo tốc độ của riêng bạn. Tương lai của bạn bắt đầu từ đây."
+    }
+}

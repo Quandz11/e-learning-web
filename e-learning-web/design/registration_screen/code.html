@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>E-Learning Registration</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#007b80",
+                        "primary-hover": "#006266",
+                        "background-light": "#f9f7f6",
+                        "background-dark": "#1c1f22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d3236",
+                        "text-main": "#0c1c1d",
+                        "text-muted": "#5c7c7e",
+                    },
+                    fontFamily: {
+                        "display": ["Epilogue", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .role-radio:checked + div {
+            background-color: #007b80;
+            color: white;
+            border-color: #007b80;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-text-main dark:text-gray-100 transition-colors duration-300">
+<div class="min-h-screen flex w-full">
+<!-- Left Side: Visual/Branding (Hidden on mobile, visible on lg screens) -->
+<div class="hidden lg:flex lg:w-5/12 relative bg-primary/10 overflow-hidden flex-col justify-between p-12">
+<!-- Background Image with Overlay -->
+<div class="absolute inset-0 z-0">
+<img alt="Students collaborating in a modern library environment" class="w-full h-full object-cover opacity-90" data-alt="Students collaborating in a modern library environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWqx_sPlDMBcNBdtpZp_COpN2xr7PRHk0-YmMiVD_RO33twoe9v1KQ2HoBTE9hsJI_f83yZ8BmbLlAVOMQsf8wNXXGgSzK5xoCdyAN5ZdoXkRmxA5A0V5SECTuEVY0ag8ih8Wws-WEONzdZwOihdPnuegDqdYYV23_zkkKR5zg6QTwotsUEY9bpMhR-xTn4T0FcUGrGN4dWBpEaldzRwOcOoRQeIk7xqgzrnEyo7sLVHNFpwn4_N9QHpQGH3uHLpqcTAv_QDYFdQ"/>
+<div class="absolute inset-0 bg-primary/80 mix-blend-multiply"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+</div>
+<!-- Brand Logo -->
+<div class="relative z-10 flex items-center gap-3 text-white">
+<div class="size-8 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/30">
+<span class="material-symbols-outlined text-white text-[20px]">school</span>
+</div>
+<span class="text-xl font-bold tracking-tight">EduSphere</span>
+</div>
+<!-- Testimonial/Value Prop -->
+<div class="relative z-10 text-white max-w-md">
+<div class="mb-6 flex gap-1 text-yellow-400">
+<span class="material-symbols-outlined text-[20px] fill-1">star</span>
+<span class="material-symbols-outlined text-[20px] fill-1">star</span>
+<span class="material-symbols-outlined text-[20px] fill-1">star</span>
+<span class="material-symbols-outlined text-[20px] fill-1">star</span>
+<span class="material-symbols-outlined text-[20px] fill-1">star</span>
+</div>
+<h3 class="text-3xl font-bold leading-tight mb-4">"The flexibility of the agent program allowed me to build a career while studying."</h3>
+<div class="flex items-center gap-4 mt-6">
+<img alt="Portrait of Sarah Jenkins" class="size-12 rounded-full border-2 border-white/50 object-cover" data-alt="Portrait of Sarah Jenkins" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO5Sud_MEbhDpN5K2RjUwk_KqoMRMxzN-bfLWuXWwKc0caXGMafbGeL3FNMI0W5XQBt1tzeVLelMwU6jShMDZLz5oGYC62K6S0iz6e-ozi2RwX4oOiPz4Uc637xMiA3_ekW7E6mYvE9owTfGpnvnIodikPptJgCQBlgWKpDeqshNCNx3ZhfxrQ_FnJ9CwWsE1692t5Vb7jFPhWXdg5WAnisNGsPcN4cWFVtDldBa-Gz12aRd4kgUk5cdoQZ0nhFH-w-Y2g-tPx6Q"/>
+<div>
+<p class="font-bold text-lg">Sarah Jenkins</p>
+<p class="text-white/80 text-sm">Top Agent, 2023</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side: Registration Form -->
+<div class="w-full lg:w-7/12 flex flex-col justify-center items-center p-6 sm:p-12 overflow-y-auto">
+<div class="w-full max-w-[520px] space-y-8">
+<!-- Mobile Logo (Visible only on small screens) -->
+<div class="flex lg:hidden items-center gap-2 mb-6 text-primary">
+<span class="material-symbols-outlined text-[24px]">school</span>
+<span class="text-xl font-bold">EduSphere</span>
+</div>
+<!-- Header -->
+<div class="text-center sm:text-left space-y-2">
+<h1 class="text-3xl sm:text-4xl font-bold text-text-main dark:text-white">Create your account</h1>
+<p class="text-text-muted dark:text-gray-400 text-base">Join thousands of learners and educators today.</p>
+</div>
+<!-- Role Selector -->
+<div class="bg-gray-100 dark:bg-gray-800 p-1.5 rounded-xl flex relative">
+<label class="flex-1 cursor-pointer group">
+<input checked="" class="peer sr-only role-radio" name="role" type="radio" value="student"/>
+<div class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 font-medium group-hover:text-primary dark:group-hover:text-primary-light border border-transparent">
+<span class="material-symbols-outlined text-[20px]">school</span>
+<span>Student</span>
+</div>
+</label>
+<label class="flex-1 cursor-pointer group">
+<input class="peer sr-only role-radio" name="role" type="radio" value="agent"/>
+<div class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 font-medium group-hover:text-primary dark:group-hover:text-primary-light border border-transparent">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+<span>Agent</span>
+</div>
+</label>
+</div>
+<!-- Main Form -->
+<form class="space-y-5" onsubmit="event.preventDefault();">
+<!-- Full Name -->
+<div class="space-y-1.5">
+<label class="block text-sm font-semibold text-text-main dark:text-gray-200">Full Name</label>
+<div class="relative">
+<input class="w-full h-12 px-4 rounded-lg bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary text-text-main dark:text-white placeholder-gray-400 transition-colors" placeholder="e.g. Alex Morgan" type="text"/>
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-1.5">
+<label class="block text-sm font-semibold text-text-main dark:text-gray-200">Email Address</label>
+<div class="relative">
+<input class="w-full h-12 px-4 rounded-lg bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary text-text-main dark:text-white placeholder-gray-400 transition-colors" placeholder="name@company.com" type="email"/>
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</div>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-1.5">
+<label class="block text-sm font-semibold text-text-main dark:text-gray-200">Password</label>
+<div class="relative">
+<input class="w-full h-12 px-4 rounded-lg bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary text-text-main dark:text-white placeholder-gray-400 transition-colors" placeholder="Create a password" type="password"/>
+<button class="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<p class="text-xs text-text-muted dark:text-gray-500 mt-1">Must be at least 8 characters.</p>
+</div>
+<!-- Referral Code -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="block text-sm font-semibold text-text-main dark:text-gray-200">Referral Code</label>
+<span class="text-xs font-medium text-gray-400 uppercase tracking-wide">Optional</span>
+</div>
+<div class="relative">
+<input class="w-full h-12 px-4 rounded-lg bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 border-dashed focus:border-solid focus:border-primary focus:ring-1 focus:ring-primary text-text-main dark:text-white placeholder-gray-400 transition-all" placeholder="Enter code" type="text"/>
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+<span class="material-symbols-outlined text-[20px]">confirmation_number</span>
+</div>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full h-12 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg shadow-lg shadow-primary/20 transition-all duration-200 flex items-center justify-center gap-2 mt-4">
+<span>Create Account</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<!-- Divider -->
+<div class="relative flex py-2 items-center">
+<div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+<span class="flex-shrink-0 mx-4 text-gray-400 text-sm">or sign up with</span>
+<div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+</div>
+<!-- Social Login -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-text-main dark:text-gray-200">
+<svg class="w-5 h-5" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M23.766 12.2764C23.766 11.4607 23.6999 10.6406 23.5588 9.83807H12.24V14.4591H18.7217C18.4528 15.9494 17.5885 17.2678 16.323 18.1056V21.1039H20.19C22.4608 19.0139 23.766 15.9274 23.766 12.2764Z" fill="#4285F4"></path>
+<path d="M12.24 24.0008C15.4765 24.0008 18.2058 22.9382 20.1945 21.1039L16.3275 18.1055C15.2517 18.8375 13.8627 19.252 12.2445 19.252C9.11388 19.252 6.45946 17.1399 5.50705 14.3003H1.5166V17.3912C3.55371 21.4434 7.7029 24.0008 12.24 24.0008Z" fill="#34A853"></path>
+<path d="M5.50253 14.3003C5.00236 12.8099 5.00236 11.1961 5.50253 9.70575V6.61481H1.51649C-0.18551 10.0056 -0.18551 14.0004 1.51649 17.3912L5.50253 14.3003Z" fill="#FBBC05"></path>
+<path d="M12.24 4.74966C13.9509 4.7232 15.6044 5.36697 16.8434 6.54867L20.2695 3.12262C18.1001 1.0855 15.2208 -0.034466 12.24 0.000808666C7.7029 0.000808666 3.55371 2.55822 1.5166 6.61481L5.50264 9.70575C6.45064 6.86173 9.10947 4.74966 12.24 4.74966Z" fill="#EA4335"></path>
+</svg>
+                            Google
+                        </button>
+<button class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-text-main dark:text-gray-200">
+<svg class="w-5 h-5 text-gray-900 dark:text-white" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM15.556 16.944L13.778 15.167L15.556 13.389L13.778 11.611L15.556 9.833L13.778 8.056L15.556 6.278L13.778 4.5L12 6.278L10.222 4.5L8.444 6.278L10.222 8.056L8.444 9.833L10.222 11.611L8.444 13.389L10.222 15.167L8.444 16.944L10.222 18.722L12 16.944L13.778 18.722L15.556 16.944Z" fill-opacity="0"></path>
+<path clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12C2 16.418 5.614 20 10 20V12.25H8V9.75H10V8.25C10 6.134 11.168 5 13.064 5C13.974 5 14.75 5.068 14.75 5.068V7.167H13.805C12.756 7.167 12.5 7.818 12.5 8.484V9.75H15L14.5 12.25H12.5V20C16.886 20 20.5 16.418 20.5 12C20.5 6.477 16.023 2 10.5 2H12Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+                            Facebook
+                        </button>
+</div>
+<!-- Footer Link -->
+<p class="text-center text-sm text-text-muted dark:text-gray-400 pt-4">
+                        Already have an account? 
+                        <a class="font-bold text-primary hover:text-primary-hover hover:underline" href="#">Log In</a>
+</p>
+</form>
+</div>
+</div>
+</div>
+</body></html>

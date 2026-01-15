@@ -1,0 +1,45 @@
+{
+    "app": {
+        "name": "SKVILearn"
+    },
+    "auth": {
+        "welcomeBack": "Welcome Back",
+        "enterDetails": "Please enter your details to access your account.",
+        "email": "Email",
+        "emailPlaceholder": "Enter your email",
+        "password": "Password",
+        "passwordPlaceholder": "••••••••",
+        "rememberMe": "Remember for 30 days",
+        "forgotPassword": "Forgot password?",
+        "logIn": "Log In",
+        "orLogInWith": "Or log in with",
+        "dontHaveAccount": "Don't have an account?",
+        "signUp": "Sign up",
+        "createAccount": "Create your account",
+        "joinCommunity": "Join thousands of learners and educators today.",
+        "student": "Student",
+        "agent": "Agent",
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "e.g. Alex Morgan",
+        "createPassword": "Create a password",
+        "passwordHint": "Must be at least 8 characters.",
+        "referralCode": "Referral Code",
+        "optional": "Optional",
+        "enterCode": "Enter code",
+        "orSignUpWith": "or sign up with",
+        "alreadyHaveAccount": "Already have an account?",
+        "sendResetLink": "Send Reset Link",
+        "backToLogin": "Back to log in",
+        "forgotPasswordTitle": "Forgot Password?",
+        "forgotPasswordDesc": "No worries, we'll send you reset instructions. Please enter the email associated with your account below.",
+        "verifyAccount": "Verify Your Account",
+        "codeSentTo": "We’ve sent a 6-digit verification code to",
+        "didntReceiveCode": "Didn't receive the code?",
+        "resend": "Resend",
+        "verifyAndProceed": "Verify & Proceed"
+    },
+    "hero": {
+        "title": "Unlock your potential with every lesson.",
+        "subtitle": "Join a community of lifelong learners and master new skills at your own pace. Your future starts here."
+    }
+}

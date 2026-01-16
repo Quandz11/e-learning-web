@@ -632,6 +632,9 @@ namespace e_learning_server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -669,6 +672,12 @@ namespace e_learning_server.Migrations
 
                     b.Property<bool>("IsPhoneVerified")
                         .HasColumnType("bit");
+
+                    b.Property<string>("OtpCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("OtpExpiration")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

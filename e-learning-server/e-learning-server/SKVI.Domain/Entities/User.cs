@@ -12,6 +12,8 @@ public class User
     public string Status { get; set; } = "ACTIVE";
     public bool IsEmailVerified { get; set; } = false;
     public bool IsPhoneVerified { get; set; } = false;
+    public string? OtpCode { get; set; }
+    public DateTime? OtpExpiration { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;

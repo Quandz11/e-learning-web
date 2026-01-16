@@ -41,5 +41,51 @@
     "hero": {
         "title": "Mở khóa tiềm năng của bạn qua từng bài học.",
         "subtitle": "Tham gia cộng đồng học tập suốt đời và làm chủ các kỹ năng mới theo tốc độ của riêng bạn. Tương lai của bạn bắt đầu từ đây."
+    },
+    "admin": {
+        "sidebar": {
+            "dashboard": "Bảng điều khiển",
+            "students": "Học viên",
+            "instructors": "Giảng viên",
+            "agents": "Đại lý",
+            "courses": "Khóa học",
+            "revenue": "Doanh thu",
+            "settings": "Cài đặt"
+        },
+        "header": {
+            "searchPlaceholder": "Tìm kiếm học viên, khóa học, hoặc đơn hàng...",
+            "adminProfileAlt": "Hồ sơ quản trị viên"
+        },
+        "dashboard": {
+            "overview": "Tổng quan",
+            "overviewSubtitle": "Đây là những gì đang diễn ra trong học viện của bạn hôm nay.",
+            "last30Days": "30 ngày qua",
+            "exportReport": "Xuất báo cáo",
+            "totalStudents": "Tổng học viên",
+            "totalRevenue": "Tổng doanh thu",
+            "agentRevenue": "Doanh thu đại lý",
+            "activeCourses": "Khóa học đang hoạt động"
+        },
+        "recentOrders": {
+            "title": "Đơn hàng gần đây",
+            "viewAll": "Xem tất cả",
+            "table": {
+                "orderId": "Mã đơn",
+                "student": "Học viên",
+                "course": "Khóa học",
+                "amount": "Số tiền",
+                "status": "Trạng thái",
+                "date": "Ngày"
+            },
+            "status": {
+                "paid": "Đã thanh toán",
+                "pending": "Đang chờ",
+                "failed": "Thất bại"
+            }
+        },
+        "topAgents": {
+            "title": "Đại lý hàng đầu",
+            "viewAll": "Xem tất cả đại lý"
+        }
     }
 }

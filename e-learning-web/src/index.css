@@ -1,9 +1,5 @@
 @import "tailwindcss";
-
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-
-@plugin "tailwindcss-animate";
 
 @theme {
   --font-display: 'Epilogue', sans-serif;
@@ -15,6 +11,19 @@
 
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+
+  /* Dashboard Theme extensions */
+  --font-dashboard: 'Manrope', sans-serif;
+  --color-dashboard-primary: #155879;
+  --color-dashboard-primary-dark: #0e3f57;
+  --color-dashboard-accent: #d97706;
+  --color-dashboard-background-light: #f1f2f4;
+  --color-dashboard-background-dark: #121b20;
+  --color-dashboard-surface-light: #ffffff;
+  --color-dashboard-surface-dark: #1a262e;
+  
+  --shadow-dashboard-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-dashboard-lift: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 @layer base {

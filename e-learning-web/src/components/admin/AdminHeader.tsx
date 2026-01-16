@@ -1,0 +1,66 @@
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+const AdminHeader: React.FC = () => {
+    const { t, i18n } = useTranslation();
+
+    const changeLanguage = () => {
+        const newLang = i18n.language === 'en' ? 'vi' : 'en';
+        i18n.changeLanguage(newLang);
+    };
+
+    return (
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-dashboard-surface-light/90 px-6 backdrop-blur-sm dark:border-slate-800 dark:bg-dashboard-surface-dark/90">
+            {/* Mobile Menu Trigger */}
+            <button className="rounded-md p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden">
+                <span className="material-symbols-outlined">menu</span>
+            </button>
+
+            {/* Search Bar */}
+            <div className="hidden max-w-md flex-1 md:flex lg:ml-0">
+                <div className="group relative w-full">
+                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <span className="material-symbols-outlined text-slate-400 transition-colors group-focus-within:text-dashboard-primary">search</span>
+                    </span>
+                    <input
+                        className="block w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-3 leading-5 text-slate-900 placeholder-slate-400 transition-all focus:border-dashboard-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-dashboard-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:bg-slate-950 sm:text-sm"
+                        placeholder={t('admin.header.searchPlaceholder')}
+                        type="text"
+                    />
+                </div>
+            </div>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-4">
+                <button 
+                    onClick={changeLanguage}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    title="Change Language"
+                >
+                    {i18n.language === 'en' ? 'EN' : 'VI'}
+                </button>
+
+                <button className="relative rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+                    <span className="material-symbols-outlined">notifications</span>
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-dashboard-accent ring-2 ring-white dark:ring-dashboard-surface-dark"></span>
+                </button>
+                <button className="hidden rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 sm:block">
+                    <span className="material-symbols-outlined">help</span>
+                </button>
+                <div className="mx-1 hidden h-8 w-[1px] bg-slate-200 dark:bg-slate-700 sm:block"></div>
+                {/* Mini Profile for Mobile (Simplified) */}
+                <div className="flex items-center gap-2 lg:hidden">
+                    <div
+                        className="h-8 w-8 rounded-full bg-slate-300 bg-cover bg-center"
+                        style={{
+                            backgroundImage:
+                                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCwoq3mqfpmGjF_Jocw6OABcwV11GznkLX-g2gW0u3f07lm3BA-HUl8SdNx7wgZojnAX0R5bs5AbdPIDsyZkQDEoFdfwQ7ETNnk9T2bT4VXfOtLHFcERRYc07aUUOakLgtMI65A79Eq6g0oA-SPwywMnsw37PFjw8DT5bSBuyoCnPLXmVa23qCq6dU6xJUsb5PrWcEq_COaJe2KFjRAuQbt3tAqd3_woBJGYM1kS1oyMnjtc7vYd4Kjxv-jBORoNls-sPCF8bKW9g')",
+                        }}
+                    ></div>
+                </div>
+            </div>
+        </header>
+    );
+};
+
+export default AdminHeader;

@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@theme {
+  --color-primary: #007b80;
+  --color-background-light: #f9f7f6;
+  --color-background-dark: #1c1f22;
+  --color-dashboard-primary: #155879;
+  --color-dashboard-primary-dark: #0e3f57;
+  --color-dashboard-accent: #d97706;
+  --color-dashboard-background-light: #f1f2f4;
+  --color-dashboard-background-dark: #121b20;
+  --color-dashboard-surface-light: #ffffff;
+  --color-dashboard-surface-dark: #1a262e;
+}
+
+@layer base {
+  html {
+    @apply font-sans;
+  }
+  
+  body {
+    @apply bg-background-light dark:bg-background-dark text-gray-900 dark:text-white;
+  }
+}

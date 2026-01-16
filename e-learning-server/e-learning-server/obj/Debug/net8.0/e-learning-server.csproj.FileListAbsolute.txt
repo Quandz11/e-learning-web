@@ -137,3 +137,10 @@ C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\obj\Debug\
 C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\obj\Debug\net8.0\e-learning-server.pdb
 C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\obj\Debug\net8.0\e-learning-server.genruntimeconfig.cache
 C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\obj\Debug\net8.0\ref\e-learning-server.dll
+C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
+C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\bin\Debug\net8.0\MailKit.dll
+C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\bin\Debug\net8.0\MimeKit.dll
+C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\Quan\Documents\elearning\e-learning-server\e-learning-server\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll

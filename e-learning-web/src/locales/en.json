@@ -41,5 +41,51 @@
     "hero": {
         "title": "Unlock your potential with every lesson.",
         "subtitle": "Join a community of lifelong learners and master new skills at your own pace. Your future starts here."
+    },
+    "admin": {
+        "sidebar": {
+            "dashboard": "Dashboard",
+            "students": "Students",
+            "instructors": "Instructors",
+            "agents": "Agents",
+            "courses": "Courses",
+            "revenue": "Revenue",
+            "settings": "Settings"
+        },
+        "header": {
+            "searchPlaceholder": "Search students, courses, or orders...",
+            "adminProfileAlt": "Admin user profile"
+        },
+        "dashboard": {
+            "overview": "Overview",
+            "overviewSubtitle": "Here's what's happening in your academy today.",
+            "last30Days": "Last 30 Days",
+            "exportReport": "Export Report",
+            "totalStudents": "Total Students",
+            "totalRevenue": "Total Revenue",
+            "agentRevenue": "Agent Revenue",
+            "activeCourses": "Active Courses"
+        },
+        "recentOrders": {
+            "title": "Recent Orders",
+            "viewAll": "View All",
+            "table": {
+                "orderId": "Order ID",
+                "student": "Student",
+                "course": "Course",
+                "amount": "Amount",
+                "status": "Status",
+                "date": "Date"
+            },
+            "status": {
+                "paid": "Paid",
+                "pending": "Pending",
+                "failed": "Failed"
+            }
+        },
+        "topAgents": {
+            "title": "Top Agents",
+            "viewAll": "View All Agents"
+        }
     }
 }

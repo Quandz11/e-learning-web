@@ -1,8 +1,8 @@
 import React from 'react';
-import AdminLayout from '../../components/admin/AdminLayout';
-import StatsCard from '../../components/admin/StatsCard';
-import RecentOrdersTable from '../../components/admin/RecentOrdersTable';
-import TopAgents from '../../components/admin/TopAgents';
+import AdminLayout from '../../../components/admin/AdminLayout';
+import StatsCard from '../../../components/admin/StatsCard';
+import RecentOrdersTable from '../../../components/admin/RecentOrdersTable';
+import TopAgents from '../../../components/admin/TopAgents';
 import { useTranslation } from 'react-i18next';
 
 const AdminDashboardPage: React.FC = () => {

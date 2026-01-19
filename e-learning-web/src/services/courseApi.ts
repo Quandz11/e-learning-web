@@ -42,6 +42,10 @@ export interface VideoUploadResponse {
   duration: number;
 }
 
+export interface UploadThumbnailResponse {
+  url: string;
+}
+
 function authHeaders() {
   const token = authApi.getAccessToken();
   const headers: Record<string, string> = {};
@@ -52,8 +56,9 @@ function authHeaders() {
 }
 
 export const courseApi = {
-  async getAll(): Promise<CourseResponse[]> {
-    const res = await fetch(`${API_BASE_URL}/courses`, {
+  async getAll(isPublished?: boolean): Promise<CourseResponse[]> {
+    const url = isPublished === undefined ? `${API_BASE_URL}/courses` : `${API_BASE_URL}/courses?isPublished=${isPublished}`;
+    const res = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -62,6 +67,19 @@ export const courseApi = {
       credentials: 'include',
     });
     if (!res.ok) throw new Error('Failed to fetch courses');
+    return res.json();
+  },
+
+  async getById(id: string): Promise<CourseResponse> {
+    const res = await fetch(`${API_BASE_URL}/courses/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error('Failed to fetch course');
     return res.json();
   },
 
@@ -121,6 +139,46 @@ export const courseApi = {
     if (!res.ok) {
       const message = await res.text();
       throw new Error(message || 'Failed to upload video');
+    }
+
+    return res.json();
+  },
+
+  async uploadVideoThumbnail(videoId: string, file: File): Promise<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${API_BASE_URL}/videos/${videoId}/thumbnail`, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(),
+      },
+      credentials: 'include',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const message = await res.text();
+      throw new Error(message || 'Failed to upload video thumbnail');
+    }
+  },
+
+  async uploadThumbnail(file: File): Promise<UploadThumbnailResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${API_BASE_URL}/courses/thumbnail`, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(),
+      },
+      credentials: 'include',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const message = await res.text();
+      throw new Error(message || 'Failed to upload thumbnail');
     }
 
     return res.json();

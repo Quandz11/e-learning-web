@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import AdminLayout from '../../components/admin/AdminLayout';
-import { userApi, type UserDto, type UserRole, type UserStatus, type CreateUserRequest, type UpdateUserRequest } from '../../services/userApi';
+import AdminLayout from '../../../components/admin/AdminLayout';
+import { userApi, type UserDto, type UserRole, type UserStatus, type CreateUserRequest, type UpdateUserRequest } from '../../../services/userApi';
 import { format } from 'date-fns';
 
 const roles: UserRole[] = ['ADMIN', 'CARE', 'CABIN_OWNER', 'STUDENT', 'LECTURER'];

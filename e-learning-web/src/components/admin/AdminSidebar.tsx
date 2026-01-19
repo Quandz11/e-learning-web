@@ -38,7 +38,7 @@ const AdminSidebar: React.FC = () => {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-dashboard-primary text-white">
               <span className="material-symbols-outlined text-[20px]">school</span>
             </div>
-            <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">EduAdmin</h1>
+            <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">SKVI Admin</h1>
           </div>
         </div>
 

@@ -10,10 +10,12 @@ namespace e_learning_server.Controllers;
 public class VideosController : ControllerBase
 {
     private readonly IVideoService _videoService;
+    private readonly IBunnyStreamService _bunnyStreamService;
 
-    public VideosController(IVideoService videoService)
+    public VideosController(IVideoService videoService, IBunnyStreamService bunnyStreamService)
     {
         _videoService = videoService;
+        _bunnyStreamService = bunnyStreamService;
     }
 
     [HttpPost("upload")]
@@ -30,6 +32,43 @@ public class VideosController : ControllerBase
         {
             var result = await _videoService.UploadAsync(file, title, cancellationToken);
             return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{videoId}/thumbnail")]
+    [Authorize(Roles = "ADMIN,LECTURER")]
+    [RequestSizeLimit(20_000_000)]
+    public async Task<IActionResult> UploadThumbnail(Guid videoId, [FromForm] IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file == null)
+        {
+            return BadRequest(new { message = "File is required" });
+        }
+
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = "Only image files are allowed" });
+        }
+
+        try
+        {
+            var video = await _videoService.GetByIdAsync(videoId, cancellationToken);
+            if (video == null || string.IsNullOrWhiteSpace(video.BunnyVideoId))
+            {
+                return NotFound(new { message = "Video not found" });
+            }
+
+            await using var stream = file.OpenReadStream();
+            await _bunnyStreamService.UploadVideoThumbnailAsync(video.BunnyVideoId, stream, file.FileName, cancellationToken);
+            return Ok(new { message = "Thumbnail uploaded" });
         }
         catch (ArgumentException ex)
         {

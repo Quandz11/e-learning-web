@@ -11,16 +11,14 @@ public class BunnyStreamService : IBunnyStreamService
     private readonly HttpClient _httpClient;
     private readonly BunnySettings _settings;
 
+    private const string AccessKeyHeader = "AccessKey";
+
     public BunnyStreamService(HttpClient httpClient, IOptions<BunnySettings> settings)
     {
         _httpClient = httpClient;
         _settings = settings.Value;
 
         _httpClient.BaseAddress ??= new Uri("https://video.bunnycdn.com");
-        if (!_httpClient.DefaultRequestHeaders.Contains("AccessKey"))
-        {
-            _httpClient.DefaultRequestHeaders.Add("AccessKey", _settings.ApiKey);
-        }
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
@@ -37,8 +35,12 @@ public class BunnyStreamService : IBunnyStreamService
             : title.Trim();
 
         // 1) Create video entry
-        var createResponse = await _httpClient.PostAsJsonAsync($"/library/{_settings.LibraryId}/videos", new { title = normalizedTitle }, cancellationToken);
-        createResponse.EnsureSuccessStatusCode();
+        using var createRequest = new HttpRequestMessage(HttpMethod.Post, $"/library/{_settings.LibraryId}/videos")
+        {
+            Content = JsonContent.Create(new { title = normalizedTitle })
+        };
+
+        var createResponse = await SendWithAccessKeyAsync(createRequest, _settings.ApiKey, cancellationToken);
 
         var created = await createResponse.Content.ReadFromJsonAsync<BunnyCreateVideoResponse>(cancellationToken: cancellationToken);
         if (created == null || string.IsNullOrWhiteSpace(created.Guid))
@@ -52,8 +54,12 @@ public class BunnyStreamService : IBunnyStreamService
         using var content = new StreamContent(fileStream);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
-        var uploadResponse = await _httpClient.PutAsync($"/library/{_settings.LibraryId}/videos/{videoId}", content, cancellationToken);
-        uploadResponse.EnsureSuccessStatusCode();
+        using var uploadRequest = new HttpRequestMessage(HttpMethod.Put, $"/library/{_settings.LibraryId}/videos/{videoId}")
+        {
+            Content = content
+        };
+
+        var uploadResponse = await SendWithAccessKeyAsync(uploadRequest, _settings.ApiKey, cancellationToken);
 
         return new BunnyUploadResult
         {
@@ -72,6 +78,95 @@ public class BunnyStreamService : IBunnyStreamService
         }
 
         return $"{_settings.CdnBaseUrl.TrimEnd('/')}/{bunnyVideoId}/playlist.m3u8";
+    }
+
+    public async Task<string> UploadImageAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
+    {
+        if (fileStream == null || fileStream.Length == 0)
+        {
+            throw new ArgumentException("File stream is empty", nameof(fileStream));
+        }
+
+        if (string.IsNullOrWhiteSpace(_settings.StorageZoneName) || string.IsNullOrWhiteSpace(_settings.StorageApiKey))
+        {
+            throw new InvalidOperationException("Bunny storage settings are not configured");
+        }
+
+        var safeFileName = $"{Guid.NewGuid():N}{Path.GetExtension(fileName)}";
+        var uploadUrl = $"{_settings.StorageBaseUrl.TrimEnd('/')}/{_settings.StorageZoneName}/thumbnails/{safeFileName}";
+
+        using var content = new StreamContent(fileStream);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+
+        using var request = new HttpRequestMessage(HttpMethod.Put, uploadUrl)
+        {
+            Content = content
+        };
+
+        var response = await SendWithAccessKeyAsync(request, _settings.StorageApiKey, cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(_settings.StorageCdnBaseUrl))
+        {
+            throw new InvalidOperationException("Bunny storage CDN base URL is not configured");
+        }
+
+        return $"{_settings.StorageCdnBaseUrl.TrimEnd('/')}/thumbnails/{safeFileName}";
+    }
+
+    private async Task<HttpResponseMessage> SendWithAccessKeyAsync(HttpRequestMessage request, string apiKey, CancellationToken cancellationToken)
+    {
+        request.Headers.Remove(AccessKeyHeader);
+        request.Headers.Add(AccessKeyHeader, apiKey);
+
+        var response = await _httpClient.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new InvalidOperationException($"Bunny API error ({(int)response.StatusCode}): {body}");
+        }
+
+        return response;
+    }
+
+    public async Task UploadVideoThumbnailAsync(string bunnyVideoId, Stream fileStream, string fileName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(bunnyVideoId))
+        {
+            throw new ArgumentException("Video id is required", nameof(bunnyVideoId));
+        }
+
+        if (fileStream == null || fileStream.Length == 0)
+        {
+            throw new ArgumentException("File stream is empty", nameof(fileStream));
+        }
+
+        using var content = new MultipartFormDataContent();
+
+        var streamContent = new StreamContent(fileStream);
+        streamContent.Headers.ContentType = new MediaTypeHeaderValue(GetImageContentType(fileName));
+
+        // Bunny expects multipart key "thumbnail"
+        content.Add(streamContent, "thumbnail", fileName);
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"/library/{_settings.LibraryId}/videos/{bunnyVideoId}/thumbnail")
+        {
+            Content = content
+        };
+
+        await SendWithAccessKeyAsync(request, _settings.ApiKey, cancellationToken);
+    }
+
+    private static string GetImageContentType(string fileName)
+    {
+        var ext = Path.GetExtension(fileName)?.ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream"
+        };
     }
 
     private class BunnyCreateVideoResponse

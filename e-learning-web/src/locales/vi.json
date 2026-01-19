@@ -116,8 +116,15 @@
                 "editTitle": "Chỉnh sửa khóa học",
                 "title": "Tiêu đề",
                 "thumbnail": "Ảnh thumbnail",
+                "thumbnailUploading": "Đang upload thumbnail...",
                 "price": "Giá",
-                "lecturer": "Mã giảng viên",
+                "lecturer": "Giảng viên",
+                "lecturerSearchPlaceholder": "Tìm giảng viên theo tên hoặc email",
+                "lecturerSelectPlaceholder": "Chọn giảng viên",
+                "lecturerLoading": "Đang tải danh sách giảng viên...",
+                "lecturerEmpty": "Không tìm thấy giảng viên",
+                "lecturerHint": "Hiển thị tối đa 20 giảng viên. Dùng ô tìm kiếm để lọc.",
+                "selectedLecturerId": "Giảng viên đã chọn (ID: {{id}})",
                 "description": "Mô tả",
                 "free": "Khóa học miễn phí",
                 "published": "Xuất bản",
@@ -133,7 +140,8 @@
                 "deleteConfirm": "Xóa khóa học này?",
                 "errors": {
                     "title": "Vui lòng nhập tiêu đề",
-                    "lecturer": "Vui lòng nhập mã giảng viên",
+                    "lecturer": "Vui lòng chọn giảng viên",
+                    "loadLecturers": "Tải danh sách giảng viên thất bại",
                     "saveFailed": "Lưu thất bại",
                     "deleteFailed": "Xóa thất bại",
                     "loadFailed": "Tải danh sách khóa học thất bại",
@@ -219,5 +227,29 @@
     },
     "common": {
         "saving": "Đang lưu..."
+    },
+    "courseDetail": {
+        "back": "Quay lại",
+        "loading": "Đang tải khóa học...",
+        "loadError": "Tải khóa học thất bại",
+        "overviewTab": "Tổng quan",
+        "curriculumTab": "Giáo trình",
+        "selectLesson": "Chọn bài để xem",
+        "free": "Miễn phí",
+        "sections": "Phần",
+        "lessons": "Bài học",
+        "durationMinutes": "{{minutes}} phút",
+        "submittedAt": "Ngày tạo",
+        "totalDuration": "Tổng thời lượng",
+        "preview": "Xem trước",
+        "level": "Trình độ",
+        "language": "Ngôn ngữ",
+        "defaultLanguage": "Tiếng Việt",
+        "instructor": "Giảng viên",
+        "unknownInstructor": "Giảng viên",
+        "meta": {
+            "statusPublished": "Đã xuất bản",
+            "statusDraft": "Bản nháp"
+        }
     }
 }

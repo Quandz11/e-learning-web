@@ -7,13 +7,14 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import OtpVerifyPage from './pages/auth/OtpVerifyPage';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
-import CoursesPage from './pages/admin/CoursesPage';
+import AdminDashboardPage from './pages/admin/dashboard/AdminDashboardPage';
+import CoursesPage from './pages/admin/course/CoursesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { setAuthState } from './store/authSlice';
 import { authApi } from './services/authApi';
 import HomePage from './pages/HomePage';
-import UsersPage from './pages/admin/UsersPage';
+import UsersPage from './pages/admin/user/UsersPage';
+import CourseDetailPage from './pages/admin/course/CourseDetailPage';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -63,6 +64,14 @@ function App() {
           element: (
             <ProtectedRoute>
               <HomePage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'courses/:id',
+          element: (
+            <ProtectedRoute>
+              <CourseDetailPage />
             </ProtectedRoute>
           ),
         },

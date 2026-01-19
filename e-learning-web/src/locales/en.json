@@ -116,8 +116,15 @@
                 "editTitle": "Edit Course",
                 "title": "Title",
                 "thumbnail": "Thumbnail URL",
+                "thumbnailUploading": "Uploading thumbnail...",
                 "price": "Price",
-                "lecturer": "Lecturer Id",
+                "lecturer": "Lecturer",
+                "lecturerSearchPlaceholder": "Search lecturer by name or email",
+                "lecturerSelectPlaceholder": "Select a lecturer",
+                "lecturerLoading": "Loading lecturers...",
+                "lecturerEmpty": "No lecturers found",
+                "lecturerHint": "Showing up to 20 lecturers. Use search to filter.",
+                "selectedLecturerId": "Selected lecturer (ID: {{id}})",
                 "description": "Description",
                 "free": "Free course",
                 "published": "Published",
@@ -133,7 +140,8 @@
                 "deleteConfirm": "Delete this course?",
                 "errors": {
                     "title": "Title is required",
-                    "lecturer": "LecturerId is required",
+                    "lecturer": "Lecturer is required",
+                    "loadLecturers": "Failed to load lecturers",
                     "saveFailed": "Save failed",
                     "deleteFailed": "Delete failed",
                     "loadFailed": "Failed to load courses",
@@ -219,5 +227,29 @@
     },
     "common": {
         "saving": "Saving..."
+    },
+    "courseDetail": {
+        "back": "Back",
+        "loading": "Loading course...",
+        "loadError": "Failed to load course",
+        "overviewTab": "Overview",
+        "curriculumTab": "Curriculum",
+        "selectLesson": "Select a lesson to play",
+        "free": "Free",
+        "sections": "Sections",
+        "lessons": "Lessons",
+        "durationMinutes": "{{minutes}} min",
+        "submittedAt": "Created",
+        "totalDuration": "Total duration",
+        "preview": "Preview",
+        "level": "Level",
+        "language": "Language",
+        "defaultLanguage": "Vietnamese",
+        "instructor": "Instructor",
+        "unknownInstructor": "Instructor",
+        "meta": {
+            "statusPublished": "Published",
+            "statusDraft": "Draft"
+        }
     }
 }

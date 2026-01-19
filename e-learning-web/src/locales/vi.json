@@ -45,6 +45,7 @@
     "admin": {
         "sidebar": {
             "dashboard": "Bảng điều khiển",
+            "users": "Người dùng",
             "students": "Học viên",
             "instructors": "Giảng viên",
             "agents": "Đại lý",
@@ -86,6 +87,137 @@
         "topAgents": {
             "title": "Đại lý hàng đầu",
             "viewAll": "Xem tất cả đại lý"
+        },
+        "courses": {
+            "title": "Khóa học",
+            "subtitle": "Quản lý danh mục khóa học, video và trạng thái xuất bản.",
+            "new": "Tạo khóa học",
+            "table": {
+                "title": "Tiêu đề",
+                "price": "Giá",
+                "sections": "Phần",
+                "status": "Trạng thái",
+                "created": "Ngày tạo",
+                "actions": "Thao tác",
+                "loading": "Đang tải...",
+                "noData": "Chưa có khóa học nào."
+            },
+            "status": {
+                "published": "Đã xuất bản",
+                "draft": "Bản nháp",
+                "free": "Miễn phí"
+            },
+            "buttons": {
+                "edit": "Sửa",
+                "delete": "Xóa"
+            },
+            "form": {
+                "newTitle": "Tạo khóa học",
+                "editTitle": "Chỉnh sửa khóa học",
+                "title": "Tiêu đề",
+                "thumbnail": "Ảnh thumbnail",
+                "price": "Giá",
+                "lecturer": "Mã giảng viên",
+                "description": "Mô tả",
+                "free": "Khóa học miễn phí",
+                "published": "Xuất bản",
+                "curriculum": "Giáo trình",
+                "addSection": "Thêm phần",
+                "addLesson": "Thêm bài học",
+                "preview": "Xem thử",
+                "videoLinked": "Đã gắn video",
+                "uploadRequired": "Cần upload",
+                "previewPlaylist": "Xem playlist",
+                "save": "Lưu khóa học",
+                "cancel": "Hủy",
+                "deleteConfirm": "Xóa khóa học này?",
+                "errors": {
+                    "title": "Vui lòng nhập tiêu đề",
+                    "lecturer": "Vui lòng nhập mã giảng viên",
+                    "saveFailed": "Lưu thất bại",
+                    "deleteFailed": "Xóa thất bại",
+                    "loadFailed": "Tải danh sách khóa học thất bại",
+                    "uploadFailed": "Upload thất bại"
+                }
+            }
+        },
+        "users": {
+            "title": "Người dùng",
+            "subtitle": "Quản lý tài khoản, vai trò và quyền truy cập.",
+            "new": "Người dùng mới",
+            "searchPlaceholder": "Tìm theo email, tên, hoặc điện thoại",
+            "roles": {
+                "ADMIN": "Quản trị",
+                "CARE": "Chăm sóc",
+                "CABIN_OWNER": "Chủ cabin",
+                "STUDENT": "Học viên",
+                "LECTURER": "Giảng viên"
+            },
+            "statuses": {
+                "ACTIVE": "Hoạt động",
+                "INACTIVE": "Ngưng hoạt động",
+                "SUSPENDED": "Tạm khóa"
+            },
+            "filters": {
+                "roleAll": "Tất cả vai trò",
+                "statusAll": "Tất cả trạng thái"
+            },
+            "table": {
+                "email": "Email",
+                "name": "Tên",
+                "role": "Vai trò",
+                "status": "Trạng thái",
+                "created": "Ngày tạo",
+                "actions": "Thao tác",
+                "loading": "Đang tải...",
+                "noData": "Không có người dùng."
+            },
+            "buttons": {
+                "search": "Tìm kiếm",
+                "edit": "Sửa",
+                "delete": "Xóa",
+                "reset": "Đặt lại mật khẩu"
+            },
+            "form": {
+                "newTitle": "Tạo người dùng",
+                "editTitle": "Chỉnh sửa người dùng",
+                "email": "Email",
+                "fullName": "Họ tên",
+                "phone": "Số điện thoại",
+                "avatar": "URL ảnh đại diện",
+                "password": "Mật khẩu",
+                "role": "Vai trò",
+                "status": "Trạng thái",
+                "save": "Lưu người dùng",
+                "cancel": "Hủy"
+            },
+            "passwordToggle": {
+                "show": "Hiện mật khẩu",
+                "hide": "Ẩn mật khẩu"
+            },
+            "reset": {
+                "title": "Đặt lại mật khẩu",
+                "subtitle": "Thiết lập mật khẩu mới cho tài khoản này.",
+                "password": "Mật khẩu mới",
+                "submit": "Cập nhật mật khẩu"
+            },
+            "pagination": {
+                "summary": "{{from}}-{{to}} / {{total}} người dùng",
+                "prev": "Trước",
+                "next": "Sau"
+            },
+            "deleteConfirm": "Xóa người dùng này?",
+            "errors": {
+                "emailRequired": "Vui lòng nhập email",
+                "passwordRequired": "Vui lòng nhập mật khẩu",
+                "saveFailed": "Lưu thất bại",
+                "deleteFailed": "Xóa thất bại",
+                "loadFailed": "Tải danh sách thất bại",
+                "resetFailed": "Đặt lại mật khẩu thất bại"
+            }
         }
+    },
+    "common": {
+        "saving": "Đang lưu..."
     }
 }

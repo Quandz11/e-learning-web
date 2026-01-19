@@ -45,9 +45,8 @@ const LoginPage = () => {
                 expiresAt: response.expiresAt,
             }));
 
-            // Store access token in memory (security best practice)
-            localStorage.setItem('accessToken', response.accessToken);
-            localStorage.setItem('expiresAt', response.expiresAt);
+            // Store access token in memory only (prevent XSS)
+            authApi.setAccessToken(response.accessToken);
 
             // Redirect based on role
             if (user.role === 'ADMIN') {

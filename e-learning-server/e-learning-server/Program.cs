@@ -7,6 +7,8 @@ using SKVI.Application.Interfaces;
 using SKVI.Application.Services;
 using SKVI.Infrastructure;
 using SKVI.Infrastructure.Security;
+using SKVI.Infrastructure.Services;
+using SKVI.Infrastructure.VideoStreaming;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,12 +21,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Configuration
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.Configure<BunnySettings>(builder.Configuration.GetSection("BunnySettings"));
 
 // Services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IVideoService, VideoService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddHttpClient<IBunnyStreamService, BunnyStreamService>();
 
 // Authentication & JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;

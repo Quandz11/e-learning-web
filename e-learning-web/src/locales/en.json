@@ -45,6 +45,7 @@
     "admin": {
         "sidebar": {
             "dashboard": "Dashboard",
+            "users": "Users",
             "students": "Students",
             "instructors": "Instructors",
             "agents": "Agents",
@@ -86,6 +87,137 @@
         "topAgents": {
             "title": "Top Agents",
             "viewAll": "View All Agents"
+        },
+        "courses": {
+            "title": "Courses",
+            "subtitle": "Manage course catalog, videos, and publish status.",
+            "new": "New Course",
+            "table": {
+                "title": "Title",
+                "price": "Price",
+                "sections": "Sections",
+                "status": "Status",
+                "created": "Created",
+                "actions": "Actions",
+                "loading": "Loading...",
+                "noData": "No courses yet."
+            },
+            "status": {
+                "published": "Published",
+                "draft": "Draft",
+                "free": "Free"
+            },
+            "buttons": {
+                "edit": "Edit",
+                "delete": "Delete"
+            },
+            "form": {
+                "newTitle": "New Course",
+                "editTitle": "Edit Course",
+                "title": "Title",
+                "thumbnail": "Thumbnail URL",
+                "price": "Price",
+                "lecturer": "Lecturer Id",
+                "description": "Description",
+                "free": "Free course",
+                "published": "Published",
+                "curriculum": "Curriculum",
+                "addSection": "Add section",
+                "addLesson": "Add lesson",
+                "preview": "Preview",
+                "videoLinked": "Video linked",
+                "uploadRequired": "Upload required",
+                "previewPlaylist": "Preview playlist",
+                "save": "Save course",
+                "cancel": "Cancel",
+                "deleteConfirm": "Delete this course?",
+                "errors": {
+                    "title": "Title is required",
+                    "lecturer": "LecturerId is required",
+                    "saveFailed": "Save failed",
+                    "deleteFailed": "Delete failed",
+                    "loadFailed": "Failed to load courses",
+                    "uploadFailed": "Upload failed"
+                }
+            }
+        },
+        "users": {
+            "title": "Users",
+            "subtitle": "Manage accounts, roles, and access.",
+            "new": "New User",
+            "searchPlaceholder": "Search by email, name, or phone",
+            "roles": {
+                "ADMIN": "Admin",
+                "CARE": "Care",
+                "CABIN_OWNER": "Cabin Owner",
+                "STUDENT": "Student",
+                "LECTURER": "Lecturer"
+            },
+            "statuses": {
+                "ACTIVE": "Active",
+                "INACTIVE": "Inactive",
+                "SUSPENDED": "Suspended"
+            },
+            "filters": {
+                "roleAll": "All roles",
+                "statusAll": "All statuses"
+            },
+            "table": {
+                "email": "Email",
+                "name": "Name",
+                "role": "Role",
+                "status": "Status",
+                "created": "Created",
+                "actions": "Actions",
+                "loading": "Loading...",
+                "noData": "No users found."
+            },
+            "buttons": {
+                "search": "Search",
+                "edit": "Edit",
+                "delete": "Delete",
+                "reset": "Reset password"
+            },
+            "form": {
+                "newTitle": "Create User",
+                "editTitle": "Edit User",
+                "email": "Email",
+                "fullName": "Full name",
+                "phone": "Phone",
+                "avatar": "Avatar URL",
+                "password": "Password",
+                "role": "Role",
+                "status": "Status",
+                "save": "Save user",
+                "cancel": "Cancel"
+            },
+            "passwordToggle": {
+                "show": "Show password",
+                "hide": "Hide password"
+            },
+            "reset": {
+                "title": "Reset Password",
+                "subtitle": "Set a new password for this account.",
+                "password": "New password",
+                "submit": "Update password"
+            },
+            "pagination": {
+                "summary": "{{from}}-{{to}} of {{total}} users",
+                "prev": "Prev",
+                "next": "Next"
+            },
+            "deleteConfirm": "Delete this user?",
+            "errors": {
+                "emailRequired": "Email is required",
+                "passwordRequired": "Password is required",
+                "saveFailed": "Save failed",
+                "deleteFailed": "Delete failed",
+                "loadFailed": "Failed to load users",
+                "resetFailed": "Reset password failed"
+            }
         }
+    },
+    "common": {
+        "saving": "Saving..."
     }
 }

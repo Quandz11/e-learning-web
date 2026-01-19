@@ -211,7 +211,7 @@ public class AuthService : IAuthService
         
         // 2. Generate new tokens
         var user = tokenEntity.User;
-        var newAccessToken = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Role);
+        var newAccessToken = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Role, user.FullName);
         var newRefreshToken = _tokenService.GenerateRefreshToken();
         
         var newRefreshTokenEntity = new RefreshToken

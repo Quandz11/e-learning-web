@@ -10,11 +10,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ILogger<AuthController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
-    public AuthController(IAuthService authService, ILogger<AuthController> logger)
+    public AuthController(IAuthService authService, ILogger<AuthController> logger, IWebHostEnvironment environment)
     {
         _authService = authService;
         _logger = logger;
+        _environment = environment;
     }
 
     [HttpPost("login")]
@@ -29,10 +31,12 @@ public class AuthController : ControllerBase
             
             SetRefreshTokenCookie(response.RefreshToken);
             
+            Console.WriteLine($"[AuthController] ✅ Login successful for {request.Email}, refresh token set in HttpOnly Cookie");
             return Ok(new { response.AccessToken, response.ExpiresAt });
         }
         catch (UnauthorizedAccessException ex)
         {
+            Console.WriteLine($"[AuthController] ❌ Login failed: {ex.Message}");
             return Unauthorized(new { message = ex.Message });
         }
     }
@@ -88,8 +92,12 @@ public class AuthController : ControllerBase
     {
         var refreshToken = Request.Cookies["refreshToken"];
         
+        Console.WriteLine($"[AuthController] 🔄 Refresh endpoint called");
+        Console.WriteLine($"[AuthController] Cookie refreshToken present: {!string.IsNullOrEmpty(refreshToken)}");
+        
         if (string.IsNullOrEmpty(refreshToken))
         {
+            Console.WriteLine($"[AuthController] ❌ Refresh token is missing from cookies");
             return Unauthorized(new { message = "Refresh token is missing." });
         }
 
@@ -102,10 +110,12 @@ public class AuthController : ControllerBase
             
             SetRefreshTokenCookie(response.RefreshToken);
             
+            Console.WriteLine($"[AuthController] ✅ Token refreshed successfully");
             return Ok(new { response.AccessToken, response.ExpiresAt });
         }
         catch (UnauthorizedAccessException ex)
         {
+            Console.WriteLine($"[AuthController] ❌ Refresh failed: {ex.Message}");
             return Unauthorized(new { message = ex.Message });
         }
     }
@@ -130,9 +140,9 @@ public class AuthController : ControllerBase
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Expires = DateTime.UtcNow.AddDays(7), // Match configuration
-            SameSite = SameSiteMode.Strict,
-            Secure = true // HTTPS required as per rules
+            Expires = DateTime.UtcNow.AddDays(7),
+            SameSite = SameSiteMode.Strict, // HTTPS only - same-origin
+            Secure = true // HTTPS required
         };
         
         Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);

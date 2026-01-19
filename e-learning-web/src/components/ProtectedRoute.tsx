@@ -10,6 +10,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const normalizedRole = user?.role?.toUpperCase();
 
   // Not authenticated - redirect to login
   if (!isAuthenticated || !user) {
@@ -17,8 +18,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   }
 
   // Check role if required
-  if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to="/login" replace />;
+  if (requiredRole && normalizedRole !== requiredRole) {
+    return <Navigate to="/home" replace />;
   }
 
   return <>{children}</>;

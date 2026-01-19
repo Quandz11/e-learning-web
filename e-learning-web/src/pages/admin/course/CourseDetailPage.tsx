@@ -38,7 +38,7 @@ const CourseDetailPage: React.FC = () => {
   const totalLessons = lessons.length;
   const totalDuration = lessons.reduce((sum, l) => sum + (l.duration || 0), 0);
   const statusLabel = course?.isPublished ? t('courseDetail.meta.statusPublished') : t('courseDetail.meta.statusDraft');
-  const priceLabel = course?.isFree ? t('courseDetail.free') : `$${course?.price ?? 0}`;
+  const priceLabel = course?.isFree ? t('courseDetail.free') : `${(course?.price ?? 0).toLocaleString('vi-VN')} VND`;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">

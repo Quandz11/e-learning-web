@@ -69,6 +69,18 @@ public class CourseService : ICourseService
             CreatedAt = DateTime.UtcNow
         };
 
+        // Preload video durations to auto-fill lesson duration
+        var createVideoIds = request.Sections
+            .SelectMany(s => s.Lessons)
+            .Where(l => l.VideoId != Guid.Empty)
+            .Select(l => l.VideoId)
+            .Distinct()
+            .ToList();
+
+        var createVideoDurations = await _dbContext.Videos
+            .Where(v => createVideoIds.Contains(v.Id))
+            .ToDictionaryAsync(v => v.Id, v => v.Duration, cancellationToken);
+
         foreach (var sectionDto in request.Sections.OrderBy(s => s.OrderIndex))
         {
             var section = new CourseSection
@@ -81,12 +93,18 @@ public class CourseService : ICourseService
 
             foreach (var lessonDto in sectionDto.Lessons.OrderBy(l => l.OrderIndex))
             {
+                var resolvedDuration = lessonDto.Duration;
+                if (resolvedDuration <= 0 && lessonDto.VideoId != Guid.Empty && createVideoDurations.TryGetValue(lessonDto.VideoId, out var videoDuration))
+                {
+                    resolvedDuration = videoDuration;
+                }
+
                 var lesson = new CourseLesson
                 {
                     Id = Guid.NewGuid(),
                     SectionId = section.Id,
                     Title = lessonDto.Title,
-                    Duration = lessonDto.Duration,
+                    Duration = resolvedDuration,
                     VideoId = lessonDto.VideoId,
                     OrderIndex = lessonDto.OrderIndex,
                     IsPreview = lessonDto.IsPreview
@@ -106,9 +124,9 @@ public class CourseService : ICourseService
 
     public async Task<CourseResponse> UpdateAsync(Guid id, UpdateCourseRequest request, CancellationToken cancellationToken = default)
     {
+        // Load course without tracking to avoid stale tracked entities when rebuilding children
         var course = await _dbContext.Courses
-            .Include(c => c.CourseSections)
-                .ThenInclude(s => s.CourseLessons)
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (course == null)
@@ -125,12 +143,37 @@ public class CourseService : ICourseService
         course.IsPublished = request.IsPublished;
         course.CreatedAt = course.CreatedAt == default ? DateTime.UtcNow : course.CreatedAt;
 
-        // Remove existing sections/lessons then re-add to simplify ordering consistency
-        var existingSections = course.CourseSections.ToList();
-        var existingLessons = existingSections.SelectMany(s => s.CourseLessons).ToList();
+        // Preload video durations for lessons so duration is always derived from stored video metadata when absent
+        var updateVideoIds = request.Sections
+            .SelectMany(s => s.Lessons)
+            .Where(l => l.VideoId != Guid.Empty)
+            .Select(l => l.VideoId)
+            .Distinct()
+            .ToList();
 
-        _dbContext.CourseLessons.RemoveRange(existingLessons);
-        _dbContext.CourseSections.RemoveRange(existingSections);
+        var updateVideoDurations = await _dbContext.Videos
+            .Where(v => updateVideoIds.Contains(v.Id))
+            .ToDictionaryAsync(v => v.Id, v => v.Duration, cancellationToken);
+
+        // Remove existing sections/lessons set-based to avoid per-row concurrency
+        var sectionIds = await _dbContext.CourseSections
+            .Where(s => s.CourseId == course.Id)
+            .Select(s => s.Id)
+            .ToListAsync(cancellationToken);
+
+        if (sectionIds.Count > 0)
+        {
+            await _dbContext.CourseLessons
+                .Where(l => sectionIds.Contains(l.SectionId))
+                .ExecuteDeleteAsync(cancellationToken);
+
+            await _dbContext.CourseSections
+                .Where(s => s.CourseId == course.Id)
+                .ExecuteDeleteAsync(cancellationToken);
+        }
+
+        // Rebuild sections/lessons
+        var newSections = new List<CourseSection>();
 
         foreach (var sectionDto in request.Sections.OrderBy(s => s.OrderIndex))
         {
@@ -144,22 +187,30 @@ public class CourseService : ICourseService
 
             foreach (var lessonDto in sectionDto.Lessons.OrderBy(l => l.OrderIndex))
             {
-                var lesson = new CourseLesson
+                var resolvedDuration = lessonDto.Duration;
+                if (resolvedDuration <= 0 && lessonDto.VideoId != Guid.Empty && updateVideoDurations.TryGetValue(lessonDto.VideoId, out var videoDuration))
+                {
+                    resolvedDuration = videoDuration;
+                }
+
+                section.CourseLessons.Add(new CourseLesson
                 {
                     Id = Guid.NewGuid(),
                     SectionId = section.Id,
                     Title = lessonDto.Title,
-                    Duration = lessonDto.Duration,
+                    Duration = resolvedDuration,
                     VideoId = lessonDto.VideoId,
                     OrderIndex = lessonDto.OrderIndex,
                     IsPreview = lessonDto.IsPreview
-                };
-
-                section.CourseLessons.Add(lesson);
+                });
             }
 
-            course.CourseSections.Add(section);
+            newSections.Add(section);
         }
+
+        // Re-attach course and mark modified (no tracked children lingering)
+        _dbContext.Courses.Update(course);
+        _dbContext.CourseSections.AddRange(newSections);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -224,7 +275,7 @@ public class CourseService : ICourseService
                 {
                     Id = lesson.Id,
                     Title = lesson.Title,
-                    Duration = lesson.Duration,
+                    Duration = lesson.Video != null && lesson.Video.Duration > 0 ? lesson.Video.Duration : lesson.Duration,
                     VideoId = lesson.VideoId,
                     OrderIndex = lesson.OrderIndex,
                     IsPreview = lesson.IsPreview,

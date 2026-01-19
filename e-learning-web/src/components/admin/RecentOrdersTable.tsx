@@ -33,7 +33,7 @@ const RecentOrdersTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-slate-600 dark:text-slate-400">Advanced React Patterns</td>
-                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">$49.00</td>
+                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">49.000 VND</td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
@@ -51,7 +51,7 @@ const RecentOrdersTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-slate-600 dark:text-slate-400">UX Design Fundamentals</td>
-                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">$89.00</td>
+                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">89.000 VND</td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
@@ -69,7 +69,7 @@ const RecentOrdersTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-slate-600 dark:text-slate-400">Python for Data Science</td>
-                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">$120.00</td>
+                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">120.000 VND</td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
@@ -87,7 +87,7 @@ const RecentOrdersTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-slate-600 dark:text-slate-400">Digital Marketing 101</td>
-                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">$35.00</td>
+                <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">35.000 VND</td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-red-100 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
                     <span className="h-1.5 w-1.5 rounded-full bg-red-500"></span>

@@ -299,8 +299,8 @@ const CoursesPage: React.FC = () => {
                   ) : (
                     <div className="h-full w-full bg-gradient-to-br from-sky-500 via-emerald-500 to-cyan-500 flex items-center justify-between px-4 text-white">
                       <div className="flex flex-col gap-2">
-                        <span className="text-xs uppercase tracking-[0.25em] text-white/80">Course</span>
-                        <p className="text-lg font-black leading-tight line-clamp-2 drop-shadow-lg">{course.title}</p>
+                        <span className="text-xs uppercase tracking-[0.25em] text-white/80">Khóa học</span>
+                        <p className="text-lg font-bold text-slate-900 line-clamp-2 transition group-hover:text-sky-700 dark:text-white dark:group-hover:text-sky-300">{course.title}</p>
                       </div>
                       <span className="material-symbols-outlined text-4xl text-white/70">play_circle</span>
                     </div>
@@ -330,7 +330,7 @@ const CoursesPage: React.FC = () => {
                   <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
                     <div className="flex flex-col">
                       <span className="text-xs text-slate-500 dark:text-slate-400">{t('admin.courses.table.price')}</span>
-                      <span className="text-base font-bold text-slate-900 dark:text-white">{course.isFree ? t('admin.courses.status.free') : `$${course.price.toLocaleString('en-US')}`}</span>
+                      <span className="text-base font-bold text-slate-900 dark:text-white">{course.isFree ? t('admin.courses.status.free') : `${course.price.toLocaleString('vi-VN')} VND`}</span>
                     </div>
                     <div className="flex flex-col items-end">
                       <span className="text-xs text-slate-500 dark:text-slate-400">{t('admin.courses.table.created')}</span>
@@ -558,9 +558,17 @@ const CoursesPage: React.FC = () => {
                                   className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-dashboard-primary file:px-3 file:py-2 file:text-white file:cursor-pointer"
                                 />
                                 {lesson.playbackUrl && (
-                                  <a href={lesson.playbackUrl} target="_blank" rel="noreferrer" className="text-sm text-dashboard-primary underline">
-                                    {t('admin.courses.form.previewPlaylist')}
-                                  </a>
+                                  <>
+                                    <a href={lesson.playbackUrl} target="_blank" rel="noreferrer" className="text-sm text-dashboard-primary underline">
+                                      {t('admin.courses.form.previewPlaylist')}
+                                    </a>
+                                    <video
+                                      key={lesson.playbackUrl}
+                                      controls
+                                      className="mt-2 h-24 w-full rounded-lg border border-slate-200 object-cover dark:border-slate-700"
+                                      src={lesson.playbackUrl}
+                                    />
+                                  </>
                                 )}
                               </div>
                             </div>

@@ -53,7 +53,7 @@ const AdminDashboardPage: React.FC = () => {
                 {/* Card 2: Total Revenue */}
                 <StatsCard
                     title={t('admin.dashboard.totalRevenue')}
-                    value="$45,230"
+                    value="45.230.000 VND"
                     trend="+12%"
                     trendType="positive"
                     chart={
@@ -73,7 +73,7 @@ const AdminDashboardPage: React.FC = () => {
                 {/* Card 3: Agent Revenue */}
                 <StatsCard
                     title={t('admin.dashboard.agentRevenue')}
-                    value="$15,100"
+                    value="15.100.000 VND"
                     trend="+2.1%"
                     trendType="neutral"
                     chart={

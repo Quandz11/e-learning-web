@@ -23,7 +23,7 @@ const TopAgents: React.FC = () => {
                         <div className="min-w-0 flex-1">
                             <div className="mb-1 flex items-center justify-between">
                                 <p className="truncate text-sm font-bold text-slate-900 dark:text-white">Jenny Wilson</p>
-                                <p className="text-sm font-bold text-dashboard-primary">$12.5k</p>
+                                <p className="text-sm font-bold text-dashboard-primary">12.5 triệu VND</p>
                             </div>
                             <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-700">
                                 <div className="h-1.5 rounded-full bg-dashboard-primary" style={{ width: '85%' }}></div>
@@ -39,7 +39,7 @@ const TopAgents: React.FC = () => {
                         <div className="min-w-0 flex-1">
                             <div className="mb-1 flex items-center justify-between">
                                 <p className="truncate text-sm font-bold text-slate-900 dark:text-white">Robert Fox</p>
-                                <p className="text-sm font-bold text-dashboard-primary">$9.2k</p>
+                                <p className="text-sm font-bold text-dashboard-primary">9.2 triệu VND</p>
                             </div>
                             <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-700">
                                 <div className="h-1.5 rounded-full bg-dashboard-primary/80" style={{ width: '65%' }}></div>
@@ -55,7 +55,7 @@ const TopAgents: React.FC = () => {
                         <div className="min-w-0 flex-1">
                             <div className="mb-1 flex items-center justify-between">
                                 <p className="truncate text-sm font-bold text-slate-900 dark:text-white">Cody Fisher</p>
-                                <p className="text-sm font-bold text-dashboard-primary">$5.4k</p>
+                                <p className="text-sm font-bold text-dashboard-primary">5.4 triệu VND</p>
                             </div>
                             <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-700">
                                 <div className="h-1.5 rounded-full bg-dashboard-primary/60" style={{ width: '45%' }}></div>
@@ -70,7 +70,7 @@ const TopAgents: React.FC = () => {
                         <div className="min-w-0 flex-1">
                             <div className="mb-1 flex items-center justify-between">
                                 <p className="truncate text-sm font-bold text-slate-900 dark:text-white">Guy Hawkins</p>
-                                <p className="text-sm font-bold text-dashboard-primary">$3.1k</p>
+                                <p className="text-sm font-bold text-dashboard-primary">3.1 triệu VND</p>
                             </div>
                             <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-700">
                                 <div className="h-1.5 rounded-full bg-dashboard-primary/40" style={{ width: '30%' }}></div>

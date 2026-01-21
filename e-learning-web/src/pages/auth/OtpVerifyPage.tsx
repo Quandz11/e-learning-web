@@ -14,7 +14,6 @@ const OtpVerifyPage = () => {
 
     // Get email from navigation state
     const email = location.state?.email;
-    const fromRegistration = location.state?.fromRegistration;
 
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);

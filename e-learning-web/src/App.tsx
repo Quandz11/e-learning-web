@@ -169,8 +169,8 @@ function App() {
           );
         }
       })
-      .catch((error) => {
-
+      .catch(() => {
+        console.error('Failed to fetch user profile');
         authApi.setAccessToken(null);
       })
       .finally(() => {

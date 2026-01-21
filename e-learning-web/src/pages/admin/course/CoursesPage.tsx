@@ -9,7 +9,7 @@ import CourseFormModal from './components/CourseFormModal';
 
 const CoursesPage: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate(); // Hook is unused if we link directly, but checking usage
+  // const navigate = useNavigate(); // Hook is unused if we link directly, but checking usage
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

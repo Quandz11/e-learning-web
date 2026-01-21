@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./e-learning-server/e-learning-server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal,1433;Database=ElearningDB;User ID=sa;Password=YourPass@123;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - JwtSettings__Secret=ReplaceThisWithAStrongSecretKeyAtLeast256BitsLong_SuperSecretKey123!
+      - JwtSettings__Issuer=SKVI_Server
+      - JwtSettings__Audience=SKVI_Client
+    networks:
+      - elearning-network
+
+  frontend:
+    build:
+      context: ./e-learning-web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=http://localhost:8080/api
+    depends_on:
+      - backend
+    networks:
+      - elearning-network
+
+networks:
+  elearning-network:
+    driver: bridge

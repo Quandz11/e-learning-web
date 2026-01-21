@@ -16,6 +16,7 @@ import HomePage from './pages/HomePage';
 import UsersPage from './pages/admin/user/UsersPage';
 import UserDetailPage from './pages/admin/user/UserDetailPage';
 import CourseDetailPage from './pages/admin/course/CourseDetailPage';
+import AdminSettingsPage from './pages/admin/settings/AdminSettingsPage';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -108,22 +109,28 @@ function App() {
             </ProtectedRoute>
           ),
         },
+        {
+          path: 'admin/settings',
+          element: (
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminSettingsPage />
+            </ProtectedRoute>
+          ),
+        },
       ]),
     [isAuthenticated, role]
   );
 
   // On app load, always try to refresh token using HTTP-only cookie
   useEffect(() => {
-    console.log(
-      '[App] 🔌 App mounted, attempting to restore session from HTTP-only cookie...'
-    );
+
 
     authApi
       .refreshToken()
       .then((response) => {
         const user = authApi.decodeToken(response.accessToken);
         if (user) {
-          console.log('[App] 👤 Session restored for user:', user.email);
+
           authApi.setAccessToken(response.accessToken);
           dispatch(
             setAuthState({
@@ -136,10 +143,7 @@ function App() {
         }
       })
       .catch((error) => {
-        console.warn(
-          '[App] Session restore failed, user must login:',
-          error.message
-        );
+
         authApi.setAccessToken(null);
       })
       .finally(() => {

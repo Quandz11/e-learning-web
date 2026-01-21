@@ -182,6 +182,7 @@ public class UserService : IUserService
         AvatarUrl = user.AvatarUrl,
         IsEmailVerified = user.IsEmailVerified,
         IsPhoneVerified = user.IsPhoneVerified,
+        IsTwoFactorEnabled = user.IsTwoFactorEnabled,
         CreatedAt = user.CreatedAt
     };
 }

@@ -11,6 +11,7 @@ export interface LoginRequest {
 export interface AuthResponse {
   accessToken: string;
   expiresAt: string;
+  requiresTwoFactor?: boolean;
 }
 
 export interface User {
@@ -120,7 +121,7 @@ class AuthApi {
   }
 
   async refreshToken(): Promise<AuthResponse> {
-    console.log('[AuthApi] 🔄 Calling /auth/refresh to get new token...');
+
 
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
@@ -128,24 +129,68 @@ class AuthApi {
     });
 
     if (!response.ok) {
-      console.error('[AuthApi] ❌ Token refresh failed:', response.status, response.statusText);
+
       throw new Error('Token refresh failed');
     }
 
     const data = await response.json();
-    console.log('[AuthApi] ✅ New access token received, expires at:', data.expiresAt);
+
     return data;
+  }
+
+  // 2FA Methods
+  async setupTwoFactor(): Promise<{ secret: string; qrCodeUri: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/2fa/setup`, {
+      method: 'POST',
+      headers: this.getHeaders(true),
+    });
+    if (!response.ok) throw new Error('Failed to setup 2FA');
+    return response.json();
+  }
+
+  async enableTwoFactor(secret: string, code: string): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/2fa/enable`, {
+      method: 'POST',
+      headers: this.getHeaders(true),
+      body: JSON.stringify({ secret, code }),
+    });
+    if (!response.ok) throw new Error('Failed to enable 2FA');
+    return response.json();
+  }
+
+  async disableTwoFactor(password: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/2fa/disable`, {
+      method: 'POST',
+      headers: this.getHeaders(true),
+      body: JSON.stringify({ password }),
+    });
+    if (!response.ok) throw new Error('Failed to disable 2FA');
+    return response.json();
+  }
+
+  async loginVerifyTwoFactor(code: string): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/2fa/login-verify`, {
+      method: 'POST',
+      headers: this.getHeaders(true), // Uses the temp PreAuth token
+      body: JSON.stringify({ code }),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Invalid code');
+    }
+    return response.json();
   }
 
   async logout(): Promise<void> {
     try {
-      console.log('[AuthApi] 🚪 Logging out...');
+
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         headers: this.getHeaders(),
         credentials: 'include',
       });
-      console.log('[AuthApi] ✅ Logout successful, token cleared');
+
     } finally {
       // Clear access token from memory only (prevent XSS)
       this.setAccessToken(null);
@@ -167,7 +212,7 @@ class AuthApi {
         avatarUrl: decoded.avatarUrl,
       };
     } catch (error) {
-      console.error('Failed to decode token:', error);
+
       return null;
     }
   }
@@ -175,10 +220,9 @@ class AuthApi {
   isTokenExpired(expiresAt: string): boolean {
     const isExpired = new Date(expiresAt) <= new Date();
     if (isExpired) {
-      console.warn('[AuthApi] ⏰ Access token EXPIRED at', expiresAt);
+
     } else {
-      const secondsLeft = Math.floor((new Date(expiresAt).getTime() - new Date().getTime()) / 1000);
-      console.log('[AuthApi] ⏱️  Access token valid, expires in', secondsLeft, 'seconds');
+
     }
     return isExpired;
   }

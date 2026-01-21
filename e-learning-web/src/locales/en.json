@@ -52,6 +52,14 @@
             "otpInvalid": "Please enter a 6-digit code",
             "otpVerificationFailed": "Invalid or expired OTP code",
             "resendFailed": "Failed to resend code. Please try again."
+        },
+        "twoFactor": {
+            "title": "Two-Factor Authentication",
+            "desc": "Please enter the 6-digit code from your authenticator app.",
+            "label": "Authenticator Code",
+            "verify": "Verify",
+            "verifying": "Verifying...",
+            "backToLogin": "Back to Login"
         }
     },
     "hero": {
@@ -257,6 +265,33 @@
                     "completionRate": "Completion Rate",
                     "lastActive": "Last Active"
                 }
+            }
+        },
+        "settings": {
+            "title": "Settings",
+            "security": {
+                "title": "Security Settings",
+                "twoFactor": "Two-Factor Authentication (2FA)",
+                "twoFactorDesc": "Add an extra layer of security to your account by requiring a code when logging in.",
+                "statusEnabled": "2FA is currently enabled on your account.",
+                "disableTitle": "Disable 2FA",
+                "disableDesc": "Please enter your password to confirm disabling Two-Factor Authentication.",
+                "currentPassword": "Current Password",
+                "cancel": "Cancel",
+                "disable": "Disable 2FA",
+                "disabling": "Disabling..."
+            },
+            "setup": {
+                "title": "Set up Two-Factor Authentication",
+                "titleComplete": "Setup Complete!",
+                "scanQr": "Scan the QR code below with your authenticator app (e.g., Google Authenticator).",
+                "secretKey": "Secret Key",
+                "enterCode": "Enter 6-digit Code",
+                "verifyEnable": "Verify & Enable",
+                "verifying": "Verifying...",
+                "successTitle": "Success!",
+                "successDesc": "Two-factor authentication has been enabled for your account.",
+                "errorQr": "Failed to load QR Code"
             }
         }
     },

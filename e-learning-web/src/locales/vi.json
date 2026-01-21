@@ -52,6 +52,14 @@
             "otpInvalid": "Vui lòng nhập mã OTP gồm 6 chữ số",
             "otpVerificationFailed": "Mã OTP không hợp lệ hoặc đã hết hạn",
             "resendFailed": "Gửi lại mã OTP thất bại. Vui lòng thử lại."
+        },
+        "twoFactor": {
+            "title": "Xác thực 2 yếu tố",
+            "desc": "Vui lòng nhập mã 6 chữ số từ ứng dụng xác thực của bạn.",
+            "label": "Mã xác thực",
+            "verify": "Xác minh",
+            "verifying": "Đang xác minh...",
+            "backToLogin": "Quay lại Đăng nhập"
         }
     },
     "hero": {
@@ -257,6 +265,33 @@
                     "completionRate": "Tỷ lệ hoàn thành",
                     "lastActive": "Hoạt động gần nhất"
                 }
+            }
+        },
+        "settings": {
+            "title": "Cài đặt",
+            "security": {
+                "title": "Bảo mật",
+                "twoFactor": "Xác thực 2 yếu tố (2FA)",
+                "twoFactorDesc": "Tăng cường bảo mật cho tài khoản của bạn bằng cách yêu cầu mã xác thực khi đăng nhập.",
+                "statusEnabled": "2FA đang được bật trên tài khoản của bạn.",
+                "disableTitle": "Tắt 2FA",
+                "disableDesc": "Vui lòng nhập mật khẩu để xác nhận tắt Xác thực 2 yếu tố.",
+                "currentPassword": "Mật khẩu hiện tại",
+                "cancel": "Hủy",
+                "disable": "Tắt 2FA",
+                "disabling": "Đang tắt..."
+            },
+            "setup": {
+                "title": "Thiết lập Xác thực 2 yếu tố",
+                "titleComplete": "Thiết lập hoàn tất!",
+                "scanQr": "Quét mã QR dưới đây bằng ứng dụng xác thực (ví dụ: Google Authenticator).",
+                "secretKey": "Khóa bí mật",
+                "enterCode": "Nhập mã 6 chữ số",
+                "verifyEnable": "Xác minh & Bật",
+                "verifying": "Đang xác minh...",
+                "successTitle": "Thành công!",
+                "successDesc": "Xác thực 2 yếu tố đã được bật cho tài khoản của bạn.",
+                "errorQr": "Không thể tải mã QR"
             }
         }
     },

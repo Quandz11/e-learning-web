@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
-import type { AppDispatch } from '../../store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '../../store/store';
 import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
 
@@ -11,6 +11,9 @@ const LoginPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
+    const { requiresTwoFactor } = useSelector((state: RootState) => state.auth);
+
+    const [twoFactorCode, setTwoFactorCode] = useState('');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -29,10 +32,25 @@ const LoginPage = () => {
 
             // Call login API
             const response = await authApi.login({ email, password });
+            console.log('Login Raw Response:', response);
+
+            // Check for 2FA requirement (handle both cases for safety)
+            const isTwoFactorRequired = response.requiresTwoFactor || (response as any).RequiresTwoFactor;
+
+            if (isTwoFactorRequired) {
+                dispatch(loginSuccess({
+                    user: null,
+                    accessToken: response.accessToken,
+                    expiresAt: response.expiresAt,
+                    requiresTwoFactor: true
+                }));
+                authApi.setAccessToken(response.accessToken); // Set PreAuth Token
+                setIsLoading(false);
+                return;
+            }
 
             // Decode token to get user info
             const user = authApi.decodeToken(response.accessToken);
-            console.log('Decoded user:', user);
 
             if (!user) {
                 throw new Error('Failed to decode token');
@@ -62,6 +80,91 @@ const LoginPage = () => {
             setIsLoading(false);
         }
     };
+
+    const handle2FASubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            // Call verify API
+            const response = await authApi.loginVerifyTwoFactor(twoFactorCode);
+
+            // Decode token
+            const user = authApi.decodeToken(response.accessToken);
+            if (!user) throw new Error('Failed to decode token');
+
+            dispatch(loginSuccess({
+                user,
+                accessToken: response.accessToken,
+                expiresAt: response.expiresAt,
+                requiresTwoFactor: false
+            }));
+
+            authApi.setAccessToken(response.accessToken);
+
+            if (user.role === 'ADMIN') {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/home');
+            }
+        } catch (err: any) {
+            setError(err.message || 'Verification failed');
+            dispatch(loginFailure(err.message || 'Verification failed'));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (requiresTwoFactor) {
+        return (
+            <>
+                <div className="text-center lg:text-left">
+                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('auth.twoFactor.title')}</h2>
+                    <p className="text-gray-500 dark:text-gray-400">{t('auth.twoFactor.desc')}</p>
+                </div>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                    </div>
+                )}
+
+                <form className="flex flex-col gap-5" onSubmit={handle2FASubmit}>
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300" htmlFor="code">{t('auth.twoFactor.label')}</label>
+                        <input
+                            className="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 dark:text-white placeholder-gray-400 text-center text-2xl tracking-widest"
+                            id="code"
+                            maxLength={6}
+                            placeholder="000 000"
+                            value={twoFactorCode}
+                            onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ''))}
+                            required
+                            disabled={isLoading}
+                            autoFocus
+                        />
+                    </div>
+
+                    <button
+                        className="w-full py-3.5 px-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-[0_4px_12px_rgba(0,123,128,0.2)] hover:shadow-[0_6px_16px_rgba(0,123,128,0.3)] transition-all transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                        type="submit"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? t('auth.twoFactor.verifying') : t('auth.twoFactor.verify')}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 underline text-center block w-full"
+                    >
+                        {t('auth.twoFactor.backToLogin')}
+                    </button>
+                </form>
+            </>
+        );
+    }
 
     return (
         <>

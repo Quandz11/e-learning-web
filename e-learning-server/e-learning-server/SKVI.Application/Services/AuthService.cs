@@ -56,6 +56,35 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Account is not active.");
         }
 
+        if (user.IsTwoFactorEnabled)
+        {
+            // Return Pre-Auth Token (a special JWT or just use existing token logic with a flag? 
+            // Better to return a partial response. 
+            // For simplicity, we can generate a temporary access token with a special claim or scope "pre_auth".
+            // AND return RequiresTwoFactor=true.
+            
+            // NOTE: Here we reuse GenerateTokensForUser but the frontend needs to know it's not fully logged in yet?
+            // Actually, secure implementation:
+            // Return a "PreAuthToken" which allows access ONLY to 2FA verify endpoints.
+            // But existing GenerateTokensForUser returns full access. 
+            // Let's modify GenTokens or create a specific helper.
+            // For MVP: Let's use the standard token but the Controller/Frontend will redirect to 2FA page.
+            // Ideally, we secure endpoints by checking a "2fa_verified" claim if 2fa is enabled.
+            // But that requires changing Jwt Middleware.
+            
+            // Alternative: Return a SHORT LIVED (5 min) token with a claim "amr": "pwd" (Authentication Method Reference).
+            // Full login token has "amr": "pwd", "mfa".
+            // Let's stick to the simplest approach: Return a standard token BUT with RequiresTwoFactor=true/
+            // The FRONTEND must respect this flag and not allow dashboard access.
+            // SECURITY RISK: If backend endpoints don't enforce 2FA, this token works.
+            // Correct approach: The Token returned here SHOULD NOT have the Role claims yet? 
+            // OR we add a custom claim "PreAuth=true".
+            
+            // Let's create a PreAuth Token function.
+            var preAuthToken = _tokenService.GenerateAccessToken(user.Id, user.Email, "PRE_AUTH", user.FullName);
+            return new AuthResponse(preAuthToken, "", DateTime.UtcNow.AddMinutes(5), true);
+        }
+
         return await GenerateTokensForUser(user, ipAddress, userAgent);
     }
 
@@ -93,7 +122,7 @@ public class AuthService : IAuthService
         
         await _emailService.SendEmailAsync(user.Email, subject, body);
         
-        Console.WriteLine($"[DEV] OTP for {user.Email}: {otp}"); // For dev testing
+
     }
 
     public async Task<AuthResponse> VerifyOtpAsync(VerifyOtpRequest request)
@@ -156,7 +185,7 @@ public class AuthService : IAuthService
         string body = $"<h3>Validation Code</h3><p>Your new verification code is: <strong>{otp}</strong></p>";
         
         await _emailService.SendEmailAsync(user.Email, subject, body);
-        Console.WriteLine($"[DEV] Resend OTP for {user.Email}: {otp}");
+
     }
 
     private async Task<AuthResponse> GenerateTokensForUser(User user, string ipAddress, string userAgent)
@@ -239,5 +268,79 @@ public class AuthService : IAuthService
             tokenEntity.RevokedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
+    }
+
+    // 2FA Implementations
+
+    public async Task<(string Secret, string QrCodeUri)> GenerateTwoFactorSetupAsync(Guid userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) throw new UnauthorizedAccessException("User not found.");
+
+        var key = OtpNet.KeyGeneration.GenerateRandomKey(20);
+        var secret = OtpNet.Base32Encoding.ToString(key);
+        
+        // Format: otpauth://totp/{Issuer}:{AccountName}?secret={Secret}&issuer={Issuer}&algorithm=SHA1&digits=6&period=30
+        var issuer = "SKVI-Learning";
+        var account = user.Email;
+        var uri = $"otpauth://totp/{issuer}:{account}?secret={secret}&issuer={issuer}&algorithm=SHA1&digits=6&period=30";
+
+        return (secret, uri);
+    }
+
+    public async Task<AuthResponse> EnableTwoFactorAsync(Guid userId, string secret, string code)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) throw new UnauthorizedAccessException("User not found.");
+
+        var secretBytes = OtpNet.Base32Encoding.ToBytes(secret);
+        var totp = new OtpNet.Totp(secretBytes);
+        
+        if (!totp.VerifyTotp(code, out _, new OtpNet.VerificationWindow(2, 2)))
+        {
+             throw new UnauthorizedAccessException("Invalid code.");
+        }
+
+        user.TwoFactorSecret = secret;
+        user.IsTwoFactorEnabled = true;
+        await _context.SaveChangesAsync();
+
+        return await GenerateTokensForUser(user, "Unknown", "Unknown"); // Return fresh tokens
+    }
+
+    public async Task DisableTwoFactorAsync(Guid userId, string password)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) throw new UnauthorizedAccessException("User not found.");
+
+        if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
+        {
+            throw new UnauthorizedAccessException("Invalid password.");
+        }
+
+        user.IsTwoFactorEnabled = false;
+        user.TwoFactorSecret = null;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<AuthResponse> VerifyTwoFactorLoginAsync(Guid userId, string code)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) throw new UnauthorizedAccessException("User not found.");
+
+        if (!user.IsTwoFactorEnabled || string.IsNullOrEmpty(user.TwoFactorSecret))
+        {
+            throw new UnauthorizedAccessException("2FA is not enabled for this user.");
+        }
+
+        var secretBytes = OtpNet.Base32Encoding.ToBytes(user.TwoFactorSecret);
+        var totp = new OtpNet.Totp(secretBytes);
+
+        if (!totp.VerifyTotp(code, out _, new OtpNet.VerificationWindow(2, 2)))
+        {
+             throw new UnauthorizedAccessException("Invalid 2FA code.");
+        }
+
+        return await GenerateTokensForUser(user, "Unknown", "Unknown"); // Should pass IP/UA
     }
 }

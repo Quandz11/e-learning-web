@@ -673,6 +673,9 @@ namespace e_learning_server.Migrations
                     b.Property<bool>("IsPhoneVerified")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsTwoFactorEnabled")
+                        .HasColumnType("bit");
+
                     b.Property<string>("OtpCode")
                         .HasColumnType("nvarchar(max)");
 
@@ -692,6 +695,9 @@ namespace e_learning_server.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TwoFactorSecret")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")

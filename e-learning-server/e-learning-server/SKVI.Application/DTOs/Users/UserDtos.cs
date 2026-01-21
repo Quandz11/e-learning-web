@@ -23,6 +23,7 @@ public class UserDto
     public string? AvatarUrl { get; set; }
     public bool IsEmailVerified { get; set; }
     public bool IsPhoneVerified { get; set; }
+    public bool IsTwoFactorEnabled { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

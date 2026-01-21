@@ -15,6 +15,7 @@ export interface UserDto {
   avatarUrl?: string;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
+  isTwoFactorEnabled: boolean;
   createdAt: string;
 }
 

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SKVI.Application.DTOs.Auth;
 using SKVI.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace e_learning_server.Controllers;
 
@@ -32,7 +34,11 @@ public class AuthController : ControllerBase
             SetRefreshTokenCookie(response.RefreshToken);
             
             Console.WriteLine($"[AuthController] ✅ Login successful for {request.Email}, refresh token set in HttpOnly Cookie");
-            return Ok(new { response.AccessToken, response.ExpiresAt });
+            return Ok(new { 
+                accessToken = response.AccessToken, 
+                expiresAt = response.ExpiresAt,
+                requiresTwoFactor = response.RequiresTwoFactor 
+            });
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -111,7 +117,11 @@ public class AuthController : ControllerBase
             SetRefreshTokenCookie(response.RefreshToken);
             
             Console.WriteLine($"[AuthController] ✅ Token refreshed successfully");
-            return Ok(new { response.AccessToken, response.ExpiresAt });
+            
+            return Ok(new { 
+                accessToken = response.AccessToken, 
+                expiresAt = response.ExpiresAt 
+            });
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -133,6 +143,92 @@ public class AuthController : ControllerBase
         Response.Cookies.Delete("refreshToken");
         
         return Ok(new { message = "Logged out successfully." });
+    }
+
+    [Authorize]
+    [HttpPost("2fa/setup")]
+    public async Task<IActionResult> TwoFactorSetup()
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var (secret, qrCodeUri) = await _authService.GenerateTwoFactorSetupAsync(Guid.Parse(userId));
+            return Ok(new { secret, qrCodeUri });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPost("2fa/enable")]
+    public async Task<IActionResult> EnableTwoFactor([FromBody] TwoFactorEnableRequest request)
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var response = await _authService.EnableTwoFactorAsync(Guid.Parse(userId), request.Secret, request.Code);
+            
+            SetRefreshTokenCookie(response.RefreshToken);
+            
+            return Ok(new { 
+                accessToken = response.AccessToken, 
+                expiresAt = response.ExpiresAt 
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPost("2fa/disable")]
+    public async Task<IActionResult> DisableTwoFactor([FromBody] TwoFactorDisableRequest request)
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            await _authService.DisableTwoFactorAsync(Guid.Parse(userId), request.Password);
+            return Ok(new { message = "2FA disabled successfully." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("2fa/login-verify")]
+    public async Task<IActionResult> LoginVerifyTwoFactor([FromBody] TwoFactorLoginRequest request)
+    {
+        try
+        {
+            // The user should be authenticated via the PreAuth token here?
+            // Actually, if we use [Authorize], the PreAuth token must work.
+            // If the PreAuth token is valid JWT, [Authorize] works.
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var response = await _authService.VerifyTwoFactorLoginAsync(Guid.Parse(userId), request.Code);
+            
+            SetRefreshTokenCookie(response.RefreshToken);
+            
+            return Ok(new { 
+                accessToken = response.AccessToken, 
+                expiresAt = response.ExpiresAt 
+            });
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
     }
 
     private void SetRefreshTokenCookie(string refreshToken)

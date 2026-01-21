@@ -49,7 +49,7 @@ const AdminSidebar: React.FC = () => {
             className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname === '/admin/dashboard'
               ? 'bg-dashboard-primary text-white shadow-dashboard-subtle'
               : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">dashboard</span>
             <span className="text-sm font-medium">{t('admin.sidebar.dashboard')}</span>
@@ -59,7 +59,7 @@ const AdminSidebar: React.FC = () => {
             className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/courses')
               ? 'bg-dashboard-primary text-white shadow-dashboard-subtle'
               : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">library_books</span>
             <span className="text-sm font-medium">{t('admin.sidebar.courses')}</span>
@@ -69,7 +69,7 @@ const AdminSidebar: React.FC = () => {
             className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/users')
               ? 'bg-dashboard-primary text-white shadow-dashboard-subtle'
               : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">groups</span>
             <span className="text-sm font-medium">{t('admin.sidebar.users')}</span>
@@ -96,13 +96,13 @@ const AdminSidebar: React.FC = () => {
             <span className="text-sm font-medium">{t('admin.sidebar.revenue')}</span>
           </a>
           <div className="my-2 border-t border-slate-200 dark:border-slate-800"></div>
-          <a
-            href="#"
-            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300"
+          <Link
+            to="/admin/settings"
+            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300 ${location.pathname === '/admin/settings' ? 'bg-dashboard-primary text-white shadow-dashboard-subtle' : ''}`}
           >
             <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">settings</span>
             <span className="text-sm font-medium">{t('admin.sidebar.settings')}</span>
-          </a>
+          </Link>
         </nav>
 
         {/* User Mini Profile */}

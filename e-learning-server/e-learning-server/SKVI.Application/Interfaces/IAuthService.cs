@@ -10,6 +10,12 @@ public interface IAuthService
     Task ResendOtpAsync(ResendOtpRequest request);
     Task<AuthResponse> RefreshTokenAsync(string refreshToken, string ipAddress, string userAgent);
     Task LogoutAsync(string refreshToken);
+
+    // 2FA
+    Task<(string Secret, string QrCodeUri)> GenerateTwoFactorSetupAsync(Guid userId);
+    Task<AuthResponse> EnableTwoFactorAsync(Guid userId, string secret, string code);
+    Task DisableTwoFactorAsync(Guid userId, string password);
+    Task<AuthResponse> VerifyTwoFactorLoginAsync(Guid userId, string code);
 }
 
 public interface ITokenService

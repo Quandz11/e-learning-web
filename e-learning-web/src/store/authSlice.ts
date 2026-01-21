@@ -16,6 +16,7 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  requiresTwoFactor: boolean;
 }
 
 const initialState: AuthState = {
@@ -25,6 +26,7 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   isAuthenticated: false,
+  requiresTwoFactor: false,
 };
 
 export const authSlice = createSlice({
@@ -36,13 +38,21 @@ export const authSlice = createSlice({
       state.isLoading = true;
       state.error = null;
     },
-    loginSuccess: (state, action: PayloadAction<{ user: User; accessToken: string; expiresAt: string }>) => {
+    loginSuccess: (state, action: PayloadAction<{ user: User | null; accessToken: string; expiresAt: string; requiresTwoFactor?: boolean }>) => {
       state.isLoading = false;
-      state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.expiresAt = action.payload.expiresAt;
-      state.isAuthenticated = true;
       state.error = null;
+
+      if (action.payload.requiresTwoFactor) {
+        state.requiresTwoFactor = true;
+        state.isAuthenticated = false; // Not fully authenticated yet
+        state.user = null; // User details might be partial or hidden
+      } else {
+        state.requiresTwoFactor = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+      }
     },
     loginFailure: (state, action: PayloadAction<string>) => {
       state.isLoading = false;

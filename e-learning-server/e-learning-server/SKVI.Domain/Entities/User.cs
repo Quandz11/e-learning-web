@@ -18,6 +18,10 @@ public class User
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
 
+    // 2FA
+    public string? TwoFactorSecret { get; set; }
+    public bool IsTwoFactorEnabled { get; set; } = false;
+
     // Navigation properties
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();

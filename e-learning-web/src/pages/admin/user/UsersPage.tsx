@@ -1,21 +1,14 @@
+import { Link } from 'react-router-dom';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../../components/admin/AdminLayout';
-import { userApi, type UserDto, type UserRole, type UserStatus, type CreateUserRequest, type UpdateUserRequest } from '../../../services/userApi';
+import { userApi, type UserDto, type UserRole, type UserStatus } from '../../../services/userApi';
 import { format } from 'date-fns';
+import UserFormModal from './components/UserFormModal';
+import ResetPasswordModal from './components/ResetPasswordModal';
 
 const roles: UserRole[] = ['ADMIN', 'CARE', 'CABIN_OWNER', 'STUDENT', 'LECTURER'];
 const statuses: UserStatus[] = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
-
-const emptyCreate = (email?: string): CreateUserRequest => ({
-  email: email || '',
-  password: '',
-  fullName: '',
-  phone: '',
-  role: 'STUDENT',
-  status: 'ACTIVE',
-  avatarUrl: '',
-});
 
 const UsersPage: React.FC = () => {
   const { t } = useTranslation();
@@ -28,15 +21,12 @@ const UsersPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Modals state
   const [showForm, setShowForm] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [resetting, setResetting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<CreateUserRequest>(emptyCreate());
-  const [resetPassword, setResetPassword] = useState('');
-  const [showCreatePassword, setShowCreatePassword] = useState(false);
-  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
@@ -69,60 +59,19 @@ const UsersPage: React.FC = () => {
 
   const openCreate = () => {
     setEditingId(null);
-    setForm(emptyCreate());
+    setSelectedUser(null);
     setShowForm(true);
   };
 
   const openEdit = (u: UserDto) => {
     setEditingId(u.id);
-    const update: UpdateUserRequest = {
-      fullName: u.fullName,
-      phone: u.phone,
-      role: u.role,
-      status: u.status,
-      avatarUrl: u.avatarUrl,
-    };
-    setForm({ ...emptyCreate(u.email), ...update, password: '' });
+    setSelectedUser(u);
     setShowForm(true);
   };
 
-  const closeForm = () => {
-    setShowForm(false);
-    setError(null);
-    setResetPassword('');
-  };
-
-  const save = async () => {
-    if (!form.email.trim()) {
-      setError(t('admin.users.errors.emailRequired'));
-      return;
-    }
-    if (!editingId && !form.password.trim()) {
-      setError(t('admin.users.errors.passwordRequired'));
-      return;
-    }
-    try {
-      setSaving(true);
-      setError(null);
-      if (editingId) {
-        const payload: UpdateUserRequest = {
-          fullName: form.fullName,
-          phone: form.phone,
-          role: form.role,
-          status: form.status,
-          avatarUrl: form.avatarUrl,
-        };
-        await userApi.update(editingId, payload);
-      } else {
-        await userApi.create(form);
-      }
-      await load();
-      setShowForm(false);
-    } catch (err: any) {
-      setError(err.message || t('admin.users.errors.saveFailed'));
-    } finally {
-      setSaving(false);
-    }
+  const openResetPassword = (id: string) => {
+    setEditingId(id);
+    setShowReset(true);
   };
 
   const confirmDelete = async (id: string) => {
@@ -135,27 +84,11 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const openResetPassword = (id: string) => {
-    setEditingId(id);
-    setResetPassword('');
-    setShowReset(true);
-  };
-
-  const resetPasswordSubmit = async () => {
-    if (!resetPassword.trim()) {
-      setError(t('admin.users.errors.passwordRequired'));
-      return;
-    }
-    try {
-      setResetting(true);
-      setError(null);
-      await userApi.resetPassword(editingId!, { newPassword: resetPassword });
-      setShowReset(false);
-    } catch (err: any) {
-      setError(err.message || t('admin.users.errors.resetFailed'));
-    } finally {
-      setResetting(false);
-    }
+  const handleSuccess = async () => {
+    await load();
+    // Form closes itself via onSuccess prop if needed, or we close it here? 
+    // The Modal calls onSuccess then onClose? Wait, let's check Modal implementation.
+    // Modal calls onSuccess() then onClose(). So we just reload here.
   };
 
   return (
@@ -238,7 +171,9 @@ const UsersPage: React.FC = () => {
                 data.map((u) => (
                   <tr key={u.id} className="border-t border-slate-100 dark:border-slate-800">
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-slate-900 dark:text-white">{u.email}</div>
+                      <Link to={`/admin/users/${u.id}`} className="font-semibold text-slate-900 hover:text-dashboard-primary dark:text-white dark:hover:text-dashboard-primary transition-colors">
+                        {u.email}
+                      </Link>
                       <div className="text-xs text-slate-500 dark:text-slate-400">{u.phone}</div>
                     </td>
                     <td className="px-4 py-3">{u.fullName || '-'}</td>
@@ -252,6 +187,7 @@ const UsersPage: React.FC = () => {
                     </td>
                     <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{format(new Date(u.createdAt), 'yyyy-MM-dd')}</td>
                     <td className="px-4 py-3 text-right space-x-2">
+                      {/* TODO: Link to Detail Page */}
                       <button
                         className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                         onClick={() => openEdit(u)}
@@ -309,162 +245,24 @@ const UsersPage: React.FC = () => {
         </div>
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
-          <div className="w-full max-w-3xl rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-dashboard-surface-dark">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{editingId ? t('admin.users.form.editTitle') : t('admin.users.form.newTitle')}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('admin.users.subtitle')}</p>
-              </div>
-              <button onClick={closeForm} className="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
+      <UserFormModal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        onSuccess={handleSuccess}
+        editingId={editingId}
+        initialData={selectedUser}
+      />
 
-            <div className="max-h-[70vh] overflow-y-auto px-6 py-5 space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.form.email')}</label>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    disabled={!!editingId}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.form.fullName')}</label>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                    value={form.fullName || ''}
-                    onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.form.phone')}</label>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                    value={form.phone || ''}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.form.avatar')}</label>
-                  <input
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                    value={form.avatarUrl || ''}
-                    onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })}
-                  />
-                </div>
-                {!editingId && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.form.password')}</label>
-                    <input
-                      className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                      type={showCreatePassword ? 'text' : 'password'}
-                      value={form.password}
-                      onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    />
-                    <button
-                      type="button"
-                      className="text-xs font-medium text-dashboard-primary hover:text-dashboard-primary-dark"
-                      onClick={() => setShowCreatePassword((v) => !v)}
-                    >
-                      {showCreatePassword ? t('admin.users.passwordToggle.hide') : t('admin.users.passwordToggle.show')}
-                    </button>
-                  </div>
-                )}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.form.role')}</label>
-                  <select
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
-                  >
-                    {roles.map((r) => <option key={r} value={r}>{roleLabel(r)}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.form.status')}</label>
-                  <select
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                    value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value as UserStatus })}
-                  >
-                    {statuses.map((s) => <option key={s} value={s}>{statusLabel(s)}</option>)}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4 dark:border-slate-700">
-              <button
-                onClick={closeForm}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-              >
-                {t('admin.users.form.cancel')}
-              </button>
-              <button
-                onClick={save}
-                disabled={saving}
-                className="inline-flex items-center gap-2 rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-dashboard-primary/30 transition hover:bg-dashboard-primary-dark disabled:opacity-60"
-              >
-                {saving ? t('common.saving', { defaultValue: 'Saving...' }) : t('admin.users.form.save')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showReset && (
-        <div className="fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-dashboard-surface-dark">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{t('admin.users.reset.title')}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('admin.users.reset.subtitle')}</p>
-              </div>
-              <button onClick={() => setShowReset(false)} className="rounded-full p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div className="px-6 py-5 space-y-3">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.reset.password')}</label>
-              <input
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                type={showResetPassword ? 'text' : 'password'}
-                value={resetPassword}
-                onChange={(e) => setResetPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="text-xs font-medium text-dashboard-primary hover:text-dashboard-primary-dark"
-                onClick={() => setShowResetPassword((v) => !v)}
-              >
-                {showResetPassword ? t('admin.users.passwordToggle.hide') : t('admin.users.passwordToggle.show')}
-              </button>
-            </div>
-            <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4 dark:border-slate-700">
-              <button
-                onClick={() => setShowReset(false)}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-              >
-                {t('admin.users.form.cancel')}
-              </button>
-              <button
-                onClick={resetPasswordSubmit}
-                disabled={resetting}
-                className="inline-flex items-center gap-2 rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-dashboard-primary/30 transition hover:bg-dashboard-primary-dark disabled:opacity-60"
-              >
-                {resetting ? t('common.saving', { defaultValue: 'Saving...' }) : t('admin.users.reset.submit')}
-              </button>
-            </div>
-          </div>
-        </div>
+      {editingId && (
+        <ResetPasswordModal
+          isOpen={showReset}
+          onClose={() => setShowReset(false)}
+          userId={editingId}
+        />
       )}
     </AdminLayout>
   );
 };
 
 export default UsersPage;
+

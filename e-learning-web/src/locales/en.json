@@ -36,7 +36,23 @@
         "codeSentTo": "We’ve sent a 6-digit verification code to",
         "didntReceiveCode": "Didn't receive the code?",
         "resend": "Resend",
-        "verifyAndProceed": "Verify & Proceed"
+        "verifyAndProceed": "Verify & Proceed",
+        "phone": "Phone",
+        "phonePlaceholder": "Enter your phone number",
+        "creating": "Creating account...",
+        "verifying": "Verifying...",
+        "otpResent": "A new verification code has been sent to your email",
+        "errors": {
+            "fullNameRequired": "Full name is required",
+            "emailRequired": "Email is required",
+            "emailInvalid": "Invalid email format",
+            "passwordRequired": "Password is required",
+            "passwordLength": "Password must be at least 8 characters",
+            "registrationFailed": "Registration failed. Please try again.",
+            "otpInvalid": "Please enter a 6-digit code",
+            "otpVerificationFailed": "Invalid or expired OTP code",
+            "resendFailed": "Failed to resend code. Please try again."
+        }
     },
     "hero": {
         "title": "Unlock your potential with every lesson.",
@@ -222,11 +238,32 @@
                 "deleteFailed": "Delete failed",
                 "loadFailed": "Failed to load users",
                 "resetFailed": "Reset password failed"
+            },
+            "detail": {
+                "verifiedEmail": "Verified Email",
+                "notFound": "User not found",
+                "additionalInfo": "Additional Information",
+                "additionalInfoDesc": "User details and extended profile information will appear here.",
+                "coursesEmpty": "Course enrollment history coming soon.",
+                "activityEmpty": "User activity logs coming soon.",
+                "tabs": {
+                    "overview": "Overview",
+                    "courses": "Courses",
+                    "activity": "Activity"
+                },
+                "stats": {
+                    "title": "Statistics",
+                    "coursesEnrolled": "Courses Enrolled",
+                    "completionRate": "Completion Rate",
+                    "lastActive": "Last Active"
+                }
             }
         }
     },
     "common": {
-        "saving": "Saving..."
+        "saving": "Saving...",
+        "unnamed": "Unnamed User",
+        "backToList": "Back to List"
     },
     "courseDetail": {
         "back": "Back",
@@ -236,7 +273,7 @@
         "curriculumTab": "Curriculum",
         "selectLesson": "Select a lesson to play",
         "free": "Free",
-        "sections": "Sections",
+        "sectionsCount": "Sections",
         "lessons": "Lessons",
         "durationMinutes": "{{minutes}} min",
         "submittedAt": "Created",
@@ -250,6 +287,169 @@
         "meta": {
             "statusPublished": "Published",
             "statusDraft": "Draft"
+        },
+        "breadcrumb": {
+            "courses": "Courses",
+            "management": "Management"
+        },
+        "tabs": {
+            "overview": "Overview",
+            "curriculum": "Curriculum",
+            "students": "Students Enrolled",
+            "financials": "Financials/Earnings"
+        },
+        "sections": {
+            "description": "Course Description",
+            "whatLearn": "What Students Will Learn",
+            "structure": "Course Structure",
+            "statistics": "Course Statistics",
+            "internalNotes": "Internal Notes"
+        },
+        "stats": {
+            "enrollments": "Total Enrollments",
+            "rating": "Current Rating",
+            "lastUpdated": "Last Updated",
+            "revenue": "Estimated Revenue",
+            "reviews": "reviews"
+        },
+        "actions": {
+            "deactivate": "Deactivate",
+            "edit": "Edit Course",
+            "analytics": "View Analytics",
+            "addNote": "Add an internal note...",
+            "viewNoteHistory": "View Note History"
+        },
+        "instructorInfo": {
+            "senior": "Senior Instructor",
+            "courses": "Courses"
+        }
+    },
+    "home": {
+        "header": {
+            "nav": {
+                "home": "Home",
+                "courses": "Courses",
+                "benefits": "Benefits",
+                "testimonials": "Testimonials"
+            },
+            "logout": "Logout",
+            "welcome": "Welcome"
+        },
+        "hero": {
+            "badge": "New Semester Open",
+            "title": "Unlock Your",
+            "titleHighlight": "Potential Today.",
+            "subtitle": "Join a community of learners and industry experts. Master new skills with expert guidance in a modern, flexible environment.",
+            "searchPlaceholder": "What do you want to learn?",
+            "searchButton": "Search",
+            "socialProof": "Trusted by students worldwide",
+            "stats": {
+                "completionRate": "Completion Rate",
+                "viewStats": "View Stats"
+            },
+            "interactive": "Interactive Learning",
+            "liveSession": "Live sessions & workshops"
+        },
+        "courses": {
+            "title": "Featured Courses",
+            "subtitle": "Hand-picked by our experts for your career growth.",
+            "viewAll": "View All Courses",
+            "reviews": "reviews",
+            "featured": [
+                {
+                    "title": "Data Science Fundamentals",
+                    "description": "Master Python, SQL, and statistical analysis with real-world projects.",
+                    "instructor": "Dr. Sarah Smith",
+                    "badge": "New"
+                },
+                {
+                    "title": "UX Design Mastery",
+                    "description": "Learn user research, wireframing, and prototyping from industry leaders.",
+                    "instructor": "John Doe",
+                    "badge": "Bestseller"
+                },
+                {
+                    "title": "Digital Marketing 101",
+                    "description": "Comprehensive guide to SEO, social media, and content marketing strategies.",
+                    "instructor": "Emily Blunt",
+                    "badge": null
+                }
+            ]
+        },
+        "benefits": {
+            "title": "Why Choose SKVI Learning?",
+            "subtitle": "Our platform is designed to provide a comprehensive and flexible learning experience.",
+            "certifiedInstructors": {
+                "title": "Certified Instructors",
+                "description": "Learn from the best in the industry. Our instructors are vetted experts with years of real-world experience.",
+                "cta": "Meet our Team"
+            },
+            "selfPaced": {
+                "title": "Self-Paced",
+                "description": "Learn at your own convenience."
+            },
+            "certificates": {
+                "title": "Certificates",
+                "description": "Industry-recognized awards."
+            },
+            "support": {
+                "title": "24/7 Support",
+                "description": "Our dedicated support ensures you're never stuck."
+            }
+        },
+        "testimonials": {
+            "title": "What our learners say",
+            "items": [
+                {
+                    "quote": "The flexibility of the courses allowed me to switch careers while working full-time. The content is incredibly up-to-date.",
+                    "name": "Michael Chen",
+                    "role": "Software Engineer"
+                },
+                {
+                    "quote": "I've taken courses on other platforms, but the instructor quality here is unmatched. The community support is also fantastic.",
+                    "name": "Sarah Johnson",
+                    "role": "Product Manager"
+                },
+                {
+                    "quote": "The agent support was a game changer. Any issue I had was resolved within minutes, letting me focus on learning.",
+                    "name": "David Ross",
+                    "role": "Marketing Specialist"
+                }
+            ]
+        },
+        "newsletter": {
+            "title": "Ready to start your journey?",
+            "subtitle": "Join 50,000+ students and start learning today.",
+            "placeholder": "Enter your email",
+            "cta": "Get Started"
+        },
+        "footer": {
+            "description": "Empowering learners worldwide with accessible, high-quality education from industry experts.",
+            "platform": {
+                "title": "Platform",
+                "browseCourses": "Browse Courses",
+                "successStories": "Success Stories",
+                "pricing": "Pricing",
+                "forBusiness": "For Business"
+            },
+            "portals": {
+                "title": "Portals",
+                "studentLogin": "Student Login",
+                "instructorDashboard": "Instructor Dashboard",
+                "agentPortal": "Agent Portal",
+                "adminAccess": "Admin Access"
+            },
+            "connect": {
+                "title": "Connect",
+                "aboutUs": "About Us",
+                "careers": "Careers",
+                "contactSupport": "Contact Support",
+                "privacyPolicy": "Privacy Policy"
+            },
+            "copyright": "© 2024 SKVI Learning Inc. All rights reserved.",
+            "terms": "Terms",
+            "privacy": "Privacy",
+            "cookies": "Cookies"
         }
     }
 }

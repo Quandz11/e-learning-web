@@ -14,6 +14,7 @@ import { setAuthState } from './store/authSlice';
 import { authApi } from './services/authApi';
 import HomePage from './pages/HomePage';
 import UsersPage from './pages/admin/user/UsersPage';
+import UserDetailPage from './pages/admin/user/UserDetailPage';
 import CourseDetailPage from './pages/admin/course/CourseDetailPage';
 
 function App() {
@@ -68,9 +69,9 @@ function App() {
           ),
         },
         {
-          path: 'courses/:id',
+          path: 'admin/courses/:id',
           element: (
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="ADMIN">
               <CourseDetailPage />
             </ProtectedRoute>
           ),
@@ -96,6 +97,14 @@ function App() {
           element: (
             <ProtectedRoute requiredRole="ADMIN">
               <UsersPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'admin/users/:id',
+          element: (
+            <ProtectedRoute requiredRole="ADMIN">
+              <UserDetailPage />
             </ProtectedRoute>
           ),
         },

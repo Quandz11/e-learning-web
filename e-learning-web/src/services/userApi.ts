@@ -72,6 +72,16 @@ export const userApi = {
     return res.json();
   },
 
+  async getById(id: string): Promise<UserDto> {
+    const res = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'GET',
+      headers: authHeaders(),
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error('Failed to fetch user details');
+    return res.json();
+  },
+
   async create(payload: CreateUserRequest): Promise<UserDto> {
     const res = await fetch(`${API_BASE_URL}/users`, {
       method: 'POST',

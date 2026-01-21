@@ -21,6 +21,7 @@ public class CourseService : ICourseService
     public async Task<IReadOnlyList<CourseResponse>> GetAllAsync(bool? isPublished, CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Courses
+            .Include(c => c.Lecturer)
             .Include(c => c.CourseSections)
                 .ThenInclude(s => s.CourseLessons)
                     .ThenInclude(l => l.Video)
@@ -41,6 +42,7 @@ public class CourseService : ICourseService
     public async Task<CourseResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var course = await _dbContext.Courses
+            .Include(c => c.Lecturer)
             .Include(c => c.CourseSections)
                 .ThenInclude(s => s.CourseLessons)
                     .ThenInclude(l => l.Video)
@@ -249,6 +251,13 @@ public class CourseService : ICourseService
             Price = course.Price,
             IsFree = course.IsFree,
             LecturerId = course.LecturerId,
+            Lecturer = course.Lecturer != null ? new LecturerInfo
+            {
+                Id = course.Lecturer.Id,
+                FullName = course.Lecturer.FullName ?? string.Empty,
+                Email = course.Lecturer.Email,
+                AvatarUrl = course.Lecturer.AvatarUrl
+            } : null,
             ThumbnailUrl = course.ThumbnailUrl,
             IsPublished = course.IsPublished,
             CreatedAt = course.CreatedAt,
@@ -271,6 +280,10 @@ public class CourseService : ICourseService
                     ? _bunnyStreamService.GetPlaybackUrl(lesson.Video.BunnyVideoId)
                     : null;
 
+                var embedUrl = lesson.Video != null && !string.IsNullOrWhiteSpace(lesson.Video.BunnyLibraryId) && !string.IsNullOrWhiteSpace(lesson.Video.BunnyVideoId)
+                    ? $"https://iframe.mediadelivery.net/embed/{lesson.Video.BunnyLibraryId}/{lesson.Video.BunnyVideoId}"
+                    : null;
+
                 sectionResponse.Lessons.Add(new CourseLessonResponse
                 {
                     Id = lesson.Id,
@@ -279,7 +292,8 @@ public class CourseService : ICourseService
                     VideoId = lesson.VideoId,
                     OrderIndex = lesson.OrderIndex,
                     IsPreview = lesson.IsPreview,
-                    PlaybackUrl = playbackUrl
+                    PlaybackUrl = playbackUrl,
+                    EmbedUrl = embedUrl
                 });
             }
 

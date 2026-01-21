@@ -17,7 +17,7 @@ const AuthLayout = () => {
                 <div className="relative z-10 text-white max-w-md">
                     <div className="flex items-center gap-2 mb-8">
                         <span className="material-symbols-outlined text-4xl">school</span>
-                        <span className="text-2xl font-bold tracking-tight">SKVI-learning</span>
+                        <span className="text-2xl font-bold tracking-tight">SKVI-Learning</span>
                     </div>
                     <h1 className="text-5xl font-bold leading-tight mb-6">Khai phá tiềm năng của bạn qua mỗi bài học.</h1>
                     <p className="text-lg opacity-90 leading-relaxed">Tham gia cộng đồng những người học tập suốt đời và làm chủ các kỹ năng mới theo tốc độ của riêng bạn.</p>
@@ -36,7 +36,7 @@ const AuthLayout = () => {
                     <div className="lg:hidden flex justify-center mb-4">
                         <div className="flex items-center gap-2 text-primary dark:text-white">
                             <span className="material-symbols-outlined text-4xl">school</span>
-                            <span className="text-2xl font-bold tracking-tight">EduNexus</span>
+                            <span className="text-2xl font-bold tracking-tight">SKVI-learning</span>
                         </div>
                     </div>
 

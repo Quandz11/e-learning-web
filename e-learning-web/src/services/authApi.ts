@@ -121,7 +121,7 @@ class AuthApi {
 
   async refreshToken(): Promise<AuthResponse> {
     console.log('[AuthApi] 🔄 Calling /auth/refresh to get new token...');
-    
+
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',

@@ -8,11 +8,21 @@ public class CourseResponse
     public decimal Price { get; set; }
     public bool IsFree { get; set; }
     public Guid LecturerId { get; set; }
+    public LecturerInfo? Lecturer { get; set; }
     public string? ThumbnailUrl { get; set; }
     public bool IsPublished { get; set; }
     public DateTime CreatedAt { get; set; }
     public List<CourseSectionResponse> Sections { get; set; } = new();
 }
+
+public class LecturerInfo
+{
+    public Guid Id { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? AvatarUrl { get; set; }
+}
+
 
 public class CourseSectionResponse
 {
@@ -31,4 +41,5 @@ public class CourseLessonResponse
     public int OrderIndex { get; set; }
     public bool IsPreview { get; set; }
     public string? PlaybackUrl { get; set; }
+    public string? EmbedUrl { get; set; }
 }

@@ -10,6 +10,7 @@ export interface CourseLessonInput {
   isPreview: boolean;
   videoId: string;
   playbackUrl?: string;
+  embedUrl?: string;
 }
 
 export interface CourseSectionInput {
@@ -30,9 +31,17 @@ export interface CourseInput {
   sections: CourseSectionInput[];
 }
 
+export interface LecturerInfo {
+  id: string;
+  fullName: string;
+  email: string;
+  avatarUrl?: string;
+}
+
 export interface CourseResponse extends CourseInput {
   id: string;
   createdAt: string;
+  lecturer?: LecturerInfo;
 }
 
 export interface VideoUploadResponse {

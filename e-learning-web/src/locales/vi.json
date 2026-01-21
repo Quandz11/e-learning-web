@@ -36,7 +36,23 @@
         "codeSentTo": "Chúng tôi đã gửi mã xác minh 6 chữ số đến",
         "didntReceiveCode": "Không nhận được mã?",
         "resend": "Gửi lại",
-        "verifyAndProceed": "Xác minh & Tiếp tục"
+        "verifyAndProceed": "Xác minh & Tiếp tục",
+        "phone": "Số điện thoại",
+        "phonePlaceholder": "Nhập số điện thoại của bạn",
+        "creating": "Đang tạo tài khoản...",
+        "verifying": "Đang xác minh...",
+        "otpResent": "Mã xác minh mới đã được gửi đến email của bạn",
+        "errors": {
+            "fullNameRequired": "Vui lòng nhập họ và tên",
+            "emailRequired": "Vui lòng nhập email",
+            "emailInvalid": "Email không hợp lệ",
+            "passwordRequired": "Vui lòng nhập mật khẩu",
+            "passwordLength": "Mật khẩu phải có ít nhất 8 ký tự",
+            "registrationFailed": "Đăng ký thất bại. Vui lòng thử lại.",
+            "otpInvalid": "Vui lòng nhập mã OTP gồm 6 chữ số",
+            "otpVerificationFailed": "Mã OTP không hợp lệ hoặc đã hết hạn",
+            "resendFailed": "Gửi lại mã OTP thất bại. Vui lòng thử lại."
+        }
     },
     "hero": {
         "title": "Mở khóa tiềm năng của bạn qua từng bài học.",
@@ -222,11 +238,32 @@
                 "deleteFailed": "Xóa thất bại",
                 "loadFailed": "Tải danh sách thất bại",
                 "resetFailed": "Đặt lại mật khẩu thất bại"
+            },
+            "detail": {
+                "verifiedEmail": "Đã xác thực Email",
+                "notFound": "Không tìm thấy người dùng",
+                "additionalInfo": "Thông tin bổ sung",
+                "additionalInfoDesc": "Chi tiết người dùng và thông tin hồ sơ mở rộng sẽ xuất hiện ở đây.",
+                "coursesEmpty": "Lịch sử đăng ký khóa học sẽ sớm được cập nhật.",
+                "activityEmpty": "Nhật ký hoạt động người dùng sẽ sớm được cập nhật.",
+                "tabs": {
+                    "overview": "Tổng quan",
+                    "courses": "Khóa học",
+                    "activity": "Hoạt động"
+                },
+                "stats": {
+                    "title": "Thống kê",
+                    "coursesEnrolled": "Khóa học đã tham gia",
+                    "completionRate": "Tỷ lệ hoàn thành",
+                    "lastActive": "Hoạt động gần nhất"
+                }
             }
         }
     },
     "common": {
-        "saving": "Đang lưu..."
+        "saving": "Đang lưu...",
+        "unnamed": "Người dùng chưa đặt tên",
+        "backToList": "Quay lại danh sách"
     },
     "courseDetail": {
         "back": "Quay lại",
@@ -236,7 +273,7 @@
         "curriculumTab": "Giáo trình",
         "selectLesson": "Chọn bài để xem",
         "free": "Miễn phí",
-        "sections": "Phần",
+        "sectionsCount": "Phần",
         "lessons": "Bài học",
         "durationMinutes": "{{minutes}} phút",
         "submittedAt": "Ngày tạo",
@@ -250,6 +287,169 @@
         "meta": {
             "statusPublished": "Đã xuất bản",
             "statusDraft": "Bản nháp"
+        },
+        "breadcrumb": {
+            "courses": "Khóa học",
+            "management": "Quản lý"
+        },
+        "tabs": {
+            "overview": "Tổng quan",
+            "curriculum": "Chương trình",
+            "students": "Học viên đã đăng ký",
+            "financials": "Tài chính/Thu nhập"
+        },
+        "sections": {
+            "description": "Mô tả khóa học",
+            "whatLearn": "Học viên sẽ học được gì",
+            "structure": "Cấu trúc khóa học",
+            "statistics": "Thống kê khóa học",
+            "internalNotes": "Ghi chú nội bộ"
+        },
+        "stats": {
+            "enrollments": "Tổng đăng ký",
+            "rating": "Đánh giá hiện tại",
+            "lastUpdated": "Cập nhật lần cuối",
+            "revenue": "Doanh thu ước tính",
+            "reviews": "đánh giá"
+        },
+        "actions": {
+            "deactivate": "Vô hiệu hóa",
+            "edit": "Chỉnh sửa khóa học",
+            "analytics": "Xem phân tích",
+            "addNote": "Thêm ghi chú nội bộ...",
+            "viewNoteHistory": "Xem lịch sử ghi chú"
+        },
+        "instructorInfo": {
+            "senior": "Giảng viên cao cấp",
+            "courses": "khóa học"
+        }
+    },
+    "home": {
+        "header": {
+            "nav": {
+                "home": "Trang chủ",
+                "courses": "Khóa học",
+                "benefits": "Lợi ích",
+                "testimonials": "Đánh giá"
+            },
+            "logout": "Đăng xuất",
+            "welcome": "Chào mừng"
+        },
+        "hero": {
+            "badge": "Khai giảng học kỳ mới",
+            "title": "Mở khóa",
+            "titleHighlight": "Tiềm năng của bạn ngay hôm nay.",
+            "subtitle": "Tham gia cộng đồng học viên và chuyên gia ngành. Nắm vững kỹ năng mới với sự hướng dẫn chuyên nghiệp trong môi trường hiện đại, linh hoạt.",
+            "searchPlaceholder": "Bạn muốn học gì?",
+            "searchButton": "Tìm kiếm",
+            "socialProof": "Được tin tưởng bởi học viên trên toàn thế giới",
+            "stats": {
+                "completionRate": "Tỷ lệ hoàn thành",
+                "viewStats": "Xem thống kê"
+            },
+            "interactive": "Học tập tương tác",
+            "liveSession": "Buổi học trực tiếp & hội thảo"
+        },
+        "courses": {
+            "title": "Khóa học nổi bật",
+            "subtitle": "Được chọn lọc bởi chuyên gia của chúng tôi cho sự phát triển sự nghiệp của bạn.",
+            "viewAll": "Xem tất cả khóa học",
+            "reviews": "đánh giá",
+            "featured": [
+                {
+                    "title": "Nền tảng khoa học dữ liệu",
+                    "description": "Làm chủ Python, SQL và phân tích thống kê với các dự án thực tế.",
+                    "instructor": "TS. Sarah Smith",
+                    "badge": "Mới"
+                },
+                {
+                    "title": "Làm chủ thiết kế UX",
+                    "description": "Học nghiên cứu người dùng, wireframing và tạo nguyên mẫu từ các chuyên gia hàng đầu.",
+                    "instructor": "John Doe",
+                    "badge": "Bán chạy"
+                },
+                {
+                    "title": "Marketing số 101",
+                    "description": "Hướng dẫn toàn diện về SEO, mạng xã hội và chiến lược marketing nội dung.",
+                    "instructor": "Emily Blunt",
+                    "badge": null
+                }
+            ]
+        },
+        "benefits": {
+            "title": "Tại sao chọn SKVI Learning?",
+            "subtitle": "Nền tảng của chúng tôi được thiết kế để cung cấp trải nghiệm học tập toàn diện và linh hoạt.",
+            "certifiedInstructors": {
+                "title": "Giảng viên được chứng nhận",
+                "description": "Học từ những người giỏi nhất trong ngành. Các giảng viên của chúng tôi là chuyên gia được xác minh với nhiều năm kinh nghiệm thực tế.",
+                "cta": "Gặp gỡ đội ngũ"
+            },
+            "selfPaced": {
+                "title": "Tự học",
+                "description": "Học theo tốc độ của riêng bạn."
+            },
+            "certificates": {
+                "title": "Chứng chỉ",
+                "description": "Được công nhận trong ngành."
+            },
+            "support": {
+                "title": "Hỗ trợ 24/7",
+                "description": "Đội ngũ hỗ trợ tận tâm đảm bảo bạn không bao giờ bị kẹt."
+            }
+        },
+        "testimonials": {
+            "title": "Học viên nói gì về chúng tôi",
+            "items": [
+                {
+                    "quote": "Sự linh hoạt của các khóa học cho phép tôi chuyển đổi sự nghiệp trong khi vẫn làm việc toàn thời gian. Nội dung cực kỳ cập nhật.",
+                    "name": "Michael Chen",
+                    "role": "Kỹ sư phần mềm"
+                },
+                {
+                    "quote": "Tôi đã tham gia khóa học trên các nền tảng khác, nhưng chất lượng giảng viên ở đây vô song. Sự hỗ trợ của cộng đồng cũng tuyệt vời.",
+                    "name": "Sarah Johnson",
+                    "role": "Quản lý Sản phẩm"
+                },
+                {
+                    "quote": "Hỗ trợ từ đội ngũ là yếu tố thay đổi cuộc chơi. Mọi vấn đề tôi gặp phải đều được giải quyết trong vài phút, giúp tôi tập trung vào học tập.",
+                    "name": "David Ross",
+                    "role": "Chuyên gia Marketing"
+                }
+            ]
+        },
+        "newsletter": {
+            "title": "Sẵn sàng bắt đầu hành trình?",
+            "subtitle": "Tham gia 50.000+ học viên và bắt đầu học ngay hôm nay.",
+            "placeholder": "Nhập email của bạn",
+            "cta": "Bắt đầu"
+        },
+        "footer": {
+            "description": "Trao quyền cho người học trên toàn thế giới với giáo dục chất lượng cao, dễ tiếp cận từ các chuyên gia ngành.",
+            "platform": {
+                "title": "Nền tảng",
+                "browseCourses": "Duyệt khóa học",
+                "successStories": "Câu chuyện thành công",
+                "pricing": "Bảng giá",
+                "forBusiness": "Dành cho doanh nghiệp"
+            },
+            "portals": {
+                "title": "Cổng thông tin",
+                "studentLogin": "Đăng nhập học viên",
+                "instructorDashboard": "Bảng điều khiển giảng viên",
+                "agentPortal": "Cổng đại lý",
+                "adminAccess": "Truy cập quản trị"
+            },
+            "connect": {
+                "title": "Kết nối",
+                "aboutUs": "Về chúng tôi",
+                "careers": "Nghề nghiệp",
+                "contactSupport": "Liên hệ hỗ trợ",
+                "privacyPolicy": "Chính sách bảo mật"
+            },
+            "copyright": "© 2024 SKVI Learning Inc. Bản quyền thuộc về.",
+            "terms": "Điều khoản",
+            "privacy": "Bảo mật",
+            "cookies": "Cookies"
         }
     }
 }

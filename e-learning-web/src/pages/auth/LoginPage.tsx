@@ -52,7 +52,7 @@ const LoginPage = () => {
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');
             } else {
-                navigate('/dashboard'); // or appropriate page for other roles
+                navigate('/home'); // or appropriate page for other roles
             }
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Login failed';

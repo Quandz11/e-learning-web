@@ -188,7 +188,8 @@
             "statuses": {
                 "ACTIVE": "Active",
                 "INACTIVE": "Inactive",
-                "SUSPENDED": "Suspended"
+                "SUSPENDED": "Suspended",
+                "PENDING": "Pending"
             },
             "filters": {
                 "roleAll": "All roles",
@@ -267,6 +268,87 @@
                 }
             }
         },
+        "instructors": {
+            "title": "Instructors",
+            "subtitle": "Manage instructors, courses, and teaching performance.",
+            "new": "New Instructor",
+            "searchPlaceholder": "Search by email, name, or phone",
+            "statuses": {
+                "ACTIVE": "Active",
+                "INACTIVE": "Inactive",
+                "SUSPENDED": "Suspended"
+            },
+            "filters": {
+                "statusAll": "All statuses"
+            },
+            "table": {
+                "email": "Email",
+                "name": "Name",
+                "courses": "Courses",
+                "students": "Students",
+                "status": "Status",
+                "created": "Created",
+                "actions": "Actions",
+                "loading": "Loading...",
+                "noData": "No instructors found."
+            },
+            "buttons": {
+                "search": "Search",
+                "edit": "Edit",
+                "delete": "Delete",
+                "reset": "Reset password"
+            },
+            "form": {
+                "newTitle": "Create Instructor",
+                "editTitle": "Edit Instructor",
+                "email": "Email",
+                "fullName": "Full name",
+                "phone": "Phone",
+                "avatar": "Avatar URL",
+                "password": "Password",
+                "passwordHint": "Must be at least 8 characters",
+                "status": "Status",
+                "save": "Save instructor",
+                "cancel": "Cancel"
+            },
+            "pagination": {
+                "summary": "{{from}}-{{to}} of {{total}} instructors",
+                "prev": "Prev",
+                "next": "Next"
+            },
+            "deleteConfirm": "Delete this instructor? Instructors with courses cannot be deleted.",
+            "resetPasswordPrompt": "Enter new password (minimum 8 characters):",
+            "resetPasswordSuccess": "Password reset successfully!",
+            "errors": {
+                "emailRequired": "Email is required",
+                "passwordRequired": "Password is required",
+                "passwordLength": "Password must be at least 8 characters",
+                "saveFailed": "Save failed",
+                "deleteFailed": "Delete failed",
+                "loadFailed": "Failed to load instructors",
+                "resetFailed": "Reset password failed"
+            },
+            "detail": {
+                "loading": "Loading instructor details...",
+                "notFound": "Instructor not found",
+                "coursesEmpty": "This instructor has no courses yet.",
+                "tabs": {
+                    "overview": "Overview",
+                    "courses": "Courses",
+                    "activity": "Activity"
+                },
+                "stats": {
+                    "totalCourses": "Total Courses",
+                    "published": "published",
+                    "totalStudents": "Total Students",
+                    "totalRevenue": "Total Revenue",
+                    "lastActive": "Last Active",
+                    "updated": "Last Updated",
+                    "disabled": "Not enabled",
+                    "enrollments": "enrollments"
+                }
+            }
+        },
         "settings": {
             "title": "Settings",
             "security": {
@@ -299,6 +381,44 @@
         "saving": "Saving...",
         "unnamed": "Unnamed User",
         "backToList": "Back to List"
+    },
+    "profile": {
+        "title": "User Profile",
+        "subtitle": "Manage your personal information and account settings",
+        "loading": "Loading profile...",
+        "profileInfo": "Profile Information",
+        "editProfile": "Edit Profile",
+        "changePassword": "Change Password",
+        "changePasswordDesc": "Update your password to keep your account secure",
+        "accountCreated": "Account Created",
+        "lastUpdated": "Last Updated",
+        "twoFactorDisabled": "Not enabled",
+        "changing": "Changing...",
+        "form": {
+            "fullName": "Full Name",
+            "phone": "Phone",
+            "avatar": "Avatar URL",
+            "currentPassword": "Current Password",
+            "newPassword": "New Password",
+            "confirmPassword": "Confirm Password",
+            "passwordHint": "Must be at least 8 characters",
+            "save": "Save Changes",
+            "cancel": "Cancel",
+            "changePassword": "Change Password"
+        },
+        "success": {
+            "profileUpdated": "Profile updated successfully!",
+            "passwordChanged": "Password changed successfully! Please login again."
+        },
+        "errors": {
+            "loadFailed": "Failed to load profile",
+            "notFound": "Profile not found",
+            "updateFailed": "Update failed",
+            "passwordMismatch": "Passwords do not match",
+            "passwordLength": "Password must be at least 8 characters",
+            "wrongPassword": "Current password is incorrect",
+            "changeFailed": "Failed to change password"
+        }
     },
     "courseDetail": {
         "back": "Back",

@@ -17,6 +17,9 @@ import UsersPage from './pages/admin/user/UsersPage';
 import UserDetailPage from './pages/admin/user/UserDetailPage';
 import CourseDetailPage from './pages/admin/course/CourseDetailPage';
 import AdminSettingsPage from './pages/admin/settings/AdminSettingsPage';
+import InstructorsPage from './pages/admin/instructor/InstructorsPage';
+import InstructorDetailPage from './pages/admin/instructor/InstructorDetailPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -70,6 +73,14 @@ function App() {
           ),
         },
         {
+          path: 'profile',
+          element: (
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          ),
+        },
+        {
           path: 'admin/courses/:id',
           element: (
             <ProtectedRoute requiredRole="ADMIN">
@@ -114,6 +125,22 @@ function App() {
           element: (
             <ProtectedRoute requiredRole="ADMIN">
               <AdminSettingsPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'admin/instructors',
+          element: (
+            <ProtectedRoute requiredRole="ADMIN">
+              <InstructorsPage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'admin/instructors/:id',
+          element: (
+            <ProtectedRoute requiredRole="ADMIN">
+              <InstructorDetailPage />
             </ProtectedRoute>
           ),
         },

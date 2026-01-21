@@ -188,7 +188,8 @@
             "statuses": {
                 "ACTIVE": "Hoạt động",
                 "INACTIVE": "Ngưng hoạt động",
-                "SUSPENDED": "Tạm khóa"
+                "SUSPENDED": "Tạm khóa",
+                "PENDING": "Đang chờ"
             },
             "filters": {
                 "roleAll": "Tất cả vai trò",
@@ -267,6 +268,87 @@
                 }
             }
         },
+        "instructors": {
+            "title": "Giảng viên",
+            "subtitle": "Quản lý giảng viên, khóa học và hiệu suất giảng dạy.",
+            "new": "Giảng viên mới",
+            "searchPlaceholder": "Tìm theo email, tên, hoặc điện thoại",
+            "statuses": {
+                "ACTIVE": "Hoạt động",
+                "INACTIVE": "Ngưng hoạt động",
+                "SUSPENDED": "Tạm khóa"
+            },
+            "filters": {
+                "statusAll": "Tất cả trạng thái"
+            },
+            "table": {
+                "email": "Email",
+                "name": "Tên",
+                "courses": "Khóa học",
+                "students": "Học viên",
+                "status": "Trạng thái",
+                "created": "Ngày tạo",
+                "actions": "Thao tác",
+                "loading": "Đang tải...",
+                "noData": "Không có giảng viên."
+            },
+            "buttons": {
+                "search": "Tìm kiếm",
+                "edit": "Sửa",
+                "delete": "Xóa",
+                "reset": "Đặt lại mật khẩu"
+            },
+            "form": {
+                "newTitle": "Tạo giảng viên",
+                "editTitle": "Chỉnh sửa giảng viên",
+                "email": "Email",
+                "fullName": "Họ tên",
+                "phone": "Số điện thoại",
+                "avatar": "URL ảnh đại diện",
+                "password": "Mật khẩu",
+                "passwordHint": "Phải có ít nhất 8 ký tự",
+                "status": "Trạng thái",
+                "save": "Lưu giảng viên",
+                "cancel": "Hủy"
+            },
+            "pagination": {
+                "summary": "{{from}}-{{to}} / {{total}} giảng viên",
+                "prev": "Trước",
+                "next": "Sau"
+            },
+            "deleteConfirm": "Xóa giảng viên này? Giảng viên có khóa học không thể xóa.",
+            "resetPasswordPrompt": "Nhập mật khẩu mới (tối thiểu 8 ký tự):",
+            "resetPasswordSuccess": "Đặt lại mật khẩu thành công!",
+            "errors": {
+                "emailRequired": "Vui lòng nhập email",
+                "passwordRequired": "Vui lòng nhập mật khẩu",
+                "passwordLength": "Mật khẩu phải có ít nhất 8 ký tự",
+                "saveFailed": "Lưu thất bại",
+                "deleteFailed": "Xóa thất bại",
+                "loadFailed": "Tải danh sách thất bại",
+                "resetFailed": "Đặt lại mật khẩu thất bại"
+            },
+            "detail": {
+                "loading": "Đang tải thông tin giảng viên...",
+                "notFound": "Không tìm thấy giảng viên",
+                "coursesEmpty": "Giảng viên chưa có khóa học nào.",
+                "tabs": {
+                    "overview": "Tổng quan",
+                    "courses": "Khóa học",
+                    "activity": "Hoạt động"
+                },
+                "stats": {
+                    "totalCourses": "Tổng khóa học",
+                    "published": "đã xuất bản",
+                    "totalStudents": "Tổng học viên",
+                    "totalRevenue": "Tổng doanh thu",
+                    "lastActive": "Hoạt động gần nhất",
+                    "updated": "Cập nhật lần cuối",
+                    "disabled": "Chưa bật",
+                    "enrollments": "đăng ký"
+                }
+            }
+        },
         "settings": {
             "title": "Cài đặt",
             "security": {
@@ -299,6 +381,44 @@
         "saving": "Đang lưu...",
         "unnamed": "Người dùng chưa đặt tên",
         "backToList": "Quay lại danh sách"
+    },
+    "profile": {
+        "title": "Hồ sơ cá nhân",
+        "subtitle": "Quản lý thông tin cá nhân và cài đặt tài khoản",
+        "loading": "Đang tải hồ sơ...",
+        "profileInfo": "Thông tin cá nhân",
+        "editProfile": "Chỉnh sửa hồ sơ",
+        "changePassword": "Đổi mật khẩu",
+        "changePasswordDesc": "Cập nhật mật khẩu để bảo mật tài khoản",
+        "accountCreated": "Ngày tạo tài khoản",
+        "lastUpdated": "Cập nhật lần cuối",
+        "twoFactorDisabled": "Chưa bật",
+        "changing": "Đang thay đổi...",
+        "form": {
+            "fullName": "Họ và tên",
+            "phone": "Số điện thoại",
+            "avatar": "URL ảnh đại diện",
+            "currentPassword": "Mật khẩu hiện tại",
+            "newPassword": "Mật khẩu mới",
+            "confirmPassword": "Xác nhận mật khẩu",
+            "passwordHint": "Phải có ít nhất 8 ký tự",
+            "save": "Lưu thay đổi",
+            "cancel": "Hủy",
+            "changePassword": "Đổi mật khẩu"
+        },
+        "success": {
+            "profileUpdated": "Cập nhật hồ sơ thành công!",
+            "passwordChanged": "Đổi mật khẩu thành công! Vui lòng đăng nhập lại."
+        },
+        "errors": {
+            "loadFailed": "Tải hồ sơ thất bại",
+            "notFound": "Không tìm thấy hồ sơ",
+            "updateFailed": "Cập nhật thất bại",
+            "passwordMismatch": "Mật khẩu xác nhận không khớp",
+            "passwordLength": "Mật khẩu phải có ít nhất 8 ký tự",
+            "wrongPassword": "Mật khẩu hiện tại không đúng",
+            "changeFailed": "Đổi mật khẩu thất bại"
+        }
     },
     "courseDetail": {
         "back": "Quay lại",

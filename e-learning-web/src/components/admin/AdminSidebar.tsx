@@ -74,13 +74,16 @@ const AdminSidebar: React.FC = () => {
             <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">groups</span>
             <span className="text-sm font-medium">{t('admin.sidebar.users')}</span>
           </Link>
-          <a
-            href="#"
-            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300"
+          <Link
+            to="/admin/instructors"
+            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/instructors')
+              ? 'bg-dashboard-primary text-white shadow-dashboard-subtle'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
+              }`}
           >
             <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">cast_for_education</span>
             <span className="text-sm font-medium">{t('admin.sidebar.instructors')}</span>
-          </a>
+          </Link>
           <a
             href="#"
             className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300"
@@ -107,7 +110,10 @@ const AdminSidebar: React.FC = () => {
 
         {/* User Mini Profile */}
         <div className="border-t border-slate-200 p-4 dark:border-slate-800">
-          <div className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">
+          <Link
+            to="/profile"
+            className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
             <div className="h-10 w-10 rounded-full border border-slate-200 bg-dashboard-primary/10 flex items-center justify-center text-sm font-semibold text-dashboard-primary dark:border-slate-700">
               {userInitial}
             </div>
@@ -116,7 +122,7 @@ const AdminSidebar: React.FC = () => {
               <span className="truncate text-xs text-slate-500 dark:text-slate-400">{userRole}</span>
             </div>
             <span className="material-symbols-outlined ml-auto text-[18px] text-slate-400">more_vert</span>
-          </div>
+          </Link>
           <button
             onClick={handleLogout}
             className="mt-3 flex w-full items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:border-red-200 dark:border-slate-700 dark:text-red-300 dark:hover:bg-red-900/20"

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SKVI.Application.Interfaces;
+using SKVI.Infrastructure.VideoStreaming;
 
 namespace e_learning_server.Controllers;
 
@@ -9,74 +8,56 @@ namespace e_learning_server.Controllers;
 [Route("api/videos")]
 public class VideosController : ControllerBase
 {
-    private readonly IVideoService _videoService;
-    private readonly IBunnyStreamService _bunnyStreamService;
+    private readonly IVideoSecurityService _videoSecurityService;
+    private readonly ILogger<VideosController> _logger;
 
-    public VideosController(IVideoService videoService, IBunnyStreamService bunnyStreamService)
+    public VideosController(IVideoSecurityService videoSecurityService, ILogger<VideosController> logger)
     {
-        _videoService = videoService;
-        _bunnyStreamService = bunnyStreamService;
+        _videoSecurityService = videoSecurityService;
+        _logger = logger;
     }
 
-    [HttpPost("upload")]
-    [Authorize(Roles = "ADMIN,LECTURER")]
-    [RequestSizeLimit(1_000_000_000)] // Allow up to ~1GB, adjust as needed
-    public async Task<IActionResult> Upload([FromForm] IFormFile file, [FromForm] string? title, CancellationToken cancellationToken)
+    [Authorize]
+    [HttpGet("{videoId}/stream-url")]
+    public IActionResult GetStreamUrl(string videoId)
     {
-        if (file == null)
-        {
-            return BadRequest(new { message = "File is required" });
-        }
-
         try
         {
-            var result = await _videoService.UploadAsync(file, title, cancellationToken);
-            return Ok(result);
+            // Generate signed URL that expires in 30 minutes
+            var signedUrl = _videoSecurityService.GenerateSignedUrl(videoId, expirationMinutes: 30);
+            
+            _logger.LogInformation($"Generated signed URL for video {videoId}");
+            
+            return Ok(new 
+            { 
+                streamUrl = signedUrl,
+                expiresIn = 1800 // 30 minutes in seconds
+            });
         }
-        catch (ArgumentException ex)
+        catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
+            _logger.LogError(ex, $"Error generating stream URL for video {videoId}");
+            return StatusCode(500, new { message = "Failed to generate stream URL" });
         }
     }
 
-    [HttpPost("{videoId}/thumbnail")]
-    [Authorize(Roles = "ADMIN,LECTURER")]
-    [RequestSizeLimit(20_000_000)]
-    public async Task<IActionResult> UploadThumbnail(Guid videoId, [FromForm] IFormFile file, CancellationToken cancellationToken)
+    [Authorize]
+    [HttpGet("{videoId}/embed-url")]
+    public IActionResult GetEmbedUrl(string videoId)
     {
-        if (file == null)
-        {
-            return BadRequest(new { message = "File is required" });
-        }
-
-        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-        {
-            return BadRequest(new { message = "Only image files are allowed" });
-        }
-
         try
         {
-            var video = await _videoService.GetByIdAsync(videoId, cancellationToken);
-            if (video == null || string.IsNullOrWhiteSpace(video.BunnyVideoId))
-            {
-                return NotFound(new { message = "Video not found" });
-            }
-
-            await using var stream = file.OpenReadStream();
-            await _bunnyStreamService.UploadVideoThumbnailAsync(video.BunnyVideoId, stream, file.FileName, cancellationToken);
-            return Ok(new { message = "Thumbnail uploaded" });
+            var embedUrl = _videoSecurityService.GenerateEmbedUrl(videoId);
+            
+            return Ok(new 
+            { 
+                embedUrl = embedUrl
+            });
         }
-        catch (ArgumentException ex)
+        catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
+            _logger.LogError(ex, $"Error generating embed URL for video {videoId}");
+            return StatusCode(500, new { message = "Failed to generate embed URL" });
         }
     }
 }

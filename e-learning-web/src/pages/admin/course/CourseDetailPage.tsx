@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { courseApi, type CourseResponse, type CourseLessonInput } from '../../../services/courseApi';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import CourseFormModal from './components/CourseFormModal';
+import SecureVideoPlayer from '../../../components/SecureVideoPlayer';
 
 const CourseDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -149,16 +150,12 @@ const CourseDetailPage: React.FC = () => {
                       allowFullScreen
                       title={selectedLesson.title}
                     />
-                  ) : selectedLesson?.playbackUrl ? (
-                    <video
-                      key={selectedLesson.playbackUrl}
-                      src={selectedLesson.playbackUrl}
+                  ) : selectedLesson?.videoId ? (
+                    <SecureVideoPlayer
+                      videoId={selectedLesson.videoId}
+                      className="absolute inset-0 w-full h-full object-cover"
                       controls
-                      className="absolute inset-0 w-full h-full"
-                      controlsList="nodownload"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
+                    />
                   ) : (
                     <div className="flex aspect-video items-center justify-center text-slate-400">
                       {t('courseDetail.selectLesson')}

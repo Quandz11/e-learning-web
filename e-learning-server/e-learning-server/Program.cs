@@ -33,6 +33,13 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 
+// Video Security Service (for signed URLs)
+builder.Services.AddScoped<IVideoSecurityService>(sp =>
+{
+    var bunnySettings = sp.GetRequiredService<IOptions<BunnySettings>>().Value;
+    return new VideoSecurityService(bunnySettings);
+});
+
 builder.Services.AddHttpClient<IBunnyStreamService, BunnyStreamService>();
 
 // Authentication & JWT

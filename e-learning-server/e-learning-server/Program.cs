@@ -2,6 +2,7 @@ using System.Text;
 using e_learning_server.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SKVI.Application.Interfaces;
 using SKVI.Application.Services;

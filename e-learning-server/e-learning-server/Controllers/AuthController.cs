@@ -237,8 +237,8 @@ public class AuthController : ControllerBase
         {
             HttpOnly = true,
             Expires = DateTime.UtcNow.AddDays(7),
-            SameSite = SameSiteMode.Strict, // HTTPS only - same-origin
-            Secure = true // HTTPS required
+            SameSite = SameSiteMode.None, // Allow cross-origin (frontend and backend on different domains)
+            Secure = true // HTTPS required (must be true when SameSite=None)
         };
         
         Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);

@@ -14,9 +14,7 @@ const SecureVideoPlayer = React.forwardRef<HTMLVideoElement, SecureVideoPlayerPr
     videoId,
     className = '',
     autoPlay = false,
-    controls = true,
-    onEnded,
-}, ref) => {
+}, _) => {
     const [embedUrl, setEmbedUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);

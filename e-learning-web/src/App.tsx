@@ -20,6 +20,9 @@ import AdminSettingsPage from './pages/admin/settings/AdminSettingsPage';
 import InstructorsPage from './pages/admin/instructor/InstructorsPage';
 import InstructorDetailPage from './pages/admin/instructor/InstructorDetailPage';
 import ProfilePage from './pages/ProfilePage';
+import StudentCoursesPage from './pages/CoursesPage';
+import StudentCourseDetailPage from './pages/StudentCourseDetailPage';
+import LearningPage from './pages/LearningPage';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -40,7 +43,7 @@ function App() {
               replace
             />
           ) : (
-            <Navigate to="/login" replace />
+            <HomePage />
           ),
         },
         {
@@ -77,6 +80,22 @@ function App() {
           element: (
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: 'courses',
+          element: <StudentCoursesPage />,
+        },
+        {
+          path: 'courses/:id',
+          element: <StudentCourseDetailPage />,
+        },
+        {
+          path: 'courses/:id/learn',
+          element: (
+            <ProtectedRoute>
+              <LearningPage />
             </ProtectedRoute>
           ),
         },

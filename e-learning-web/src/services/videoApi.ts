@@ -1,3 +1,5 @@
+import { authApi } from './authApi';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
 
 export interface SignedVideoUrlResponse {
@@ -11,7 +13,7 @@ export interface EmbedUrlResponse {
 
 class VideoApi {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('accessToken');
+    const token = authApi.getAccessToken();
     return {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),

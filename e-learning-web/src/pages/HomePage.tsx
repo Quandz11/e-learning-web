@@ -1,16 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import type { RootState, AppDispatch } from '../store/store';
 import { logout } from '../store/authSlice';
 import { authApi } from '../services/authApi';
+import { courseApi, type CourseResponse } from '../services/courseApi';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+
+  const [courses, setCourses] = useState<CourseResponse[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
+  const [coursesError, setCoursesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setCoursesLoading(true);
+        const allCourses = await courseApi.getAll();
+        // Filter only published courses for students
+        const publishedCourses = allCourses.filter(c => c.isPublished);
+        setCourses(publishedCourses.slice(0, 3)); // Show only first 3 on homepage
+      } catch (err: any) {
+        setCoursesError(err.message || 'Failed to load courses');
+      } finally {
+        setCoursesLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -180,29 +202,62 @@ const HomePage: React.FC = () => {
                 {t('home.courses.subtitle')}
               </p>
             </div>
-            <button className="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
+            <button
+              onClick={() => navigate('/courses')}
+              className="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all"
+            >
               {t('home.courses.viewAll')} <span className="material-symbols-outlined text-sm">arrow_forward</span>
             </button>
           </div>
 
           {/* Course Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {([0, 1, 2] as const).map((index) => {
-              const course = t(`home.courses.featured.${index}`, { returnObjects: true }) as any;
-              const prices = ['$49.99', '$59.99', '$39.99'];
-              const ratings = [4.9, 4.8, 4.7];
-              const reviews = [1200, 850, 2100];
-              const badgeColors = ['bg-red-500', 'bg-primary/20 text-primary backdrop-blur-md', ''];
-
-              return (
-                <div
-                  key={index}
+          {coursesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
+                  <div className="aspect-video bg-gray-200 dark:bg-gray-700" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : coursesError ? (
+            <div className="text-center py-12 text-red-500">
+              {coursesError}
+            </div>
+          ) : courses.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              {t('home.courses.noCourses', { defaultValue: 'No courses available yet' })}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course, index) => (
+                <Link
+                  key={course.id}
+                  to={`/courses/${course.id}`}
                   className="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden"
                 >
                   <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
-                    {course.badge && (
-                      <div className={`absolute top-3 left-3 ${badgeColors[index]} text-white text-xs font-bold px-2 py-1 rounded shadow-sm z-10`}>
-                        {course.badge}
+                    {course.thumbnailUrl ? (
+                      <img
+                        src={course.thumbnailUrl}
+                        alt={course.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500" />
+                    )}
+                    {course.isFree && (
+                      <div className="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm z-10">
+                        {t('home.courses.free', { defaultValue: 'FREE' })}
+                      </div>
+                    )}
+                    {index === 0 && !course.isFree && (
+                      <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm z-10">
+                        {t('home.courses.popular', { defaultValue: 'POPULAR' })}
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
@@ -211,10 +266,10 @@ const HomePage: React.FC = () => {
                     <div className="flex items-center gap-2 mb-3">
                       <span className="material-symbols-outlined text-yellow-400 text-sm">star</span>
                       <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                        {ratings[index]} ({reviews[index].toLocaleString()} {t('home.courses.reviews')})
+                        4.8 (128 {t('home.courses.reviews')})
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold text-[#0c1c1d] dark:text-white mb-2 leading-tight">
+                    <h3 className="text-xl font-bold text-[#0c1c1d] dark:text-white mb-2 leading-tight line-clamp-2">
                       {course.title}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
@@ -222,18 +277,28 @@ const HomePage: React.FC = () => {
                     </p>
                     <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-blue-600"></div>
-                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                          {course.instructor}
+                        {course.lecturer?.avatarUrl ? (
+                          <img
+                            src={course.lecturer.avatarUrl}
+                            alt={course.lecturer.fullName}
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-blue-600" />
+                        )}
+                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate max-w-[120px]">
+                          {course.lecturer?.fullName || 'SKVI Instructor'}
                         </span>
                       </div>
-                      <span className="text-primary font-bold text-lg">{prices[index]}</span>
+                      <span className="text-primary font-bold text-lg">
+                        {course.isFree ? t('home.courses.free', { defaultValue: 'FREE' }) : `${course.price.toLocaleString('vi-VN')} VND`}
+                      </span>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Benefits Bento Grid */}

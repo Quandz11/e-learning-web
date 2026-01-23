@@ -347,17 +347,25 @@ namespace e_learning_server.Migrations
                     b.Property<DateTime>("EnrolledAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Progress")
-                        .HasColumnType("decimal(5,2)");
+                    b.Property<DateTime>("LastAccessedAt")
+                        .HasColumnType("datetime2");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<int>("ProgressPercentage")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
 
-                    b.HasIndex("StudentId", "CourseId");
+                    b.HasIndex("LastAccessedAt");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "CourseId")
+                        .IsUnique();
 
                     b.ToTable("Enrollments");
                 });
@@ -413,23 +421,35 @@ namespace e_learning_server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CourseLessonId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("EnrollmentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("LastWatchedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("LessonId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("WatchedSeconds")
+                    b.Property<int>("WatchedDuration")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CourseLessonId");
+
                     b.HasIndex("EnrollmentId");
 
-                    b.HasIndex("LessonId");
+                    b.HasIndex("EnrollmentId", "LessonId")
+                        .IsUnique();
 
                     b.ToTable("LessonProgresses");
                 });
@@ -843,18 +863,18 @@ namespace e_learning_server.Migrations
                     b.HasOne("SKVI.Domain.Entities.Course", "Course")
                         .WithMany("Enrollments")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SKVI.Domain.Entities.User", "Student")
+                    b.HasOne("SKVI.Domain.Entities.User", "User")
                         .WithMany("Enrollments")
-                        .HasForeignKey("StudentId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Course");
 
-                    b.Navigation("Student");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Lead", b =>
@@ -876,21 +896,17 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.LessonProgress", b =>
                 {
-                    b.HasOne("SKVI.Domain.Entities.Enrollment", "Enrollment")
+                    b.HasOne("SKVI.Domain.Entities.CourseLesson", null)
                         .WithMany("LessonProgresses")
+                        .HasForeignKey("CourseLessonId");
+
+                    b.HasOne("SKVI.Domain.Entities.Enrollment", "Enrollment")
+                        .WithMany("LessonProgress")
                         .HasForeignKey("EnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SKVI.Domain.Entities.CourseLesson", "Lesson")
-                        .WithMany("LessonProgresses")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Enrollment");
-
-                    b.Navigation("Lesson");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Order", b =>
@@ -999,7 +1015,7 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.Enrollment", b =>
                 {
-                    b.Navigation("LessonProgresses");
+                    b.Navigation("LessonProgress");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Lead", b =>

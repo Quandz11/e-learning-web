@@ -115,6 +115,16 @@
         "courses": {
             "title": "Courses",
             "subtitle": "Manage course catalog, videos, and publish status.",
+            "userTitle": "All Courses",
+            "userSubtitle": "Explore our comprehensive collection of courses",
+            "searchPlaceholder": "Search courses...",
+            "resultsCount": "{{count}} courses found",
+            "noCourses": "No courses found",
+            "filters": {
+                "all": "All",
+                "free": "Free",
+                "premium": "Premium"
+            },
             "new": "New Course",
             "table": {
                 "title": "Title",
@@ -140,12 +150,9 @@
                 "editTitle": "Edit Course",
                 "title": "Title",
                 "thumbnail": "Thumbnail URL",
-                "thumbnailUploading": "Uploading thumbnail...",
                 "price": "Price",
-                "lecturer": "Lecturer",
                 "lecturerSearchPlaceholder": "Search lecturer by name or email",
                 "lecturerSelectPlaceholder": "Select a lecturer",
-                "lecturerLoading": "Loading lecturers...",
                 "lecturerEmpty": "No lecturers found",
                 "lecturerHint": "Showing up to 20 lecturers. Use search to filter.",
                 "selectedLecturerId": "Selected lecturer (ID: {{id}})",
@@ -159,16 +166,20 @@
                 "videoLinked": "Video linked",
                 "uploadRequired": "Upload required",
                 "previewPlaylist": "Preview playlist",
+                "sectionTitle": "Section Title",
+                "lessonTitle": "Lesson Title",
+                "order": "Order",
+                "duration": "Duration (min)",
+                "syncDuration": "Sync duration from cloud",
+                "thumbnailUploading": "Uploading thumbnail...",
+                "uploadVideo": "Upload video file",
+                "uploadThumbnail": "Upload lesson thumbnail",
+                "videoRequiredBeforeThumbnail": "Please upload video before uploading thumbnail.",
                 "save": "Save course",
                 "cancel": "Cancel",
                 "deleteConfirm": "Delete this course?",
                 "errors": {
                     "title": "Title is required",
-                    "lecturer": "Lecturer is required",
-                    "loadLecturers": "Failed to load lecturers",
-                    "saveFailed": "Save failed",
-                    "deleteFailed": "Delete failed",
-                    "loadFailed": "Failed to load courses",
                     "uploadFailed": "Upload failed"
                 }
             }
@@ -439,6 +450,19 @@
         "defaultLanguage": "Vietnamese",
         "instructor": "Instructor",
         "unknownInstructor": "Instructor",
+        "enrollFree": "Enroll for Free",
+        "enrollPremium": "Buy Now",
+        "enrolling": "Enrolling...",
+        "startLearning": "Start Learning",
+        "paymentRequired": "Payment required - Coming soon!",
+        "enrolled": "ENROLLED",
+        "freeCourse": "FREE COURSE",
+        "premium": "PREMIUM",
+        "features": {
+            "lifetimeAccess": "Lifetime access",
+            "mobileAccess": "Access on mobile and desktop",
+            "certificate": "Certificate of completion"
+        },
         "meta": {
             "statusPublished": "Published",
             "statusDraft": "Draft"
@@ -478,6 +502,20 @@
             "senior": "Senior Instructor",
             "courses": "Courses"
         }
+    },
+    "learn": {
+        "backToCourse": "Back to Course",
+        "loading": "Loading lessons...",
+        "progress": "Progress",
+        "completed": "completed",
+        "lessons": "lessons",
+        "courseContent": "Course Content",
+        "noVideo": "No video available for this lesson",
+        "markComplete": "Mark as Complete",
+        "marking": "Marking...",
+        "completedStatus": "Completed",
+        "previous": "Previous",
+        "next": "Next"
     },
     "home": {
         "header": {

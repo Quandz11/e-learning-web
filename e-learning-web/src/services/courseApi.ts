@@ -5,6 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api
 export interface CourseLessonInput {
   id?: string;
   title: string;
+  description?: string;
   duration: number;
   orderIndex: number;
   isPreview: boolean;
@@ -188,6 +189,24 @@ export const courseApi = {
     if (!res.ok) {
       const message = await res.text();
       throw new Error(message || 'Failed to upload thumbnail');
+    }
+
+    return res.json();
+  },
+
+
+  async syncVideoDuration(videoId: string): Promise<{ duration: number }> {
+    const res = await fetch(`${API_BASE_URL}/videos/${videoId}/sync-duration`, {
+      method: 'POST',
+      headers: {
+        ...authHeaders(),
+      },
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      const message = await res.text();
+      throw new Error(message || 'Failed to sync video duration');
     }
 
     return res.json();

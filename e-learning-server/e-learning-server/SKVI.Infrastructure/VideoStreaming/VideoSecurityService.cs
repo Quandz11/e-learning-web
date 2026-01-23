@@ -21,40 +21,37 @@ public class VideoSecurityService : IVideoSecurityService
     public string GenerateSignedUrl(string videoId, int expirationMinutes = 30)
     {
         var expirationTime = DateTimeOffset.UtcNow.AddMinutes(expirationMinutes).ToUnixTimeSeconds();
-        var tokenPath = $"/{videoId}/";
         
-        // Create signature: base64(sha256(token_security_key + tokenPath + expirationTime))
-        var signatureData = $"{_settings.VideoTokenKey}{tokenPath}{expirationTime}";
-        var signature = ComputeSha256Hash(signatureData);
-        var base64Signature = Convert.ToBase64String(Encoding.UTF8.GetBytes(signature))
-            .Replace("\n", "")
-            .Replace("+", "-")
-            .Replace("/", "_")
-            .Replace("=", "");
+        // Path to the playlist
+        var path = $"/{videoId}/playlist.m3u8";
+        
+        // Create signature: sha256_hex(token_key + path + expiration)
+        var hashInput = $"{_settings.VideoTokenKey}{path}{expirationTime}";
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(hashInput));
+        
+        // Convert to hex string (lowercase)
+        var signature = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
 
         // Generate signed URL
-        var playlistUrl = $"{_settings.CdnBaseUrl}/bcdn_token={base64Signature}&expires={expirationTime}&token_path={Uri.EscapeDataString(tokenPath)}/{videoId}/playlist.m3u8";
+        var playlistUrl = $"{_settings.CdnBaseUrl}{path}?token={signature}&expires={expirationTime}";
         
         return playlistUrl;
     }
 
     public string GenerateEmbedUrl(string videoId)
     {
-        // Bunny.net player embed URL doesn't need signing
-        return $"https://iframe.mediadelivery.net/embed/{_settings.LibraryId}/{videoId}";
-    }
-
-    private string ComputeSha256Hash(string rawData)
-    {
-        using (SHA256 sha256Hash = SHA256.Create())
-        {
-            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                builder.Append(bytes[i].ToString("x2"));
-            }
-            return builder.ToString();
-        }
+        // Generate signed embed URL with token authentication
+        // Per Bunny Stream docs: SHA256_HEX(token_security_key + video_id + expiration)
+        var expirationTime = DateTimeOffset.UtcNow.AddMinutes(3600).ToUnixTimeSeconds(); // 60 hours
+        
+        // Create hash input: security_key + videoId + expires
+        var hashInput = $"{_settings.VideoTokenKey}{videoId}{expirationTime}";
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(hashInput));
+        
+        // Convert to hex string (lowercase)
+        var signature = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+        
+        // Generate signed embed URL
+        return $"https://iframe.mediadelivery.net/embed/{_settings.LibraryId}/{videoId}?token={signature}&expires={expirationTime}";
     }
 }

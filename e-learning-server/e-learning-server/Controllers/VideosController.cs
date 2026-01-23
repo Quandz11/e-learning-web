@@ -1,63 +1,88 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SKVI.Infrastructure.VideoStreaming;
+using SKVI.Application.DTOs.Videos;
+using SKVI.Application.Interfaces;
 
-namespace e_learning_server.Controllers;
+namespace SKVI.Controllers;
 
+[Authorize]
 [ApiController]
-[Route("api/videos")]
+[Route("api/[controller]")]
 public class VideosController : ControllerBase
 {
-    private readonly IVideoSecurityService _videoSecurityService;
-    private readonly ILogger<VideosController> _logger;
+    private readonly IVideoService _videoService;
 
-    public VideosController(IVideoSecurityService videoSecurityService, ILogger<VideosController> logger)
+    public VideosController(IVideoService videoService)
     {
-        _videoSecurityService = videoSecurityService;
-        _logger = logger;
+        _videoService = videoService;
     }
 
-    [Authorize]
-    [HttpGet("{videoId}/stream-url")]
-    public IActionResult GetStreamUrl(string videoId)
+    [HttpGet("{id:guid}/embed-url")]
+    public async Task<ActionResult<EmbedUrlResponse>> GetEmbedUrl(Guid id, CancellationToken cancellationToken)
+    {
+        var embedUrl = await _videoService.GetEmbedUrlAsync(id, cancellationToken);
+        
+        if (embedUrl == null)
+        {
+            return NotFound(new { message = "Video not found" });
+        }
+
+        return Ok(new EmbedUrlResponse { EmbedUrl = embedUrl });
+    }
+
+    [HttpPost("upload")]
+    [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = 2147483648)] // 2GB
+    public async Task<ActionResult<VideoUploadResponse>> Upload(IFormFile file, [FromForm] string? title, CancellationToken cancellationToken)
     {
         try
         {
-            // Generate signed URL that expires in 30 minutes
-            var signedUrl = _videoSecurityService.GenerateSignedUrl(videoId, expirationMinutes: 30);
-            
-            _logger.LogInformation($"Generated signed URL for video {videoId}");
-            
-            return Ok(new 
-            { 
-                streamUrl = signedUrl,
-                expiresIn = 1800 // 30 minutes in seconds
-            });
+            var result = await _videoService.UploadAsync(file, title, cancellationToken);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error generating stream URL for video {videoId}");
-            return StatusCode(500, new { message = "Failed to generate stream URL" });
+            return StatusCode(500, new { message = $"Upload failed: {ex.Message}" });
         }
     }
 
-    [Authorize]
-    [HttpGet("{videoId}/embed-url")]
-    public IActionResult GetEmbedUrl(string videoId)
+    [HttpPost("{id:guid}/sync-duration")]
+    public async Task<ActionResult<object>> SyncDuration(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var embedUrl = _videoSecurityService.GenerateEmbedUrl(videoId);
-            
-            return Ok(new 
-            { 
-                embedUrl = embedUrl
-            });
+            var duration = await _videoService.SyncDurationAsync(id, cancellationToken);
+            return Ok(new { duration });
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error generating embed URL for video {videoId}");
-            return StatusCode(500, new { message = "Failed to generate embed URL" });
+            return StatusCode(500, new { message = $"Sync failed: {ex.Message}" });
+        }
+    }
+
+    [HttpPost("{id:guid}/thumbnail")]
+    public async Task<ActionResult> UploadThumbnail(Guid id, IFormFile file, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _videoService.SetThumbnailAsync(id, file, cancellationToken);
+            return Ok(new { message = "Thumbnail uploaded successfully" });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Thumbnail upload failed: {ex.Message}" });
         }
     }
 }

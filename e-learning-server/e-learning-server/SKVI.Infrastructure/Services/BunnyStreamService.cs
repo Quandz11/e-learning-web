@@ -80,6 +80,37 @@ public class BunnyStreamService : IBunnyStreamService
         return $"{_settings.CdnBaseUrl.TrimEnd('/')}/{bunnyVideoId}/playlist.m3u8";
     }
 
+    public string GetEmbedUrl(string bunnyVideoId)
+    {
+        if (string.IsNullOrWhiteSpace(_settings.LibraryId))
+        {
+            throw new InvalidOperationException("Bunny Library ID is not configured");
+        }
+
+        if (string.IsNullOrWhiteSpace(_settings.VideoTokenKey))
+        {
+            throw new InvalidOperationException("Bunny Video Token Key is not configured");
+        }
+
+        // Generate expiration timestamp (24 hours from now)
+        var expirationTimestamp = DateTimeOffset.UtcNow.AddHours(24).ToUnixTimeSeconds();
+
+        // Generate token: SHA256(VideoTokenKey + BunnyVideoId + ExpirationTimestamp)
+        var tokenString = $"{_settings.VideoTokenKey}{bunnyVideoId}{expirationTimestamp}";
+        var token = ComputeSha256Hash(tokenString);
+
+        // Return signed embed URL with token and expiration
+        return $"https://iframe.mediadelivery.net/embed/{_settings.LibraryId}/{bunnyVideoId}?token={token}&expires={expirationTimestamp}";
+    }
+
+    private static string ComputeSha256Hash(string input)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        var bytes = System.Text.Encoding.UTF8.GetBytes(input);
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToHexString(hash).ToLowerInvariant();
+    }
+
     public async Task<string> UploadImageAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
     {
         if (fileStream == null || fileStream.Length == 0)
@@ -167,6 +198,25 @@ public class BunnyStreamService : IBunnyStreamService
             ".gif" => "image/gif",
             _ => "application/octet-stream"
         };
+    }
+
+    public async Task<BunnyGetVideoResponse> GetVideoAsync(string bunnyVideoId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(bunnyVideoId))
+        {
+            throw new ArgumentException("Video id is required", nameof(bunnyVideoId));
+        }
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"/library/{_settings.LibraryId}/videos/{bunnyVideoId}");
+        var response = await SendWithAccessKeyAsync(request, _settings.ApiKey, cancellationToken);
+
+        var video = await response.Content.ReadFromJsonAsync<BunnyGetVideoResponse>(cancellationToken: cancellationToken);
+        if (video == null)
+        {
+            throw new InvalidOperationException("Failed to retrieve video details from Bunny");
+        }
+
+        return video;
     }
 
     private class BunnyCreateVideoResponse

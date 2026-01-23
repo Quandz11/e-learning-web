@@ -4,6 +4,7 @@ import { courseApi, type CourseInput, type CourseResponse, type CourseSectionInp
 import { userApi, type UserDto } from '../../../../services/userApi';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../../store/store';
+import SecureVideoPlayer from '../../../../components/SecureVideoPlayer';
 
 interface CourseFormModalProps {
     isOpen: boolean;
@@ -194,6 +195,44 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
         }
     };
 
+    const syncDuration = async (sectionIndex: number, lessonIndex: number, videoId: string) => {
+        if (!videoId) return;
+        try {
+            setLoading(true); // Or use a specific loading state for sync
+            const res = await courseApi.syncVideoDuration(videoId);
+            updateLesson(sectionIndex, lessonIndex, { duration: res.duration });
+        } catch (err: any) {
+            console.error('Failed to sync duration:', err);
+            // Optional: show toast/error
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Auto-sync duration for videos with 0 duration when modal opens or initial data loads
+    useEffect(() => {
+        if (!isOpen || !form.sections) return;
+
+        const syncNeededLessons: { sIdx: number; lIdx: number; videoId: string }[] = [];
+        form.sections.forEach((section, sIdx) => {
+            section.lessons.forEach((lesson, lIdx) => {
+                if (lesson.videoId && (lesson.duration === 0 || !lesson.duration)) {
+                    syncNeededLessons.push({ sIdx, lIdx, videoId: lesson.videoId });
+                }
+            });
+        });
+
+        if (syncNeededLessons.length > 0) {
+            // Processing sequentially to avoid race conditions or API flooding (though parallel is fine for few)
+            // Using a small delay or just firing them
+            syncNeededLessons.forEach(({ sIdx, lIdx, videoId }) => {
+                void syncDuration(sIdx, lIdx, videoId);
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, initialData]); // Run once when opening/data loaded. 
+    // Ideally we track if we already synced to avoid loops, but checking duration === 0 is safe enough unless it stays 0.
+
     const handleVideoThumbnailUpload = async (sectionIndex: number, lessonIndex: number, file?: File | null) => {
         if (!file) return;
         const lesson = form.sections[sectionIndex].lessons[lessonIndex];
@@ -340,21 +379,27 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                         {form.sections.map((section, sIdx) => (
                             <div key={sIdx} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/40">
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <input
-                                        className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                        value={section.title}
-                                        onChange={(e) => updateSection(sIdx, { title: e.target.value })}
-                                    />
-                                    <input
-                                        type="number"
-                                        min={1}
-                                        className="w-24 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                        value={section.orderIndex}
-                                        onChange={(e) => updateSection(sIdx, { orderIndex: Number(e.target.value) })}
-                                    />
+                                    <div className="flex-1 space-y-1">
+                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.sectionTitle')}</label>
+                                        <input
+                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                                            value={section.title}
+                                            onChange={(e) => updateSection(sIdx, { title: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="w-24 space-y-1">
+                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.order')}</label>
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                                            value={section.orderIndex}
+                                            onChange={(e) => updateSection(sIdx, { orderIndex: Number(e.target.value) })}
+                                        />
+                                    </div>
                                     <button
                                         onClick={() => addLesson(sIdx)}
-                                        className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                                        className="mt-6 inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">add</span>
                                         {t('admin.courses.form.addLesson')}
@@ -367,44 +412,67 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                         const isVideoThumbUploading = videoThumbnailUploading[thumbKey];
 
                                         return (
-                                            <div key={lIdx} className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
-                                                <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-center">
-                                                    <input
-                                                        className="md:col-span-4 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                                        value={lesson.title}
-                                                        onChange={(e) => updateLesson(sIdx, lIdx, { title: e.target.value })}
-                                                    />
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        className="md:col-span-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                                        value={lesson.duration}
-                                                        onChange={(e) => updateLesson(sIdx, lIdx, { duration: Number(e.target.value) })}
-                                                    />
-                                                    <input
-                                                        type="number"
-                                                        min={1}
-                                                        className="md:col-span-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                                        value={lesson.orderIndex}
-                                                        onChange={(e) => updateLesson(sIdx, lIdx, { orderIndex: Number(e.target.value) })}
-                                                    />
-                                                    <label className="md:col-span-2 inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                                            <div key={lIdx} className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 border-l-4 border-l-transparent hover:border-l-dashboard-primary transition-colors">
+                                                <div className="flex flex-wrap items-end gap-3">
+                                                    <div className="flex-1 min-w-[200px] space-y-1">
+                                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.lessonTitle')}</label>
                                                         <input
-                                                            type="checkbox"
-                                                            checked={lesson.isPreview}
-                                                            onChange={(e) => updateLesson(sIdx, lIdx, { isPreview: e.target.checked })}
-                                                            className="h-4 w-4 rounded border-slate-300 text-dashboard-primary focus:ring-dashboard-primary"
+                                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                                                            value={lesson.title}
+                                                            onChange={(e) => updateLesson(sIdx, lIdx, { title: e.target.value })}
                                                         />
-                                                        {t('admin.courses.form.preview')}
-                                                    </label>
-                                                    <div className="md:col-span-2 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                                    </div>
+                                                    <div className="w-[140px] space-y-1">
+                                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.duration')}</label>
+                                                        <div className="flex items-center gap-1">
+                                                            <input
+                                                                type="number"
+                                                                min={0}
+                                                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                                                                value={lesson.duration}
+                                                                onChange={(e) => updateLesson(sIdx, lIdx, { duration: Number(e.target.value) })}
+                                                            />
+                                                            {lesson.videoId && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => syncDuration(sIdx, lIdx, lesson.videoId)}
+                                                                    className="h-[38px] w-[38px] flex items-center justify-center text-slate-500 hover:text-dashboard-primary hover:bg-slate-100 rounded-md dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                                                                    title={t('admin.courses.form.syncDuration')}
+                                                                >
+                                                                    <span className="material-symbols-outlined text-[20px]">sync</span>
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-20 space-y-1">
+                                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.order')}</label>
+                                                        <input
+                                                            type="number"
+                                                            min={1}
+                                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                                                            value={lesson.orderIndex}
+                                                            onChange={(e) => updateLesson(sIdx, lIdx, { orderIndex: Number(e.target.value) })}
+                                                        />
+                                                    </div>
+                                                    <div className="flex items-center h-[38px] pb-1">
+                                                        <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={lesson.isPreview}
+                                                                onChange={(e) => updateLesson(sIdx, lIdx, { isPreview: e.target.checked })}
+                                                                className="h-4 w-4 rounded border-slate-300 text-dashboard-primary focus:ring-dashboard-primary"
+                                                            />
+                                                            {t('admin.courses.form.preview')}
+                                                        </label>
+                                                    </div>
+                                                    <div className="flex items-center h-[38px] pb-1">
                                                         {lesson.videoId ? (
-                                                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                                                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-300">
                                                                 <span className="material-symbols-outlined text-[16px]">check_circle</span>
                                                                 {t('admin.courses.form.videoLinked')}
                                                             </span>
                                                         ) : (
-                                                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                                                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
                                                                 <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
                                                                 {t('admin.courses.form.uploadRequired')}
                                                             </span>
@@ -413,7 +481,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                                 </div>
 
                                                 <div className="mt-3 space-y-1">
-                                                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.uploadVideo', { defaultValue: 'Upload video file' })}</div>
+                                                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.uploadVideo')}</div>
                                                     <div className="flex flex-wrap items-center gap-3">
                                                         <input
                                                             type="file"
@@ -421,24 +489,21 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                                             onChange={(e) => handleUpload(sIdx, lIdx, e.target.files?.[0])}
                                                             className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-dashboard-primary file:px-3 file:py-2 file:text-white file:cursor-pointer"
                                                         />
-                                                        {lesson.playbackUrl && (
-                                                            <>
-                                                                <a href={lesson.playbackUrl} target="_blank" rel="noreferrer" className="text-sm text-dashboard-primary underline">
-                                                                    {t('admin.courses.form.previewPlaylist')}
-                                                                </a>
-                                                                <video
-                                                                    key={lesson.playbackUrl}
+                                                        {/* Preview with SecureVideoPlayer */}
+                                                        {lesson.videoId && (
+                                                            <div className="mt-2 w-64 aspect-video rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-black">
+                                                                <SecureVideoPlayer
+                                                                    videoId={lesson.videoId}
+                                                                    className="w-full h-full object-cover"
                                                                     controls
-                                                                    className="mt-2 h-24 w-full rounded-lg border border-slate-200 object-cover dark:border-slate-700"
-                                                                    src={lesson.playbackUrl}
                                                                 />
-                                                            </>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
 
                                                 <div className="mt-3 space-y-1">
-                                                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.uploadThumbnail', { defaultValue: 'Upload thumbnail (image)' })}</div>
+                                                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.uploadThumbnail')}</div>
                                                     <div className="flex flex-wrap items-center gap-3">
                                                         <input
                                                             type="file"

@@ -57,7 +57,7 @@ public class InstructorService : IInstructorService
             var courseCount = await _dbContext.Courses.CountAsync(c => c.LecturerId == instructor.Id, cancellationToken);
             var studentCount = await _dbContext.Enrollments
                 .Where(e => _dbContext.Courses.Any(c => c.Id == e.CourseId && c.LecturerId == instructor.Id))
-                .Select(e => e.StudentId)
+                .Select(e => e.UserId)
                 .Distinct()
                 .CountAsync(cancellationToken);
 
@@ -121,7 +121,7 @@ public class InstructorService : IInstructorService
         var courseIds = courses.Select(c => c.Id).ToList();
         var totalStudents = await _dbContext.Enrollments
             .Where(e => courseIds.Contains(e.CourseId))
-            .Select(e => e.StudentId)
+            .Select(e => e.UserId)
             .Distinct()
             .CountAsync(cancellationToken);
 
@@ -233,7 +233,7 @@ public class InstructorService : IInstructorService
         var courseCount = await _dbContext.Courses.CountAsync(c => c.LecturerId == instructor.Id, cancellationToken);
         var studentCount = await _dbContext.Enrollments
             .Where(e => _dbContext.Courses.Any(c => c.Id == e.CourseId && c.LecturerId == instructor.Id))
-            .Select(e => e.StudentId)
+            .Select(e => e.UserId)
             .Distinct()
             .CountAsync(cancellationToken);
 

@@ -142,15 +142,7 @@ const CourseDetailPage: React.FC = () => {
               <div className="lg:col-span-2 space-y-8">
                 {/* 1. Video Player */}
                 <div className="w-full aspect-video rounded-xl bg-slate-900 relative overflow-hidden shadow-lg border border-slate-800">
-                  {selectedLesson?.embedUrl ? (
-                    <iframe
-                      src={selectedLesson.embedUrl}
-                      className="absolute inset-0 w-full h-full"
-                      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-                      allowFullScreen
-                      title={selectedLesson.title}
-                    />
-                  ) : selectedLesson?.videoId ? (
+                  {selectedLesson?.videoId ? (
                     <SecureVideoPlayer
                       videoId={selectedLesson.videoId}
                       className="absolute inset-0 w-full h-full object-cover"

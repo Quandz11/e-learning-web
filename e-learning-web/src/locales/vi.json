@@ -115,6 +115,14 @@
         "courses": {
             "title": "Khóa học",
             "subtitle": "Quản lý danh mục khóa học, video và trạng thái xuất bản.",
+            "searchPlaceholder": "Tìm khóa học...",
+            "resultsCount": "{{count}} khóa học được tìm thấy",
+            "noCourses": "Không tìm thấy khóa học nào",
+            "filters": {
+                "all": "Tất cả",
+                "free": "Miễn phí",
+                "premium": "Cao cấp"
+            },
             "new": "Tạo khóa học",
             "table": {
                 "title": "Tiêu đề",
@@ -142,7 +150,6 @@
                 "thumbnail": "Ảnh thumbnail",
                 "thumbnailUploading": "Đang upload thumbnail...",
                 "price": "Giá",
-                "lecturer": "Giảng viên",
                 "lecturerSearchPlaceholder": "Tìm giảng viên theo tên hoặc email",
                 "lecturerSelectPlaceholder": "Chọn giảng viên",
                 "lecturerLoading": "Đang tải danh sách giảng viên...",
@@ -159,16 +166,20 @@
                 "videoLinked": "Đã gắn video",
                 "uploadRequired": "Cần upload",
                 "previewPlaylist": "Xem playlist",
+                "sectionTitle": "Tiêu đề phần",
+                "lessonTitle": "Tiêu đề bài học",
+                "order": "Thứ tự",
+                "duration": "Thời lượng (phút)",
+                "syncDuration": "Đồng bộ thời lượng từ cloud",
+                "thumbnailUploading": "Đang tải ảnh lên...",
+                "uploadVideo": "Tải video lên",
+                "uploadThumbnail": "Tải ảnh đại diện bài học",
+                "videoRequiredBeforeThumbnail": "Vui lòng tải video trước khi tải ảnh đại diện.",
                 "save": "Lưu khóa học",
                 "cancel": "Hủy",
                 "deleteConfirm": "Xóa khóa học này?",
                 "errors": {
                     "title": "Vui lòng nhập tiêu đề",
-                    "lecturer": "Vui lòng chọn giảng viên",
-                    "loadLecturers": "Tải danh sách giảng viên thất bại",
-                    "saveFailed": "Lưu thất bại",
-                    "deleteFailed": "Xóa thất bại",
-                    "loadFailed": "Tải danh sách khóa học thất bại",
                     "uploadFailed": "Upload thất bại"
                 }
             }
@@ -439,6 +450,19 @@
         "defaultLanguage": "Tiếng Việt",
         "instructor": "Giảng viên",
         "unknownInstructor": "Giảng viên",
+        "enrollFree": "Đăng ký miễn phí",
+        "enrollPremium": "Mua ngay",
+        "enrolling": "Đang đăng ký...",
+        "startLearning": "Bắt đầu học",
+        "paymentRequired": "Yêu cầu thanh toán - Sắp ra mắt!",
+        "enrolled": "ĐÃ ĐĂNG KÝ",
+        "freeCourse": "KHÓA HỌC MIỄN PHÍ",
+        "premium": "CAO CẤP",
+        "features": {
+            "lifetimeAccess": "Truy cập trọn đời",
+            "mobileAccess": "Học trên mọi thiết bị",
+            "certificate": "Chứng chỉ hoàn thành"
+        },
         "meta": {
             "statusPublished": "Đã xuất bản",
             "statusDraft": "Bản nháp"
@@ -478,6 +502,20 @@
             "senior": "Giảng viên cao cấp",
             "courses": "khóa học"
         }
+    },
+    "learn": {
+        "backToCourse": "Quay lại khóa học",
+        "loading": "Đang tải bài học...",
+        "progress": "Tiến độ",
+        "completed": "hoàn thành",
+        "lessons": "bài học",
+        "courseContent": "Nội dung khóa học",
+        "noVideo": "Không có video cho bài học này",
+        "markComplete": "Đánh dấu hoàn thành",
+        "marking": "Đang xử lý...",
+        "completedStatus": "Đã hoàn thành",
+        "previous": "Bài trước",
+        "next": "Bài sau"
     },
     "home": {
         "header": {

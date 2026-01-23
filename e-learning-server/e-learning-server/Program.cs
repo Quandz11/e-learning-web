@@ -33,6 +33,8 @@ builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
 
 // Video Security Service (for signed URLs)
 builder.Services.AddScoped<IVideoSecurityService>(sp =>

@@ -1,16 +1,30 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace SKVI.Domain.Entities;
 
 public class Enrollment
 {
+    [Key]
     public Guid Id { get; set; }
-    public Guid StudentId { get; set; }
+
+    [Required]
+    public Guid UserId { get; set; }
+
+    [Required]
     public Guid CourseId { get; set; }
-    public decimal Progress { get; set; }
-    public DateTime EnrolledAt { get; set; } = DateTime.UtcNow;
+
+    [Required]
+    public DateTime EnrolledAt { get; set; }
+
     public DateTime? CompletedAt { get; set; }
 
+    [Range(0, 100)]
+    public int ProgressPercentage { get; set; } = 0;
+
+    public DateTime LastAccessedAt { get; set; }
+
     // Navigation properties
-    public User Student { get; set; } = null!;
+    public User User { get; set; } = null!;
     public Course Course { get; set; } = null!;
-    public ICollection<LessonProgress> LessonProgresses { get; set; } = new List<LessonProgress>();
+    public ICollection<LessonProgress> LessonProgress { get; set; } = new List<LessonProgress>();
 }

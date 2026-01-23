@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { videoApi } from '../services/videoApi';
 import { authApi } from '../services/authApi';
 
@@ -7,64 +7,49 @@ interface SecureVideoPlayerProps {
     className?: string;
     autoPlay?: boolean;
     controls?: boolean;
+    onEnded?: () => void;
 }
 
-const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
+const SecureVideoPlayer = React.forwardRef<HTMLVideoElement, SecureVideoPlayerProps>(({
     videoId,
     className = '',
     autoPlay = false,
     controls = true,
-}) => {
-    const [streamUrl, setStreamUrl] = useState<string | null>(null);
+    onEnded,
+}, ref) => {
+    const [embedUrl, setEmbedUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const refreshTimerRef = useRef<number | null>(null);
-
-    const fetchStreamUrl = async () => {
-        try {
-            setError(null);
-            const { streamUrl: url, expiresIn } = await videoApi.getStreamUrl(videoId);
-            setStreamUrl(url);
-            setLoading(false);
-
-            // Schedule refresh 2 minutes before expiration (to be safe)
-            const refreshTime = (expiresIn - 120) * 1000; // Convert to milliseconds
-            if (refreshTime > 0) {
-                refreshTimerRef.current = setTimeout(() => {
-                    console.log('Refreshing video URL...');
-                    fetchStreamUrl();
-                }, refreshTime);
-            }
-        } catch (err: any) {
-            console.error('Failed to fetch stream URL:', err);
-            setError(err.message || 'Failed to load video');
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
-        if (!videoId) {
-            setError('No video ID provided');
-            setLoading(false);
-            return;
-        }
+        const fetchEmbedUrl = async () => {
+            if (!videoId) {
+                setError('No video ID provided');
+                setLoading(false);
+                return;
+            }
 
-        const token = authApi.getAccessToken();
-        if (!token) {
-            setError('Please login to watch videos');
-            setLoading(false);
-            return;
-        }
+            const token = authApi.getAccessToken();
+            if (!token) {
+                setError('Please login to watch videos');
+                setLoading(false);
+                return;
+            }
 
-        fetchStreamUrl();
-
-        // Cleanup timer on unmount
-        return () => {
-            if (refreshTimerRef.current) {
-                clearTimeout(refreshTimerRef.current);
+            try {
+                console.log('Fetching embed URL for video:', videoId);
+                const { embedUrl: url } = await videoApi.getEmbedUrl(videoId);
+                console.log('Received embed URL:', url);
+                setEmbedUrl(url);
+                setLoading(false);
+            } catch (err: any) {
+                console.error('Failed to fetch embed URL:', err);
+                setError(err.message || 'Failed to load video');
+                setLoading(false);
             }
         };
+
+        fetchEmbedUrl();
     }, [videoId]);
 
     if (loading) {
@@ -89,7 +74,7 @@ const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
         );
     }
 
-    if (!streamUrl) {
+    if (!embedUrl) {
         return (
             <div className={`flex items-center justify-center bg-slate-900 ${className}`}>
                 <p className="text-slate-400">No video available</p>
@@ -97,20 +82,19 @@ const SecureVideoPlayer: React.FC<SecureVideoPlayerProps> = ({
         );
     }
 
+    // Use Bunny's embed player (no token needed, built-in controls)
     return (
-        <video
-            ref={videoRef}
+        <iframe
+            src={`${embedUrl}&autoplay=${autoPlay ? 'true' : 'false'}`}
+            loading="lazy"
             className={className}
-            controls={controls}
-            autoPlay={autoPlay}
-            playsInline
-            controlsList="nodownload" // Hint to browser to hide download button
-            onContextMenu={(e) => e.preventDefault()} // Disable right-click
-        >
-            <source src={streamUrl} type="application/x-mpegURL" />
-            Your browser does not support HLS video playback.
-        </video>
+            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+            allowFullScreen
+            style={{ border: 'none', width: '100%', height: '100%' }}
+        />
     );
-};
+});
+
+SecureVideoPlayer.displayName = 'SecureVideoPlayer';
 
 export default SecureVideoPlayer;

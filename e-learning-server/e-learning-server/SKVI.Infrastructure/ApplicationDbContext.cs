@@ -74,12 +74,27 @@ public class ApplicationDbContext : DbContext
             .Property(o => o.TotalAmount)
             .HasColumnType("decimal(18,2)");
 
-        // Enrollments
+        // Enrollments - Optimized composite index + unique constraint
         modelBuilder.Entity<Enrollment>()
-            .HasIndex(e => new { e.StudentId, e.CourseId });
+            .HasIndex(e => new { e.UserId, e.CourseId })
+            .IsUnique(); // Prevent duplicate enrollments
+            
         modelBuilder.Entity<Enrollment>()
-            .Property(e => e.Progress)
-            .HasColumnType("decimal(5,2)");
+            .HasIndex(e => e.UserId); // Fast lookup of user's enrollments
+            
+        modelBuilder.Entity<Enrollment>()
+            .HasIndex(e => e.CourseId); // Fast lookup of course enrollments
+            
+        modelBuilder.Entity<Enrollment>()
+            .HasIndex(e => e.LastAccessedAt); // For sorting recent courses
+
+        // LessonProgress - Composite index for fast lookup
+        modelBuilder.Entity<LessonProgress>()
+            .HasIndex(lp => new { lp.EnrollmentId, lp.LessonId })
+            .IsUnique(); // One progress entry per lesson per enrollment
+            
+        modelBuilder.Entity<LessonProgress>()
+            .HasIndex(lp => lp.EnrollmentId); // Fast lookup of all lesson progress for enrollment
 
         // CommissionLedgers
         modelBuilder.Entity<CommissionLedger>()
@@ -123,19 +138,26 @@ public class ApplicationDbContext : DbContext
             
         // Relationships configuration to prevent cycles
         
-        // Enrollment - Student (User)
+        // Enrollment - User
         modelBuilder.Entity<Enrollment>()
-            .HasOne(e => e.Student)
+            .HasOne(e => e.User)
             .WithMany(u => u.Enrollments)
-            .HasForeignKey(e => e.StudentId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevent cascade cycle (User->Enrollment vs User->Course->Enrollment)
 
         // Enrollment - Course
         modelBuilder.Entity<Enrollment>()
             .HasOne(e => e.Course)
             .WithMany(c => c.Enrollments)
             .HasForeignKey(e => e.CourseId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade); // Delete enrollments when course deleted
+            
+        // LessonProgress -Enrollment
+        modelBuilder.Entity<LessonProgress>()
+            .HasOne(lp => lp.Enrollment)
+            .WithMany(e => e.LessonProgress)
+            .HasForeignKey(lp => lp.EnrollmentId)
+            .OnDelete(DeleteBehavior.Cascade); // Delete progress when enrollment deleted
 
         // Order - Buyer (User)
         modelBuilder.Entity<Order>()

@@ -42,6 +42,14 @@ public class CoursesController : ControllerBase
         }
     }
 
+    [HttpGet("{id:guid}/students")]
+    [Authorize(Roles = "ADMIN,LECTURER")]
+    public async Task<IActionResult> GetEnrolledStudents(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _courseService.GetEnrolledStudentsAsync(id, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost]
     [Authorize(Roles = "ADMIN,LECTURER")]
     public async Task<IActionResult> Create([FromBody] CreateCourseRequest request, CancellationToken cancellationToken)
@@ -99,7 +107,7 @@ public class CoursesController : ControllerBase
         try
         {
             await using var stream = file.OpenReadStream();
-            var url = await _bunnyStreamService.UploadImageAsync(stream, file.FileName, cancellationToken);
+            var url = await _bunnyStreamService.UploadImageAsync(stream, file.FileName, "thumbnails", cancellationToken);
             return Ok(new { url });
         }
         catch (ArgumentException ex)

@@ -11,6 +11,7 @@ public class CourseResponse
     public LecturerInfo? Lecturer { get; set; }
     public string? ThumbnailUrl { get; set; }
     public bool IsPublished { get; set; }
+    public List<string> LearningOutcomes { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public List<CourseSectionResponse> Sections { get; set; } = new();
 }
@@ -45,4 +46,13 @@ public class CourseLessonResponse
     public Guid? DocumentId { get; set; }
     public string? DocumentUrl { get; set; }
     public string? DocumentFileName { get; set; }
+}
+
+public class StudentDto
+{
+    public Guid Id { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? AvatarUrl { get; set; }
+    public DateTime EnrolledAt { get; set; }
 }

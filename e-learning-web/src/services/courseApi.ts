@@ -32,6 +32,7 @@ export interface CourseInput {
   lecturerId: string;
   thumbnailUrl?: string;
   isPublished: boolean;
+  learningOutcomes?: string[];
   sections: CourseSectionInput[];
 }
 
@@ -46,6 +47,15 @@ export interface CourseResponse extends CourseInput {
   id: string;
   createdAt: string;
   lecturer?: LecturerInfo;
+  learningOutcomes?: string[];
+}
+
+export interface StudentResponse {
+  id: string;
+  fullName: string;
+  email: string;
+  avatarUrl?: string;
+  enrolledAt: string;
 }
 
 export interface VideoUploadResponse {
@@ -212,6 +222,19 @@ export const courseApi = {
       throw new Error(message || 'Failed to sync video duration');
     }
 
+    return res.json();
+  },
+
+  async getEnrolledStudents(id: string): Promise<StudentResponse[]> {
+    const res = await fetch(`${API_BASE_URL}/courses/${id}/students`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      },
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error('Failed to fetch enrolled students');
     return res.json();
   },
 };

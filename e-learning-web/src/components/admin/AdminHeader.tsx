@@ -1,8 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../store/store';
 
 const AdminHeader: React.FC = () => {
     const { t, i18n } = useTranslation();
+    const { user } = useSelector((state: RootState) => state.auth);
 
     const changeLanguage = () => {
         const newLang = i18n.language === 'en' ? 'vi' : 'en';
@@ -32,7 +35,7 @@ const AdminHeader: React.FC = () => {
 
             {/* Right Actions */}
             <div className="flex items-center gap-4">
-                <button 
+                <button
                     onClick={changeLanguage}
                     className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
                     title="Change Language"
@@ -50,13 +53,15 @@ const AdminHeader: React.FC = () => {
                 <div className="mx-1 hidden h-8 w-[1px] bg-slate-200 dark:bg-slate-700 sm:block"></div>
                 {/* Mini Profile for Mobile (Simplified) */}
                 <div className="flex items-center gap-2 lg:hidden">
-                    <div
-                        className="h-8 w-8 rounded-full bg-slate-300 bg-cover bg-center"
-                        style={{
-                            backgroundImage:
-                                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCwoq3mqfpmGjF_Jocw6OABcwV11GznkLX-g2gW0u3f07lm3BA-HUl8SdNx7wgZojnAX0R5bs5AbdPIDsyZkQDEoFdfwQ7ETNnk9T2bT4VXfOtLHFcERRYc07aUUOakLgtMI65A79Eq6g0oA-SPwywMnsw37PFjw8DT5bSBuyoCnPLXmVa23qCq6dU6xJUsb5PrWcEq_COaJe2KFjRAuQbt3tAqd3_woBJGYM1kS1oyMnjtc7vYd4Kjxv-jBORoNls-sPCF8bKW9g')",
-                        }}
-                    ></div>
+                    <div className="h-8 w-8 rounded-full border border-slate-200 bg-dashboard-primary/10 flex items-center justify-center overflow-hidden dark:border-slate-700">
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
+                        ) : (
+                            <span className="text-xs font-semibold text-dashboard-primary">
+                                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
         </header>

@@ -305,6 +305,9 @@ namespace e_learning_server.Migrations
                     b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LearningOutcomes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("LecturerId")
                         .HasColumnType("uniqueidentifier");
 

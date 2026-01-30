@@ -15,11 +15,13 @@ public class ProfileController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IBunnyStreamService _bunnyStreamService;
 
-    public ProfileController(ApplicationDbContext dbContext, IPasswordHasher passwordHasher)
+    public ProfileController(ApplicationDbContext dbContext, IPasswordHasher passwordHasher, IBunnyStreamService bunnyStreamService)
     {
         _dbContext = dbContext;
         _passwordHasher = passwordHasher;
+        _bunnyStreamService = bunnyStreamService;
     }
 
     [HttpGet("me")]
@@ -143,5 +145,42 @@ public class ProfileController : ControllerBase
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Ok(new { message = "Password changed successfully. Please login again." });
+    }
+
+    [HttpPost("upload-avatar")]
+    public async Task<IActionResult> UploadAvatar(IFormFile file, CancellationToken cancellationToken = default)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { message = "No file uploaded" });
+        }
+
+        // Validate file type
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension))
+        {
+            return BadRequest(new { message = "Invalid file type. Allowed types: jpg, jpeg, png, webp, gif" });
+        }
+
+        // Validate file size (e.g. max 5MB)
+        if (file.Length > 5 * 1024 * 1024)
+        {
+             return BadRequest(new { message = "File size exceeds 5MB limit" });
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var url = await _bunnyStreamService.UploadImageAsync(stream, file.FileName, "avatars", cancellationToken);
+            
+            // Return the URL. We do NOT update the user profile here. 
+            // The frontend will receive the URL and user must click "Save" on the profile form to persist it.
+            return Ok(new { url });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = "Failed to upload avatar: " + ex.Message });
+        }
     }
 }

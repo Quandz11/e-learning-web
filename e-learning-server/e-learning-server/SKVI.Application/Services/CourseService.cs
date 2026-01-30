@@ -4,6 +4,7 @@ using SKVI.Application.DTOs.Courses;
 using SKVI.Application.Interfaces;
 using SKVI.Domain.Entities;
 using SKVI.Infrastructure;
+using System.Text.Json;
 
 namespace SKVI.Application.Services;
 
@@ -62,6 +63,24 @@ public class CourseService : ICourseService
         return MapToResponse(course);
     }
 
+    public async Task<IReadOnlyList<StudentDto>> GetEnrolledStudentsAsync(Guid courseId, CancellationToken cancellationToken = default)
+    {
+        var enrollments = await _dbContext.Enrollments
+            .Include(e => e.User)
+            .Where(e => e.CourseId == courseId)
+            .OrderByDescending(e => e.EnrolledAt)
+            .ToListAsync(cancellationToken);
+
+        return enrollments.Select(e => new StudentDto
+        {
+            Id = e.User.Id,
+            FullName = e.User.FullName,
+            Email = e.User.Email,
+            AvatarUrl = e.User.AvatarUrl,
+            EnrolledAt = e.EnrolledAt
+        }).ToList();
+    }
+
     public async Task<CourseResponse> CreateAsync(CreateCourseRequest request, CancellationToken cancellationToken = default)
     {
         var course = new Course
@@ -74,6 +93,7 @@ public class CourseService : ICourseService
             LecturerId = request.LecturerId,
             ThumbnailUrl = request.ThumbnailUrl,
             IsPublished = request.IsPublished,
+            LearningOutcomes = request.LearningOutcomes != null ? JsonSerializer.Serialize(request.LearningOutcomes) : null,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -150,6 +170,7 @@ public class CourseService : ICourseService
         course.LecturerId = request.LecturerId;
         course.ThumbnailUrl = request.ThumbnailUrl;
         course.IsPublished = request.IsPublished;
+        course.LearningOutcomes = request.LearningOutcomes != null ? JsonSerializer.Serialize(request.LearningOutcomes) : null;
         course.CreatedAt = course.CreatedAt == default ? DateTime.UtcNow : course.CreatedAt;
 
         // Preload video durations for lessons so duration is always derived from stored video metadata when absent
@@ -268,6 +289,9 @@ public class CourseService : ICourseService
             } : null,
             ThumbnailUrl = course.ThumbnailUrl,
             IsPublished = course.IsPublished,
+            LearningOutcomes = !string.IsNullOrEmpty(course.LearningOutcomes) 
+                ? JsonSerializer.Deserialize<List<string>>(course.LearningOutcomes) ?? new List<string>() 
+                : new List<string>(),
             CreatedAt = course.CreatedAt,
             Sections = new List<CourseSectionResponse>()
         };

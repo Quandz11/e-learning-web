@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/admin/AdminLayout';
 import { profileApi, type UserProfileDto, type UpdateProfileRequest, type ChangePasswordRequest } from '../services/profileApi';
 import { format } from 'date-fns';
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../store/authSlice';
 
 const ProfilePage: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [profile, setProfile] = useState<UserProfileDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -19,6 +22,8 @@ const ProfilePage: React.FC = () => {
     const [phone, setPhone] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [saving, setSaving] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Change password state
     const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -60,6 +65,14 @@ const ProfilePage: React.FC = () => {
             };
             const updated = await profileApi.updateProfile(payload);
             setProfile(updated);
+
+            // Update Redux state to reflect changes in header/sidebar
+            dispatch(updateUser({
+                fullName: updated.fullName || '',
+                phone: updated.phone || '',
+                avatarUrl: updated.avatarUrl,
+            }));
+
             setIsEditing(false);
             setSuccess(t('profile.success.profileUpdated'));
         } catch (err: any) {
@@ -116,6 +129,31 @@ const ProfilePage: React.FC = () => {
             setAvatarUrl(profile.avatarUrl || '');
         }
         setError(null);
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setError(t('profile.errors.fileSize') || 'File size exceeds 5MB');
+            return;
+        }
+
+        try {
+            setUploadingAvatar(true);
+            setError(null);
+            const { url } = await profileApi.uploadAvatar(file);
+            setAvatarUrl(url);
+        } catch (err: any) {
+            setError(err.message || 'Upload failed');
+        } finally {
+            setUploadingAvatar(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
     };
 
     if (loading) {
@@ -178,8 +216,14 @@ const ProfilePage: React.FC = () => {
                 {!isEditing ? (
                     <div className="space-y-4">
                         <div className="flex items-start gap-4">
-                            <div className="h-20 w-20 rounded-full border border-slate-200 bg-dashboard-primary/10 flex items-center justify-center text-3xl font-semibold text-dashboard-primary dark:border-slate-700">
-                                {profile.fullName ? profile.fullName.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                            <div className="h-20 w-20 rounded-full border border-slate-200 bg-dashboard-primary/10 flex items-center justify-center overflow-hidden dark:border-slate-700">
+                                {profile.avatarUrl ? (
+                                    <img src={profile.avatarUrl} alt={profile.fullName} className="h-full w-full object-cover" />
+                                ) : (
+                                    <span className="text-3xl font-semibold text-dashboard-primary">
+                                        {profile.fullName ? profile.fullName.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+                                    </span>
+                                )}
                             </div>
                             <div className="flex-1">
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">{profile.fullName || t('common.unnamed')}</h3>
@@ -248,16 +292,48 @@ const ProfilePage: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                 {t('profile.form.avatar')}
                             </label>
-                            <input
-                                type="url"
-                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-800"
-                                value={avatarUrl}
-                                onChange={(e) => setAvatarUrl(e.target.value)}
-                                placeholder="https://..."
-                            />
+
+                            <div className="flex items-center gap-4">
+                                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border border-slate-200 bg-dashboard-primary/10 dark:border-slate-700">
+                                    {avatarUrl ? (
+                                        <img src={avatarUrl} alt="Avatar Preview" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-dashboard-primary">
+                                            {fullName ? fullName.charAt(0).toUpperCase() : '?'}
+                                        </div>
+                                    )}
+                                    {uploadingAvatar && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileChange}
+                                        accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
+                                        className="hidden"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={uploadingAvatar || saving}
+                                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">upload</span>
+                                        {uploadingAvatar ? t('common.uploading') : t('profile.form.changeAvatar')}
+                                    </button>
+                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                        JPG, PNG, WebP up to 5MB
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex gap-3">

@@ -194,6 +194,9 @@
                 "documentLinked": "Đã gắn PDF",
                 "pdfUploading": "Đang tải PDF...",
                 "videoRequiredBeforeThumbnail": "Vui lòng tải video trước khi tải ảnh đại diện.",
+                "learningOutcomes": "Kết quả học tập",
+                "learningOutcomePlaceholder": "Ví dụ: Thành thạo React hooks...",
+                "addLearningOutcome": "Thêm kết quả",
                 "save": "Lưu khóa học",
                 "cancel": "Hủy",
                 "deleteConfirm": "Xóa khóa học này?",
@@ -428,6 +431,8 @@
             "fullName": "Họ và tên",
             "phone": "Số điện thoại",
             "avatar": "URL ảnh đại diện",
+            "fileSize": "Kích thước tệp quá lớn (tối đa 5MB)",
+            "changeAvatar": "Thay đổi ảnh",
             "currentPassword": "Mật khẩu hiện tại",
             "newPassword": "Mật khẩu mới",
             "confirmPassword": "Xác nhận mật khẩu",
@@ -494,6 +499,7 @@
             "overview": "Tổng quan",
             "curriculum": "Chương trình",
             "students": "Học viên đã đăng ký",
+            "studentsCount": "Học viên ({{count}})",
             "financials": "Tài chính/Thu nhập"
         },
         "sections": {
@@ -508,7 +514,8 @@
             "rating": "Đánh giá hiện tại",
             "lastUpdated": "Cập nhật lần cuối",
             "revenue": "Doanh thu ước tính",
-            "reviews": "đánh giá"
+            "reviews": "đánh giá",
+            "coursePrice": "Chi phí khóa học"
         },
         "actions": {
             "deactivate": "Vô hiệu hóa",
@@ -520,6 +527,16 @@
         "instructorInfo": {
             "senior": "Giảng viên cao cấp",
             "courses": "khóa học"
+        },
+        "studentsTable": {
+            "student": "Học viên",
+            "email": "Email",
+            "enrolledDate": "Ngày đăng ký",
+            "empty": "Chưa có học viên nào đăng ký."
+        },
+        "financials": {
+            "totalRevenue": "Tổng doanh thu (Ước tính)",
+            "basedOnPrice": "Dựa trên giá hiện tại ({{price}}) * {{count}} học viên"
         }
     },
     "learn": {

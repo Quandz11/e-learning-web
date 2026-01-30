@@ -72,4 +72,32 @@ export const profileApi = {
             throw new Error(msg || 'Change password failed');
         }
     },
+
+    async uploadAvatar(file: File): Promise<{ url: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = authApi.getAccessToken();
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        // Content-Type is set automatically by browser with boundary for FormData
+
+        const res = await fetch(`${API_BASE_URL}/profile/upload-avatar`, {
+            method: 'POST',
+            headers,
+            credentials: 'include',
+            body: formData,
+        });
+
+        if (!res.ok) {
+            const msg = await res.text();
+            try {
+                const json = JSON.parse(msg);
+                throw new Error(json.message || 'Upload failed');
+            } catch {
+                throw new Error(msg || 'Upload failed');
+            }
+        }
+        return res.json();
+    }
 };

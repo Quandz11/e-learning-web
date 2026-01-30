@@ -124,8 +124,12 @@ const AdminSidebar: React.FC = () => {
             to="/profile"
             className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            <div className="h-10 w-10 rounded-full border border-slate-200 bg-dashboard-primary/10 flex items-center justify-center text-sm font-semibold text-dashboard-primary dark:border-slate-700">
-              {userInitial}
+            <div className="h-10 w-10 rounded-full border border-slate-200 bg-dashboard-primary/10 flex items-center justify-center overflow-hidden dark:border-slate-700">
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt={userName} className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-sm font-semibold text-dashboard-primary">{userInitial}</span>
+              )}
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="truncate text-sm font-bold text-slate-900 dark:text-white">{userName}</span>

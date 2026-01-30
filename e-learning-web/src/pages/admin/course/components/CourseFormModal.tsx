@@ -37,6 +37,7 @@ const initialCourse = (lecturerId: string | undefined): CourseInput => ({
     lecturerId: lecturerId || '',
     thumbnailUrl: '',
     isPublished: false,
+    learningOutcomes: [],
     sections: [emptySection(1)],
 });
 
@@ -86,6 +87,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                             documentFileName: l.documentFileName,
                         })),
                     })),
+                    learningOutcomes: initialData.learningOutcomes || [],
                 });
             } else if (courseId) {
                 // TODO: If only ID is passed, fetch data? 
@@ -368,6 +370,43 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                             value={form.description || ''}
                             onChange={(e) => setForm({ ...form, description: e.target.value })}
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.learningOutcomes')}</label>
+                        <div className="space-y-2">
+                            {(form.learningOutcomes || []).map((outcome, idx) => (
+                                <div key={idx} className="flex gap-2">
+                                    <input
+                                        className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                                        value={outcome}
+                                        onChange={(e) => {
+                                            const newOutcomes = [...(form.learningOutcomes || [])];
+                                            newOutcomes[idx] = e.target.value;
+                                            setForm({ ...form, learningOutcomes: newOutcomes });
+                                        }}
+                                        placeholder={t('admin.courses.form.learningOutcomePlaceholder')}
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            const newOutcomes = [...(form.learningOutcomes || [])];
+                                            newOutcomes.splice(idx, 1);
+                                            setForm({ ...form, learningOutcomes: newOutcomes });
+                                        }}
+                                        className="rounded-lg p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                    >
+                                        <span className="material-symbols-outlined">delete</span>
+                                    </button>
+                                </div>
+                            ))}
+                            <button
+                                onClick={() => setForm({ ...form, learningOutcomes: [...(form.learningOutcomes || []), ''] })}
+                                className="inline-flex items-center gap-1 text-sm font-medium text-dashboard-primary hover:text-dashboard-primary-dark"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">add</span>
+                                {t('admin.courses.form.addLearningOutcome')}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex flex-wrap gap-4">

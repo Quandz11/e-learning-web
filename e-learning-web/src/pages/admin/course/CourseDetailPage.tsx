@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { courseApi, type CourseResponse, type CourseLessonInput } from '../../../services/courseApi';
+import { courseApi, type CourseResponse, type CourseLessonInput, type StudentResponse } from '../../../services/courseApi';
+import { format } from 'date-fns';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import CourseFormModal from './components/CourseFormModal';
 import SecureVideoPlayer from '../../../components/SecureVideoPlayer';
@@ -14,6 +15,7 @@ const CourseDetailPage: React.FC = () => {
 
   // State
   const [course, setCourse] = useState<CourseResponse | null>(null);
+  const [enrolledStudents, setEnrolledStudents] = useState<StudentResponse[]>([]);
   const [selectedLesson, setSelectedLesson] = useState<CourseLessonInput | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +45,10 @@ const CourseDetailPage: React.FC = () => {
       if (expandedSections.size === 0 && data.sections.length > 0) {
         setExpandedSections(new Set([data.sections[0].id || '0']));
       }
+
+      // Fetch enrolled students
+      const students = await courseApi.getEnrolledStudents(id);
+      setEnrolledStudents(students);
     } catch (err: any) {
       setError(err.message || t('courseDetail.loadError'));
     } finally {
@@ -251,7 +257,7 @@ const CourseDetailPage: React.FC = () => {
                             {t('courseDetail.sections.whatLearn')}
                           </h3>
                           <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {mockLearningOutcomes.map((outcome, idx) => (
+                            {(course.learningOutcomes && course.learningOutcomes.length > 0 ? course.learningOutcomes : mockLearningOutcomes).map((outcome, idx) => (
                               <li key={idx} className="flex items-start gap-2 text-slate-600 dark:text-slate-300 text-sm">
                                 <span className="material-symbols-outlined text-success text-lg shrink-0">check_circle</span>
                                 <span>{outcome}</span>
@@ -263,20 +269,77 @@ const CourseDetailPage: React.FC = () => {
                     )}
 
                     {activeTab === 'curriculum' && (
-                      <div className="text-slate-600 dark:text-slate-300">
-                        Curriculum tab content - Coming soon
+                      <div className="space-y-4">
+                        {course.sections.map((section, sIdx) => (
+                          <div key={section.id || sIdx} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                            <h4 className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200 mb-2">
+                              <span className="material-symbols-outlined text-primary">folder</span>
+                              {section.title}
+                              <span className="text-xs font-normal text-slate-500 ml-auto">{section.lessons.length} lessons</span>
+                            </h4>
+                            <div className="space-y-2 pl-4 border-l-2 border-slate-100 dark:border-slate-800 ml-2">
+                              {section.lessons.map((lesson, lIdx) => (
+                                <div key={lesson.id || lIdx} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                  <span className="material-symbols-outlined text-[18px]">{lesson.videoId ? 'play_circle' : 'description'}</span>
+                                  <span>{lesson.title}</span>
+                                  <span className="text-xs text-slate-400 ml-auto">{lesson.duration || 0}m</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
 
                     {activeTab === 'students' && (
-                      <div className="text-slate-600 dark:text-slate-300">
-                        Students enrolled tab content - Coming soon
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold text-slate-900 dark:text-white">{t('courseDetail.tabs.studentsCount', { count: enrolledStudents.length })}</h3>
+                        </div>
+                        <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+                          <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+                            <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-500">
+                              <tr>
+                                <th className="px-4 py-3">{t('courseDetail.studentsTable.student')}</th>
+                                <th className="px-4 py-3">{t('courseDetail.studentsTable.email')}</th>
+                                <th className="px-4 py-3">{t('courseDetail.studentsTable.enrolledDate')}</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
+                              {enrolledStudents.map((student) => (
+                                <tr key={student.id}>
+                                  <td className="px-4 py-3">
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-8 w-8 rounded-full bg-slate-200 bg-cover bg-center flex-shrink-0" style={{ backgroundImage: student.avatarUrl ? `url(${student.avatarUrl})` : undefined }}>
+                                        {!student.avatarUrl && <span className="flex h-full w-full items-center justify-center text-xs font-bold text-slate-500">{student.fullName.charAt(0)}</span>}
+                                      </div>
+                                      <span className="font-medium text-slate-900 dark:text-white">{student.fullName}</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3">{student.email}</td>
+                                  <td className="px-4 py-3">{new Date(student.enrolledAt).toLocaleDateString()}</td>
+                                </tr>
+                              ))}
+                              {enrolledStudents.length === 0 && (
+                                <tr>
+                                  <td colSpan={3} className="px-4 py-8 text-center text-slate-500">{t('courseDetail.studentsTable.empty')}</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     )}
 
                     {activeTab === 'financials' && (
-                      <div className="text-slate-600 dark:text-slate-300">
-                        Financials/Earnings tab content - Coming soon
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                          <h4 className="text-sm font-medium text-slate-500 mb-1">{t('courseDetail.financials.totalRevenue')}</h4>
+                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                            {((course.price || 0) * enrolledStudents.length).toLocaleString('vi-VN')} VND
+                          </div>
+                          <p className="text-xs text-slate-400 mt-1">{t('courseDetail.financials.basedOnPrice', { price: course.price.toLocaleString(), count: enrolledStudents.length })}</p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -373,7 +436,8 @@ const CourseDetailPage: React.FC = () => {
                       <span className="text-xs text-slate-500 block mb-1">{t('courseDetail.stats.enrollments')}</span>
                       <span className="text-sm font-medium text-slate-800 dark:text-slate-200 flex items-center gap-2">
                         <span className="material-symbols-outlined text-primary text-base">groups</span>
-                        {mockStats.enrollments.toLocaleString()}
+                        <span className="material-symbols-outlined text-primary text-base">groups</span>
+                        {enrolledStudents.length.toLocaleString()}
                       </span>
                     </div>
                     <div className="col-span-1">
@@ -389,9 +453,10 @@ const CourseDetailPage: React.FC = () => {
                         {new Date(course.createdAt).toLocaleDateString('vi-VN')}
                       </span>
                     </div>
+
                     {/* Course Price */}
                     <div className="col-span-2 lg:col-span-1 pt-2 border-t border-border-light dark:border-border-dark mt-2">
-                      <span className="text-xs text-slate-500 block mb-1">Chi phí khóa học</span>
+                      <span className="text-xs text-slate-500 block mb-1">{t('courseDetail.stats.coursePrice')}</span>
                       <span className="text-lg font-bold text-slate-900 dark:text-white">
                         {priceLabel}
                       </span>

@@ -111,7 +111,7 @@ public class BunnyStreamService : IBunnyStreamService
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
-    public async Task<string> UploadImageAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
+    public async Task<string> UploadImageAsync(Stream fileStream, string fileName, string folder = "thumbnails", CancellationToken cancellationToken = default)
     {
         if (fileStream == null || fileStream.Length == 0)
         {
@@ -123,8 +123,11 @@ public class BunnyStreamService : IBunnyStreamService
             throw new InvalidOperationException("Bunny storage settings are not configured");
         }
 
+        // Clean folder path
+        folder = string.IsNullOrWhiteSpace(folder) ? "thumbnails" : folder.Trim().Trim('/');
+
         var safeFileName = $"{Guid.NewGuid():N}{Path.GetExtension(fileName)}";
-        var uploadUrl = $"{_settings.StorageBaseUrl.TrimEnd('/')}/{_settings.StorageZoneName}/thumbnails/{safeFileName}";
+        var uploadUrl = $"{_settings.StorageBaseUrl.TrimEnd('/')}/{_settings.StorageZoneName}/{folder}/{safeFileName}";
 
         using var content = new StreamContent(fileStream);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
@@ -141,7 +144,7 @@ public class BunnyStreamService : IBunnyStreamService
             throw new InvalidOperationException("Bunny storage CDN base URL is not configured");
         }
 
-        return $"{_settings.StorageCdnBaseUrl.TrimEnd('/')}/thumbnails/{safeFileName}";
+        return $"{_settings.StorageCdnBaseUrl.TrimEnd('/')}/{folder}/{safeFileName}";
     }
 
     public async Task<string> UploadDocumentAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)

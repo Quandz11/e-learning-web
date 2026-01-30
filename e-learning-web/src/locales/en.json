@@ -195,6 +195,9 @@
                 "documentLinked": "PDF Linked",
                 "pdfUploading": "Uploading PDF...",
                 "videoRequiredBeforeThumbnail": "Please upload video before uploading thumbnail.",
+                "learningOutcomes": "Learning Outcomes",
+                "learningOutcomePlaceholder": "e.g. Master React hooks",
+                "addLearningOutcome": "Add Outcome",
                 "save": "Save course",
                 "cancel": "Cancel",
                 "deleteConfirm": "Delete this course?",
@@ -429,6 +432,8 @@
             "fullName": "Full Name",
             "phone": "Phone",
             "avatar": "Avatar URL",
+            "fileSize": "File size too large (max 5MB)",
+            "changeAvatar": "Change Avatar",
             "currentPassword": "Current Password",
             "newPassword": "New Password",
             "confirmPassword": "Confirm Password",
@@ -495,6 +500,7 @@
             "overview": "Overview",
             "curriculum": "Curriculum",
             "students": "Students Enrolled",
+            "studentsCount": "Students Enrolled ({{count}})",
             "financials": "Financials/Earnings"
         },
         "sections": {
@@ -509,7 +515,8 @@
             "rating": "Current Rating",
             "lastUpdated": "Last Updated",
             "revenue": "Estimated Revenue",
-            "reviews": "reviews"
+            "reviews": "reviews",
+            "coursePrice": "Course Price"
         },
         "actions": {
             "deactivate": "Deactivate",
@@ -521,6 +528,16 @@
         "instructorInfo": {
             "senior": "Senior Instructor",
             "courses": "Courses"
+        },
+        "studentsTable": {
+            "student": "Student",
+            "email": "Email",
+            "enrolledDate": "Enrolled Date",
+            "empty": "No students enrolled yet."
+        },
+        "financials": {
+            "totalRevenue": "Total Revenue (Estimated)",
+            "basedOnPrice": "Based on current price ({{price}}) * {{count}} students"
         }
     },
     "learn": {

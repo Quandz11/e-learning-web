@@ -21,6 +21,8 @@ public class CreateCourseRequest
 
     public bool IsPublished { get; set; }
 
+    public List<string> LearningOutcomes { get; set; } = new();
+
     [MinLength(0)]
     public List<CreateCourseSectionDto> Sections { get; set; } = new();
 }

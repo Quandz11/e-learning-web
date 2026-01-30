@@ -5,7 +5,7 @@ public interface IBunnyStreamService
     Task<BunnyUploadResult> UploadVideoAsync(Stream fileStream, string fileName, string? title, CancellationToken cancellationToken = default);
     string GetPlaybackUrl(string bunnyVideoId);
     string GetEmbedUrl(string bunnyVideoId);
-    Task<string> UploadImageAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default);
+    Task<string> UploadImageAsync(Stream fileStream, string fileName, string folder = "thumbnails", CancellationToken cancellationToken = default);
     Task<string> UploadDocumentAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default);
     Task UploadVideoThumbnailAsync(string bunnyVideoId, Stream fileStream, string fileName, CancellationToken cancellationToken = default);
 

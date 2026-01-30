@@ -20,6 +20,7 @@ export interface User {
   fullName: string;
   role: string;
   avatarUrl?: string;
+  phone?: string;
 }
 
 class AuthApi {

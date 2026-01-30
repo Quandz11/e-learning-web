@@ -1,9 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import type { RootState } from '../../store/store';
 
-const AdminHeader: React.FC = () => {
+interface AdminHeaderProps {
+    onToggleMobileNav?: () => void;
+}
+
+const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleMobileNav }) => {
     const { t, i18n } = useTranslation();
     const { user } = useSelector((state: RootState) => state.auth);
 
@@ -13,9 +18,13 @@ const AdminHeader: React.FC = () => {
     };
 
     return (
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-dashboard-surface-light/90 px-6 backdrop-blur-sm dark:border-slate-800 dark:bg-dashboard-surface-dark/90">
+        <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-slate-200 bg-dashboard-surface-light/90 px-6 backdrop-blur-sm dark:border-slate-800 dark:bg-dashboard-surface-dark/90">
             {/* Mobile Menu Trigger */}
-            <button className="rounded-md p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden">
+            <button
+                onClick={onToggleMobileNav}
+                className="rounded-md p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
+                aria-label="Toggle navigation"
+            >
                 <span className="material-symbols-outlined">menu</span>
             </button>
 
@@ -52,7 +61,7 @@ const AdminHeader: React.FC = () => {
                 </button>
                 <div className="mx-1 hidden h-8 w-[1px] bg-slate-200 dark:bg-slate-700 sm:block"></div>
                 {/* Mini Profile for Mobile (Simplified) */}
-                <div className="flex items-center gap-2 lg:hidden">
+                <Link to="/profile" className="flex items-center gap-2 lg:hidden">
                     <div className="h-8 w-8 rounded-full border border-slate-200 bg-dashboard-primary/10 flex items-center justify-center overflow-hidden dark:border-slate-700">
                         {user?.avatarUrl ? (
                             <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
@@ -62,7 +71,7 @@ const AdminHeader: React.FC = () => {
                             </span>
                         )}
                     </div>
-                </div>
+                </Link>
             </div>
         </header>
     );

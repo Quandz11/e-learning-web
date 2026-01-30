@@ -15,7 +15,6 @@ export default function AdminChatPage() {
     const [inputMessage, setInputMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
-    const [lastReadByGuest, setLastReadByGuest] = useState<Date | null>(null); // For "Seen" status
     const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
     // Offline/Disconnected state: key = guestId
     const [disconnectedGuests, setDisconnectedGuests] = useState<Set<string>>(new Set());
@@ -164,20 +163,8 @@ export default function AdminChatPage() {
                     setTypingUsers(prev => ({ ...prev, [guestId]: false }));
                 });
 
-                chatSignalR.onMessagesRead((data) => {
-                    // If current conversation matches data
-                    if (!selectedConversationRef.current) return;
-
-                    if (selectedConversationRef.current.type === 'guest') {
-                        // If event has no args/generic or matches guestId (if we added that support)
-                        // Assuming for now any signal means guest read it
-                        setLastReadByGuest(new Date());
-                    } else {
-                        // Auth user
-                        if (data.conversationId === selectedConversationRef.current.id && data.readerId !== user?.id) {
-                            setLastReadByGuest(new Date());
-                        }
-                    }
+                chatSignalR.onMessagesRead(() => {
+                    // Read receipts not surfaced in admin UI yet; placeholder to keep hook wired.
                 });
 
                 chatSignalR.onUserTyping((userId) => {
@@ -260,7 +247,6 @@ export default function AdminChatPage() {
 
     const handleSelectConversation = (conversation: AdminConversation) => {
         setSelectedConversation(conversation);
-        setLastReadByGuest(null); // Reset seen status when switching
         loadMessages(conversation);
     };
 

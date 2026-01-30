@@ -97,7 +97,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
                                 senderName: m.senderName,
                                 content: m.content,
                                 sentAt: m.sentAt,
-                                isRead: m.isRead
+                                isRead: m.isRead,
+                                isFromGuest: false, // authenticated thread, not a guest message
                             })));
 
                             // Join conversation
@@ -359,7 +360,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
     };
 
     return (
-        <div className="fixed bottom-24 right-6 z-50 w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+        <div className="fixed inset-x-4 bottom-20 sm:bottom-24 sm:left-auto sm:right-6 z-[60] w-auto sm:w-96 max-w-full h-[70vh] max-h-[640px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
             {/* Header */}
             <div className="bg-primary text-white p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">

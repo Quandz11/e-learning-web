@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { courseApi, type CourseResponse, type CourseLessonInput, type StudentResponse } from '../../../services/courseApi';
-import { format } from 'date-fns';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import CourseFormModal from './components/CourseFormModal';
 import SecureVideoPlayer from '../../../components/SecureVideoPlayer';

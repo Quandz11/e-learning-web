@@ -86,7 +86,7 @@ export const adminChatApi = {
     },
 
     markConversationAsRead: async (conversationId: string, token: string): Promise<void> => {
-        const response = await fetch(`${API_BASE_URL}/admin/chat/conversations/${conversationId}/read`, {
+        await fetch(`${API_BASE_URL}/admin/chat/conversations/${conversationId}/read`, {
             method: 'POST', // Assuming endpoint exists or needs creation? 
             // Wait, ChatHub.MarkAsRead is SignalR. Controller might not have MarkAsRead for Auth?
             // ChatService has MarkMessagesAsReadAsync. AdminChatController has MarkGuestAsRead.

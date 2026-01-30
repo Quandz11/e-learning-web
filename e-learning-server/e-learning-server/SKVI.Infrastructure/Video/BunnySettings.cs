@@ -10,4 +10,5 @@ public class BunnySettings
     public string StorageApiKey { get; set; } = string.Empty;
     public string StorageBaseUrl { get; set; } = "https://storage.bunnycdn.com";
     public string StorageCdnBaseUrl { get; set; } = string.Empty;
+    public string DocumentFolder { get; set; } = "documents"; // Folder for PDF documents
 }

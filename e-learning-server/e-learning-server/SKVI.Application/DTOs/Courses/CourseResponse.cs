@@ -42,4 +42,7 @@ public class CourseLessonResponse
     public bool IsPreview { get; set; }
     public string? PlaybackUrl { get; set; }
     public string? EmbedUrl { get; set; }
+    public Guid? DocumentId { get; set; }
+    public string? DocumentUrl { get; set; }
+    public string? DocumentFileName { get; set; }
 }

@@ -25,6 +25,9 @@ public class CourseService : ICourseService
             .Include(c => c.CourseSections)
                 .ThenInclude(s => s.CourseLessons)
                     .ThenInclude(l => l.Video)
+            .Include(c => c.CourseSections)
+                .ThenInclude(s => s.CourseLessons)
+                    .ThenInclude(l => l.Document)
             .AsQueryable();
 
         if (isPublished.HasValue)
@@ -46,6 +49,9 @@ public class CourseService : ICourseService
             .Include(c => c.CourseSections)
                 .ThenInclude(s => s.CourseLessons)
                     .ThenInclude(l => l.Video)
+            .Include(c => c.CourseSections)
+                .ThenInclude(s => s.CourseLessons)
+                    .ThenInclude(l => l.Document)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (course == null)
@@ -108,6 +114,7 @@ public class CourseService : ICourseService
                     Title = lessonDto.Title,
                     Duration = resolvedDuration,
                     VideoId = lessonDto.VideoId,
+                    DocumentId = lessonDto.DocumentId,
                     OrderIndex = lessonDto.OrderIndex,
                     IsPreview = lessonDto.IsPreview
                 };
@@ -202,6 +209,7 @@ public class CourseService : ICourseService
                     Title = lessonDto.Title,
                     Duration = resolvedDuration,
                     VideoId = lessonDto.VideoId,
+                    DocumentId = lessonDto.DocumentId,
                     OrderIndex = lessonDto.OrderIndex,
                     IsPreview = lessonDto.IsPreview
                 });
@@ -293,7 +301,10 @@ public class CourseService : ICourseService
                     OrderIndex = lesson.OrderIndex,
                     IsPreview = lesson.IsPreview,
                     PlaybackUrl = playbackUrl,
-                    EmbedUrl = embedUrl
+                    EmbedUrl = embedUrl,
+                    DocumentId = lesson.DocumentId,
+                    DocumentUrl = lesson.Document?.BunnyStoragePath, // This is already the full CDN URL from DocumentService
+                    DocumentFileName = lesson.Document?.FileName
                 });
             }
 

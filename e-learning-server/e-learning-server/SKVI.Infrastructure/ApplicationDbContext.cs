@@ -26,10 +26,14 @@ public class ApplicationDbContext : DbContext
     public DbSet<CourseSection> CourseSections { get; set; }
     public DbSet<CourseLesson> CourseLessons { get; set; }
     public DbSet<Video> Videos { get; set; }
+    public DbSet<Document> Documents { get; set; }
 
     // Enrollment
     public DbSet<Enrollment> Enrollments { get; set; }
     public DbSet<LessonProgress> LessonProgresses { get; set; }
+    public DbSet<Conversation> Conversations { get; set; }
+    public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
+    public DbSet<Message> Messages { get; set; }
 
     // Payment
     public DbSet<Order> Orders { get; set; }

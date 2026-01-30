@@ -19,10 +19,12 @@ import CourseDetailPage from './pages/admin/course/CourseDetailPage';
 import AdminSettingsPage from './pages/admin/settings/AdminSettingsPage';
 import InstructorsPage from './pages/admin/instructor/InstructorsPage';
 import InstructorDetailPage from './pages/admin/instructor/InstructorDetailPage';
+import AdminChatPage from './pages/admin/chat/AdminChatPage';
 import ProfilePage from './pages/ProfilePage';
 import StudentCoursesPage from './pages/CoursesPage';
 import StudentCourseDetailPage from './pages/StudentCourseDetailPage';
 import LearningPage from './pages/LearningPage';
+import RootLayout from './components/layout/RootLayout';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -36,133 +38,146 @@ function App() {
     () =>
       createBrowserRouter([
         {
-          path: '/',
-          element: isAuthenticated ? (
-            <Navigate
-              to={role === 'ADMIN' ? '/admin/dashboard' : '/home'}
-              replace
-            />
-          ) : (
-            <HomePage />
-          ),
-        },
-        {
-          element: <AuthLayout />,
+          element: <RootLayout />,
           children: [
             {
-              path: 'login',
-              element: <LoginPage />,
+              path: '/',
+              element: isAuthenticated ? (
+                <Navigate
+                  to={role === 'ADMIN' ? '/admin/dashboard' : '/home'}
+                  replace
+                />
+              ) : (
+                <HomePage />
+              ),
             },
             {
-              path: 'register',
-              element: <RegisterPage />,
+              element: <AuthLayout />,
+              children: [
+                {
+                  path: 'login',
+                  element: <LoginPage />,
+                },
+                {
+                  path: 'register',
+                  element: <RegisterPage />,
+                },
+                {
+                  path: 'forgot-password',
+                  element: <ForgotPasswordPage />,
+                },
+                {
+                  path: 'otp-verify',
+                  element: <OtpVerifyPage />,
+                },
+              ],
             },
             {
-              path: 'forgot-password',
-              element: <ForgotPasswordPage />,
+              path: 'home',
+              element: (
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              ),
             },
             {
-              path: 'otp-verify',
-              element: <OtpVerifyPage />,
+              path: 'profile',
+              element: (
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              ),
             },
-          ],
-        },
-        {
-          path: 'home',
-          element: (
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'profile',
-          element: (
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'courses',
-          element: <StudentCoursesPage />,
-        },
-        {
-          path: 'courses/:id',
-          element: <StudentCourseDetailPage />,
-        },
-        {
-          path: 'courses/:id/learn',
-          element: (
-            <ProtectedRoute>
-              <LearningPage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'admin/courses/:id',
-          element: (
-            <ProtectedRoute requiredRole="ADMIN">
-              <CourseDetailPage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'admin/dashboard',
-          element: (
-            <ProtectedRoute requiredRole="ADMIN">
-              <AdminDashboardPage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'admin/courses',
-          element: (
-            <ProtectedRoute requiredRole="ADMIN">
-              <CoursesPage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'admin/users',
-          element: (
-            <ProtectedRoute requiredRole="ADMIN">
-              <UsersPage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'admin/users/:id',
-          element: (
-            <ProtectedRoute requiredRole="ADMIN">
-              <UserDetailPage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'admin/settings',
-          element: (
-            <ProtectedRoute requiredRole="ADMIN">
-              <AdminSettingsPage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'admin/instructors',
-          element: (
-            <ProtectedRoute requiredRole="ADMIN">
-              <InstructorsPage />
-            </ProtectedRoute>
-          ),
-        },
-        {
-          path: 'admin/instructors/:id',
-          element: (
-            <ProtectedRoute requiredRole="ADMIN">
-              <InstructorDetailPage />
-            </ProtectedRoute>
-          ),
-        },
+            {
+              path: 'courses',
+              element: <StudentCoursesPage />,
+            },
+            {
+              path: 'courses/:id',
+              element: <StudentCourseDetailPage />,
+            },
+            {
+              path: 'courses/:id/learn',
+              element: (
+                <ProtectedRoute>
+                  <LearningPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/courses/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <CourseDetailPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/dashboard',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminDashboardPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/chat',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminChatPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/courses',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <CoursesPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/users',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <UsersPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/users/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <UserDetailPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/settings',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminSettingsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/instructors',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <InstructorsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/instructors/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <InstructorDetailPage />
+                </ProtectedRoute>
+              ),
+            },
+          ]
+        }
       ]),
     [isAuthenticated, role]
   );
@@ -210,7 +225,11 @@ function App() {
     );
   }
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

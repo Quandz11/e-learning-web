@@ -75,7 +75,8 @@
             "agents": "Agents",
             "courses": "Courses",
             "revenue": "Revenue",
-            "settings": "Settings"
+            "settings": "Settings",
+            "chat": "Chat Management"
         },
         "header": {
             "searchPlaceholder": "Search students, courses, or orders...",
@@ -90,6 +91,22 @@
             "totalRevenue": "Total Revenue",
             "agentRevenue": "Agent Revenue",
             "activeCourses": "Active Courses"
+        },
+        "chat": {
+            "title": "Chat Management",
+            "subtitle": "Manage all customer conversations",
+            "conversations": "Conversations",
+            "active": "active",
+            "loading": "Loading...",
+            "noConversations": "No conversations yet",
+            "guest": "Guest",
+            "noMessages": "No messages yet",
+            "inputPlaceholder": "Type your message...",
+            "send": "Send",
+            "sending": "Sending...",
+            "close": "Close Conversation",
+            "selectTitle": "No conversation selected",
+            "selectDesc": "Choose a conversation from the list to start chatting"
         },
         "recentOrders": {
             "title": "Recent Orders",
@@ -174,6 +191,9 @@
                 "thumbnailUploading": "Uploading thumbnail...",
                 "uploadVideo": "Upload video file",
                 "uploadThumbnail": "Upload lesson thumbnail",
+                "uploadDocument": "Upload PDF Document",
+                "documentLinked": "PDF Linked",
+                "pdfUploading": "Uploading PDF...",
                 "videoRequiredBeforeThumbnail": "Please upload video before uploading thumbnail.",
                 "save": "Save course",
                 "cancel": "Cancel",
@@ -507,10 +527,18 @@
         "backToCourse": "Back to Course",
         "loading": "Loading lessons...",
         "progress": "Progress",
-        "completed": "completed",
+        "completed": "Completed",
         "lessons": "lessons",
+        "lesson": "Lesson",
+        "lessonsCompleted": "lessons completed",
+        "curriculum": "Curriculum",
         "courseContent": "Course Content",
         "noVideo": "No video available for this lesson",
+        "noPdf": "No document available",
+        "contentType": {
+            "video": "Video",
+            "document": "Document"
+        },
         "markComplete": "Mark as Complete",
         "marking": "Marking...",
         "completedStatus": "Completed",
@@ -643,6 +671,38 @@
             "terms": "Terms",
             "privacy": "Privacy",
             "cookies": "Cookies"
+        }
+    },
+    "chat": {
+        "button": {
+            "open": "Chat with Support",
+            "unread": "{{count}} unread"
+        },
+        "window": {
+            "title": "Support Chat",
+            "online": "Online",
+            "connecting": "Connecting...",
+            "offline": "Offline",
+            "typing": "Support is typing..."
+        },
+        "guest": {
+            "welcomeTitle": "Welcome to Support Chat",
+            "welcomeDesc": "Please enter your name to start chatting",
+            "namePlaceholder": "Enter your name",
+            "startChat": "Start Chat",
+            "or": "or",
+            "login": "Login to Your Account",
+            "guestNote": "Guest messages are temporary and not saved"
+        },
+        "messages": {
+            "empty": {
+                "title": "Start a conversation",
+                "desc": "How can we help you today?",
+                "guestNote": "Note: Guest messages are not saved"
+            },
+            "inputPlaceholder": "Type a message...",
+            "send": "Send",
+            "error": "Failed to send message"
         }
     }
 }

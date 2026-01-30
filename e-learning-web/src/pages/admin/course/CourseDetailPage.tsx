@@ -5,6 +5,7 @@ import { courseApi, type CourseResponse, type CourseLessonInput } from '../../..
 import AdminLayout from '../../../components/admin/AdminLayout';
 import CourseFormModal from './components/CourseFormModal';
 import SecureVideoPlayer from '../../../components/SecureVideoPlayer';
+import PdfViewer from '../../../components/PdfViewer';
 
 const CourseDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,7 @@ const CourseDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'students' | 'financials'>('overview');
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showEditModal, setShowEditModal] = useState(false);
+  const [contentType, setContentType] = useState<'video' | 'document'>('video');
 
   // Fetch course data
   const fetchCourse = async () => {
@@ -51,6 +53,18 @@ const CourseDetailPage: React.FC = () => {
   useEffect(() => {
     void fetchCourse();
   }, [id, t]);
+
+  // Auto-select content type when lesson changes
+  useEffect(() => {
+    if (selectedLesson) {
+      // Prioritize video if available, otherwise show document
+      if (selectedLesson.videoId) {
+        setContentType('video');
+      } else if (selectedLesson.documentUrl) {
+        setContentType('document');
+      }
+    }
+  }, [selectedLesson]);
 
   // Computed values
   const lessons = useMemo(() => course?.sections.flatMap((s) => s.lessons) ?? [], [course]);
@@ -140,22 +154,63 @@ const CourseDetailPage: React.FC = () => {
 
               {/* Left Column (2/3) - Video & Tabs & Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* 1. Video Player */}
-                <div className="w-full aspect-video rounded-xl bg-slate-900 relative overflow-hidden shadow-lg border border-slate-800">
-                  {selectedLesson?.videoId ? (
-                    <SecureVideoPlayer
-                      videoId={selectedLesson.videoId}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      controls
-                    />
+                {/* 1. Content Type Tabs (if lesson has both video and document) */}
+                {selectedLesson && selectedLesson.videoId && selectedLesson.documentUrl && (
+                  <div className="flex gap-2 border-b border-border-light dark:border-border-dark">
+                    <button
+                      onClick={() => setContentType('video')}
+                      className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${contentType === 'video'
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                        }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[18px]">play_circle</span>
+                        {t('learn.contentType.video')}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => setContentType('document')}
+                      className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${contentType === 'document'
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                        }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[18px]">description</span>
+                        {t('learn.contentType.document')}
+                      </span>
+                    </button>
+                  </div>
+                )}
+
+                {/* 2. Video/Document Player */}
+                <div className={`w-full rounded-xl bg-slate-900 relative overflow-hidden shadow-lg border border-slate-800 ${contentType === 'video' ? 'aspect-video' : 'min-h-[800px]'
+                  }`}>
+                  {contentType === 'video' ? (
+                    selectedLesson?.videoId ? (
+                      <SecureVideoPlayer
+                        videoId={selectedLesson.videoId}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        controls
+                      />
+                    ) : (
+                      <div className="flex aspect-video items-center justify-center text-slate-400">
+                        {t('learn.noVideo')}
+                      </div>
+                    )
                   ) : (
-                    <div className="flex aspect-video items-center justify-center text-slate-400">
-                      {t('courseDetail.selectLesson')}
-                    </div>
+                    selectedLesson?.documentUrl ? (
+                      <PdfViewer documentUrl={selectedLesson.documentUrl} />
+                    ) : (
+                      <div className="flex aspect-video items-center justify-center text-slate-400">
+                        {t('learn.noPdf')}
+                      </div>
+                    )
                   )}
                 </div>
 
-                {/* 2. Tabs & Content */}
+                {/* 3. Tabs & Content */}
                 <div className="space-y-6">
                   {/* Tab Navigation */}
                   <div className="border-b border-border-light dark:border-border-dark">

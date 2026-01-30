@@ -12,6 +12,9 @@ export interface CourseLessonInput {
   videoId: string;
   playbackUrl?: string;
   embedUrl?: string;
+  documentId?: string;
+  documentUrl?: string;
+  documentFileName?: string;
 }
 
 export interface CourseSectionInput {

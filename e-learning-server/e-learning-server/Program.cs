@@ -30,11 +30,19 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
+builder.Services.AddScoped<IChatService, ChatService>();
+
+// Guest Conversation Service (Singleton for in-memory storage)
+builder.Services.AddSingleton<IGuestConversationService, GuestConversationService>();
+
+// Background Services
+builder.Services.AddHostedService<SKVI.Infrastructure.BackgroundServices.GuestConversationCleanupService>();
 
 // Video Security Service (for signed URLs)
 builder.Services.AddScoped<IVideoSecurityService>(sp =>
@@ -69,6 +77,23 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ClockSkew = TimeSpan.Zero
     };
+
+    // Allow SignalR to read tokens from the query string when using WebSockets
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/chat"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Authorization policies (RBAC)
@@ -97,6 +122,9 @@ builder.Services.AddCors(options =>
               .AllowCredentials(); // Important for Cookies
     });
 });
+
+// SignalR
+builder.Services.AddSignalR();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -179,5 +207,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<SKVI.Infrastructure.Hubs.ChatHub>("/hubs/chat");
 
 app.Run();

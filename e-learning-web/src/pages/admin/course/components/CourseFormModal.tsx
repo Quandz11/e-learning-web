@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { courseApi, type CourseInput, type CourseResponse, type CourseSectionInput, type CourseLessonInput } from '../../../../services/courseApi';
+import { documentApi } from '../../../../services/documentApi';
 import { userApi, type UserDto } from '../../../../services/userApi';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../../store/store';
@@ -50,6 +51,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
     const [lecturerSearch, setLecturerSearch] = useState('');
     const [lecturerLoading, setLecturerLoading] = useState(false);
     const [videoThumbnailUploading, setVideoThumbnailUploading] = useState<Record<string, boolean>>({});
+    const [pdfUploading, setPdfUploading] = useState<Record<string, boolean>>({});
 
     const currentUserLecturerId = useMemo(() => user?.id || '', [user]);
 
@@ -79,6 +81,9 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                             isPreview: l.isPreview,
                             videoId: l.videoId,
                             playbackUrl: l.playbackUrl,
+                            documentId: l.documentId,
+                            documentUrl: l.documentUrl,
+                            documentFileName: l.documentFileName,
                         })),
                     })),
                 });
@@ -251,6 +256,28 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
             setError(err.message || t('admin.courses.form.errors.uploadFailed'));
         } finally {
             setVideoThumbnailUploading((prev) => ({ ...prev, [key]: false }));
+        }
+    };
+
+    const handlePdfUpload = async (sectionIndex: number, lessonIndex: number, file?: File | null) => {
+        if (!file) return;
+
+        const key = `${sectionIndex}-${lessonIndex}`;
+        try {
+            setPdfUploading((prev) => ({ ...prev, [key]: true }));
+            setError(null);
+            const res = await documentApi.uploadPdf(file);
+
+            // Update lesson with document info
+            updateLesson(sectionIndex, lessonIndex, {
+                documentId: res.documentId,
+                documentUrl: res.fileUrl,
+                documentFileName: file.name,
+            });
+        } catch (err: any) {
+            setError(err.message || t('admin.courses.form.errors.uploadFailed'));
+        } finally {
+            setPdfUploading((prev) => ({ ...prev, [key]: false }));
         }
     };
 
@@ -514,6 +541,30 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                                         {isVideoThumbUploading && (
                                                             <span className="text-xs text-slate-500">
                                                                 {t('admin.courses.form.thumbnailUploading', { defaultValue: 'Uploading thumbnail...' })}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-3 space-y-1">
+                                                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.uploadDocument', { defaultValue: 'Upload PDF Document' })}</div>
+                                                    <div className="flex flex-wrap items-center gap-3">
+                                                        <input
+                                                            type="file"
+                                                            accept=".pdf,application/pdf"
+                                                            onChange={(e) => handlePdfUpload(sIdx, lIdx, e.target.files?.[0])}
+                                                            className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-dashboard-primary file:px-3 file:py-2 file:text-white file:cursor-pointer"
+                                                        />
+                                                        {pdfUploading[`${sIdx}-${lIdx}`] && (
+                                                            <span className="text-xs text-slate-500">
+                                                                {t('admin.courses.form.pdfUploading', { defaultValue: 'Uploading PDF...' })}
+                                                            </span>
+                                                        )}
+                                                        {lesson.documentId && !pdfUploading[`${sIdx}-${lIdx}`] && (
+                                                            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                                                <span className="material-symbols-outlined text-[16px]">description</span>
+                                                                {t('admin.courses.form.documentLinked', { defaultValue: 'PDF Linked' })}
+                                                                {lesson.documentFileName && `: ${lesson.documentFileName.substring(0, 20)}...`}
                                                             </span>
                                                         )}
                                                     </div>

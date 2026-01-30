@@ -46,6 +46,8 @@ public class CreateCourseLessonDto
     [Required]
     public Guid VideoId { get; set; }
 
+    public Guid? DocumentId { get; set; }
+
     public int OrderIndex { get; set; }
 
     public bool IsPreview { get; set; }

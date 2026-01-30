@@ -237,6 +237,56 @@ namespace e_learning_server.Migrations
                     b.ToTable("CommissionRules");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.Conversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastMessageAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ConversationParticipant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ConversationParticipants");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Course", b =>
                 {
                     b.Property<Guid>("Id")
@@ -281,6 +331,9 @@ namespace e_learning_server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("DocumentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Duration")
                         .HasColumnType("int");
 
@@ -301,6 +354,8 @@ namespace e_learning_server.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
 
                     b.HasIndex("SectionId");
 
@@ -330,6 +385,31 @@ namespace e_learning_server.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("CourseSections");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.Document", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BunnyStoragePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Enrollment", b =>
@@ -452,6 +532,43 @@ namespace e_learning_server.Migrations
                         .IsUnique();
 
                     b.ToTable("LessonProgresses");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("EditedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsEdited")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Notification", b =>
@@ -817,6 +934,25 @@ namespace e_learning_server.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.ConversationParticipant", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.Conversation", "Conversation")
+                        .WithMany("Participants")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Course", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.User", "Lecturer")
@@ -830,6 +966,10 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.CourseLesson", b =>
                 {
+                    b.HasOne("SKVI.Domain.Entities.Document", "Document")
+                        .WithMany("CourseLessons")
+                        .HasForeignKey("DocumentId");
+
                     b.HasOne("SKVI.Domain.Entities.CourseSection", "Section")
                         .WithMany("CourseLessons")
                         .HasForeignKey("SectionId")
@@ -841,6 +981,8 @@ namespace e_learning_server.Migrations
                         .HasForeignKey("VideoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Document");
 
                     b.Navigation("Section");
 
@@ -907,6 +1049,25 @@ namespace e_learning_server.Migrations
                         .IsRequired();
 
                     b.Navigation("Enrollment");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.Message", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Order", b =>
@@ -994,6 +1155,13 @@ namespace e_learning_server.Migrations
                     b.Navigation("Messages");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.Conversation", b =>
+                {
+                    b.Navigation("Messages");
+
+                    b.Navigation("Participants");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Course", b =>
                 {
                     b.Navigation("CourseSections");
@@ -1009,6 +1177,11 @@ namespace e_learning_server.Migrations
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.CourseSection", b =>
+                {
+                    b.Navigation("CourseLessons");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.Document", b =>
                 {
                     b.Navigation("CourseLessons");
                 });

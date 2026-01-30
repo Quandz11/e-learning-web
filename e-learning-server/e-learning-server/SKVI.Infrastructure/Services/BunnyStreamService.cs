@@ -144,6 +144,40 @@ public class BunnyStreamService : IBunnyStreamService
         return $"{_settings.StorageCdnBaseUrl.TrimEnd('/')}/thumbnails/{safeFileName}";
     }
 
+    public async Task<string> UploadDocumentAsync(Stream fileStream, string fileName, CancellationToken cancellationToken = default)
+    {
+        if (fileStream == null || fileStream.Length == 0)
+        {
+            throw new ArgumentException("File stream is empty", nameof(fileStream));
+        }
+
+        if (string.IsNullOrWhiteSpace(_settings.StorageZoneName) || string.IsNullOrWhiteSpace(_settings.StorageApiKey))
+        {
+            throw new InvalidOperationException("Bunny storage settings are not configured");
+        }
+
+        var safeFileName = $"{Guid.NewGuid():N}{Path.GetExtension(fileName)}";
+        var documentFolder = string.IsNullOrWhiteSpace(_settings.DocumentFolder) ? "documents" : _settings.DocumentFolder;
+        var uploadUrl = $"{_settings.StorageBaseUrl.TrimEnd('/')}/{_settings.StorageZoneName}/{documentFolder}/{safeFileName}";
+
+        using var content = new StreamContent(fileStream);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+
+        using var request = new HttpRequestMessage(HttpMethod.Put, uploadUrl)
+        {
+            Content = content
+        };
+
+        var response = await SendWithAccessKeyAsync(request, _settings.StorageApiKey, cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(_settings.StorageCdnBaseUrl))
+        {
+            throw new InvalidOperationException("Bunny storage CDN base URL is not configured");
+        }
+
+        return $"{_settings.StorageCdnBaseUrl.TrimEnd('/')}/{documentFolder}/{safeFileName}";
+    }
+
     private async Task<HttpResponseMessage> SendWithAccessKeyAsync(HttpRequestMessage request, string apiKey, CancellationToken cancellationToken)
     {
         request.Headers.Remove(AccessKeyHeader);

@@ -75,7 +75,8 @@
             "agents": "Đại lý",
             "courses": "Khóa học",
             "revenue": "Doanh thu",
-            "settings": "Cài đặt"
+            "settings": "Cài đặt",
+            "chat": "Quản lý Chat"
         },
         "header": {
             "searchPlaceholder": "Tìm kiếm học viên, khóa học, hoặc đơn hàng...",
@@ -90,6 +91,22 @@
             "totalRevenue": "Tổng doanh thu",
             "agentRevenue": "Doanh thu đại lý",
             "activeCourses": "Khóa học đang hoạt động"
+        },
+        "chat": {
+            "title": "Quản lý Chat",
+            "subtitle": "Quản lý tất cả cuộc trò chuyện với khách hàng",
+            "conversations": "Cuộc trò chuyện",
+            "active": "đang hoạt động",
+            "loading": "Đang tải...",
+            "noConversations": "Chưa có cuộc trò chuyện nào",
+            "guest": "Khách",
+            "noMessages": "Chưa có tin nhắn nào",
+            "inputPlaceholder": "Nhập tin nhắn của bạn...",
+            "send": "Gửi",
+            "sending": "Đang gửi...",
+            "close": "Đóng cuộc trò chuyện",
+            "selectTitle": "Chưa chọn cuộc trò chuyện",
+            "selectDesc": "Chọn một cuộc trò chuyện từ danh sách để bắt đầu"
         },
         "recentOrders": {
             "title": "Đơn hàng gần đây",
@@ -148,7 +165,6 @@
                 "editTitle": "Chỉnh sửa khóa học",
                 "title": "Tiêu đề",
                 "thumbnail": "Ảnh thumbnail",
-                "thumbnailUploading": "Đang upload thumbnail...",
                 "price": "Giá",
                 "lecturerSearchPlaceholder": "Tìm giảng viên theo tên hoặc email",
                 "lecturerSelectPlaceholder": "Chọn giảng viên",
@@ -174,6 +190,9 @@
                 "thumbnailUploading": "Đang tải ảnh lên...",
                 "uploadVideo": "Tải video lên",
                 "uploadThumbnail": "Tải ảnh đại diện bài học",
+                "uploadDocument": "Tải tài liệu PDF",
+                "documentLinked": "Đã gắn PDF",
+                "pdfUploading": "Đang tải PDF...",
                 "videoRequiredBeforeThumbnail": "Vui lòng tải video trước khi tải ảnh đại diện.",
                 "save": "Lưu khóa học",
                 "cancel": "Hủy",
@@ -507,15 +526,23 @@
         "backToCourse": "Quay lại khóa học",
         "loading": "Đang tải bài học...",
         "progress": "Tiến độ",
-        "completed": "hoàn thành",
+        "completed": "Đã hoàn thành",
         "lessons": "bài học",
+        "lesson": "Bài học",
+        "lessonsCompleted": "bài học đã hoàn thành",
+        "curriculum": "Nội dung khóa học",
         "courseContent": "Nội dung khóa học",
         "noVideo": "Không có video cho bài học này",
+        "noPdf": "Không có tài liệu",
+        "contentType": {
+            "video": "Video",
+            "document": "Tài liệu"
+        },
         "markComplete": "Đánh dấu hoàn thành",
-        "marking": "Đang xử lý...",
+        "marking": "Đang đánh dấu...",
         "completedStatus": "Đã hoàn thành",
-        "previous": "Bài trước",
-        "next": "Bài sau"
+        "previous": "Trước",
+        "next": "Tiếp theo"
     },
     "home": {
         "header": {
@@ -643,6 +670,38 @@
             "terms": "Điều khoản",
             "privacy": "Bảo mật",
             "cookies": "Cookies"
+        }
+    },
+    "chat": {
+        "button": {
+            "open": "Chat với Hỗ trợ",
+            "unread": "{{count}} tin chưa đọc"
+        },
+        "window": {
+            "title": "Hỗ trợ Trực tuyến",
+            "online": "Trực tuyến",
+            "connecting": "Đang kết nối...",
+            "offline": "Ngoại tuyến",
+            "typing": "Hỗ trợ đang soạn tin..."
+        },
+        "guest": {
+            "welcomeTitle": "Chào mừng đến với Hỗ trợ",
+            "welcomeDesc": "Vui lòng nhập tên của bạn để bắt đầu trò chuyện",
+            "namePlaceholder": "Nhập tên của bạn",
+            "startChat": "Bắt đầu Chat",
+            "or": "hoặc",
+            "login": "Đăng nhập Tài khoản",
+            "guestNote": "Tin nhắn của khách chỉ được lưu tạm thời"
+        },
+        "messages": {
+            "empty": {
+                "title": "Bắt đầu cuộc trò chuyện",
+                "desc": "Chúng tôi có thể giúp gì cho bạn hôm nay?",
+                "guestNote": "Lưu ý: Tin nhắn của khách sẽ không được lưu"
+            },
+            "inputPlaceholder": "Nhập tin nhắn...",
+            "send": "Gửi",
+            "error": "Gửi tin nhắn thất bại"
         }
     }
 }

@@ -10,7 +10,7 @@ export interface ChatMessage {
     content: string;
     sentAt: string;
     isRead: boolean;
-    isGuest?: boolean;
+    isFromGuest: boolean;
 }
 
 // Define a type for the callbacks object to improve type safety and readability
@@ -109,15 +109,30 @@ class ChatSignalRService {
                     state === signalR.HubConnectionState.Connecting ||
                     state === signalR.HubConnectionState.Reconnecting
                 ) {
-                    return;
+                    // If token is provided, we might need to reconnect to update auth
+                    // Simplified strategy: Always stop and reconnect if connect is called explicitly with a token
+                    // This ensures we don't get stuck in Anonymous mode when User logs in
+                    if (token) {
+                        console.log('[ChatSignalR] Token provided, forcing reconnection to update auth context.');
+                        if (this.connection) {
+                            await this.connection.stop();
+                        }
+                        this.connection = null; // Rebuild connection
+                    } else {
+                        return;
+                    }
                 }
 
                 if (state === signalR.HubConnectionState.Disconnected) {
                     try {
-                        await this.connection.start();
+                        if (this.connection) {
+                            await this.connection.start();
+                        }
                         return;
                     } catch {
-                        await this.connection.stop();
+                        if (this.connection) {
+                            await this.connection.stop();
+                        }
                         this.connection = null;
                     }
                 }
@@ -136,10 +151,12 @@ class ChatSignalRService {
 
             // Register event handlers once per connection
             this.connection.on('ReceiveMessage', (message: ChatMessage) => {
+                console.log('[ChatSignalR] Event Received: ReceiveMessage', message);
                 this.callbacks.onReceiveMessage.forEach(cb => cb(message));
             });
 
             this.connection.on('ReceiveGuestMessage', (guestId: string, message: ChatMessage) => {
+                console.log('[ChatSignalR] Event Received: ReceiveGuestMessage', guestId, message);
                 this.callbacks.onGuestMessage.forEach(cb => cb(guestId, message));
             });
 
@@ -245,8 +262,11 @@ class ChatSignalRService {
     }
 
     async sendGuestReply(guestId: string, content: string) {
+        console.log('[ChatSignalR] Sending guest reply...', guestId);
         const conn = await this.ensureConnected();
+        console.log('[ChatSignalR] Connection secured, invoking SendGuestReply...');
         await conn.invoke('SendGuestReply', guestId, content);
+        console.log('[ChatSignalR] SendGuestReply invoked successfully.');
     }
 
     async startTypingGuest(guestId: string) {

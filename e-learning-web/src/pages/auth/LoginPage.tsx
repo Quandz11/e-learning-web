@@ -4,8 +4,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../store/store';
-import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
+import { loginStart, loginSuccess, loginFailure, updateUser } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
+import { profileApi } from '../../services/profileApi';
 
 const LoginPage = () => {
     const { t } = useTranslation();
@@ -21,6 +22,22 @@ const LoginPage = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const syncProfile = async () => {
+        try {
+            const profile = await profileApi.getMyProfile();
+            dispatch(updateUser({
+                email: profile.email,
+                fullName: profile.fullName || '',
+                phone: profile.phone,
+                avatarUrl: profile.avatarUrl,
+                role: profile.role,
+                id: profile.id,
+            }));
+        } catch (profileErr) {
+            console.warn('Failed to load profile for avatar', profileErr);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -66,6 +83,9 @@ const LoginPage = () => {
             // Store access token in memory only (prevent XSS)
             authApi.setAccessToken(response.accessToken);
 
+            // Hydrate profile to get avatar/full data
+            await syncProfile();
+
             // Redirect based on role
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');
@@ -102,6 +122,8 @@ const LoginPage = () => {
             }));
 
             authApi.setAccessToken(response.accessToken);
+
+            await syncProfile();
 
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');

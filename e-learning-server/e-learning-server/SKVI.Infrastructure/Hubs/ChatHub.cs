@@ -9,6 +9,7 @@ public class ChatHub : Hub
 {
     private readonly IChatService _chatService;
     private readonly IGuestConversationService _guestConversationService;
+    private readonly ILogger<ChatHub> _logger;
     private static readonly Dictionary<string, string> _guestConnections = new(); // connectionId -> guestId
     private static readonly Dictionary<string, DateTime> _lastMessageTime = new(); // userId/guestId -> last message time
     
@@ -17,10 +18,11 @@ public class ChatHub : Hub
     private const int USER_RATE_LIMIT_SECONDS = 1;
     private const int MAX_MESSAGE_LENGTH = 1000; // Chat.md section 11.2
 
-    public ChatHub(IChatService chatService, IGuestConversationService guestConversationService)
+    public ChatHub(IChatService chatService, IGuestConversationService guestConversationService, ILogger<ChatHub> logger)
     {
         _chatService = chatService;
         _guestConversationService = guestConversationService;
+        _logger = logger;
     }
     
     private bool CheckRateLimit(string identifier, int rateLimitSeconds)
@@ -46,15 +48,32 @@ public class ChatHub : Hub
         var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var role = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
         
+        _logger.LogInformation($"[ChatHub] Connected: ConnectionId={Context.ConnectionId}, UserId={userId}, Role={role}");
+
         if (!string.IsNullOrEmpty(userId))
         {
             // Authenticated user - join their personal group
             await Groups.AddToGroupAsync(Context.ConnectionId, $"user-{userId}");
 
+            // Resolve role from standard ClaimTypes or raw "role" claim
+            // Resolve role from standard ClaimTypes or raw "role" claim
+            var roleClaim = Context.User?.Claims.FirstOrDefault(c => 
+                c.Type == ClaimTypes.Role || 
+                c.Type == "role" || 
+                c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+            
+            var userRole = roleClaim?.Value;
+
+            _logger.LogInformation($"[ChatHub] User Connected: {userId}, RoleClaim={userRole}");
+
             // Support roles join a shared support group to receive guest chats
-            if (role == "ADMIN" || role == "AGENT" || role == "CARE")
+            if (!string.IsNullOrEmpty(userRole) && (
+                userRole.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || 
+                userRole.Equals("AGENT", StringComparison.OrdinalIgnoreCase) || 
+                userRole.Equals("CARE", StringComparison.OrdinalIgnoreCase)))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, "care-group");
+                _logger.LogInformation($"[ChatHub] User {userId} added to care-group.");
             }
         }
         
@@ -70,7 +89,10 @@ public class ChatHub : Hub
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"user-{userId}");
             
-            if (role == "ADMIN" || role == "AGENT" || role == "CARE")
+            if (!string.IsNullOrEmpty(role) && (
+                role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || 
+                role.Equals("AGENT", StringComparison.OrdinalIgnoreCase) || 
+                role.Equals("CARE", StringComparison.OrdinalIgnoreCase)))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, "care-group");
             }
@@ -190,6 +212,10 @@ public class ChatHub : Hub
         
         // Send to all participants in conversation
         await Clients.Group($"conversation-{conversationId}").SendAsync("ReceiveMessage", message);
+
+        // Notify Admins/Support (care-group) so they see the new message in their list immediately
+        // allowing realtime updates without joining every single conversation group
+        await Clients.Group("care-group").SendAsync("ReceiveMessage", message);
     }
 
     [Authorize]

@@ -74,7 +74,7 @@ public class CourseService : ICourseService
         return enrollments.Select(e => new StudentDto
         {
             Id = e.User.Id,
-            FullName = e.User.FullName,
+            FullName = e.User.FullName ?? "Unknown User",
             Email = e.User.Email,
             AvatarUrl = e.User.AvatarUrl,
             EnrolledAt = e.EnrolledAt

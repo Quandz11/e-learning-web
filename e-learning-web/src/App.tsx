@@ -10,7 +10,7 @@ import OtpVerifyPage from './pages/auth/OtpVerifyPage';
 import AdminDashboardPage from './pages/admin/dashboard/AdminDashboardPage';
 import CoursesPage from './pages/admin/course/CoursesPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import { setAuthState } from './store/authSlice';
+import { setAuthState, updateUser } from './store/authSlice';
 import { authApi } from './services/authApi';
 import HomePage from './pages/HomePage';
 import UsersPage from './pages/admin/user/UsersPage';
@@ -25,6 +25,7 @@ import StudentCoursesPage from './pages/CoursesPage';
 import StudentCourseDetailPage from './pages/StudentCourseDetailPage';
 import LearningPage from './pages/LearningPage';
 import RootLayout from './components/layout/RootLayout';
+import { profileApi } from './services/profileApi';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -184,14 +185,12 @@ function App() {
 
   // On app load, always try to refresh token using HTTP-only cookie
   useEffect(() => {
-
-
-    authApi
-      .refreshToken()
-      .then((response) => {
+    const initAuth = async () => {
+      try {
+        const response = await authApi.refreshToken();
         const user = authApi.decodeToken(response.accessToken);
-        if (user) {
 
+        if (user) {
           authApi.setAccessToken(response.accessToken);
           dispatch(
             setAuthState({
@@ -201,15 +200,32 @@ function App() {
               isAuthenticated: true,
             })
           );
+
+          try {
+            const profile = await profileApi.getMyProfile();
+            dispatch(
+              updateUser({
+                email: profile.email,
+                fullName: profile.fullName || '',
+                phone: profile.phone,
+                avatarUrl: profile.avatarUrl,
+                role: profile.role,
+                id: profile.id,
+              })
+            );
+          } catch (profileError) {
+            console.error('Failed to load profile', profileError);
+          }
         }
-      })
-      .catch(() => {
-        console.error('Failed to fetch user profile');
+      } catch (error) {
+        console.error('Failed to fetch user profile', error);
         authApi.setAccessToken(null);
-      })
-      .finally(() => {
+      } finally {
         setIsInitializing(false);
-      });
+      }
+    };
+
+    initAuth();
   }, [dispatch]);
 
   if (isInitializing) {

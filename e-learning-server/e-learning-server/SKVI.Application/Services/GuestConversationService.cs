@@ -50,17 +50,30 @@ public class GuestConversationService : IGuestConversationService
 
     public GuestConversation? GetConversation(string guestId)
     {
-        _conversations.TryGetValue(guestId, out var conversation);
-        return conversation;
+        lock (_lock)
+        {
+            if (_conversations.TryGetValue(guestId, out var conversation))
+            {
+                // Return a copy or careful clone? For now just reference, but modification is risky.
+                // ideally return DTO or Clone. since GuestConversation is mutable List.
+                // Deep clone is expensive.
+                // Assuming callers don't modify the list directly without service.
+                return conversation; 
+            }
+            return null;
+        }
     }
 
     public List<GuestMessage> GetMessages(string guestId)
     {
-        if (_conversations.TryGetValue(guestId, out var conversation))
+        lock (_lock)
         {
-            return conversation.Messages.ToList();
+            if (_conversations.TryGetValue(guestId, out var conversation))
+            {
+                return conversation.Messages.ToList();
+            }
+            return new List<GuestMessage>();
         }
-        return new List<GuestMessage>();
     }
 
     public void CloseConversation(string guestId)

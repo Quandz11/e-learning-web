@@ -16,10 +16,10 @@ export default function AdminChatPage() {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [lastReadByGuest, setLastReadByGuest] = useState<Date | null>(null); // For "Seen" status
-    // Typing state: key = guestId or userId, value = isTyping
     const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
     // Offline/Disconnected state: key = guestId
     const [disconnectedGuests, setDisconnectedGuests] = useState<Set<string>>(new Set());
+    const [activeTab, setActiveTab] = useState<'guest' | 'authenticated'>('guest');
 
     // Use ref to avoid stale closure in SignalR callbacks
     const selectedConversationRef = useRef<AdminConversation | null>(null);
@@ -28,6 +28,21 @@ export default function AdminChatPage() {
     // Update ref when selectedConversation changes
     useEffect(() => {
         selectedConversationRef.current = selectedConversation;
+
+        // Join/Leave SignalR groups for authenticated conversations
+        if (selectedConversation?.type === 'authenticated' && selectedConversation.id) {
+            console.log('[AdminChat] Joining conversation group:', selectedConversation.id);
+            chatSignalR.joinConversation(selectedConversation.id).catch(err =>
+                console.error('[AdminChat] Failed to join group:', err)
+            );
+
+            return () => {
+                console.log('[AdminChat] Leaving conversation group:', selectedConversation.id);
+                chatSignalR.leaveConversation(selectedConversation.id).catch(err =>
+                    console.error('[AdminChat] Failed to leave group:', err)
+                );
+            };
+        }
     }, [selectedConversation]);
 
     // Auto-scroll to bottom when messages change
@@ -76,12 +91,17 @@ export default function AdminChatPage() {
 
                     // If this is the selected conversation, add message
                     const current = selectedConversationRef.current;
+                    console.log('[Admin Chat] Current Selection:', current?.guestId, 'Incoming GuestId:', guestId);
+
                     if (current?.guestId === guestId) {
                         console.log('[Admin Chat] Adding message to current conversation');
                         setMessages(prev => {
                             if (prev.some(m => m.id === message.id)) return prev;
                             return [...prev, message as unknown as GuestMessage];
                         });
+
+                        // Mark as read immediately if viewing
+                        chatSignalR.markGuestAsRead(guestId);
                     }
 
                     // Play sound for all incoming guest messages
@@ -92,14 +112,39 @@ export default function AdminChatPage() {
                 chatSignalR.onReceiveMessage((message) => {
                     console.log('[Admin Chat] Received message (echo back):', message);
 
+                    // Always reload conversations to update snippets/unread
+                    loadConversations();
+
+                    // Play sound ONLY if message is NOT from me
+                    if (message.senderId !== user?.id) {
+                        playNotificationSound();
+                    }
+
                     // Add to current conversation if it matches
                     const current = selectedConversationRef.current;
-                    if (current?.type === 'guest') {
-                        console.log('[Admin Chat] Adding admin message to current conversation');
-                        setMessages(prev => {
-                            if (prev.some(m => m.id === message.id)) return prev;
-                            return [...prev, message as unknown as GuestMessage];
-                        });
+                    if (current) {
+                        // Check if message belongs to current conversation
+                        // For Echo, we assume it's for the current conversation if we triggered it
+                        // But wait, if multiple tabs...
+                        // If it's a guest conversation reply
+                        if (current.type === 'guest') {
+                            console.log('[Admin Chat] Adding admin message to GUEST conversation');
+                            setMessages(prev => {
+                                if (prev.some(m => m.id === message.id)) return prev;
+                                return [...prev, message as unknown as GuestMessage];
+                            });
+                        }
+                        // If it's an authenticated user conversation
+                        else if (current.type === 'authenticated') {
+                            // Can verify conversationId if message has it
+                            if (message.conversationId && message.conversationId !== current.id) return;
+
+                            console.log('[Admin Chat] Adding admin message to AUTH conversation');
+                            setMessages(prev => {
+                                if (prev.some(m => m.id === message.id)) return prev;
+                                return [...prev, message as unknown as GuestMessage];
+                            });
+                        }
                     }
                 });
 
@@ -164,6 +209,8 @@ export default function AdminChatPage() {
         try {
             setLoading(true);
             const data = await adminChatApi.getAllConversations(accessToken);
+            console.log('[AdminChat] Loaded conversations:', data);
+
             // Merge lists
             const all = [
                 ...data.guestConversations,
@@ -229,9 +276,12 @@ export default function AdminChatPage() {
 
         try {
             setSending(true);
+            console.log('[AdminChat] Sending message. Selected:', JSON.stringify(selectedConversation, null, 2));
 
             if (selectedConversation.type === 'guest' && selectedConversation.guestId) {
+                console.log('[AdminChat] Call sendGuestReply');
                 await chatSignalR.sendGuestReply(selectedConversation.guestId, content);
+                console.log('[AdminChat] sendGuestReply done');
                 setInputMessage('');
             } else if (selectedConversation.type === 'authenticated' && selectedConversation.id) {
                 // For authenticated users, we use sendMessage with conversationId
@@ -240,9 +290,9 @@ export default function AdminChatPage() {
             }
         } catch (error) {
             console.error('Failed to send message:', error);
-            console.error('Failed to send message:', error);
             alert(t('admin.chat.error') || 'Failed to send message');
         } finally {
+            console.log('[AdminChat] Cleanup sending state');
             setSending(false);
         }
     };
@@ -267,63 +317,91 @@ export default function AdminChatPage() {
                 <div className="flex-1 flex overflow-hidden">
                     {/* Conversation List */}
                     <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-                        <div className="p-4 border-b border-gray-200">
-                            <h2 className="font-semibold text-gray-900">{t('admin.chat.conversations')}</h2>
-                            <p className="text-xs text-gray-500 mt-1">{conversations.length} {t('admin.chat.active')}</p>
+                        {/* Tabs */}
+                        <div className="flex border-b border-gray-200">
+                            <button
+                                onClick={() => { setActiveTab('guest'); setSelectedConversation(null); }}
+                                className={`flex-1 py-3 text-sm font-medium text-center ${activeTab === 'guest'
+                                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    }`}
+                            >
+                                {t('admin.chat.guest')}
+                            </button>
+                            <button
+                                onClick={() => { setActiveTab('authenticated'); setSelectedConversation(null); }}
+                                className={`flex-1 py-3 text-sm font-medium text-center ${activeTab === 'authenticated'
+                                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    }`}
+                            >
+                                {t('admin.chat.member')}
+                            </button>
+                        </div>
+
+                        <div className="p-4 border-b border-gray-200 bg-gray-50/50">
+                            <h2 className="font-semibold text-gray-900">
+                                {activeTab === 'guest' ? t('admin.chat.guestConversations') : t('admin.chat.memberConversations')}
+                            </h2>
+                            <p className="text-xs text-gray-500 mt-1">
+                                {conversations.filter(c => c.type === activeTab).length} {t('admin.chat.active')}
+                            </p>
                         </div>
 
                         <div className="flex-1 overflow-y-auto">
                             {loading ? (
                                 <div className="p-4 text-center text-gray-500">{t('admin.chat.loading')}</div>
-                            ) : conversations.length === 0 ? (
+                            ) : conversations.filter(c => c.type === activeTab).length === 0 ? (
                                 <div className="p-4 text-center text-gray-500">{t('admin.chat.noConversations')}</div>
                             ) : (
-                                conversations.map(conv => (
-                                    <div
-                                        key={conv.id}
-                                        onClick={() => handleSelectConversation(conv)}
-                                        className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${selectedConversation?.id === conv.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-                                            }`}
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium text-gray-900 truncate">
-                                                        {conv.userName}
-                                                    </span>
-                                                    {conv.type === 'guest' && (
-                                                        <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
-                                                            {t('admin.chat.guest')}
+                                conversations
+                                    .filter(c => c.type === activeTab)
+                                    .map(conv => (
+                                        <div
+                                            key={conv.id}
+                                            onClick={() => handleSelectConversation(conv)}
+                                            className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${selectedConversation?.id === conv.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                                                }`}
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium text-gray-900 truncate">
+                                                            {conv.userName}
+                                                        </span>
+                                                        {conv.type === 'guest' && (
+                                                            <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                                {t('admin.chat.guest')}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 truncate mt-1">
+                                                        {conv.lastMessage || t('admin.chat.noMessages')}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400 mt-1">
+                                                        {new Date(conv.lastActivity).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                                <div className="flex flex-col items-end gap-1">
+                                                    {conv.unreadCount > 0 && (
+                                                        <span className="px-2 py-1 text-xs font-bold bg-blue-500 text-white rounded-full">
+                                                            {conv.unreadCount}
                                                         </span>
                                                     )}
+                                                    {/* Typing Indicator in List */}
+                                                    {(typingUsers[conv.guestId!] || typingUsers[conv.userId!]) && (
+                                                        <span className="text-xs text-green-600 font-medium animate-pulse">
+                                                            Typing...
+                                                        </span>
+                                                    )}
+                                                    {/* Offline Indicator */}
+                                                    {conv.type === 'guest' && disconnectedGuests.has(conv.guestId!) && (
+                                                        <span className="text-xs text-gray-400">Offline</span>
+                                                    )}
                                                 </div>
-                                                <p className="text-sm text-gray-600 truncate mt-1">
-                                                    {conv.lastMessage || t('admin.chat.noMessages')}
-                                                </p>
-                                                <p className="text-xs text-gray-400 mt-1">
-                                                    {new Date(conv.lastActivity).toLocaleString()}
-                                                </p>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1">
-                                                {conv.unreadCount > 0 && (
-                                                    <span className="px-2 py-1 text-xs font-bold bg-blue-500 text-white rounded-full">
-                                                        {conv.unreadCount}
-                                                    </span>
-                                                )}
-                                                {/* Typing Indicator in List */}
-                                                {(typingUsers[conv.guestId!] || typingUsers[conv.userId!]) && (
-                                                    <span className="text-xs text-green-600 font-medium animate-pulse">
-                                                        Typing...
-                                                    </span>
-                                                )}
-                                                {/* Offline Indicator */}
-                                                {conv.type === 'guest' && disconnectedGuests.has(conv.guestId!) && (
-                                                    <span className="text-xs text-gray-400">Offline</span>
-                                                )}
                                             </div>
                                         </div>
-                                    </div>
-                                ))
+                                    ))
                             )}
                         </div>
                     </div>
@@ -338,7 +416,7 @@ export default function AdminChatPage() {
                                         <div>
                                             <h3 className="font-semibold text-gray-900">{selectedConversation.userName}</h3>
                                             <p className="text-sm text-gray-500">
-                                                {selectedConversation.type === 'guest' ? 'Guest User' : 'Authenticated User'}
+                                                {selectedConversation.type === 'guest' ? t('admin.chat.guest') : t('admin.chat.member')}
                                                 {(typingUsers[selectedConversation.guestId!] || typingUsers[selectedConversation.userId!]) && (
                                                     <span className="ml-2 text-xs text-green-600 font-medium animate-pulse">
                                                         is typing...
@@ -370,30 +448,32 @@ export default function AdminChatPage() {
 
                                 {/* Messages */}
                                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                                    {messages.map(msg => (
-                                        <div
-                                            key={msg.id}
-                                            className={`flex ${msg.isFromGuest ? 'justify-start' : 'justify-end'}`}
-                                        >
-                                            <div className={`max-w-md rounded-2xl px-4 py-2 ${msg.isFromGuest
-                                                ? 'bg-white text-gray-900 border border-gray-200 rounded-bl-sm'
-                                                : 'bg-primary text-white rounded-br-sm'
-                                                }`}>
-                                                {msg.isFromGuest && <p className="text-xs text-gray-500 mb-1">{msg.senderName}</p>}
-                                                <p className="whitespace-pre-wrap">{msg.content}</p>
-                                                <p className={`text-xs mt-1 ${msg.isFromGuest ? 'text-gray-400' : 'text-white/70'}`}>
-                                                    {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                    {messages.map(msg => {
+                                        // Determine if message is from "Me" (the Admin)
+                                        // For Guest Chat: !isFromGuest (Admin sent it)
+                                        // For Auth Chat: senderId === user.id
+                                        const isMe = selectedConversation.type === 'guest'
+                                            ? !msg.isFromGuest
+                                            : msg.senderId === user?.id;
 
-                                    {/* SEEN STATUS (Last message from Me) */}
-                                    {messages.length > 0 && !messages[messages.length - 1].isFromGuest && lastReadByGuest && (
-                                        <div className="flex justify-end mt-1 mr-1">
-                                            <span className="text-[10px] text-gray-400">{t('chat.messages.seen', 'Đã xem')}</span>
-                                        </div>
-                                    )}
+                                        return (
+                                            <div
+                                                key={msg.id}
+                                                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div className={`max-w-md rounded-2xl px-4 py-2 ${!isMe
+                                                    ? 'bg-white text-gray-900 border border-gray-200 rounded-bl-sm'
+                                                    : 'bg-primary text-white rounded-br-sm'
+                                                    }`}>
+                                                    {!isMe && <p className="text-xs text-gray-500 mb-1">{msg.senderName}</p>}
+                                                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                                                    <p className={`text-xs mt-1 ${msg.isFromGuest ? 'text-gray-400' : 'text-white/70'}`}>
+                                                        {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
 
                                     <div ref={messagesEndRef} />
                                 </div>
@@ -407,11 +487,8 @@ export default function AdminChatPage() {
                                             onChange={(e) => setInputMessage(e.target.value)}
                                             onKeyPress={handleKeyPress}
                                             onFocus={() => {
-                                                // Mark as read when focusing input
                                                 if (selectedConversation?.id && selectedConversation.type === 'authenticated') {
                                                     chatSignalR.markAsRead(selectedConversation.id);
-                                                    // Refresh list to clear badge? Maybe just update local state if possible specific to this conversation
-                                                    // For now, loadConversations is safe
                                                     loadConversations();
                                                 } else if (selectedConversation?.guestId && selectedConversation.type === 'guest') {
                                                     chatSignalR.markGuestAsRead(selectedConversation.guestId);

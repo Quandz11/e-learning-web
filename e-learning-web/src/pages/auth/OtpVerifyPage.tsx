@@ -3,8 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../store/store';
-import { loginSuccess } from '../../store/authSlice';
+import { loginSuccess, updateUser } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
+import { profileApi } from '../../services/profileApi';
 
 const OtpVerifyPage = () => {
     const { t } = useTranslation();
@@ -24,6 +25,21 @@ const OtpVerifyPage = () => {
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [countdown, setCountdown] = useState(600); // 10 minutes in seconds
     const [canResend, setCanResend] = useState(false);
+    const syncProfile = async () => {
+        try {
+            const profile = await profileApi.getMyProfile();
+            dispatch(updateUser({
+                email: profile.email,
+                fullName: profile.fullName || '',
+                phone: profile.phone,
+                avatarUrl: profile.avatarUrl,
+                role: profile.role,
+                id: profile.id,
+            }));
+        } catch (err) {
+            console.warn('Failed to load profile for avatar', err);
+        }
+    };
 
     // Redirect if no email provided
     useEffect(() => {
@@ -130,6 +146,8 @@ const OtpVerifyPage = () => {
                     accessToken: response.accessToken,
                     expiresAt: response.expiresAt,
                 }));
+
+                await syncProfile();
 
                 // Navigate to appropriate page based on role
                 const role = user.role?.toUpperCase();

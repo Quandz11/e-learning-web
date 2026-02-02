@@ -115,8 +115,9 @@ builder.Services.AddCors(options =>
                 "https://localhost:5173",
                 "http://localhost:5174",
                 "https://localhost:5174",
-                "https://lemon-water-0b4792900.2.azurestaticapps.net"
-              )
+                "https://lemon-water-0b4792900.2.azurestaticapps.net",
+                "https://salmon-river-0d2751800.4.azurestaticapps.net"
+              
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Important for Cookies

@@ -39,7 +39,7 @@ jobs:
           app_location: "/e-learning-web"
           api_location: ""
           output_location: "dist"
-          app_build_command: "npm install && npm run build"
+          app_build_command: "npm install && VITE_API_URL=https://skvi-e-learning-api.azurewebsites.net/api npm run build"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

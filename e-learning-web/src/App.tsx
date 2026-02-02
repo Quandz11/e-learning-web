@@ -12,6 +12,7 @@ import CoursesPage from './pages/admin/course/CoursesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { setAuthState, updateUser } from './store/authSlice';
 import { authApi } from './services/authApi';
+import { loadAuth, saveAuth, clearAuth } from './services/authStorage';
 import HomePage from './pages/HomePage';
 import UsersPage from './pages/admin/user/UsersPage';
 import UserDetailPage from './pages/admin/user/UserDetailPage';
@@ -27,14 +28,22 @@ import LearningPage from './pages/LearningPage';
 import RootLayout from './components/layout/RootLayout';
 import { profileApi } from './services/profileApi';
 
-function App() {
-  const dispatch = useDispatch<AppDispatch>();
+// Helper component to handle root path redirection
+const RootRedirect = () => {
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const [isInitializing, setIsInitializing] = useState(true);
-
   const role = user?.role?.toUpperCase();
 
-  // Create router dynamically - re-create when isAuthenticated changes  
+  if (isAuthenticated) {
+    return <Navigate to={role === 'ADMIN' ? '/admin/dashboard' : '/home'} replace />;
+  }
+  return <HomePage />;
+};
+
+function App() {
+  const dispatch = useDispatch<AppDispatch>();
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  // Create router once - stable across re-renders
   const router = useMemo(
     () =>
       createBrowserRouter([
@@ -43,14 +52,7 @@ function App() {
           children: [
             {
               path: '/',
-              element: isAuthenticated ? (
-                <Navigate
-                  to={role === 'ADMIN' ? '/admin/dashboard' : '/home'}
-                  replace
-                />
-              ) : (
-                <HomePage />
-              ),
+              element: <RootRedirect />,
             },
             {
               element: <AuthLayout />,
@@ -180,12 +182,28 @@ function App() {
           ]
         }
       ]),
-    [isAuthenticated, role]
+    []
   );
 
   // On app load, always try to refresh token using HTTP-only cookie
   useEffect(() => {
     const initAuth = async () => {
+      // 1) Try to restore from localStorage quickly (non-expired access token)
+      const cached = loadAuth();
+      if (cached && !authApi.isTokenExpired(cached.expiresAt)) {
+        authApi.setAccessToken(cached.accessToken);
+        dispatch(
+          setAuthState({
+            user: cached.user,
+            accessToken: cached.accessToken,
+            expiresAt: cached.expiresAt,
+            isAuthenticated: true,
+          })
+        );
+        setIsInitializing(false);
+        return;
+      }
+
       try {
         const response = await authApi.refreshToken();
         const user = authApi.decodeToken(response.accessToken);
@@ -200,6 +218,7 @@ function App() {
               isAuthenticated: true,
             })
           );
+          saveAuth({ user, accessToken: response.accessToken, expiresAt: response.expiresAt });
 
           try {
             const profile = await profileApi.getMyProfile();
@@ -220,6 +239,7 @@ function App() {
       } catch (error) {
         console.error('Failed to fetch user profile', error);
         authApi.setAccessToken(null);
+        clearAuth();
       } finally {
         setIsInitializing(false);
       }

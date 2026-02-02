@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store/store';
 import { logout } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
+import { clearAuth } from '../../services/authStorage';
 
 const AdminHeaderWithLogout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -17,8 +18,7 @@ const AdminHeaderWithLogout: React.FC<{ children: React.ReactNode }> = ({ childr
       console.error('Logout error:', error);
     } finally {
       // Clear auth state
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('expiresAt');
+      clearAuth();
       dispatch(logout());
       navigate('/login');
     }

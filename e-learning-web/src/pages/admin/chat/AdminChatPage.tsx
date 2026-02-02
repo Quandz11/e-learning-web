@@ -49,7 +49,7 @@ export default function AdminChatPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const playNotificationSound = () => {
+    const playNotificationSound = (type: 'incoming' | 'outgoing') => {
         try {
             const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
@@ -58,14 +58,26 @@ export default function AdminChatPage() {
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
 
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
+            if (type === 'incoming') {
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
 
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
 
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } else {
+                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            }
         } catch (error) {
             console.error('Failed to play sound:', error);
         }
@@ -104,7 +116,7 @@ export default function AdminChatPage() {
                     }
 
                     // Play sound for all incoming guest messages
-                    playNotificationSound();
+                    playNotificationSound('incoming');
                 });
 
                 // Listen for echo back of admin's own messages
@@ -114,9 +126,11 @@ export default function AdminChatPage() {
                     // Always reload conversations to update snippets/unread
                     loadConversations();
 
-                    // Play sound ONLY if message is NOT from me
+                    // Play sound
                     if (message.senderId !== user?.id) {
-                        playNotificationSound();
+                        playNotificationSound('incoming');
+                    } else {
+                        playNotificationSound('outgoing');
                     }
 
                     // Add to current conversation if it matches

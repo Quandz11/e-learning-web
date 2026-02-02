@@ -6,6 +6,7 @@ import type { AppDispatch } from '../../store/store';
 import { loginSuccess, updateUser } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
 import { profileApi } from '../../services/profileApi';
+import { saveAuth } from '../../services/authStorage';
 
 const OtpVerifyPage = () => {
     const { t } = useTranslation();
@@ -148,6 +149,8 @@ const OtpVerifyPage = () => {
                 }));
 
                 await syncProfile();
+
+                saveAuth({ user, accessToken: response.accessToken, expiresAt: response.expiresAt });
 
                 // Navigate to appropriate page based on role
                 const role = user.role?.toUpperCase();

@@ -7,6 +7,7 @@ import type { AppDispatch, RootState } from '../../store/store';
 import { loginStart, loginSuccess, loginFailure, updateUser } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
 import { profileApi } from '../../services/profileApi';
+import { saveAuth } from '../../services/authStorage';
 
 const LoginPage = () => {
     const { t } = useTranslation();
@@ -86,6 +87,8 @@ const LoginPage = () => {
             // Hydrate profile to get avatar/full data
             await syncProfile();
 
+            saveAuth({ user, accessToken: response.accessToken, expiresAt: response.expiresAt });
+
             // Redirect based on role
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');
@@ -124,6 +127,8 @@ const LoginPage = () => {
             authApi.setAccessToken(response.accessToken);
 
             await syncProfile();
+
+            saveAuth({ user, accessToken: response.accessToken, expiresAt: response.expiresAt });
 
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');

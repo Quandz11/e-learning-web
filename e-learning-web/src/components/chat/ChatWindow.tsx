@@ -122,7 +122,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
                         return [...prev, message];
                     });
                     scrollToBottom();
-                    playNotificationSound();
+                    const isFromMe = isAuthenticated
+                        ? message.senderId === user?.id
+                        : message.senderId === guestId;
+                    playNotificationSound(isFromMe ? 'outgoing' : 'incoming');
 
                     // If window is closed and message is from other, increment unread
                     // We need to check if message is from other inside this callback?
@@ -209,7 +212,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
                 }
 
                 scrollToBottom();
-                playNotificationSound();
+                playNotificationSound(isFromMe ? 'outgoing' : 'incoming');
             });
         }
     }, [isConnected, isAuthenticated, guestId, onUnreadCountChange]); // Re-bind if these change
@@ -245,7 +248,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const playNotificationSound = () => {
+    const playNotificationSound = (type: 'incoming' | 'outgoing') => {
         // Simple beep using Web Audio API
         try {
             const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -255,14 +258,29 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
 
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
+            if (type === 'incoming') {
+                // High pitch 'Ding' for incoming
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
 
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3); // Longer decay
 
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } else {
+                // Lower pitch 'Pop' for outgoing
+                oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            }
+
         } catch (error) {
             console.error('Failed to play sound:', error);
         }

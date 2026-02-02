@@ -124,7 +124,11 @@ builder.Services.AddCors(options =>
 });
 
 // SignalR
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    // Increase message size to allow base64 image payloads from chat (default 32KB)
+    options.MaximumReceiveMessageSize = 200 * 1024; // 200 KB
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

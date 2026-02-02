@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { RootState, AppDispatch } from '../store/store';
 import { logout } from '../store/authSlice';
 import { authApi } from '../services/authApi';
+import { clearAuth } from '../services/authStorage';
 import { courseApi, type CourseResponse } from '../services/courseApi';
 
 const HomePage: React.FC = () => {
@@ -38,6 +39,7 @@ const HomePage: React.FC = () => {
     try {
       await authApi.logout();
       dispatch(logout());
+      clearAuth();
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);

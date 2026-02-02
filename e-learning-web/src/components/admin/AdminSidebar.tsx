@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { AppDispatch, RootState } from '../../store/store';
 import { logout } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
+import { clearAuth } from '../../services/authStorage';
 
 interface AdminSidebarProps {
   isMobileOpen?: boolean;
@@ -29,6 +30,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
       console.error('Logout error:', error);
     } finally {
       authApi.setAccessToken(null);
+      clearAuth();
       dispatch(logout());
       navigate('/login');
     }

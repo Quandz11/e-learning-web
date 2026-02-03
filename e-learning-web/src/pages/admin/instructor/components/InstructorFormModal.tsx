@@ -110,7 +110,7 @@ const InstructorFormModal: React.FC<InstructorFormModalProps> = ({
     const statusLabel = (value: InstructorStatus) => t(`admin.instructors.statuses.${value}`);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
             <div className="w-full max-w-lg rounded-xl bg-white shadow-xl dark:bg-slate-900">
                 <div className="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">

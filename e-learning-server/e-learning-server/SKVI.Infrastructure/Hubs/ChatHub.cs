@@ -67,13 +67,21 @@ public class ChatHub : Hub
             _logger.LogInformation($"[ChatHub] User Connected: {userId}, RoleClaim={userRole}");
 
             // Support roles join a shared support group to receive guest chats
-            if (!string.IsNullOrEmpty(userRole) && (
-                userRole.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || 
-                userRole.Equals("AGENT", StringComparison.OrdinalIgnoreCase) || 
-                userRole.Equals("CARE", StringComparison.OrdinalIgnoreCase)))
+            if (!string.IsNullOrEmpty(userRole))
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, "care-group");
-                _logger.LogInformation($"[ChatHub] User {userId} added to care-group.");
+                if (userRole.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, "admin-group");
+                    _logger.LogInformation($"[ChatHub] User {userId} added to admin-group.");
+                }
+
+                if (userRole.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || 
+                    userRole.Equals("AGENT", StringComparison.OrdinalIgnoreCase) || 
+                    userRole.Equals("CARE", StringComparison.OrdinalIgnoreCase))
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, "care-group");
+                    _logger.LogInformation($"[ChatHub] User {userId} added to care-group.");
+                }
             }
         }
         
@@ -89,12 +97,19 @@ public class ChatHub : Hub
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"user-{userId}");
             
-            if (!string.IsNullOrEmpty(role) && (
-                role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || 
-                role.Equals("AGENT", StringComparison.OrdinalIgnoreCase) || 
-                role.Equals("CARE", StringComparison.OrdinalIgnoreCase)))
+            if (!string.IsNullOrEmpty(role))
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, "care-group");
+                if (role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
+                {
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, "admin-group");
+                }
+
+                if (role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || 
+                    role.Equals("AGENT", StringComparison.OrdinalIgnoreCase) || 
+                    role.Equals("CARE", StringComparison.OrdinalIgnoreCase))
+                {
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, "care-group");
+                }
             }
         }
         

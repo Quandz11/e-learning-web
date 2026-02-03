@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { courseApi, type CourseResponse, type CourseLessonInput, type StudentResponse } from '../../../services/courseApi';
+import { courseApi, type CourseResponse, type StudentResponse } from '../../../services/courseApi';
+import { type LessonPartDto } from '../../../services/lessonApi';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import CourseFormModal from './components/CourseFormModal';
 import SecureVideoPlayer from '../../../components/SecureVideoPlayer';
@@ -15,13 +16,12 @@ const CourseDetailPage: React.FC = () => {
   // State
   const [course, setCourse] = useState<CourseResponse | null>(null);
   const [enrolledStudents, setEnrolledStudents] = useState<StudentResponse[]>([]);
-  const [selectedLesson, setSelectedLesson] = useState<CourseLessonInput | null>(null);
+  const [selectedPart, setSelectedPart] = useState<LessonPartDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'curriculum' | 'students' | 'financials'>('overview');
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
   const [showEditModal, setShowEditModal] = useState(false);
-  const [contentType, setContentType] = useState<'video' | 'document'>('video');
 
   // Fetch course data
   const fetchCourse = async () => {
@@ -32,17 +32,19 @@ const CourseDetailPage: React.FC = () => {
       const data = await courseApi.getById(id);
       setCourse(data);
 
-      // Auto-select first lesson (regardless of playbackUrl)
-      if (!selectedLesson) {
-        const allLessons = data.sections.flatMap((s) => s.lessons);
-        if (allLessons.length > 0) {
-          setSelectedLesson(allLessons[0]);
+      // Auto-select first part of first lesson
+      if (!selectedPart) {
+        if (data.lessons && data.lessons.length > 0) {
+          const firstLesson = data.lessons[0];
+          if (firstLesson.parts && firstLesson.parts.length > 0) {
+            setSelectedPart(firstLesson.parts[0]);
+          }
         }
       }
 
-      // Expand first section by default
-      if (expandedSections.size === 0 && data.sections.length > 0) {
-        setExpandedSections(new Set([data.sections[0].id || '0']));
+      // Expand first lesson by default
+      if (expandedLessons.size === 0 && data.lessons && data.lessons.length > 0) {
+        setExpandedLessons(new Set([data.lessons[0].id || '0']));
       }
 
       // Fetch enrolled students
@@ -59,32 +61,19 @@ const CourseDetailPage: React.FC = () => {
     void fetchCourse();
   }, [id, t]);
 
-  // Auto-select content type when lesson changes
-  useEffect(() => {
-    if (selectedLesson) {
-      // Prioritize video if available, otherwise show document
-      if (selectedLesson.videoId) {
-        setContentType('video');
-      } else if (selectedLesson.documentUrl) {
-        setContentType('document');
-      }
-    }
-  }, [selectedLesson]);
-
   // Computed values
-  const lessons = useMemo(() => course?.sections.flatMap((s) => s.lessons) ?? [], [course]);
-  const totalLessons = lessons.length;
+  const totalParts = useMemo(() => course?.lessons?.reduce((acc, l) => acc + (l.parts?.length || 0), 0) ?? 0, [course]);
   const statusLabel = course?.isPublished ? t('courseDetail.meta.statusPublished') : t('courseDetail.meta.statusDraft');
   const priceLabel = course?.isFree ? t('courseDetail.free') : `${(course?.price ?? 0).toLocaleString('vi-VN')} VND`;
 
   // Handlers
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => {
+  const toggleLesson = (lessonId: string) => {
+    setExpandedLessons(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(sectionId)) {
-        newSet.delete(sectionId);
+      if (newSet.has(lessonId)) {
+        newSet.delete(lessonId);
       } else {
-        newSet.add(sectionId);
+        newSet.add(lessonId);
       }
       return newSet;
     });
@@ -92,7 +81,6 @@ const CourseDetailPage: React.FC = () => {
 
   // Mock data (will be replaced with real data from backend later)
   const mockStats = {
-    enrollments: 1240,
     rating: 4.8,
     reviews: 210
   };
@@ -129,7 +117,6 @@ const CourseDetailPage: React.FC = () => {
         {course && (
           <div className="space-y-8">
             {/* Course Header Info (Full Width) */}
-            {/* Course Header Info (Full Width) */}
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold font-dashboard text-slate-900 dark:text-white mb-3">
@@ -159,43 +146,13 @@ const CourseDetailPage: React.FC = () => {
 
               {/* Left Column (2/3) - Video & Tabs & Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* 1. Content Type Tabs (if lesson has both video and document) */}
-                {selectedLesson && selectedLesson.videoId && selectedLesson.documentUrl && (
-                  <div className="flex gap-2 border-b border-border-light dark:border-border-dark">
-                    <button
-                      onClick={() => setContentType('video')}
-                      className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${contentType === 'video'
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                        }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px]">play_circle</span>
-                        {t('learn.contentType.video')}
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => setContentType('document')}
-                      className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${contentType === 'document'
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                        }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px]">description</span>
-                        {t('learn.contentType.document')}
-                      </span>
-                    </button>
-                  </div>
-                )}
-
-                {/* 2. Video/Document Player */}
-                <div className={`w-full rounded-xl bg-slate-900 relative overflow-hidden shadow-lg border border-slate-800 ${contentType === 'video' ? 'aspect-video' : 'min-h-[800px]'
+                {/* 1. Video/Document Player */}
+                <div className={`w-full rounded-xl bg-slate-900 relative overflow-hidden shadow-lg border border-slate-800 ${selectedPart?.type === 'Video' ? 'aspect-video' : 'min-h-[800px]'
                   }`}>
-                  {contentType === 'video' ? (
-                    selectedLesson?.videoId ? (
+                  {selectedPart?.type === 'Video' ? (
+                    selectedPart?.videoId ? (
                       <SecureVideoPlayer
-                        videoId={selectedLesson.videoId}
+                        videoId={selectedPart.videoId}
                         className="absolute inset-0 w-full h-full object-cover"
                         controls
                       />
@@ -205,8 +162,8 @@ const CourseDetailPage: React.FC = () => {
                       </div>
                     )
                   ) : (
-                    selectedLesson?.documentUrl ? (
-                      <PdfViewer documentUrl={selectedLesson.documentUrl} />
+                    selectedPart?.documentUrl ? (
+                      <PdfViewer documentUrl={selectedPart.documentUrl} />
                     ) : (
                       <div className="flex aspect-video items-center justify-center text-slate-400">
                         {t('learn.noPdf')}
@@ -215,7 +172,7 @@ const CourseDetailPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* 3. Tabs & Content */}
+                {/* 2. Tabs & Content */}
                 <div className="space-y-6">
                   {/* Tab Navigation */}
                   <div className="border-b border-border-light dark:border-border-dark">
@@ -230,7 +187,7 @@ const CourseDetailPage: React.FC = () => {
                             }`}
                         >
                           {t(`courseDetail.tabs.${tab}`)}
-                          {tab === 'curriculum' && ` (${totalLessons})`}
+                          {tab === 'curriculum' && ` (${totalParts})`}
                         </button>
                       ))}
                     </nav>
@@ -269,19 +226,24 @@ const CourseDetailPage: React.FC = () => {
 
                     {activeTab === 'curriculum' && (
                       <div className="space-y-4">
-                        {course.sections.map((section, sIdx) => (
-                          <div key={section.id || sIdx} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                        {course.lessons?.map((lesson, lIdx) => (
+                          <div key={lesson.id || lIdx} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
                             <h4 className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200 mb-2">
-                              <span className="material-symbols-outlined text-primary">folder</span>
-                              {section.title}
-                              <span className="text-xs font-normal text-slate-500 ml-auto">{section.lessons.length} lessons</span>
+                              {lesson.thumbnailUrl && <img src={lesson.thumbnailUrl} className="w-8 h-8 rounded object-cover" />}
+                              <span className="material-symbols-outlined text-primary">feed</span>
+                              {lesson.title}
+                              <span className="text-xs font-normal text-slate-500 ml-auto">{lesson.parts?.length || 0} {t('learn.parts')}</span>
                             </h4>
                             <div className="space-y-2 pl-4 border-l-2 border-slate-100 dark:border-slate-800 ml-2">
-                              {section.lessons.map((lesson, lIdx) => (
-                                <div key={lesson.id || lIdx} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                  <span className="material-symbols-outlined text-[18px]">{lesson.videoId ? 'play_circle' : 'description'}</span>
-                                  <span>{lesson.title}</span>
-                                  <span className="text-xs text-slate-400 ml-auto">{lesson.duration || 0}m</span>
+                              {lesson.parts?.map((part, pIdx) => (
+                                <div key={part.id || pIdx} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                  <span className="material-symbols-outlined text-[18px]">
+                                    {part.type === 'Video' ? 'play_circle' : 'description'}
+                                  </span>
+                                  <span>{part.title}</span>
+                                  {part.type === 'Video' && part.videoDuration && (
+                                    <span className="text-xs text-slate-400 ml-auto">{Math.round(part.videoDuration / 60)}{t('learn.minutes')}</span>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -375,45 +337,47 @@ const CourseDetailPage: React.FC = () => {
                     {t('courseDetail.sections.structure')}
                   </h3>
                   <div className="flex-1 border border-border-light dark:border-border-dark rounded-lg divide-y divide-border-light dark:divide-border-dark overflow-y-auto bg-white dark:bg-surface-dark custom-scrollbar">
-                    {course.sections.map((section, sIdx) => {
-                      const sectionId = section.id || `${sIdx}`;
-                      const isExpanded = expandedSections.has(sectionId);
-                      const sectionDuration = section.lessons.reduce((sum, l) => sum + (l.duration || 0), 0);
+                    {course.lessons?.map((lesson, lIdx) => {
+                      const lessonId = lesson.id || `${lIdx}`;
+                      const isExpanded = expandedLessons.has(lessonId);
+                      const lessonDuration = lesson.parts?.reduce((sum, p) => sum + (p.videoDuration || 0), 0) || 0;
 
                       return (
-                        <div key={sectionId}>
+                        <div key={lessonId}>
                           <div
-                            onClick={() => toggleSection(sectionId)}
+                            onClick={() => toggleLesson(lessonId)}
                             className="p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer group"
                           >
                             <div className="flex items-center gap-3">
                               <span className={`material-symbols-outlined text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
                                 expand_more
                               </span>
-                              <span className="font-medium text-slate-800 dark:text-slate-200 line-clamp-1">{section.title}</span>
+                              <span className="font-medium text-slate-800 dark:text-slate-200 line-clamp-1">{lesson.title}</span>
                             </div>
                             <span className="text-xs text-slate-500 whitespace-nowrap ml-2">
-                              {section.lessons.length} • {sectionDuration}m
+                              {lesson.parts?.length || 0} • {Math.round(lessonDuration / 60)}{t('learn.minutes')}
                             </span>
                           </div>
 
                           {isExpanded && (
                             <div className="px-4 pb-4 space-y-2 bg-slate-50 dark:bg-slate-900/50">
-                              {section.lessons.map((lesson, lIdx) => (
+                              {lesson.parts?.map((part, pIdx) => (
                                 <button
-                                  key={lesson.id || `${sIdx}-${lIdx}`}
-                                  onClick={() => setSelectedLesson(lesson)}
-                                  className={`w-full rounded-md px-3 py-2 text-left text-sm transition flex items-center justify-between ${selectedLesson?.id === lesson.id || selectedLesson === lesson
+                                  key={part.id || `${lIdx}-${pIdx}`}
+                                  onClick={() => setSelectedPart(part)}
+                                  className={`w-full rounded-md px-3 py-2 text-left text-sm transition flex items-center justify-between ${selectedPart?.id === part.id || selectedPart === part
                                     ? 'bg-primary text-white'
                                     : 'bg-white text-slate-800 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                                     }`}
                                 >
                                   <span className="flex items-center gap-2 overflow-hidden">
-                                    <span className="material-symbols-outlined text-[18px] shrink-0">play_circle</span>
-                                    <span className="truncate">{lesson.title}</span>
+                                    <span className="material-symbols-outlined text-[18px] shrink-0">
+                                      {part.type === 'Video' ? 'play_circle' : 'description'}
+                                    </span>
+                                    <span className="truncate">{part.title}</span>
                                   </span>
-                                  {lesson.duration && (
-                                    <span className="text-xs opacity-80 shrink-0 ml-2">{lesson.duration}m</span>
+                                  {part.type === 'Video' && part.videoDuration && (
+                                    <span className="text-xs opacity-80 shrink-0 ml-2">{Math.round(part.videoDuration / 60)}{t('learn.minutes')}</span>
                                   )}
                                 </button>
                               ))}
@@ -434,7 +398,6 @@ const CourseDetailPage: React.FC = () => {
                     <div className="col-span-1">
                       <span className="text-xs text-slate-500 block mb-1">{t('courseDetail.stats.enrollments')}</span>
                       <span className="text-sm font-medium text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary text-base">groups</span>
                         <span className="material-symbols-outlined text-primary text-base">groups</span>
                         {enrolledStudents.length.toLocaleString()}
                       </span>
@@ -469,7 +432,6 @@ const CourseDetailPage: React.FC = () => {
           </div>
         )}
       </div>
-
 
       <CourseFormModal
         isOpen={showEditModal}

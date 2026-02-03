@@ -67,6 +67,86 @@
         "subtitle": "Tham gia cộng đồng học tập suốt đời và làm chủ các kỹ năng mới theo tốc độ của riêng bạn. Tương lai của bạn bắt đầu từ đây."
     },
     "admin": {
+        "lessons": {
+            "title": "Quản lý Bài học",
+            "subtitle": "Tạo và quản lý các bài học tái sử dụng",
+            "new": "Bài học mới",
+            "emptyTitle": "Không tìm thấy bài học nào",
+            "emptyDesc": "Nhấn 'Bài học mới' để tạo.",
+            "badge": "Bài học",
+            "partsCount": "{{count}} Phần",
+            "created": "Ngày tạo",
+            "editInfo": "Sửa thông tin",
+            "manageContent": "Nội dung",
+            "deleteConfirm": "Bạn có chắc muốn xóa bài học này?",
+            "loadError": "Tải danh sách bài học thất bại",
+            "deleteError": "Xóa bài học thất bại",
+            "backToLessons": "Quay lại danh sách",
+            "editDetails": "Chỉnh sửa chi tiết",
+            "partsTitle": "Các phần nội dung",
+            "addPart": "Thêm phần",
+            "emptyParts": "Chưa có nội dung. Hãy thêm video hoặc tài liệu.",
+            "pdfDocument": "Tài liệu PDF",
+            "preview": "Xem trước",
+            "orderLabel": "Thứ tự: {{order}}",
+            "deletePartConfirm": "Bạn có chắc muốn xóa phần này?",
+            "loadLessonError": "Tải bài học thất bại",
+            "notFound": "Không tìm thấy bài học",
+            "form": {
+                "newTitle": "Bài học mới",
+                "editTitle": "Sửa bài học",
+                "title": "Tiêu đề",
+                "titlePlaceholder": "Tiêu đề bài học",
+                "description": "Mô tả",
+                "descriptionPlaceholder": "Mô tả bài học (Tùy chọn)",
+                "thumbnail": "Hình thu nhỏ",
+                "uploadThumbnail": "Tải ảnh lên",
+                "save": "Lưu bài học",
+                "saving": "Đang lưu...",
+                "fileSizeError": "Kích thước tệp quá lớn (>5MB)",
+                "uploadError": "Tải ảnh thất bại",
+                "titleRequired": "Vui lòng nhập tiêu đề",
+                "saveError": "Lưu thất bại"
+            },
+            "part": {
+                "addTitle": "Thêm phần",
+                "editTitle": "Sửa phần",
+                "title": "Tiêu đề",
+                "titlePlaceholder": "Tiêu đề phần",
+                "type": "Loại",
+                "allowPreview": "Cho phép xem thử (Miễn phí)",
+                "order": "Thứ tự",
+                "videoContent": "Nội dung Video",
+                "uploadingVideo": "Đang tải video...",
+                "docContent": "Nội dung tài liệu (PDF)",
+                "uploadingDoc": "Đang tải tài liệu...",
+                "docUploaded": "Đã tải lên: {{name}}",
+                "save": "Lưu phần",
+                "videoUploadError": "Tải video thất bại",
+                "docUploadError": "Tải tài liệu thất bại",
+                "titleRequired": "Vui lòng nhập tiêu đề",
+                "videoRequired": "Cần tải video lên cho loại Video",
+                "docRequired": "Cần tải tài liệu lên cho loại Tài liệu",
+                "saveError": "Lưu phần nội dung thất bại",
+                "detailsTitle": "Chi tiết",
+                "contentSourceTitle": "Nguồn nội dung",
+                "uploadVideoLabel": "Tải video lên",
+                "uploadPdfLabel": "Tải tài liệu PDF",
+                "previewTitle": "Xem trước",
+                "noVideoSelected": "Chưa chọn video",
+                "noDocumentAvailable": "Chưa có tài liệu",
+                "saveChanges": "Lưu thay đổi",
+                "backToLesson": "Quay lại bài học: {{title}}",
+                "previewNote": "Đây là giao diện hiển thị với học viên.",
+                "previewNoteDoc": "Lưu ý: Bạn có thể cần lưu và tải lại để xem tài liệu vừa tải lên."
+            },
+            "select": {
+                "title": "Chọn bài học để thêm",
+                "searchPlaceholder": "Tìm kiếm bài học...",
+                "empty": "Không tìm thấy bài học nào. Hãy tạo mới.",
+                "addButton": "Thêm {{count}} Bài học"
+            }
+        },
         "sidebar": {
             "dashboard": "Bảng điều khiển",
             "users": "Người dùng",
@@ -74,6 +154,7 @@
             "instructors": "Giảng viên",
             "agents": "Đại lý",
             "courses": "Khóa học",
+            "lessons": "Bài học",
             "revenue": "Doanh thu",
             "settings": "Cài đặt",
             "chat": "Quản lý Chat"
@@ -145,41 +226,31 @@
                 "premium": "Cao cấp"
             },
             "new": "Tạo khóa học",
-            "table": {
-                "title": "Tiêu đề",
-                "price": "Giá",
-                "sections": "Phần",
-                "status": "Trạng thái",
-                "created": "Ngày tạo",
-                "actions": "Thao tác",
-                "loading": "Đang tải...",
-                "noData": "Chưa có khóa học nào."
-            },
-            "status": {
-                "published": "Đã xuất bản",
-                "draft": "Bản nháp",
-                "free": "Miễn phí"
-            },
-            "buttons": {
-                "edit": "Sửa",
-                "delete": "Xóa"
-            },
             "form": {
-                "newTitle": "Tạo khóa học",
+                "newTitle": "Tạo khóa học mới",
                 "editTitle": "Chỉnh sửa khóa học",
-                "title": "Tiêu đề",
-                "thumbnail": "Ảnh thumbnail",
-                "price": "Giá",
+                "title": "Tên khóa học",
+                "price": "Giá (VND)",
                 "lecturer": "Giảng viên",
-                "lecturerSearchPlaceholder": "Tìm giảng viên theo tên hoặc email",
+                "lecturerSearchPlaceholder": "Tìm kiếm giảng viên...",
                 "lecturerSelectPlaceholder": "Chọn giảng viên",
-                "lecturerLoading": "Đang tải danh sách giảng viên...",
-                "lecturerEmpty": "Không tìm thấy giảng viên",
-                "lecturerHint": "Hiển thị tối đa 20 giảng viên. Dùng ô tìm kiếm để lọc.",
-                "selectedLecturerId": "Giảng viên đã chọn (ID: {{id}})",
+                "selectedLecturerId": "Đã chọn ID: {{id}}",
+                "thumbnail": "Hình đại diện",
+                "uploadThumbnail": "Tải ảnh lên",
                 "description": "Mô tả",
-                "free": "Khóa học miễn phí",
+                "free": "Miễn phí",
                 "published": "Xuất bản",
+                "cancel": "Hủy",
+                "save": "Lưu khóa học",
+                "lessonsTitle": "Chương trình học (Bài học)",
+                "addLessons": "Thêm bài học",
+                "noLessons": "Chưa có bài học nào được thêm vào khóa học này.",
+                "errors": {
+                    "fileSize": "Kích thước tệp quá lớn (>5MB)",
+                    "uploadFailed": "Tải ảnh thất bại",
+                    "title": "Vui lòng nhập tên khóa học",
+                    "saveFailed": "Lưu khóa học thất bại"
+                },
                 "curriculum": "Giáo trình",
                 "addSection": "Thêm phần",
                 "addLesson": "Thêm bài học",
@@ -201,14 +272,26 @@
                 "videoRequiredBeforeThumbnail": "Vui lòng tải video trước khi tải ảnh đại diện.",
                 "learningOutcomes": "Kết quả học tập",
                 "learningOutcomePlaceholder": "Ví dụ: Thành thạo React hooks...",
-                "addLearningOutcome": "Thêm kết quả",
-                "save": "Lưu khóa học",
-                "cancel": "Hủy",
-                "deleteConfirm": "Xóa khóa học này?",
-                "errors": {
-                    "title": "Vui lòng nhập tiêu đề",
-                    "uploadFailed": "Upload thất bại"
-                }
+                "addLearningOutcome": "Thêm kết quả"
+            },
+            "table": {
+                "title": "Tiêu đề",
+                "price": "Giá",
+                "sections": "Phần",
+                "status": "Trạng thái",
+                "created": "Ngày tạo",
+                "actions": "Thao tác",
+                "loading": "Đang tải...",
+                "noData": "Chưa có khóa học nào."
+            },
+            "status": {
+                "published": "Đã xuất bản",
+                "draft": "Bản nháp",
+                "free": "Miễn phí"
+            },
+            "buttons": {
+                "edit": "Sửa",
+                "delete": "Xóa"
             }
         },
         "users": {
@@ -417,6 +500,8 @@
     },
     "common": {
         "saving": "Đang lưu...",
+        "loading": "Đang tải...",
+        "cancel": "Hủy",
         "unnamed": "Người dùng chưa đặt tên",
         "backToList": "Quay lại danh sách"
     },
@@ -554,8 +639,13 @@
         "lessonsCompleted": "bài học đã hoàn thành",
         "curriculum": "Nội dung khóa học",
         "courseContent": "Nội dung khóa học",
-        "noVideo": "Không có video cho bài học này",
-        "noPdf": "Không có tài liệu",
+        "noVideo": "Video chưa sẵn sàng",
+        "noPdf": "Tài liệu chưa sẵn sàng",
+        "loadError": "Tải khóa học thất bại",
+        "markCompleteError": "Đánh dấu hoàn thành thất bại. Vui lòng thử lại.",
+        "contentNotFound": "Không tìm thấy nội dung khóa học",
+        "parts": "phần",
+        "minutes": "phút",
         "contentType": {
             "video": "Video",
             "document": "Tài liệu"

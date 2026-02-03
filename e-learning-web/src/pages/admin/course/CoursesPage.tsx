@@ -125,7 +125,7 @@ const CoursesPage: React.FC = () => {
                   )}
                   <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur dark:bg-slate-900/80 dark:text-slate-200">
                     <span className="material-symbols-outlined text-sm">category</span>
-                    <span>{course.sections.length} {t('courseDetail.sectionsCount')}</span>
+                    <span>{course.lessons?.length || 0} Lessons</span>
                   </div>
                 </Link>
 

@@ -330,64 +330,30 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.CourseLesson", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LessonId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("DocumentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Duration")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsPreview")
-                        .HasColumnType("bit");
-
                     b.Property<int>("OrderIndex")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("SectionId")
+                    b.Property<Guid?>("VideoId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("VideoId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
+                    b.HasKey("CourseId", "LessonId");
 
                     b.HasIndex("DocumentId");
 
-                    b.HasIndex("SectionId");
+                    b.HasIndex("LessonId");
 
                     b.HasIndex("VideoId");
 
                     b.ToTable("CourseLessons");
-                });
-
-            modelBuilder.Entity("SKVI.Domain.Entities.CourseSection", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("CourseSections");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Document", b =>
@@ -498,6 +464,76 @@ namespace e_learning_server.Migrations
                     b.ToTable("Leads");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.Lesson", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Lessons");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.LessonPart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("DocumentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsPreview")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("VideoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("LessonId");
+
+                    b.HasIndex("VideoId");
+
+                    b.ToTable("LessonParts");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.LessonProgress", b =>
                 {
                     b.Property<Guid>("Id")
@@ -506,9 +542,6 @@ namespace e_learning_server.Migrations
 
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CourseLessonId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("EnrollmentId")
                         .HasColumnType("uniqueidentifier");
@@ -519,7 +552,7 @@ namespace e_learning_server.Migrations
                     b.Property<DateTime>("LastWatchedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("LessonId")
+                    b.Property<Guid>("LessonPartId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("WatchedDuration")
@@ -527,11 +560,11 @@ namespace e_learning_server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseLessonId");
-
                     b.HasIndex("EnrollmentId");
 
-                    b.HasIndex("EnrollmentId", "LessonId")
+                    b.HasIndex("LessonPartId");
+
+                    b.HasIndex("EnrollmentId", "LessonPartId")
                         .IsUnique();
 
                     b.ToTable("LessonProgresses");
@@ -969,38 +1002,29 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.CourseLesson", b =>
                 {
-                    b.HasOne("SKVI.Domain.Entities.Document", "Document")
-                        .WithMany("CourseLessons")
-                        .HasForeignKey("DocumentId");
-
-                    b.HasOne("SKVI.Domain.Entities.CourseSection", "Section")
-                        .WithMany("CourseLessons")
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SKVI.Domain.Entities.Video", "Video")
-                        .WithMany("CourseLessons")
-                        .HasForeignKey("VideoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Document");
-
-                    b.Navigation("Section");
-
-                    b.Navigation("Video");
-                });
-
-            modelBuilder.Entity("SKVI.Domain.Entities.CourseSection", b =>
-                {
                     b.HasOne("SKVI.Domain.Entities.Course", "Course")
-                        .WithMany("CourseSections")
+                        .WithMany("CourseLessons")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SKVI.Domain.Entities.Document", null)
+                        .WithMany("CourseLessons")
+                        .HasForeignKey("DocumentId");
+
+                    b.HasOne("SKVI.Domain.Entities.Lesson", "Lesson")
+                        .WithMany("CourseLessons")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.Video", null)
+                        .WithMany("CourseLessons")
+                        .HasForeignKey("VideoId");
+
                     b.Navigation("Course");
+
+                    b.Navigation("Lesson");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Enrollment", b =>
@@ -1039,19 +1063,46 @@ namespace e_learning_server.Migrations
                     b.Navigation("AssignedCare");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.LessonPart", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId");
+
+                    b.HasOne("SKVI.Domain.Entities.Lesson", "Lesson")
+                        .WithMany("LessonParts")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.Video", "Video")
+                        .WithMany()
+                        .HasForeignKey("VideoId");
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("Video");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.LessonProgress", b =>
                 {
-                    b.HasOne("SKVI.Domain.Entities.CourseLesson", null)
-                        .WithMany("LessonProgresses")
-                        .HasForeignKey("CourseLessonId");
-
                     b.HasOne("SKVI.Domain.Entities.Enrollment", "Enrollment")
                         .WithMany("LessonProgress")
                         .HasForeignKey("EnrollmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SKVI.Domain.Entities.LessonPart", "LessonPart")
+                        .WithMany("LessonProgresses")
+                        .HasForeignKey("LessonPartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Enrollment");
+
+                    b.Navigation("LessonPart");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Message", b =>
@@ -1167,21 +1218,11 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.Course", b =>
                 {
-                    b.Navigation("CourseSections");
+                    b.Navigation("CourseLessons");
 
                     b.Navigation("Enrollments");
 
                     b.Navigation("OrderItems");
-                });
-
-            modelBuilder.Entity("SKVI.Domain.Entities.CourseLesson", b =>
-                {
-                    b.Navigation("LessonProgresses");
-                });
-
-            modelBuilder.Entity("SKVI.Domain.Entities.CourseSection", b =>
-                {
-                    b.Navigation("CourseLessons");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Document", b =>
@@ -1197,6 +1238,18 @@ namespace e_learning_server.Migrations
             modelBuilder.Entity("SKVI.Domain.Entities.Lead", b =>
                 {
                     b.Navigation("CareNotes");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.Lesson", b =>
+                {
+                    b.Navigation("CourseLessons");
+
+                    b.Navigation("LessonParts");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.LessonPart", b =>
+                {
+                    b.Navigation("LessonProgresses");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Order", b =>

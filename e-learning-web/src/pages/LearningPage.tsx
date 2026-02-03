@@ -4,9 +4,16 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { courseApi, type CourseResponse } from '../services/courseApi';
 import { enrollmentApi, type CourseProgressResponse } from '../services/enrollmentApi';
+import { type LessonPartDto } from '../services/lessonApi';
 import SecureVideoPlayer from '../components/SecureVideoPlayer';
 import PdfViewer from '../components/PdfViewer';
 import { useTranslation } from 'react-i18next';
+
+interface FlatLessonPart extends LessonPartDto {
+    lessonId: string;
+    lessonTitle: string;
+    globalIndex: number;
+}
 
 const LearningPage: React.FC = () => {
     const { t } = useTranslation();
@@ -16,24 +23,38 @@ const LearningPage: React.FC = () => {
 
     const [course, setCourse] = useState<CourseResponse | null>(null);
     const [progress, setProgress] = useState<CourseProgressResponse | null>(null);
-    const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
+    const [currentPartIndex, setCurrentPartIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isMarkingComplete, setIsMarkingComplete] = useState(false);
-    const [contentType, setContentType] = useState<'video' | 'document'>('video');
-    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+
+    // Expand lessons in sidebar
+    const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
 
     const progressSaveInterval = useRef<number | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
-    // Get all lessons flat list
-    const allLessons = course?.sections.flatMap(s => s.lessons.map(l => ({
-        ...l,
-        sectionId: s.id,
-        sectionTitle: s.title
-    }))) || [];
+    // Flatten all parts for easy navigation
+    const allParts = React.useMemo(() => {
+        if (!course?.lessons) return [] as FlatLessonPart[];
+        let parts: FlatLessonPart[] = [];
+        let globalIdx = 0;
+        course.lessons.forEach(lesson => {
+            if (lesson.parts) {
+                lesson.parts.forEach(part => {
+                    parts.push({
+                        ...part,
+                        lessonId: lesson.id,
+                        lessonTitle: lesson.title,
+                        globalIndex: globalIdx++
+                    });
+                });
+            }
+        });
+        return parts;
+    }, [course]);
 
-    const currentLesson = allLessons[currentLessonIndex];
+    const currentPart = allParts[currentPartIndex];
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -54,19 +75,49 @@ const LearningPage: React.FC = () => {
                 setCourse(courseData);
                 setProgress(progressData);
 
-                // Expand all sections by default
-                const sectionIds = new Set(courseData.sections.map(s => s.id || ''));
-                setExpandedSections(sectionIds);
+                // Expand all lessons by default
+                if (courseData.lessons) {
+                    setExpandedLessons(new Set(courseData.lessons.map(l => l.id)));
+                }
 
-                // Find last watched lesson or start from beginning
-                const lastWatchedIndex = progressData.lessonProgress
-                    .map((lp, idx) => ({ ...lp, idx }))
-                    .filter(lp => !lp.isCompleted && lp.watchedDuration > 0)
-                    .sort((a, b) => new Date(b.lastWatchedAt).getTime() - new Date(a.lastWatchedAt).getTime())[0]?.idx || 0;
+                // Find last watched part or start from beginning
+                let lastWatchedIndex = 0;
+                if (progressData && progressData.partProgress && progressData.partProgress.length > 0) {
+                    // Filter uncompleted parts that have some progress
+                    const inProgress = progressData.partProgress
+                        .filter(p => !p.isCompleted && p.watchedDuration > 0)
+                        .sort((a, b) => new Date(b.lastWatchedAt).getTime() - new Date(a.lastWatchedAt).getTime());
 
-                setCurrentLessonIndex(lastWatchedIndex);
+                    if (inProgress.length > 0) {
+                        const targetId = inProgress[0].lessonPartId;
+                        // Find index in allParts (re-calculated locally if needed, but we don't have allParts here yet as it depends on course state)
+                        // Better to do this in a separate effect or after setCourse?
+                        // But we need allParts derived from courseData right now.
+
+                        // Re-derive flattened parts temporarily
+                        let idx = 0;
+                        let found = -1;
+                        if (courseData.lessons) {
+                            for (const l of courseData.lessons) {
+                                if (l.parts) {
+                                    for (const p of l.parts) {
+                                        if (p.id === targetId) {
+                                            found = idx;
+                                            break;
+                                        }
+                                        idx++;
+                                    }
+                                }
+                                if (found !== -1) break;
+                            }
+                        }
+                        if (found !== -1) lastWatchedIndex = found;
+                    }
+                }
+
+                setCurrentPartIndex(lastWatchedIndex);
             } catch (err: any) {
-                setError(err.message || 'Failed to load course');
+                setError(err.message || t('learn.loadError'));
                 if (err.message.includes('Enrollment not found') || err.message.includes('Not Found')) {
                     setTimeout(() => navigate(`/courses/${id}`), 2000);
                 }
@@ -80,13 +131,13 @@ const LearningPage: React.FC = () => {
 
     // Auto-save progress every 10 seconds
     useEffect(() => {
-        if (!id || !currentLesson || !videoRef.current) return;
+        if (!id || !currentPart || !videoRef.current || currentPart.type !== 'Video') return;
 
         progressSaveInterval.current = window.setInterval(async () => {
             const video = videoRef.current;
-            if (video && !video.paused && id && currentLesson?.id) {
+            if (video && !video.paused && id && currentPart?.id) {
                 try {
-                    await enrollmentApi.updateLessonProgress(id, currentLesson.id, Math.floor(video.currentTime));
+                    await enrollmentApi.updateLessonProgress(id, currentPart.id, Math.floor(video.currentTime));
                 } catch (err) {
                     console.error('Failed to save progress:', err);
                 }
@@ -98,20 +149,7 @@ const LearningPage: React.FC = () => {
                 clearInterval(progressSaveInterval.current);
             }
         };
-    }, [id, currentLesson]);
-
-    // Auto-select content type
-    useEffect(() => {
-        if (!currentLesson) return;
-
-        if (currentLesson.videoId && currentLesson.documentId) {
-            setContentType('video');
-        } else if (currentLesson.videoId) {
-            setContentType('video');
-        } else if (currentLesson.documentId) {
-            setContentType('document');
-        }
-    }, [currentLessonIndex]);
+    }, [id, currentPart]);
 
     // Update last accessed
     useEffect(() => {
@@ -123,33 +161,34 @@ const LearningPage: React.FC = () => {
     }, [id]);
 
     const handleMarkComplete = async () => {
-        if (!id || !currentLesson?.id || isMarkingComplete) return;
+        if (!id || !currentPart?.id || isMarkingComplete) return;
 
         try {
             setIsMarkingComplete(true);
-            await enrollmentApi.markLessonComplete(id, currentLesson.id);
+            await enrollmentApi.markLessonComplete(id, currentPart.id);
 
             const newProgress = await enrollmentApi.getCourseProgress(id);
             setProgress(newProgress);
 
-            if (currentLessonIndex < allLessons.length - 1) {
-                setTimeout(() => setCurrentLessonIndex(prev => prev + 1), 500);
+            // Auto-advance after progress is updated
+            if (currentPartIndex < allParts.length - 1) {
+                setCurrentPartIndex(prev => prev + 1);
             }
         } catch (err) {
             console.error('Failed to mark lesson complete:', err);
-            alert('Failed to mark lesson as complete. Please try again.');
+            alert(t('learn.markCompleteError'));
         } finally {
             setIsMarkingComplete(false);
         }
     };
 
-    const toggleSection = (sectionId: string) => {
-        setExpandedSections(prev => {
+    const toggleLesson = (lessonId: string) => {
+        setExpandedLessons(prev => {
             const newSet = new Set(prev);
-            if (newSet.has(sectionId)) {
-                newSet.delete(sectionId);
+            if (newSet.has(lessonId)) {
+                newSet.delete(lessonId);
             } else {
-                newSet.add(sectionId);
+                newSet.add(lessonId);
             }
             return newSet;
         });
@@ -166,12 +205,12 @@ const LearningPage: React.FC = () => {
         );
     }
 
-    if (error || !course || !currentLesson) {
+    if (error || !course || !currentPart) {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center">
                     <span className="material-symbols-outlined text-6xl text-red-500 mb-4">error</span>
-                    <p className="text-red-500 mb-4">{error || 'Course not found'}</p>
+                    <p className="text-red-500 mb-4">{error || t('learn.contentNotFound')}</p>
                     <button
                         onClick={() => navigate(`/courses/${id}`)}
                         className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90"
@@ -183,10 +222,12 @@ const LearningPage: React.FC = () => {
         );
     }
 
-    const lessonProgress = progress?.lessonProgress.find(lp => lp.lessonId === currentLesson.id);
-    const isCurrentLessonCompleted = lessonProgress?.isCompleted || false;
-    const completedCount = progress?.lessonProgress.filter(lp => lp.isCompleted).length || 0;
-    const progressPercentage = Math.round((completedCount / allLessons.length) * 100);
+    const currentPartProgress = progress?.partProgress?.find(p => p.lessonPartId === currentPart.id);
+    const isCurrentPartCompleted = currentPartProgress?.isCompleted || false;
+    const completedCount = progress?.partProgress?.filter(p => p.isCompleted).length || 0;
+    const progressPercentage = allParts.length > 0 ? Math.round((completedCount / allParts.length) * 100) : 0;
+
+    console.log('DEBUG: currentPart', currentPart); // Debug log
 
     return (
         <div className="min-h-screen bg-white flex">
@@ -210,7 +251,7 @@ const LearningPage: React.FC = () => {
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-600">{t('learn.progress')}</span>
-                            <span className="text-primary font-medium">{completedCount}/{allLessons.length}</span>
+                            <span className="text-primary font-medium">{completedCount}/{allParts.length}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
@@ -222,29 +263,29 @@ const LearningPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Current Lesson Info */}
+                {/* Current Content Info */}
                 <div className="p-6 bg-white border-b border-gray-200">
                     <div className="mb-3">
-                        <p className="text-xs text-gray-500 mb-1">{currentLesson.sectionTitle}</p>
-                        <h2 className="text-base font-bold text-gray-900">{currentLesson.title}</h2>
+                        <p className="text-xs text-gray-500 mb-1">{currentPart.lessonTitle}</p>
+                        <h2 className="text-base font-bold text-gray-900">{currentPart.title}</h2>
                         <p className="text-xs text-gray-500 mt-1">
-                            {t('learn.lesson')} {currentLessonIndex + 1} / {allLessons.length}
+                            {t('learn.lesson')} {currentPartIndex + 1} / {allParts.length}
                         </p>
                     </div>
 
                     {/* Navigation Buttons */}
                     <div className="flex gap-2 mb-3">
                         <button
-                            onClick={() => setCurrentLessonIndex(prev => Math.max(0, prev - 1))}
-                            disabled={currentLessonIndex === 0}
+                            onClick={() => setCurrentPartIndex(prev => Math.max(0, prev - 1))}
+                            disabled={currentPartIndex === 0}
                             className="flex-1 px-3 py-2 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 text-sm"
                         >
                             <span className="material-symbols-outlined text-lg">arrow_back</span>
                             {t('learn.previous')}
                         </button>
                         <button
-                            onClick={() => setCurrentLessonIndex(prev => Math.min(allLessons.length - 1, prev + 1))}
-                            disabled={currentLessonIndex === allLessons.length - 1}
+                            onClick={() => setCurrentPartIndex(prev => Math.min(allParts.length - 1, prev + 1))}
+                            disabled={currentPartIndex === allParts.length - 1}
                             className="flex-1 px-3 py-2 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1 text-sm"
                         >
                             {t('learn.next')}
@@ -255,10 +296,10 @@ const LearningPage: React.FC = () => {
                     {/* Mark Complete Button */}
                     <button
                         onClick={handleMarkComplete}
-                        disabled={isCurrentLessonCompleted || isMarkingComplete}
+                        disabled={isCurrentPartCompleted || isMarkingComplete}
                         className="w-full px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm font-medium"
                     >
-                        {isCurrentLessonCompleted ? (
+                        {isCurrentPartCompleted ? (
                             <>
                                 <span className="material-symbols-outlined text-lg">check_circle</span>
                                 {t('learn.completed')}
@@ -272,42 +313,46 @@ const LearningPage: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Curriculum */}
+                {/* Curriculum / Playlist */}
                 <div className="flex-1 overflow-y-auto">
                     <div className="p-4">
                         <h3 className="text-sm font-semibold text-gray-900 mb-3 px-2">{t('learn.curriculum')}</h3>
 
                         <div className="space-y-2">
-                            {course.sections.map((section, sectionIdx) => {
-                                const sectionId = section.id || `section-${sectionIdx}`;
-                                const isExpanded = expandedSections.has(sectionId);
+                            {course.lessons?.map((lesson, lessonIdx) => {
+                                const lessonId = lesson.id || `lesson-${lessonIdx}`;
+                                const isExpanded = expandedLessons.has(lessonId);
+
+                                // Check if any part in this lesson is current
+                                const hasCurrentPart = lesson.parts?.some(p => p.id === currentPart.id);
 
                                 return (
-                                    <div key={sectionId} className="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                                        {/* Section Header */}
+                                    <div key={lessonId} className={`border rounded-lg overflow-hidden bg-white ${hasCurrentPart ? 'border-primary/30' : 'border-gray-200'}`}>
+                                        {/* Lesson Header */}
                                         <button
-                                            onClick={() => toggleSection(sectionId)}
+                                            onClick={() => toggleLesson(lessonId)}
                                             className="w-full px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-left"
                                         >
-                                            <span className="font-medium text-sm text-gray-900">{section.title}</span>
+                                            <span className="font-medium text-sm text-gray-900 line-clamp-1">{lesson.title}</span>
                                             <span className="material-symbols-outlined text-gray-500 text-lg">
                                                 {isExpanded ? 'expand_less' : 'expand_more'}
                                             </span>
                                         </button>
 
-                                        {/* Lessons */}
-                                        {isExpanded && (
+                                        {/* Parts */}
+                                        {isExpanded && lesson.parts && (
                                             <div className="bg-white">
-                                                {section.lessons.map((lesson) => {
-                                                    const globalIdx = allLessons.findIndex(l => l.id === lesson.id);
-                                                    const lessonProg = progress?.lessonProgress.find(lp => lp.lessonId === lesson.id);
-                                                    const isCompleted = lessonProg?.isCompleted || false;
-                                                    const isCurrent = globalIdx === currentLessonIndex;
+                                                {lesson.parts.map((part) => {
+                                                    // Find index in global allParts
+                                                    const globalIdx = allParts.findIndex(p => p.id === part.id);
+                                                    const partProg = progress?.partProgress?.find(p => p.lessonPartId === part.id);
+                                                    const isCompleted = partProg?.isCompleted || false;
+                                                    const isCurrent = globalIdx === currentPartIndex;
 
                                                     return (
                                                         <button
-                                                            key={lesson.id}
-                                                            onClick={() => setCurrentLessonIndex(globalIdx)}
+                                                            key={part.id}
+                                                            onClick={() => setCurrentPartIndex(globalIdx)}
                                                             className={`w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-50 transition-colors border-t border-gray-100 ${isCurrent ? 'bg-blue-50 border-l-4 border-l-primary' : ''
                                                                 }`}
                                                         >
@@ -317,25 +362,24 @@ const LearningPage: React.FC = () => {
                                                                 {isCompleted ? 'check_circle' : 'radio_button_unchecked'}
                                                             </span>
 
-                                                            {/* Lesson Info */}
+                                                            {/* Part Info */}
                                                             <div className="flex-1 text-left min-w-0">
                                                                 <p className={`text-xs font-medium truncate ${isCurrent ? 'text-primary' : 'text-gray-900'
                                                                     }`}>
-                                                                    {lesson.title}
+                                                                    {part.title}
                                                                 </p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    {Math.floor(lesson.duration / 60)}:{String(lesson.duration % 60).padStart(2, '0')}
-                                                                </p>
+                                                                {part.type === 'Video' && part.videoDuration && (
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {Math.floor(part.videoDuration / 60)}:{String(part.videoDuration % 60).padStart(2, '0')}
+                                                                    </p>
+                                                                )}
                                                             </div>
 
-                                                            {/* Content Type Icons */}
-                                                            <div className="flex gap-1 flex-shrink-0">
-                                                                {lesson.videoId && (
-                                                                    <span className="material-symbols-outlined text-sm text-gray-400">play_circle</span>
-                                                                )}
-                                                                {lesson.documentUrl && (
-                                                                    <span className="material-symbols-outlined text-sm text-gray-400">description</span>
-                                                                )}
+                                                            {/* Type Icon */}
+                                                            <div className="flex-shrink-0">
+                                                                <span className="material-symbols-outlined text-sm text-gray-400">
+                                                                    {part.type === 'Video' ? 'play_circle' : 'description'}
+                                                                </span>
                                                             </div>
                                                         </button>
                                                     );
@@ -352,42 +396,12 @@ const LearningPage: React.FC = () => {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col bg-white overflow-hidden">
-                {/* Content Type Tabs */}
-                {currentLesson.videoId && currentLesson.documentUrl && (
-                    <div className="flex gap-2 border-b border-gray-200 bg-white px-6">
-                        <button
-                            onClick={() => setContentType('video')}
-                            className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${contentType === 'video'
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-gray-600 hover:text-gray-900'
-                                }`}
-                        >
-                            <span className="flex items-center gap-2">
-                                <span className="material-symbols-outlined text-lg">play_circle</span>
-                                {t('learn.contentType.video')}
-                            </span>
-                        </button>
-                        <button
-                            onClick={() => setContentType('document')}
-                            className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${contentType === 'document'
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-gray-600 hover:text-gray-900'
-                                }`}
-                        >
-                            <span className="flex items-center gap-2">
-                                <span className="material-symbols-outlined text-lg">description</span>
-                                {t('learn.contentType.document')}
-                            </span>
-                        </button>
-                    </div>
-                )}
-
                 {/* Video/PDF Player */}
                 <div className="flex-1 bg-black flex items-center justify-center">
-                    {contentType === 'video' ? (
-                        currentLesson.videoId ? (
+                    {currentPart.type === 'Video' ? (
+                        currentPart.videoId ? (
                             <SecureVideoPlayer
-                                videoId={currentLesson.videoId}
+                                videoId={currentPart.videoId}
                                 ref={videoRef}
                                 className="w-full h-full"
                             />
@@ -398,8 +412,8 @@ const LearningPage: React.FC = () => {
                             </div>
                         )
                     ) : (
-                        currentLesson.documentUrl ? (
-                            <PdfViewer documentUrl={currentLesson.documentUrl} className="w-full h-full" />
+                        currentPart.documentUrl ? (
+                            <PdfViewer documentUrl={currentPart.documentUrl} className="w-full h-full" />
                         ) : (
                             <div className="text-center">
                                 <span className="material-symbols-outlined text-6xl text-gray-600 mb-4">description</span>

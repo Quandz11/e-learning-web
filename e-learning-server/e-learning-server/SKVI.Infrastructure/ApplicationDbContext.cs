@@ -23,7 +23,8 @@ public class ApplicationDbContext : DbContext
 
     // Course
     public DbSet<Course> Courses { get; set; }
-    public DbSet<CourseSection> CourseSections { get; set; }
+    public DbSet<Lesson> Lessons { get; set; }
+    public DbSet<LessonPart> LessonParts { get; set; }
     public DbSet<CourseLesson> CourseLessons { get; set; }
     public DbSet<Video> Videos { get; set; }
     public DbSet<Document> Documents { get; set; }
@@ -94,8 +95,8 @@ public class ApplicationDbContext : DbContext
 
         // LessonProgress - Composite index for fast lookup
         modelBuilder.Entity<LessonProgress>()
-            .HasIndex(lp => new { lp.EnrollmentId, lp.LessonId })
-            .IsUnique(); // One progress entry per lesson per enrollment
+            .HasIndex(lp => new { lp.EnrollmentId, lp.LessonPartId })
+            .IsUnique(); // One progress entry per lesson part per enrollment
             
         modelBuilder.Entity<LessonProgress>()
             .HasIndex(lp => lp.EnrollmentId); // Fast lookup of all lesson progress for enrollment
@@ -139,6 +140,20 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<CommissionRule>()
             .Property(c => c.Rate)
             .HasColumnType("decimal(5,2)");
+            
+        // Course-Lesson (Many-to-Many)
+        modelBuilder.Entity<CourseLesson>()
+            .HasKey(cl => new { cl.CourseId, cl.LessonId });
+            
+        modelBuilder.Entity<CourseLesson>()
+            .HasOne(cl => cl.Course)
+            .WithMany(c => c.CourseLessons)
+            .HasForeignKey(cl => cl.CourseId);
+
+        modelBuilder.Entity<CourseLesson>()
+            .HasOne(cl => cl.Lesson)
+            .WithMany(l => l.CourseLessons)
+            .HasForeignKey(cl => cl.LessonId);
             
         // Relationships configuration to prevent cycles
         

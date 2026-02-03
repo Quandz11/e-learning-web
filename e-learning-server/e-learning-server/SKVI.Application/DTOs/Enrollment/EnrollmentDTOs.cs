@@ -28,8 +28,8 @@ public class CourseProgressResponse
 
 public class LessonProgressDto
 {
-    public required string LessonId { get; set; }
-    public required string LessonTitle { get; set; }
+    public required string LessonPartId { get; set; }
+    public required string LessonPartTitle { get; set; }
     public bool IsCompleted { get; set; }
     public int WatchedDuration { get; set; }
     public DateTime? CompletedAt { get; set; }

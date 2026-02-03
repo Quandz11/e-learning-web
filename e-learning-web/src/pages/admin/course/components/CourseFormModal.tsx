@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { courseApi, type CourseInput, type CourseResponse, type CourseSectionInput, type CourseLessonInput } from '../../../../services/courseApi';
-import { documentApi } from '../../../../services/documentApi';
+import { courseApi, type CourseInput, type CourseResponse } from '../../../../services/courseApi';
 import { userApi, type UserDto } from '../../../../services/userApi';
+import { type LessonDto } from '../../../../services/lessonApi';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../../store/store';
-import SecureVideoPlayer from '../../../../components/SecureVideoPlayer';
+import SelectLessonModal from './SelectLessonModal';
 
 interface CourseFormModalProps {
     isOpen: boolean;
@@ -14,20 +14,6 @@ interface CourseFormModalProps {
     courseId?: string | null;
     initialData?: CourseResponse | null;
 }
-
-const emptyLesson = (orderIndex: number): CourseLessonInput => ({
-    title: 'New lesson',
-    duration: 0,
-    orderIndex,
-    isPreview: false,
-    videoId: '',
-});
-
-const emptySection = (orderIndex: number): CourseSectionInput => ({
-    title: 'New section',
-    orderIndex,
-    lessons: [emptyLesson(1)],
-});
 
 const initialCourse = (lecturerId: string | undefined): CourseInput => ({
     title: '',
@@ -38,7 +24,7 @@ const initialCourse = (lecturerId: string | undefined): CourseInput => ({
     thumbnailUrl: '',
     isPublished: false,
     learningOutcomes: [],
-    sections: [emptySection(1)],
+    lessonIds: [],
 });
 
 const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSuccess, courseId, initialData }) => {
@@ -47,12 +33,25 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [form, setForm] = useState<CourseInput>(initialCourse(user?.id));
+
+    // Form State
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [price, setPrice] = useState(0);
+    const [isFree, setIsFree] = useState(false);
+    const [lecturerId, setLecturerId] = useState('');
+    const [thumbnailUrl, setThumbnailUrl] = useState('');
+    const [isPublished, setIsPublished] = useState(false);
+    const [learningOutcomes, setLearningOutcomes] = useState<string[]>([]);
+
+    // Lessons State
+    const [selectedLessons, setSelectedLessons] = useState<LessonDto[]>([]);
+    const [showSelectLessonModal, setShowSelectLessonModal] = useState(false);
+
+    // Data Loading State
     const [lecturers, setLecturers] = useState<UserDto[]>([]);
     const [lecturerSearch, setLecturerSearch] = useState('');
     const [lecturerLoading, setLecturerLoading] = useState(false);
-    const [videoThumbnailUploading, setVideoThumbnailUploading] = useState<Record<string, boolean>>({});
-    const [pdfUploading, setPdfUploading] = useState<Record<string, boolean>>({});
     const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
     const thumbnailInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -71,7 +70,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
             setUploadingThumbnail(true);
             setError(null);
             const { url } = await courseApi.uploadThumbnail(file);
-            setForm((prev) => ({ ...prev, thumbnailUrl: url }));
+            setThumbnailUrl(url);
         } catch (err: any) {
             setError(err.message || t('admin.courses.form.errors.uploadFailed'));
         } finally {
@@ -87,41 +86,26 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
         if (isOpen) {
             setError(null);
             if (initialData) {
-                // Map CourseResponse to CourseInput
-                setForm({
-                    title: initialData.title,
-                    description: initialData.description,
-                    price: initialData.price,
-                    isFree: initialData.isFree,
-                    lecturerId: initialData.lecturerId,
-                    thumbnailUrl: initialData.thumbnailUrl,
-                    isPublished: initialData.isPublished,
-                    sections: initialData.sections.map((s) => ({
-                        id: s.id,
-                        title: s.title,
-                        orderIndex: s.orderIndex,
-                        lessons: s.lessons.map((l) => ({
-                            id: l.id,
-                            title: l.title,
-                            duration: l.duration,
-                            orderIndex: l.orderIndex,
-                            isPreview: l.isPreview,
-                            videoId: l.videoId,
-                            playbackUrl: l.playbackUrl,
-                            documentId: l.documentId,
-                            documentUrl: l.documentUrl,
-                            documentFileName: l.documentFileName,
-                        })),
-                    })),
-                    learningOutcomes: initialData.learningOutcomes || [],
-                });
-            } else if (courseId) {
-                // TODO: If only ID is passed, fetch data? 
-                // For now we assume initialData is passed if editing, or we reset if not.
-                // If courseId is present but no initialData, we might want to fetch. 
-                // But current usage in CoursesPage passes data.
+                setTitle(initialData.title);
+                setDescription(initialData.description || '');
+                setPrice(initialData.price);
+                setIsFree(initialData.isFree);
+                setLecturerId((initialData.lecturerId as any)?.id || initialData.lecturerId as unknown as string || '');
+                setThumbnailUrl(initialData.thumbnailUrl || '');
+                setIsPublished(initialData.isPublished);
+                setLearningOutcomes(initialData.learningOutcomes || []);
+                setSelectedLessons(initialData.lessons || []);
             } else {
-                setForm(initialCourse(currentUserLecturerId));
+                // Reset form
+                setTitle('');
+                setDescription('');
+                setPrice(0);
+                setIsFree(false);
+                setLecturerId(currentUserLecturerId);
+                setThumbnailUrl('');
+                setIsPublished(false);
+                setLearningOutcomes([]);
+                setSelectedLessons([]);
             }
             setLecturerSearch('');
         }
@@ -138,7 +122,6 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                     setLecturers(res.items);
                 } catch (err: any) {
                     console.error(err);
-                    // Silent error or small notification
                 } finally {
                     setLecturerLoading(false);
                 }
@@ -149,18 +132,27 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
     }, [lecturerSearch, isOpen]);
 
     const handleSave = async () => {
-        if (!form.title.trim()) {
+        if (!title.trim()) {
             setError(t('admin.courses.form.errors.title'));
             return;
         }
-        if (!form.lecturerId) {
+        if (!lecturerId) {
+            // If lecturerId prop from initialData was an object (LecturerInfo), we need to extract ID. 
+            // In init, we tried to handle it.
             setError(t('admin.courses.form.errors.lecturer'));
             return;
         }
 
         const payload: CourseInput = {
-            ...form,
-            price: form.isFree ? 0 : form.price,
+            title,
+            description,
+            price: isFree ? 0 : price,
+            isFree,
+            lecturerId,
+            thumbnailUrl,
+            isPublished,
+            learningOutcomes,
+            lessonIds: selectedLessons.map(l => l.id)
         };
 
         try {
@@ -180,133 +172,27 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
         }
     };
 
-    const updateSection = (index: number, data: Partial<CourseSectionInput>) => {
-        setForm((prev) => {
-            const sections = [...prev.sections];
-            sections[index] = { ...sections[index], ...data };
-            return { ...prev, sections };
-        });
+    const handleAddLessons = (newLessons: LessonDto[]) => {
+        // Add only ones that aren't already there? The modal filters them out, but safe to check
+        const currentIds = new Set(selectedLessons.map(l => l.id));
+        const toAdd = newLessons.filter(l => !currentIds.has(l.id));
+        setSelectedLessons([...selectedLessons, ...toAdd]);
     };
 
-    const updateLesson = (sectionIndex: number, lessonIndex: number, data: Partial<CourseLessonInput>) => {
-        setForm((prev) => {
-            const sections = [...prev.sections];
-            const lessons = [...sections[sectionIndex].lessons];
-            lessons[lessonIndex] = { ...lessons[lessonIndex], ...data } as CourseLessonInput;
-            sections[sectionIndex] = { ...sections[sectionIndex], lessons };
-            return { ...prev, sections };
-        });
+    const removeLesson = (index: number) => {
+        const newLessons = [...selectedLessons];
+        newLessons.splice(index, 1);
+        setSelectedLessons(newLessons);
     };
 
-    const addSection = () => {
-        setForm((prev) => ({
-            ...prev,
-            sections: [...prev.sections, emptySection(prev.sections.length + 1)],
-        }));
-    };
+    const moveLesson = (index: number, direction: 'up' | 'down') => {
+        if (direction === 'up' && index === 0) return;
+        if (direction === 'down' && index === selectedLessons.length - 1) return;
 
-    const addLesson = (sectionIndex: number) => {
-        setForm((prev) => {
-            const sections = [...prev.sections];
-            const lessons = [...sections[sectionIndex].lessons, emptyLesson(sections[sectionIndex].lessons.length + 1)];
-            sections[sectionIndex] = { ...sections[sectionIndex], lessons };
-            return { ...prev, sections };
-        });
-    };
-
-    const handleUpload = async (sectionIndex: number, lessonIndex: number, file?: File | null) => {
-        if (!file) return;
-        try {
-            setLoading(true);
-            const lesson = form.sections[sectionIndex].lessons[lessonIndex];
-            const res = await courseApi.uploadVideo(file, lesson.title);
-            updateLesson(sectionIndex, lessonIndex, { videoId: res.videoId, playbackUrl: res.playlistUrl, duration: res.duration });
-        } catch (err: any) {
-            setError(err.message || t('admin.courses.form.errors.uploadFailed'));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const syncDuration = async (sectionIndex: number, lessonIndex: number, videoId: string) => {
-        if (!videoId) return;
-        try {
-            setLoading(true); // Or use a specific loading state for sync
-            const res = await courseApi.syncVideoDuration(videoId);
-            updateLesson(sectionIndex, lessonIndex, { duration: res.duration });
-        } catch (err: any) {
-            console.error('Failed to sync duration:', err);
-            // Optional: show toast/error
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Auto-sync duration for videos with 0 duration when modal opens or initial data loads
-    useEffect(() => {
-        if (!isOpen || !form.sections) return;
-
-        const syncNeededLessons: { sIdx: number; lIdx: number; videoId: string }[] = [];
-        form.sections.forEach((section, sIdx) => {
-            section.lessons.forEach((lesson, lIdx) => {
-                if (lesson.videoId && (lesson.duration === 0 || !lesson.duration)) {
-                    syncNeededLessons.push({ sIdx, lIdx, videoId: lesson.videoId });
-                }
-            });
-        });
-
-        if (syncNeededLessons.length > 0) {
-            // Processing sequentially to avoid race conditions or API flooding (though parallel is fine for few)
-            // Using a small delay or just firing them
-            syncNeededLessons.forEach(({ sIdx, lIdx, videoId }) => {
-                void syncDuration(sIdx, lIdx, videoId);
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, initialData]); // Run once when opening/data loaded. 
-    // Ideally we track if we already synced to avoid loops, but checking duration === 0 is safe enough unless it stays 0.
-
-    const handleVideoThumbnailUpload = async (sectionIndex: number, lessonIndex: number, file?: File | null) => {
-        if (!file) return;
-        const lesson = form.sections[sectionIndex].lessons[lessonIndex];
-        if (!lesson.videoId) {
-            setError(t('admin.courses.form.errors.videoRequiredBeforeThumbnail', { defaultValue: 'Upload video before setting a thumbnail.' }));
-            return;
-        }
-
-        const key = `${sectionIndex}-${lessonIndex}`;
-        try {
-            setVideoThumbnailUploading((prev) => ({ ...prev, [key]: true }));
-            setError(null);
-            await courseApi.uploadVideoThumbnail(lesson.videoId, file);
-            // Optional: Update UI to show success or new thumbnail URL if API returned it (currently it just uploads to Bunny)
-        } catch (err: any) {
-            setError(err.message || t('admin.courses.form.errors.uploadFailed'));
-        } finally {
-            setVideoThumbnailUploading((prev) => ({ ...prev, [key]: false }));
-        }
-    };
-
-    const handlePdfUpload = async (sectionIndex: number, lessonIndex: number, file?: File | null) => {
-        if (!file) return;
-
-        const key = `${sectionIndex}-${lessonIndex}`;
-        try {
-            setPdfUploading((prev) => ({ ...prev, [key]: true }));
-            setError(null);
-            const res = await documentApi.uploadPdf(file);
-
-            // Update lesson with document info
-            updateLesson(sectionIndex, lessonIndex, {
-                documentId: res.documentId,
-                documentUrl: res.fileUrl,
-                documentFileName: file.name,
-            });
-        } catch (err: any) {
-            setError(err.message || t('admin.courses.form.errors.uploadFailed'));
-        } finally {
-            setPdfUploading((prev) => ({ ...prev, [key]: false }));
-        }
+        const newLessons = [...selectedLessons];
+        const swapIndex = direction === 'up' ? index - 1 : index + 1;
+        [newLessons[index], newLessons[swapIndex]] = [newLessons[swapIndex], newLessons[index]];
+        setSelectedLessons(newLessons);
     };
 
     if (!isOpen) return null;
@@ -314,7 +200,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
     return (
         <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/50 p-4">
             <div className="w-full max-w-5xl rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-dashboard-surface-dark">
-                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700">
+                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-700 h-[70px]">
                     <div>
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                             {courseId ? t('admin.courses.form.editTitle') : t('admin.courses.form.newTitle')}
@@ -326,7 +212,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                     </button>
                 </div>
 
-                <div className="max-h-[80vh] overflow-y-auto px-6 py-5 space-y-6">
+                <div className="max-h-[calc(100vh-160px)] overflow-y-auto px-6 py-5 space-y-6">
                     {error && (
                         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
                             {error}
@@ -338,8 +224,8 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                             <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.title')}</label>
                             <input
                                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                value={form.title}
-                                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
                             />
                         </div>
                         <div className="space-y-2">
@@ -348,9 +234,9 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                 type="number"
                                 min={0}
                                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                value={form.price}
-                                onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-                                disabled={form.isFree}
+                                value={price}
+                                onChange={(e) => setPrice(Number(e.target.value))}
+                                disabled={isFree}
                             />
                         </div>
                         <div className="space-y-2">
@@ -364,12 +250,12 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                 />
                                 <select
                                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                                    value={form.lecturerId}
-                                    onChange={(e) => setForm({ ...form, lecturerId: e.target.value })}
+                                    value={lecturerId}
+                                    onChange={(e) => setLecturerId(e.target.value)}
                                 >
                                     <option value="">{t('admin.courses.form.lecturerSelectPlaceholder')}</option>
-                                    {form.lecturerId && !lecturers.find((l) => l.id === form.lecturerId) && (
-                                        <option value={form.lecturerId}>{t('admin.courses.form.selectedLecturerId', { id: form.lecturerId })}</option>
+                                    {lecturerId && !lecturers.find((l) => l.id === lecturerId) && (
+                                        <option value={lecturerId}>{t('admin.courses.form.selectedLecturerId', { id: lecturerId })}</option>
                                     )}
                                     {lecturers.map((l) => (
                                         <option key={l.id} value={l.id}>
@@ -377,13 +263,6 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                         </option>
                                     ))}
                                 </select>
-                                <div className="text-xs text-slate-500 dark:text-slate-400">
-                                    {lecturerLoading
-                                        ? t('admin.courses.form.lecturerLoading')
-                                        : lecturers.length === 0
-                                            ? t('admin.courses.form.lecturerEmpty')
-                                            : t('admin.courses.form.lecturerHint')}
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -392,8 +271,8 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                         <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.thumbnail')}</label>
                         <div className="flex items-start gap-4">
                             <div className="relative h-32 w-48 flex-shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
-                                {form.thumbnailUrl ? (
-                                    <img src={form.thumbnailUrl} alt="Thumbnail Preview" className="h-full w-full object-cover" />
+                                {thumbnailUrl ? (
+                                    <img src={thumbnailUrl} alt="Thumbnail Preview" className="h-full w-full object-cover" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center text-slate-400">
                                         <span className="material-symbols-outlined text-4xl">image</span>
@@ -422,9 +301,6 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                     <span className="material-symbols-outlined text-[18px]">upload</span>
                                     {uploadingThumbnail ? t('common.uploading', { defaultValue: 'Uploading...' }) : t('admin.courses.form.uploadThumbnail', { defaultValue: 'Upload Thumbnail' })}
                                 </button>
-                                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                    JPG, PNG, WebP up to 5MB. Recommended ratio 16:9.
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -434,31 +310,31 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                         <textarea
                             className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
                             rows={3}
-                            value={form.description || ''}
-                            onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                         />
                     </div>
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.learningOutcomes')}</label>
                         <div className="space-y-2">
-                            {(form.learningOutcomes || []).map((outcome, idx) => (
+                            {learningOutcomes.map((outcome, idx) => (
                                 <div key={idx} className="flex gap-2">
                                     <input
                                         className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
                                         value={outcome}
                                         onChange={(e) => {
-                                            const newOutcomes = [...(form.learningOutcomes || [])];
+                                            const newOutcomes = [...learningOutcomes];
                                             newOutcomes[idx] = e.target.value;
-                                            setForm({ ...form, learningOutcomes: newOutcomes });
+                                            setLearningOutcomes(newOutcomes);
                                         }}
                                         placeholder={t('admin.courses.form.learningOutcomePlaceholder')}
                                     />
                                     <button
                                         onClick={() => {
-                                            const newOutcomes = [...(form.learningOutcomes || [])];
+                                            const newOutcomes = [...learningOutcomes];
                                             newOutcomes.splice(idx, 1);
-                                            setForm({ ...form, learningOutcomes: newOutcomes });
+                                            setLearningOutcomes(newOutcomes);
                                         }}
                                         className="rounded-lg p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                     >
@@ -467,7 +343,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                 </div>
                             ))}
                             <button
-                                onClick={() => setForm({ ...form, learningOutcomes: [...(form.learningOutcomes || []), ''] })}
+                                onClick={() => setLearningOutcomes([...learningOutcomes, ''])}
                                 className="inline-flex items-center gap-1 text-sm font-medium text-dashboard-primary hover:text-dashboard-primary-dark"
                             >
                                 <span className="material-symbols-outlined text-[18px]">add</span>
@@ -480,8 +356,11 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                         <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
                             <input
                                 type="checkbox"
-                                checked={form.isFree}
-                                onChange={(e) => setForm({ ...form, isFree: e.target.checked, price: e.target.checked ? 0 : form.price })}
+                                checked={isFree}
+                                onChange={(e) => {
+                                    setIsFree(e.target.checked);
+                                    if (e.target.checked) setPrice(0);
+                                }}
                                 className="h-4 w-4 rounded border-slate-300 text-dashboard-primary focus:ring-dashboard-primary"
                             />
                             {t('admin.courses.form.free')}
@@ -489,202 +368,65 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                         <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
                             <input
                                 type="checkbox"
-                                checked={form.isPublished}
-                                onChange={(e) => setForm({ ...form, isPublished: e.target.checked })}
+                                checked={isPublished}
+                                onChange={(e) => setIsPublished(e.target.checked)}
                                 className="h-4 w-4 rounded border-slate-300 text-dashboard-primary focus:ring-dashboard-primary"
                             />
                             {t('admin.courses.form.published')}
                         </label>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <h4 className="text-base font-semibold text-slate-900 dark:text-white">{t('admin.courses.form.curriculum')}</h4>
-                        <button
-                            onClick={addSection}
-                            className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">add</span>
-                            {t('admin.courses.form.addSection')}
-                        </button>
-                    </div>
+                    {/* Lesson Management */}
+                    <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-base font-semibold text-slate-900 dark:text-white">{t('admin.courses.form.lessonsTitle')}</h4>
+                            <button
+                                onClick={() => setShowSelectLessonModal(true)}
+                                className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                                {t('admin.courses.form.addLessons')}
+                            </button>
+                        </div>
 
-                    <div className="space-y-4">
-                        {form.sections.map((section, sIdx) => (
-                            <div key={sIdx} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/40">
-                                <div className="flex flex-wrap items-center gap-3">
-                                    <div className="flex-1 space-y-1">
-                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.sectionTitle')}</label>
-                                        <input
-                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                            value={section.title}
-                                            onChange={(e) => updateSection(sIdx, { title: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="w-24 space-y-1">
-                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.order')}</label>
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                            value={section.orderIndex}
-                                            onChange={(e) => updateSection(sIdx, { orderIndex: Number(e.target.value) })}
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={() => addLesson(sIdx)}
-                                        className="mt-6 inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px]">add</span>
-                                        {t('admin.courses.form.addLesson')}
-                                    </button>
-                                </div>
-
-                                <div className="mt-3 space-y-3">
-                                    {section.lessons.map((lesson, lIdx) => {
-                                        const thumbKey = `${sIdx}-${lIdx}`;
-                                        const isVideoThumbUploading = videoThumbnailUploading[thumbKey];
-
-                                        return (
-                                            <div key={lIdx} className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 border-l-4 border-l-transparent hover:border-l-dashboard-primary transition-colors">
-                                                <div className="flex flex-wrap items-end gap-3">
-                                                    <div className="flex-1 min-w-[200px] space-y-1">
-                                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.lessonTitle')}</label>
-                                                        <input
-                                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                                            value={lesson.title}
-                                                            onChange={(e) => updateLesson(sIdx, lIdx, { title: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div className="w-[140px] space-y-1">
-                                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.duration')}</label>
-                                                        <div className="flex items-center gap-1">
-                                                            <input
-                                                                type="number"
-                                                                min={0}
-                                                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                                                value={lesson.duration}
-                                                                onChange={(e) => updateLesson(sIdx, lIdx, { duration: Number(e.target.value) })}
-                                                            />
-                                                            {lesson.videoId && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => syncDuration(sIdx, lIdx, lesson.videoId)}
-                                                                    className="h-[38px] w-[38px] flex items-center justify-center text-slate-500 hover:text-dashboard-primary hover:bg-slate-100 rounded-md dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                                                                    title={t('admin.courses.form.syncDuration')}
-                                                                >
-                                                                    <span className="material-symbols-outlined text-[20px]">sync</span>
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="w-20 space-y-1">
-                                                        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('admin.courses.form.order')}</label>
-                                                        <input
-                                                            type="number"
-                                                            min={1}
-                                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                                            value={lesson.orderIndex}
-                                                            onChange={(e) => updateLesson(sIdx, lIdx, { orderIndex: Number(e.target.value) })}
-                                                        />
-                                                    </div>
-                                                    <div className="flex items-center h-[38px] pb-1">
-                                                        <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={lesson.isPreview}
-                                                                onChange={(e) => updateLesson(sIdx, lIdx, { isPreview: e.target.checked })}
-                                                                className="h-4 w-4 rounded border-slate-300 text-dashboard-primary focus:ring-dashboard-primary"
-                                                            />
-                                                            {t('admin.courses.form.preview')}
-                                                        </label>
-                                                    </div>
-                                                    <div className="flex items-center h-[38px] pb-1">
-                                                        {lesson.videoId ? (
-                                                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-300">
-                                                                <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                                                                {t('admin.courses.form.videoLinked')}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                                                                <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
-                                                                {t('admin.courses.form.uploadRequired')}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-3 space-y-1">
-                                                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.uploadVideo')}</div>
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <input
-                                                            type="file"
-                                                            accept="video/*"
-                                                            onChange={(e) => handleUpload(sIdx, lIdx, e.target.files?.[0])}
-                                                            className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-dashboard-primary file:px-3 file:py-2 file:text-white file:cursor-pointer"
-                                                        />
-                                                        {/* Preview with SecureVideoPlayer */}
-                                                        {lesson.videoId && (
-                                                            <div className="mt-2 w-64 aspect-video rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-black">
-                                                                <SecureVideoPlayer
-                                                                    videoId={lesson.videoId}
-                                                                    className="w-full h-full object-cover"
-                                                                    controls
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-3 space-y-1">
-                                                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.uploadThumbnail')}</div>
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <input
-                                                            type="file"
-                                                            accept="image/*"
-                                                            onChange={(e) => handleVideoThumbnailUpload(sIdx, lIdx, e.target.files?.[0])}
-                                                            className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-dashboard-primary file:px-3 file:py-2 file:text-white file:cursor-pointer"
-                                                        />
-                                                        {isVideoThumbUploading && (
-                                                            <span className="text-xs text-slate-500">
-                                                                {t('admin.courses.form.thumbnailUploading', { defaultValue: 'Uploading thumbnail...' })}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-3 space-y-1">
-                                                    <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.uploadDocument', { defaultValue: 'Upload PDF Document' })}</div>
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <input
-                                                            type="file"
-                                                            accept=".pdf,application/pdf"
-                                                            onChange={(e) => handlePdfUpload(sIdx, lIdx, e.target.files?.[0])}
-                                                            className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-dashboard-primary file:px-3 file:py-2 file:text-white file:cursor-pointer"
-                                                        />
-                                                        {pdfUploading[`${sIdx}-${lIdx}`] && (
-                                                            <span className="text-xs text-slate-500">
-                                                                {t('admin.courses.form.pdfUploading', { defaultValue: 'Uploading PDF...' })}
-                                                            </span>
-                                                        )}
-                                                        {lesson.documentId && !pdfUploading[`${sIdx}-${lIdx}`] && (
-                                                            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                                                <span className="material-symbols-outlined text-[16px]">description</span>
-                                                                {t('admin.courses.form.documentLinked', { defaultValue: 'PDF Linked' })}
-                                                                {lesson.documentFileName && `: ${lesson.documentFileName.substring(0, 20)}...`}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                        {selectedLessons.length === 0 ? (
+                            <div className="text-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-lg dark:bg-slate-900/50 dark:border-slate-700">
+                                <p className="text-sm text-slate-500">{t('admin.courses.form.noLessons')}</p>
                             </div>
-                        ))}
+                        ) : (
+                            <div className="space-y-2">
+                                {selectedLessons.map((lesson, idx) => (
+                                    <div key={idx} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-700">
+                                        <div className="flex flex-col gap-1 text-slate-400">
+                                            <button onClick={() => moveLesson(idx, 'up')} disabled={idx === 0} className="hover:text-dashboard-primary disabled:opacity-30">
+                                                <span className="material-symbols-outlined text-[18px]">keyboard_arrow_up</span>
+                                            </button>
+                                            <button onClick={() => moveLesson(idx, 'down')} disabled={idx === selectedLessons.length - 1} className="hover:text-dashboard-primary disabled:opacity-30">
+                                                <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                                            </button>
+                                        </div>
+                                        <div className="h-12 w-20 rounded bg-slate-100 overflow-hidden flex-shrink-0">
+                                            {lesson.thumbnailUrl && <img src={lesson.thumbnailUrl} className="h-full w-full object-cover" />}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-medium text-slate-900 dark:text-white line-clamp-1">{lesson.title}</div>
+                                            <div className="text-xs text-slate-500">{lesson.parts?.length || 0} parts</div>
+                                        </div>
+                                        <button
+                                            onClick={() => removeLesson(idx)}
+                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full dark:hover:bg-red-900/20"
+                                        >
+                                            <span className="material-symbols-outlined">close</span>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
+
                 </div>
 
-                <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4 dark:border-slate-700">
+                <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4 dark:border-slate-700 h-[70px]">
                     <button
                         onClick={onClose}
                         className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
@@ -700,6 +442,13 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                     </button>
                 </div>
             </div>
+
+            <SelectLessonModal
+                isOpen={showSelectLessonModal}
+                onClose={() => setShowSelectLessonModal(false)}
+                onSelect={handleAddLessons}
+                alreadySelectedIds={selectedLessons.map(l => l.id)}
+            />
         </div>
     );
 };

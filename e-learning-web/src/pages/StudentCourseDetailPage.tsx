@@ -26,8 +26,8 @@ const StudentCourseDetailPage: React.FC = () => {
                 setLoading(true);
                 const data = await courseApi.getById(id);
                 setCourse(data);
-                if (data.sections.length > 0) {
-                    setExpandedSections(new Set([data.sections[0].id || '0']));
+                if (data.lessons && data.lessons.length > 0) {
+                    setExpandedSections(new Set([data.lessons[0].id || '0']));
                 }
             } catch (err: any) {
                 setError(err.message || t('courseDetail.loadError'));
@@ -89,9 +89,9 @@ const StudentCourseDetailPage: React.FC = () => {
         }
     };
 
-    const totalLessons = course?.sections.reduce((sum, s) => sum + s.lessons.length, 0) || 0;
-    const totalDuration = course?.sections.reduce(
-        (sum, s) => sum + s.lessons.reduce((lSum, l) => lSum + (l.duration || 0), 0),
+    const totalLessons = course?.lessons?.length || 0; // It is Lessons count now
+    const totalDuration = course?.lessons?.reduce(
+        (sum, l) => sum + (l.parts?.reduce((pSum, p) => pSum + (p.videoDuration || 0), 0) || 0),
         0
     ) || 0;
 
@@ -305,15 +305,24 @@ const StudentCourseDetailPage: React.FC = () => {
                                 {t('courseDetail.curriculumTab')}
                             </h2>
                             <div className="border border-gray-200 dark:border-gray-700 rounded-xl divide-y divide-gray-200 dark:divide-gray-700 overflow-hidden">
-                                {course.sections.map((section, sIdx) => {
-                                    const sectionId = section.id || `${sIdx}`;
-                                    const isExpanded = expandedSections.has(sectionId);
-                                    const sectionDuration = section.lessons.reduce((sum, l) => sum + (l.duration || 0), 0);
+                                {course.lessons?.map((lesson, lIdx) => {
+                                    const lessonId = lesson.id || `${lIdx}`;
+                                    const isExpanded = expandedSections.has(lessonId);
+                                    // Calculate duration sum from parts. Assuming parts have VideoDuration or similar? 
+                                    // LessonDto has Parts. LessonPartDto has VideoDuration?
+                                    // Let's assume we can sum up durations if available or derived.
+                                    // Only Video parts have duration usually.
+                                    // For now, let's sum up durations if explicit property exists or 0.
+                                    // Actually LessonDto (Step 628) has `Duration` on Lesson? 
+                                    // No, LessonDto has Parts.
+                                    // LessonPartDto has VideoDuration.
+                                    const lessonDuration = lesson.parts?.reduce((sum, p) => sum + (p.videoDuration || 0), 0) || 0;
+                                    const partCount = lesson.parts?.length || 0;
 
                                     return (
-                                        <div key={sectionId} className="bg-white dark:bg-gray-800">
+                                        <div key={lessonId} className="bg-white dark:bg-gray-800">
                                             <button
-                                                onClick={() => toggleSection(sectionId)}
+                                                onClick={() => toggleSection(lessonId)}
                                                 className="w-full p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                             >
                                                 <div className="flex items-center gap-3">
@@ -321,31 +330,33 @@ const StudentCourseDetailPage: React.FC = () => {
                                                         expand_more
                                                     </span>
                                                     <span className="font-bold text-gray-900 dark:text-white text-left">
-                                                        {section.title}
+                                                        {lesson.title}
                                                     </span>
                                                 </div>
                                                 <span className="text-sm text-gray-500">
-                                                    {section.lessons.length} {t('courseDetail.lessons')} • {sectionDuration} min
+                                                    {partCount} parts • {Math.round(lessonDuration / 60)} min
                                                 </span>
                                             </button>
 
                                             {isExpanded && (
                                                 <div className="px-4 pb-4 space-y-2 bg-gray-50 dark:bg-gray-900/50">
-                                                    {section.lessons.map((lesson, lIdx) => (
+                                                    {lesson.parts?.map((part, pIdx) => (
                                                         <div
-                                                            key={lesson.id || `${sIdx}-${lIdx}`}
+                                                            key={part.id || `${lIdx}-${pIdx}`}
                                                             className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg"
                                                         >
                                                             <div className="flex items-center gap-3">
-                                                                <span className="material-symbols-outlined text-primary text-sm">play_circle</span>
-                                                                <span className="text-sm text-gray-700 dark:text-gray-300">{lesson.title}</span>
+                                                                <span className="material-symbols-outlined text-primary text-sm">
+                                                                    {part.type === 'Video' ? 'play_circle' : 'description'}
+                                                                </span>
+                                                                <span className="text-sm text-gray-700 dark:text-gray-300">{part.title}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                {lesson.duration && (
-                                                                    <span className="text-xs text-gray-500">{lesson.duration} min</span>
+                                                                {part.type === 'Video' && (
+                                                                    <span className="text-xs text-gray-500">{Math.round((part.videoDuration || 0) / 60)} min</span>
                                                                 )}
                                                                 <span className="material-symbols-outlined text-gray-400 text-sm">
-                                                                    {isEnrolled ? 'play_arrow' : 'lock'}
+                                                                    {isEnrolled || part.isPreview ? 'play_arrow' : 'lock'}
                                                                 </span>
                                                             </div>
                                                         </div>

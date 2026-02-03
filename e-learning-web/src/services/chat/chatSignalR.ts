@@ -13,6 +13,14 @@ export interface ChatMessage {
     isFromGuest: boolean;
 }
 
+export interface NotificationMessage {
+    title: string;
+    message: string;
+    type: string;
+    data: any;
+    timestamp: string;
+}
+
 // Define a type for the callbacks object to improve type safety and readability
 interface SignalRCallbacks {
     onReceiveMessage: ((message: ChatMessage) => void)[];
@@ -27,6 +35,7 @@ interface SignalRCallbacks {
     onGuestTyping: ((guestId: string) => void)[];
     onGuestStoppedTyping: ((guestId: string) => void)[];
     onMessagesRead: ((data: { conversationId?: string, guestId?: string, readerId?: string }) => void)[];
+    onReceiveNotification: ((notification: NotificationMessage) => void)[];
 }
 
 class ChatSignalRService {
@@ -44,7 +53,8 @@ class ChatSignalRService {
         onGuestDisconnected: [],
         onGuestTyping: [],
         onGuestStoppedTyping: [],
-        onMessagesRead: []
+        onMessagesRead: [],
+        onReceiveNotification: []
     };
 
     private async ensureConnected(): Promise<signalR.HubConnection> {
@@ -90,7 +100,8 @@ class ChatSignalRService {
             onGuestDisconnected: [],
             onGuestTyping: [],
             onGuestStoppedTyping: [],
-            onMessagesRead: []
+            onMessagesRead: [],
+            onReceiveNotification: []
         };
     }
 
@@ -215,6 +226,11 @@ class ChatSignalRService {
                 }
 
                 this.callbacks.onMessagesRead.forEach(cb => cb(data));
+            });
+
+            this.connection.on('ReceiveNotification', (notification: NotificationMessage) => {
+                console.log('[ChatSignalR] Event Received: ReceiveNotification', notification);
+                this.callbacks.onReceiveNotification.forEach(cb => cb(notification));
             });
 
             try {
@@ -381,6 +397,10 @@ class ChatSignalRService {
 
     public onMessagesRead(callback: (data: { conversationId?: string, guestId?: string, readerId?: string }) => void) {
         this.callbacks.onMessagesRead.push(callback);
+    }
+
+    public onReceiveNotification(callback: (notification: NotificationMessage) => void) {
+        this.callbacks.onReceiveNotification.push(callback);
     }
 
     getConnectionState() {

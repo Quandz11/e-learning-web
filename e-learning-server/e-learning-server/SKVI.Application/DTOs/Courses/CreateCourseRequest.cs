@@ -23,8 +23,7 @@ public class CreateCourseRequest
 
     public List<string> LearningOutcomes { get; set; } = new();
 
-    [MinLength(0)]
-    public List<CreateCourseSectionDto> Sections { get; set; } = new();
+    public List<Guid> LessonIds { get; set; } = new();
 }
 
 public class CreateCourseSectionDto

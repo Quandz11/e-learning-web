@@ -1,12 +1,78 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import StatsCard from '../../../components/admin/StatsCard';
 import RecentOrdersTable from '../../../components/admin/RecentOrdersTable';
 import TopAgents from '../../../components/admin/TopAgents';
 import { useTranslation } from 'react-i18next';
+import { dashboardApi, type DashboardStats } from '../../../services/dashboardApi';
 
 const AdminDashboardPage: React.FC = () => {
     const { t } = useTranslation();
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                setLoading(true);
+                const data = await dashboardApi.getStats();
+                setStats(data);
+            } catch (err) {
+                console.error('Failed to fetch dashboard stats:', err);
+                setError(err instanceof Error ? err.message : 'Failed to load dashboard stats');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        void fetchStats();
+    }, []);
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'decimal',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount) + ' VND';
+    };
+
+    const formatTrend = (value: number) => {
+        const sign = value >= 0 ? '+' : '';
+        return `${sign}${value.toFixed(1)}%`;
+    };
+
+    const getTrendType = (value: number): 'positive' | 'negative' | 'neutral' => {
+        if (value > 0) return 'positive';
+        if (value < 0) return 'negative';
+        return 'neutral';
+    };
+
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div className="flex h-64 items-center justify-center">
+                    <div className="text-center">
+                        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-dashboard-primary border-r-transparent" />
+                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Loading dashboard...</p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    if (error || !stats) {
+        return (
+            <AdminLayout>
+                <div className="flex h-64 items-center justify-center">
+                    <div className="text-center">
+                        <span className="material-symbols-outlined text-4xl text-red-500">error</span>
+                        <p className="mt-2 text-sm text-red-500">{error || 'Failed to load dashboard'}</p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout>
@@ -33,9 +99,9 @@ const AdminDashboardPage: React.FC = () => {
                 {/* Card 1: Total Students */}
                 <StatsCard
                     title={t('admin.dashboard.totalStudents')}
-                    value="12,450"
-                    trend="+5.2%"
-                    trendType="positive"
+                    value={stats.totalStudents.toLocaleString('vi-VN')}
+                    trend={formatTrend(stats.studentGrowthPercentage)}
+                    trendType={getTrendType(stats.studentGrowthPercentage)}
                     chart={
                         <svg className="h-full w-full overflow-visible text-dashboard-primary" preserveAspectRatio="none" viewBox="0 0 100 40">
                             <defs>
@@ -53,9 +119,9 @@ const AdminDashboardPage: React.FC = () => {
                 {/* Card 2: Total Revenue */}
                 <StatsCard
                     title={t('admin.dashboard.totalRevenue')}
-                    value="45.230.000 VND"
-                    trend="+12%"
-                    trendType="positive"
+                    value={formatCurrency(stats.totalRevenue)}
+                    trend={formatTrend(stats.revenueGrowthPercentage)}
+                    trendType={getTrendType(stats.revenueGrowthPercentage)}
                     chart={
                         <svg className="h-full w-full overflow-visible text-dashboard-primary" preserveAspectRatio="none" viewBox="0 0 100 40">
                             <defs>
@@ -73,9 +139,9 @@ const AdminDashboardPage: React.FC = () => {
                 {/* Card 3: Agent Revenue */}
                 <StatsCard
                     title={t('admin.dashboard.agentRevenue')}
-                    value="15.100.000 VND"
-                    trend="+2.1%"
-                    trendType="neutral"
+                    value={formatCurrency(stats.agentRevenue)}
+                    trend={formatTrend(stats.agentRevenueGrowthPercentage)}
+                    trendType={getTrendType(stats.agentRevenueGrowthPercentage)}
                     chart={
                         <div className="flex h-12 w-full items-end gap-1">
                             <div className="h-[40%] flex-1 rounded-t-sm bg-dashboard-primary/20"></div>
@@ -93,9 +159,9 @@ const AdminDashboardPage: React.FC = () => {
                 {/* Card 4: Active Courses */}
                 <StatsCard
                     title={t('admin.dashboard.activeCourses')}
-                    value="342"
-                    trend="-0.5%"
-                    trendType="negative"
+                    value={stats.activeCourses.toLocaleString('vi-VN')}
+                    trend={formatTrend(stats.coursesGrowthPercentage)}
+                    trendType={getTrendType(stats.coursesGrowthPercentage)}
                     chart={
                         <svg className="h-full w-full overflow-visible text-dashboard-accent" preserveAspectRatio="none" viewBox="0 0 100 40">
                             <defs>

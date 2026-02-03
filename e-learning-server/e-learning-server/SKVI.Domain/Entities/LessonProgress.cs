@@ -11,7 +11,7 @@ public class LessonProgress
     public Guid EnrollmentId { get; set; }
 
     [Required]
-    public Guid LessonId { get; set; }
+    public Guid LessonPartId { get; set; }
 
     public bool IsCompleted { get; set; } = false;
 
@@ -25,4 +25,5 @@ public class LessonProgress
 
     // Navigation properties
     public Enrollment Enrollment { get; set; } = null!;
+    public LessonPart LessonPart { get; set; } = null!;
 }

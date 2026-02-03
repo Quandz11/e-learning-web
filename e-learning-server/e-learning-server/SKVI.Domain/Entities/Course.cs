@@ -15,7 +15,7 @@ public class Course
 
     // Navigation properties
     public User Lecturer { get; set; } = null!;
-    public ICollection<CourseSection> CourseSections { get; set; } = new List<CourseSection>();
+    public ICollection<CourseLesson> CourseLessons { get; set; } = new List<CourseLesson>();
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 }

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using SKVI.Application.DTOs.Courses;
+using SKVI.Application.DTOs.Lessons;
 using SKVI.Application.Interfaces;
 using SKVI.Domain.Entities;
 using SKVI.Infrastructure;
@@ -23,12 +23,15 @@ public class CourseService : ICourseService
     {
         var query = _dbContext.Courses
             .Include(c => c.Lecturer)
-            .Include(c => c.CourseSections)
-                .ThenInclude(s => s.CourseLessons)
-                    .ThenInclude(l => l.Video)
-            .Include(c => c.CourseSections)
-                .ThenInclude(s => s.CourseLessons)
-                    .ThenInclude(l => l.Document)
+            .Include(c => c.CourseLessons)
+                .ThenInclude(cl => cl.Lesson)
+                    .ThenInclude(l => l.LessonParts)
+                        .ThenInclude(p => p.Video)
+            .Include(c => c.CourseLessons)
+                .ThenInclude(cl => cl.Lesson)
+                    .ThenInclude(l => l.LessonParts)
+                        .ThenInclude(p => p.Document)
+            .AsNoTracking()
             .AsQueryable();
 
         if (isPublished.HasValue)
@@ -47,12 +50,15 @@ public class CourseService : ICourseService
     {
         var course = await _dbContext.Courses
             .Include(c => c.Lecturer)
-            .Include(c => c.CourseSections)
-                .ThenInclude(s => s.CourseLessons)
-                    .ThenInclude(l => l.Video)
-            .Include(c => c.CourseSections)
-                .ThenInclude(s => s.CourseLessons)
-                    .ThenInclude(l => l.Document)
+            .Include(c => c.CourseLessons)
+                .ThenInclude(cl => cl.Lesson)
+                    .ThenInclude(l => l.LessonParts)
+                        .ThenInclude(p => p.Video)
+            .Include(c => c.CourseLessons)
+                .ThenInclude(cl => cl.Lesson)
+                    .ThenInclude(l => l.LessonParts)
+                        .ThenInclude(p => p.Document)
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (course == null)
@@ -97,52 +103,18 @@ public class CourseService : ICourseService
             CreatedAt = DateTime.UtcNow
         };
 
-        // Preload video durations to auto-fill lesson duration
-        var createVideoIds = request.Sections
-            .SelectMany(s => s.Lessons)
-            .Where(l => l.VideoId != Guid.Empty)
-            .Select(l => l.VideoId)
-            .Distinct()
-            .ToList();
-
-        var createVideoDurations = await _dbContext.Videos
-            .Where(v => createVideoIds.Contains(v.Id))
-            .ToDictionaryAsync(v => v.Id, v => v.Duration, cancellationToken);
-
-        foreach (var sectionDto in request.Sections.OrderBy(s => s.OrderIndex))
+        // Link existing lessons
+        if (request.LessonIds != null && request.LessonIds.Any())
         {
-            var section = new CourseSection
+            for (int i = 0; i < request.LessonIds.Count; i++)
             {
-                Id = Guid.NewGuid(),
-                CourseId = course.Id,
-                Title = sectionDto.Title,
-                OrderIndex = sectionDto.OrderIndex
-            };
-
-            foreach (var lessonDto in sectionDto.Lessons.OrderBy(l => l.OrderIndex))
-            {
-                var resolvedDuration = lessonDto.Duration;
-                if (resolvedDuration <= 0 && lessonDto.VideoId != Guid.Empty && createVideoDurations.TryGetValue(lessonDto.VideoId, out var videoDuration))
+                course.CourseLessons.Add(new CourseLesson
                 {
-                    resolvedDuration = videoDuration;
-                }
-
-                var lesson = new CourseLesson
-                {
-                    Id = Guid.NewGuid(),
-                    SectionId = section.Id,
-                    Title = lessonDto.Title,
-                    Duration = resolvedDuration,
-                    VideoId = lessonDto.VideoId,
-                    DocumentId = lessonDto.DocumentId,
-                    OrderIndex = lessonDto.OrderIndex,
-                    IsPreview = lessonDto.IsPreview
-                };
-
-                section.CourseLessons.Add(lesson);
+                    CourseId = course.Id,
+                    LessonId = request.LessonIds[i],
+                    OrderIndex = i
+                });
             }
-
-            course.CourseSections.Add(section);
         }
 
         _dbContext.Courses.Add(course);
@@ -153,9 +125,8 @@ public class CourseService : ICourseService
 
     public async Task<CourseResponse> UpdateAsync(Guid id, UpdateCourseRequest request, CancellationToken cancellationToken = default)
     {
-        // Load course without tracking to avoid stale tracked entities when rebuilding children
         var course = await _dbContext.Courses
-            .AsNoTracking()
+            .Include(c => c.CourseLessons)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (course == null)
@@ -171,77 +142,24 @@ public class CourseService : ICourseService
         course.ThumbnailUrl = request.ThumbnailUrl;
         course.IsPublished = request.IsPublished;
         course.LearningOutcomes = request.LearningOutcomes != null ? JsonSerializer.Serialize(request.LearningOutcomes) : null;
-        course.CreatedAt = course.CreatedAt == default ? DateTime.UtcNow : course.CreatedAt;
-
-        // Preload video durations for lessons so duration is always derived from stored video metadata when absent
-        var updateVideoIds = request.Sections
-            .SelectMany(s => s.Lessons)
-            .Where(l => l.VideoId != Guid.Empty)
-            .Select(l => l.VideoId)
-            .Distinct()
-            .ToList();
-
-        var updateVideoDurations = await _dbContext.Videos
-            .Where(v => updateVideoIds.Contains(v.Id))
-            .ToDictionaryAsync(v => v.Id, v => v.Duration, cancellationToken);
-
-        // Remove existing sections/lessons set-based to avoid per-row concurrency
-        var sectionIds = await _dbContext.CourseSections
-            .Where(s => s.CourseId == course.Id)
-            .Select(s => s.Id)
-            .ToListAsync(cancellationToken);
-
-        if (sectionIds.Count > 0)
+        
+        // Update Course Lessons (Links)
+        // Clear existing links
+        _dbContext.CourseLessons.RemoveRange(course.CourseLessons);
+        
+        // Add new links
+        if (request.LessonIds != null && request.LessonIds.Any())
         {
-            await _dbContext.CourseLessons
-                .Where(l => sectionIds.Contains(l.SectionId))
-                .ExecuteDeleteAsync(cancellationToken);
-
-            await _dbContext.CourseSections
-                .Where(s => s.CourseId == course.Id)
-                .ExecuteDeleteAsync(cancellationToken);
-        }
-
-        // Rebuild sections/lessons
-        var newSections = new List<CourseSection>();
-
-        foreach (var sectionDto in request.Sections.OrderBy(s => s.OrderIndex))
-        {
-            var section = new CourseSection
+            for (int i = 0; i < request.LessonIds.Count; i++)
             {
-                Id = Guid.NewGuid(),
-                CourseId = course.Id,
-                Title = sectionDto.Title,
-                OrderIndex = sectionDto.OrderIndex
-            };
-
-            foreach (var lessonDto in sectionDto.Lessons.OrderBy(l => l.OrderIndex))
-            {
-                var resolvedDuration = lessonDto.Duration;
-                if (resolvedDuration <= 0 && lessonDto.VideoId != Guid.Empty && updateVideoDurations.TryGetValue(lessonDto.VideoId, out var videoDuration))
+                _dbContext.CourseLessons.Add(new CourseLesson
                 {
-                    resolvedDuration = videoDuration;
-                }
-
-                section.CourseLessons.Add(new CourseLesson
-                {
-                    Id = Guid.NewGuid(),
-                    SectionId = section.Id,
-                    Title = lessonDto.Title,
-                    Duration = resolvedDuration,
-                    VideoId = lessonDto.VideoId,
-                    DocumentId = lessonDto.DocumentId,
-                    OrderIndex = lessonDto.OrderIndex,
-                    IsPreview = lessonDto.IsPreview
+                    CourseId = course.Id,
+                    LessonId = request.LessonIds[i],
+                    OrderIndex = i
                 });
             }
-
-            newSections.Add(section);
         }
-
-        // Re-attach course and mark modified (no tracked children lingering)
-        _dbContext.Courses.Update(course);
-        _dbContext.CourseSections.AddRange(newSections);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -251,8 +169,7 @@ public class CourseService : ICourseService
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var course = await _dbContext.Courses
-            .Include(c => c.CourseSections)
-                .ThenInclude(s => s.CourseLessons)
+            .Include(c => c.CourseLessons)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (course == null)
@@ -260,13 +177,8 @@ public class CourseService : ICourseService
             throw new KeyNotFoundException("Course not found");
         }
 
-        var sections = course.CourseSections.ToList();
-        var lessons = sections.SelectMany(s => s.CourseLessons).ToList();
-
-        _dbContext.CourseLessons.RemoveRange(lessons);
-        _dbContext.CourseSections.RemoveRange(sections);
+        // Only delete the course and links, NOT the lessons themselves (reusable)
         _dbContext.Courses.Remove(course);
-
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -293,46 +205,49 @@ public class CourseService : ICourseService
                 ? JsonSerializer.Deserialize<List<string>>(course.LearningOutcomes) ?? new List<string>() 
                 : new List<string>(),
             CreatedAt = course.CreatedAt,
-            Sections = new List<CourseSectionResponse>()
+            Lessons = new List<LessonDto>()
         };
 
-        foreach (var section in course.CourseSections.OrderBy(s => s.OrderIndex))
+        foreach (var cl in course.CourseLessons.OrderBy(x => x.OrderIndex))
         {
-            var sectionResponse = new CourseSectionResponse
+            if (cl.Lesson == null) continue;
+
+            var lessonDto = new LessonDto
             {
-                Id = section.Id,
-                Title = section.Title,
-                OrderIndex = section.OrderIndex,
-                Lessons = new List<CourseLessonResponse>()
+                Id = cl.Lesson.Id,
+                Title = cl.Lesson.Title,
+                Description = cl.Lesson.Description,
+                ThumbnailUrl = cl.Lesson.ThumbnailUrl,
+                CreatedAt = cl.Lesson.CreatedAt,
+                UpdatedAt = cl.Lesson.UpdatedAt,
+                Parts = new List<LessonPartDto>()
             };
 
-            foreach (var lesson in section.CourseLessons.OrderBy(l => l.OrderIndex))
+            if (cl.Lesson.LessonParts != null)
             {
-                var playbackUrl = lesson.Video != null && !string.IsNullOrWhiteSpace(lesson.Video.BunnyVideoId)
-                    ? _bunnyStreamService.GetPlaybackUrl(lesson.Video.BunnyVideoId)
-                    : null;
-
-                var embedUrl = lesson.Video != null && !string.IsNullOrWhiteSpace(lesson.Video.BunnyLibraryId) && !string.IsNullOrWhiteSpace(lesson.Video.BunnyVideoId)
-                    ? $"https://iframe.mediadelivery.net/embed/{lesson.Video.BunnyLibraryId}/{lesson.Video.BunnyVideoId}"
-                    : null;
-
-                sectionResponse.Lessons.Add(new CourseLessonResponse
+                foreach (var part in cl.Lesson.LessonParts.OrderBy(p => p.OrderIndex))
                 {
-                    Id = lesson.Id,
-                    Title = lesson.Title,
-                    Duration = lesson.Video != null && lesson.Video.Duration > 0 ? lesson.Video.Duration : lesson.Duration,
-                    VideoId = lesson.VideoId,
-                    OrderIndex = lesson.OrderIndex,
-                    IsPreview = lesson.IsPreview,
-                    PlaybackUrl = playbackUrl,
-                    EmbedUrl = embedUrl,
-                    DocumentId = lesson.DocumentId,
-                    DocumentUrl = lesson.Document?.BunnyStoragePath, // This is already the full CDN URL from DocumentService
-                    DocumentFileName = lesson.Document?.FileName
-                });
-            }
+                    var playbackUrl = part.Video != null && !string.IsNullOrWhiteSpace(part.Video.BunnyVideoId)
+                         ? _bunnyStreamService.GetPlaybackUrl(part.Video.BunnyVideoId) 
+                         : null;
 
-            response.Sections.Add(sectionResponse);
+                    lessonDto.Parts.Add(new LessonPartDto
+                    {
+                        Id = part.Id,
+                        Title = part.Title,
+                        Type = part.Type,
+                        OrderIndex = part.OrderIndex,
+                        IsPreview = part.IsPreview,
+                        VideoId = part.VideoId,
+                        VideoDuration = part.Video?.Duration ?? 0,
+                        PlaybackUrl = playbackUrl,
+                        DocumentId = part.DocumentId,
+                        DocumentUrl = part.Document?.BunnyStoragePath,
+                        Content = part.Content
+                    });
+                }
+            }
+            response.Lessons.Add(lessonDto);
         }
 
         return response;

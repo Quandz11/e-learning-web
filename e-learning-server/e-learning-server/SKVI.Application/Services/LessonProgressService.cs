@@ -17,7 +17,7 @@ public class LessonProgressService : ILessonProgressService
         _logger = logger;
     }
 
-    public async Task UpdateProgressAsync(Guid userId, Guid courseId, Guid lessonId, int watchedDuration)
+    public async Task UpdateProgressAsync(Guid userId, Guid courseId, Guid lessonPartId, int watchedDuration)
     {
         // Get or create enrollment
         var enrollment = await _context.Enrollments
@@ -31,7 +31,7 @@ public class LessonProgressService : ILessonProgressService
 
         // Get or create lesson progress
         var lessonProgress = enrollment.LessonProgress
-            .FirstOrDefault(lp => lp.LessonId == lessonId);
+            .FirstOrDefault(lp => lp.LessonPartId == lessonPartId);
 
         if (lessonProgress == null)
         {
@@ -39,7 +39,7 @@ public class LessonProgressService : ILessonProgressService
             {
                 Id = Guid.NewGuid(),
                 EnrollmentId = enrollment.Id,
-                LessonId = lessonId,
+                LessonPartId = lessonPartId,
                 WatchedDuration = watchedDuration,
                 LastWatchedAt = DateTime.UtcNow,
                 IsCompleted = false
@@ -62,7 +62,7 @@ public class LessonProgressService : ILessonProgressService
         await _context.SaveChangesAsync();
     }
 
-    public async Task MarkLessonCompleteAsync(Guid userId, Guid courseId, Guid lessonId)
+    public async Task MarkLessonCompleteAsync(Guid userId, Guid courseId, Guid lessonPartId)
     {
         // Start transaction for atomic progress update
         using var transaction = await _context.Database.BeginTransactionAsync();
@@ -73,8 +73,9 @@ public class LessonProgressService : ILessonProgressService
             var enrollment = await _context.Enrollments
                 .Include(e => e.LessonProgress)
                 .Include(e => e.Course)
-                    .ThenInclude(c => c.CourseSections)
-                    .ThenInclude(s => s.CourseLessons)
+                    .ThenInclude(c => c.CourseLessons)
+                        .ThenInclude(cl => cl.Lesson)
+                            .ThenInclude(l => l.LessonParts)
                 .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
 
             if (enrollment == null)
@@ -84,19 +85,19 @@ public class LessonProgressService : ILessonProgressService
 
             // Get or create lesson progress
             // Handle potential duplicates (self-healing)
-            var allProgressForLesson = enrollment.LessonProgress
-                .Where(lp => lp.LessonId == lessonId)
+            var allProgressForPart = enrollment.LessonProgress
+                .Where(lp => lp.LessonPartId == lessonPartId)
                 .ToList();
 
             LessonProgress lessonProgress;
 
-            if (allProgressForLesson.Count == 0)
+            if (allProgressForPart.Count == 0)
             {
                 lessonProgress = new LessonProgress
                 {
                     Id = Guid.NewGuid(),
                     EnrollmentId = enrollment.Id,
-                    LessonId = lessonId,
+                    LessonPartId = lessonPartId,
                     IsCompleted = true,
                     CompletedAt = DateTime.UtcNow,
                     LastWatchedAt = DateTime.UtcNow,
@@ -109,7 +110,7 @@ public class LessonProgressService : ILessonProgressService
             else
             {
                 // Use the first one
-                lessonProgress = allProgressForLesson[0];
+                lessonProgress = allProgressForPart[0];
                 
                 // Update it
                 if (!lessonProgress.IsCompleted)
@@ -120,31 +121,33 @@ public class LessonProgressService : ILessonProgressService
                 }
 
                 // Delete duplicates if any
-                if (allProgressForLesson.Count > 1)
+                if (allProgressForPart.Count > 1)
                 {
-                    _logger.LogWarning("Found {Count} duplicate progress records for User {UserId}, Lesson {LessonId}. Cleaning up.", allProgressForLesson.Count, userId, lessonId);
-                    for (int i = 1; i < allProgressForLesson.Count; i++)
+                    _logger.LogWarning("Found {Count} duplicate progress records for User {UserId}, LessonPart {LessonPartId}. Cleaning up.", allProgressForPart.Count, userId, lessonPartId);
+                    for (int i = 1; i < allProgressForPart.Count; i++)
                     {
-                        _context.LessonProgresses.Remove(allProgressForLesson[i]);
-                        enrollment.LessonProgress.Remove(allProgressForLesson[i]);
+                        _context.LessonProgresses.Remove(allProgressForPart[i]);
+                        enrollment.LessonProgress.Remove(allProgressForPart[i]);
                     }
                 }
             }
 
-            // Calculate progress percentage (Robust calculation)
-            var totalLessons = enrollment.Course.CourseSections
-                .SelectMany(s => s.CourseLessons)
+            // Calculate progress percentage
+            // Flatten: Course -> CourseLesson -> Lesson -> LessonPart
+            var totalParts = enrollment.Course.CourseLessons
+                .Where(cl => cl.Lesson != null)
+                .SelectMany(cl => cl.Lesson.LessonParts)
                 .Count();
 
-            var completedLessons = enrollment.LessonProgress
+            var completedParts = enrollment.LessonProgress
                 .Where(lp => lp.IsCompleted)
-                .Select(lp => lp.LessonId)
+                .Select(lp => lp.LessonPartId)
                 .Distinct()
                 .Count();
 
             // Update progress percentage
-            var progressPercentage = totalLessons > 0 
-                ? (int)Math.Floor((completedLessons / (double)totalLessons) * 100) 
+            var progressPercentage = totalParts > 0 
+                ? (int)Math.Floor((completedParts / (double)totalParts) * 100) 
                 : 0;
 
             enrollment.ProgressPercentage = progressPercentage;
@@ -160,7 +163,7 @@ public class LessonProgressService : ILessonProgressService
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            _logger.LogInformation("Lesson {LessonId} marked complete for user {UserId}", lessonId, userId);
+            _logger.LogInformation("LessonPart {LessonPartId} marked complete for user {UserId}", lessonPartId, userId);
         }
         catch (Exception ex)
         {
@@ -170,14 +173,15 @@ public class LessonProgressService : ILessonProgressService
         }
     }
 
-    public async Task<LessonProgressDto?> GetLessonProgressAsync(Guid userId, Guid courseId, Guid lessonId)
+    public async Task<LessonProgressDto?> GetLessonProgressAsync(Guid userId, Guid courseId, Guid lessonPartId)
     {
         var enrollment = await _context.Enrollments
             .AsNoTracking()
             .Include(e => e.LessonProgress)
             .Include(e => e.Course)
-                .ThenInclude(c => c.CourseSections)
-                .ThenInclude(s => s.CourseLessons)
+                .ThenInclude(c => c.CourseLessons)
+                    .ThenInclude(cl => cl.Lesson)
+                        .ThenInclude(l => l.LessonParts)
             .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
 
         if (enrollment == null)
@@ -185,21 +189,22 @@ public class LessonProgressService : ILessonProgressService
             return null;
         }
 
-        var lesson = enrollment.Course.CourseSections
-            .SelectMany(s => s.CourseLessons)
-            .FirstOrDefault(l => l.Id == lessonId);
+        var part = enrollment.Course.CourseLessons
+            .Where(cl => cl.Lesson != null)
+            .SelectMany(cl => cl.Lesson.LessonParts)
+            .FirstOrDefault(p => p.Id == lessonPartId);
 
-        if (lesson == null)
+        if (part == null)
         {
             return null;
         }
 
-        var progress = enrollment.LessonProgress.FirstOrDefault(lp => lp.LessonId == lessonId);
+        var progress = enrollment.LessonProgress.FirstOrDefault(lp => lp.LessonPartId == lessonPartId);
 
         return new LessonProgressDto
         {
-            LessonId = lessonId.ToString(),
-            LessonTitle = lesson.Title,
+            LessonPartId = lessonPartId.ToString(),
+            LessonPartTitle = part.Title,
             IsCompleted = progress?.IsCompleted ?? false,
             WatchedDuration = progress?.WatchedDuration ?? 0,
             CompletedAt = progress?.CompletedAt,

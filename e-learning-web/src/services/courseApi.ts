@@ -2,27 +2,7 @@ import { authApi } from './authApi';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
 
-export interface CourseLessonInput {
-  id?: string;
-  title: string;
-  description?: string;
-  duration: number;
-  orderIndex: number;
-  isPreview: boolean;
-  videoId: string;
-  playbackUrl?: string;
-  embedUrl?: string;
-  documentId?: string;
-  documentUrl?: string;
-  documentFileName?: string;
-}
-
-export interface CourseSectionInput {
-  id?: string;
-  title: string;
-  orderIndex: number;
-  lessons: CourseLessonInput[];
-}
+import type { LessonDto } from './lessonApi';
 
 export interface CourseInput {
   title: string;
@@ -33,7 +13,7 @@ export interface CourseInput {
   thumbnailUrl?: string;
   isPublished: boolean;
   learningOutcomes?: string[];
-  sections: CourseSectionInput[];
+  lessonIds: string[];
 }
 
 export interface LecturerInfo {
@@ -43,11 +23,12 @@ export interface LecturerInfo {
   avatarUrl?: string;
 }
 
-export interface CourseResponse extends CourseInput {
+export interface CourseResponse extends Omit<CourseInput, 'lessonIds'> {
   id: string;
   createdAt: string;
   lecturer?: LecturerInfo;
   learningOutcomes?: string[];
+  lessons: LessonDto[];
 }
 
 export interface StudentResponse {

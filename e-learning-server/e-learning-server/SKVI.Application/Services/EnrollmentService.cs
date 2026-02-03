@@ -9,11 +9,13 @@ namespace SKVI.Application.Services;
 public class EnrollmentService : IEnrollmentService
 {
     private readonly ApplicationDbContext _context;
+    private readonly INotificationService _notificationService;
     private readonly ILogger<EnrollmentService> _logger;
 
-    public EnrollmentService(ApplicationDbContext context, ILogger<EnrollmentService> logger)
+    public EnrollmentService(ApplicationDbContext context, INotificationService notificationService, ILogger<EnrollmentService> logger)
     {
         _context = context;
+        _notificationService = notificationService;
         _logger = logger;
     }
 
@@ -74,7 +76,41 @@ public class EnrollmentService : IEnrollmentService
         _context.Enrollments.Add(enrollment);
         await _context.SaveChangesAsync();
 
+
+
         _logger.LogInformation("User {UserId} enrolled in course {CourseId}", userId, courseId);
+
+        // --- Notification Trigger ---
+        try
+        {
+            var studentName = await _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => u.FullName ?? u.Email)
+                .FirstOrDefaultAsync() ?? "A new student";
+
+            // Notify Lecturer
+            if (!string.IsNullOrEmpty(course.LecturerId.ToString()))
+            {
+                await _notificationService.NotifyUserAsync(
+                    course.LecturerId.ToString(), 
+                    "New Student Enrollment", 
+                    $"{studentName} has enrolled in your course: {course.Title}", 
+                    "enrollment", 
+                    new { courseId = course.Id, userId });
+            }
+
+            // Notify Admins
+            await _notificationService.NotifyAdminsAsync(
+                "New Enrollment", 
+                $"{studentName} enrolled in {course.Title}", 
+                "enrollment", 
+                new { courseId = course.Id, userId });
+        }
+        catch (Exception ex)
+        {
+            // Don't fail the enrollment if notification fails
+            _logger.LogError(ex, "Error sending enrollment notifications");
+        }
 
         return new EnrollmentResponse
         {
@@ -125,8 +161,9 @@ public class EnrollmentService : IEnrollmentService
         var enrollment = await _context.Enrollments
             .Include(e => e.LessonProgress)
             .Include(e => e.Course)
-                .ThenInclude(c => c.CourseSections)
-                .ThenInclude(s => s.CourseLessons)
+                .ThenInclude(c => c.CourseLessons)
+                    .ThenInclude(cl => cl.Lesson)
+                        .ThenInclude(l => l.LessonParts)
             .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
 
         if (enrollment == null)
@@ -134,21 +171,22 @@ public class EnrollmentService : IEnrollmentService
             throw new InvalidOperationException("Enrollment not found");
         }
 
-        // Get all lessons from all sections
-        var allLessons = enrollment.Course.CourseSections
-            .SelectMany(s => s.CourseLessons)
+        // Get all lessons (parts) via Flattening
+        var allParts = enrollment.Course.CourseLessons
+            .Where(cl => cl.Lesson != null)
+            .SelectMany(cl => cl.Lesson.LessonParts)
             .ToList();
 
         // Calculate progress percentage
-        var totalLessons = allLessons.Count;
-        var completedLessons = enrollment.LessonProgress
+        var totalParts = allParts.Count;
+        var completedParts = enrollment.LessonProgress
             .Where(lp => lp.IsCompleted)
-            .Select(lp => lp.LessonId)
+            .Select(lp => lp.LessonPartId)
             .Distinct()
             .Count();
         
-        var calculatedPercentage = totalLessons > 0 
-            ? (int)Math.Floor((completedLessons / (double)totalLessons) * 100) 
+        var calculatedPercentage = totalParts > 0 
+            ? (int)Math.Floor((completedParts / (double)totalParts) * 100) 
             : 0;
 
         // Sync with DB if different (e.g. new lessons added)
@@ -169,13 +207,13 @@ public class EnrollmentService : IEnrollmentService
         }
 
         // Map lesson progress
-        var lessonProgressDtos = allLessons.Select(lesson =>
+        var lessonProgressDtos = allParts.Select(part =>
         {
-            var progress = enrollment.LessonProgress.FirstOrDefault(lp => lp.LessonId == lesson.Id);
+            var progress = enrollment.LessonProgress.FirstOrDefault(lp => lp.LessonPartId == part.Id);
             return new LessonProgressDto
             {
-                LessonId = lesson.Id.ToString(),
-                LessonTitle = lesson.Title,
+                LessonPartId = part.Id.ToString(),
+                LessonPartTitle = part.Title,
                 IsCompleted = progress?.IsCompleted ?? false,
                 WatchedDuration = progress?.WatchedDuration ?? 0,
                 CompletedAt = progress?.CompletedAt,
@@ -187,8 +225,8 @@ public class EnrollmentService : IEnrollmentService
         {
             EnrollmentId = enrollment.Id.ToString(),
             ProgressPercentage = calculatedPercentage,
-            CompletedLessons = completedLessons,
-            TotalLessons = totalLessons,
+            CompletedLessons = completedParts,
+            TotalLessons = totalParts,
             CompletedAt = enrollment.CompletedAt,
             LessonProgress = lessonProgressDtos
         };

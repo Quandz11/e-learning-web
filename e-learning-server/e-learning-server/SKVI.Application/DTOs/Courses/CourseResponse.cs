@@ -13,7 +13,7 @@ public class CourseResponse
     public bool IsPublished { get; set; }
     public List<string> LearningOutcomes { get; set; } = new();
     public DateTime CreatedAt { get; set; }
-    public List<CourseSectionResponse> Sections { get; set; } = new();
+    public List<SKVI.Application.DTOs.Lessons.LessonDto> Lessons { get; set; } = new();
 }
 
 public class LecturerInfo
@@ -24,14 +24,6 @@ public class LecturerInfo
     public string? AvatarUrl { get; set; }
 }
 
-
-public class CourseSectionResponse
-{
-    public Guid Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public int OrderIndex { get; set; }
-    public List<CourseLessonResponse> Lessons { get; set; } = new();
-}
 
 public class CourseLessonResponse
 {

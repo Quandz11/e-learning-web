@@ -9,6 +9,9 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import OtpVerifyPage from './pages/auth/OtpVerifyPage';
 import AdminDashboardPage from './pages/admin/dashboard/AdminDashboardPage';
 import CoursesPage from './pages/admin/course/CoursesPage';
+import LessonsPage from './pages/admin/lesson/LessonsPage';
+import LessonDetailPage from './pages/admin/lesson/LessonDetailPage';
+import LessonPartDetailPage from './pages/admin/lesson/LessonPartDetailPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { setAuthState, updateUser } from './store/authSlice';
 import { authApi } from './services/authApi';
@@ -136,6 +139,38 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <CoursesPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/lessons',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <LessonsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/lessons/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <LessonDetailPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/lessons/:lessonId/parts/:partId',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <LessonPartDetailPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/lessons/:lessonId/parts/new',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <LessonPartDetailPage />
                 </ProtectedRoute>
               ),
             },

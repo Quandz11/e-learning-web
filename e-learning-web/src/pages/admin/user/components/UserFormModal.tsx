@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { userApi, type CreateUserRequest, type UpdateUserRequest, type UserDto, type UserRole, type UserStatus } from '../../../../services/userApi';
 
+import { profileApi } from '../../../../services/profileApi';
+
 const roles: UserRole[] = ['ADMIN', 'CARE', 'CABIN_OWNER', 'STUDENT', 'LECTURER'];
 const statuses: UserStatus[] = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
 
@@ -30,8 +32,37 @@ const UserFormModal: React.FC<UserFormModalProps> = ({ isOpen, onClose, onSucces
     const [showCreatePassword, setShowCreatePassword] = useState(false);
     const [form, setForm] = useState<CreateUserRequest>(emptyCreate());
 
+    // Avatar upload state
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
     const roleLabel = (value: UserRole) => t(`admin.users.roles.${value}`);
     const statusLabel = (value: UserStatus) => t(`admin.users.statuses.${value}`);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setError('File size exceeds 5MB');
+            return;
+        }
+
+        try {
+            setUploadingAvatar(true);
+            setError(null);
+            const { url } = await profileApi.uploadAvatar(file);
+            setForm(prev => ({ ...prev, avatarUrl: url }));
+        } catch (err: any) {
+            setError(err.message || 'Upload failed');
+        } finally {
+            setUploadingAvatar(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -136,13 +167,45 @@ const UserFormModal: React.FC<UserFormModalProps> = ({ isOpen, onClose, onSucces
                                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                             />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 md:col-span-2">
                             <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.users.form.avatar')}</label>
-                            <input
-                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                                value={form.avatarUrl || ''}
-                                onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })}
-                            />
+                            <div className="flex items-center gap-4">
+                                <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full border border-slate-200 bg-dashboard-primary/10 dark:border-slate-700">
+                                    {form.avatarUrl ? (
+                                        <img src={form.avatarUrl} alt="Avatar Preview" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-dashboard-primary">
+                                            {form.fullName ? form.fullName.charAt(0).toUpperCase() : '?'}
+                                        </div>
+                                    )}
+                                    {uploadingAvatar && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileChange}
+                                        accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
+                                        className="hidden"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={uploadingAvatar || loading}
+                                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">upload</span>
+                                        {uploadingAvatar ? t('common.uploading', { defaultValue: 'Uploading...' }) : t('profile.form.changeAvatar', { defaultValue: 'Change Avatar' })}
+                                    </button>
+                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                        JPG, PNG, WebP up to 5MB
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                         {!editingId && (
                             <div className="space-y-2">

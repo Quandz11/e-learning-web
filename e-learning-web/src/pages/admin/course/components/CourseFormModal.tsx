@@ -53,8 +53,34 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
     const [lecturerLoading, setLecturerLoading] = useState(false);
     const [videoThumbnailUploading, setVideoThumbnailUploading] = useState<Record<string, boolean>>({});
     const [pdfUploading, setPdfUploading] = useState<Record<string, boolean>>({});
+    const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+    const thumbnailInputRef = React.useRef<HTMLInputElement>(null);
 
     const currentUserLecturerId = useMemo(() => user?.id || '', [user]);
+
+    const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError(t('admin.courses.form.errors.fileSize', { defaultValue: 'File size exceeds 5MB' }));
+            return;
+        }
+
+        try {
+            setUploadingThumbnail(true);
+            setError(null);
+            const { url } = await courseApi.uploadThumbnail(file);
+            setForm((prev) => ({ ...prev, thumbnailUrl: url }));
+        } catch (err: any) {
+            setError(err.message || t('admin.courses.form.errors.uploadFailed'));
+        } finally {
+            setUploadingThumbnail(false);
+            if (thumbnailInputRef.current) {
+                thumbnailInputRef.current.value = '';
+            }
+        }
+    };
 
     // Initialize form when opening
     useEffect(() => {
@@ -358,6 +384,47 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                             ? t('admin.courses.form.lecturerEmpty')
                                             : t('admin.courses.form.lecturerHint')}
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.thumbnail')}</label>
+                        <div className="flex items-start gap-4">
+                            <div className="relative h-32 w-48 flex-shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
+                                {form.thumbnailUrl ? (
+                                    <img src={form.thumbnailUrl} alt="Thumbnail Preview" className="h-full w-full object-cover" />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-slate-400">
+                                        <span className="material-symbols-outlined text-4xl">image</span>
+                                    </div>
+                                )}
+                                {uploadingThumbnail && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <input
+                                    type="file"
+                                    ref={thumbnailInputRef}
+                                    onChange={handleThumbnailUpload}
+                                    accept="image/png, image/jpeg, image/jpg, image/webp"
+                                    className="hidden"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => thumbnailInputRef.current?.click()}
+                                    disabled={uploadingThumbnail || loading}
+                                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">upload</span>
+                                    {uploadingThumbnail ? t('common.uploading', { defaultValue: 'Uploading...' }) : t('admin.courses.form.uploadThumbnail', { defaultValue: 'Upload Thumbnail' })}
+                                </button>
+                                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                    JPG, PNG, WebP up to 5MB. Recommended ratio 16:9.
+                                </p>
                             </div>
                         </div>
                     </div>

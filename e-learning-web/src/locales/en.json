@@ -172,6 +172,7 @@
                 "title": "Title",
                 "thumbnail": "Thumbnail URL",
                 "price": "Price",
+                "lecturer": "Lecturer",
                 "lecturerSearchPlaceholder": "Search lecturer by name or email",
                 "lecturerSelectPlaceholder": "Select a lecturer",
                 "lecturerEmpty": "No lecturers found",

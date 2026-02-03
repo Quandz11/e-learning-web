@@ -2,8 +2,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 @theme {
-  --font-display: 'Epilogue', sans-serif;
-  --font-sans: 'Epilogue', sans-serif;
+  --font-display: 'Roboto', sans-serif;
+  --font-sans: 'Roboto', sans-serif;
 
   --color-primary: #007b80;
   --color-background-light: #f9f7f6;
@@ -13,7 +13,7 @@
   --radius-xl: 1.5rem;
 
   /* Dashboard Theme extensions */
-  --font-dashboard: 'Manrope', sans-serif;
+  --font-dashboard: 'Roboto', sans-serif;
   --color-dashboard-primary: #155879;
   --color-dashboard-primary-dark: #0e3f57;
   --color-dashboard-accent: #d97706;

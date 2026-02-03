@@ -170,6 +170,7 @@
                 "title": "Tiêu đề",
                 "thumbnail": "Ảnh thumbnail",
                 "price": "Giá",
+                "lecturer": "Giảng viên",
                 "lecturerSearchPlaceholder": "Tìm giảng viên theo tên hoặc email",
                 "lecturerSelectPlaceholder": "Chọn giảng viên",
                 "lecturerLoading": "Đang tải danh sách giảng viên...",

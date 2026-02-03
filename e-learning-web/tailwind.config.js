@@ -19,9 +19,9 @@ export default {
         'dashboard-surface-dark': '#1a262e',
       },
       fontFamily: {
-        display: ["'Epilogue'", 'sans-serif'],
-        sans: ["'Epilogue'", 'sans-serif'],
-        dashboard: ["'Manrope'", 'sans-serif'],
+        display: ["'Roboto'", 'sans-serif'],
+        sans: ["'Roboto'", 'sans-serif'],
+        dashboard: ["'Roboto'", 'sans-serif'],
       },
       borderRadius: {
         lg: '1rem',

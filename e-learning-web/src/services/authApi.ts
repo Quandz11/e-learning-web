@@ -202,7 +202,16 @@ class AuthApi {
   decodeToken(token: string): User | null {
     try {
       const payload = token.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join('')
+      );
+      const decoded = JSON.parse(jsonPayload);
 
       const role = decoded.role || decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
       return {

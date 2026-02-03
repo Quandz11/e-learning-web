@@ -16,7 +16,7 @@ const LessonPartDetailPage: React.FC = () => {
     const [lesson, setLesson] = useState<LessonDto | null>(null);
     const [part, setPart] = useState<LessonPartDto | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [_error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
 

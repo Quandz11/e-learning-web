@@ -12,7 +12,7 @@ const LessonDetailPage: React.FC = () => {
     const navigate = useNavigate();
     const [lesson, setLesson] = useState<LessonDto | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [_error, setError] = useState<string | null>(null);
 
 
 

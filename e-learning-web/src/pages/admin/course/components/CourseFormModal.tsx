@@ -15,7 +15,7 @@ interface CourseFormModalProps {
     initialData?: CourseResponse | null;
 }
 
-const initialCourse = (lecturerId: string | undefined): CourseInput => ({
+const _initialCourse = (lecturerId: string | undefined): CourseInput => ({
     title: '',
     description: '',
     price: 0,
@@ -51,7 +51,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
     // Data Loading State
     const [lecturers, setLecturers] = useState<UserDto[]>([]);
     const [lecturerSearch, setLecturerSearch] = useState('');
-    const [lecturerLoading, setLecturerLoading] = useState(false);
+    const [_lecturerLoading, setLecturerLoading] = useState(false);
     const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
     const thumbnailInputRef = React.useRef<HTMLInputElement>(null);
 

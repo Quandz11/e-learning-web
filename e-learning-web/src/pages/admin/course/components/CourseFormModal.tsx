@@ -15,18 +15,6 @@ interface CourseFormModalProps {
     initialData?: CourseResponse | null;
 }
 
-const _initialCourse = (lecturerId: string | undefined): CourseInput => ({
-    title: '',
-    description: '',
-    price: 0,
-    isFree: false,
-    lecturerId: lecturerId || '',
-    thumbnailUrl: '',
-    isPublished: false,
-    learningOutcomes: [],
-    lessonIds: [],
-});
-
 const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSuccess, courseId, initialData }) => {
     const { t } = useTranslation();
     const { user } = useSelector((state: RootState) => state.auth);

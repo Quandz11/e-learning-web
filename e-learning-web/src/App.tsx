@@ -30,6 +30,8 @@ import StudentCourseDetailPage from './pages/StudentCourseDetailPage';
 import LearningPage from './pages/LearningPage';
 import RootLayout from './components/layout/RootLayout';
 import { profileApi } from './services/profileApi';
+import { ToastProvider } from './contexts/ToastContext';
+import ToastContainer from './components/ui/Toast/ToastContainer';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -283,6 +285,37 @@ function App() {
     initAuth();
   }, [dispatch]);
 
+  // Proactive silent refresh
+  useEffect(() => {
+    const REFRESH_INTERVAL = 13 * 60 * 1000; // 13 minutes
+    let refreshTimer: ReturnType<typeof setInterval>;
+
+    const startRefreshTimer = () => {
+      refreshTimer = setInterval(async () => {
+        const token = authApi.getAccessToken();
+        if (token) {
+          try {
+            console.log('Proactive token refresh...');
+            const response = await authApi.refreshToken();
+            authApi.setAccessToken(response.accessToken);
+            // Optionally update Redux if needed, though memory token is most critical for api calls
+          } catch (error) {
+            console.error('Proactive refresh failed', error);
+            // If proactive refresh fails, we might let the interceptor handle it next time
+            // or clear auth if it's a hard failure (like 401 on refresh).
+            // For now, allow interceptor to catch it later.
+          }
+        }
+      }, REFRESH_INTERVAL);
+    };
+
+    startRefreshTimer();
+
+    return () => {
+      if (refreshTimer) clearInterval(refreshTimer);
+    };
+  }, []);
+
   if (isInitializing) {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -297,9 +330,10 @@ function App() {
   }
 
   return (
-    <>
+    <ToastProvider>
       <RouterProvider router={router} />
-    </>
+      <ToastContainer />
+    </ToastProvider>
   );
 }
 

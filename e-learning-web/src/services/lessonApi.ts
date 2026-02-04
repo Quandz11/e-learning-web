@@ -1,15 +1,5 @@
-import { authApi } from './authApi';
+import { apiClient } from './apiClient';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
-
-function authHeaders() {
-    const token = authApi.getAccessToken();
-    const headers: Record<string, string> = {};
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-}
 
 export interface LessonPartDto {
     id: string;
@@ -62,77 +52,50 @@ export interface UpdateLessonPartRequest extends CreateLessonPartRequest { }
 
 export const lessonApi = {
     async getAll(): Promise<LessonDto[]> {
-        const res = await fetch(`${API_BASE_URL}/lessons`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        });
-        if (!res.ok) throw new Error('Failed to fetch lessons');
-        return res.json();
+        return apiClient('/lessons');
     },
 
     async getById(id: string): Promise<LessonDto> {
-        const res = await fetch(`${API_BASE_URL}/lessons/${id}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        });
-        if (!res.ok) throw new Error('Failed to fetch lesson');
-        return res.json();
+        return apiClient(`/lessons/${id}`);
     },
 
     async create(payload: CreateLessonRequest): Promise<LessonDto> {
-        const res = await fetch(`${API_BASE_URL}/lessons`, {
+        return apiClient('/lessons', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error('Failed to create lesson');
-        return res.json();
     },
 
     async update(id: string, payload: UpdateLessonRequest): Promise<LessonDto> {
-        const res = await fetch(`${API_BASE_URL}/lessons/${id}`, {
+        return apiClient(`/lessons/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error('Failed to update lesson');
-        return res.json();
     },
 
     async delete(id: string): Promise<void> {
-        const res = await fetch(`${API_BASE_URL}/lessons/${id}`, {
+        return apiClient(`/lessons/${id}`, {
             method: 'DELETE',
-            headers: { ...authHeaders() },
         });
-        if (!res.ok) throw new Error('Failed to delete lesson');
     },
 
     async addPart(lessonId: string, payload: CreateLessonPartRequest): Promise<LessonDto> {
-        const res = await fetch(`${API_BASE_URL}/lessons/${lessonId}/parts`, {
+        return apiClient(`/lessons/${lessonId}/parts`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error('Failed to add lesson part');
-        return res.json();
     },
 
     async updatePart(lessonId: string, partId: string, payload: UpdateLessonPartRequest): Promise<LessonDto> {
-        const res = await fetch(`${API_BASE_URL}/lessons/${lessonId}/parts/${partId}`, {
+        return apiClient(`/lessons/${lessonId}/parts/${partId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error('Failed to update lesson part');
-        return res.json();
     },
 
     async deletePart(lessonId: string, partId: string): Promise<LessonDto> {
-        const res = await fetch(`${API_BASE_URL}/lessons/${lessonId}/parts/${partId}`, {
+        return apiClient(`/lessons/${lessonId}/parts/${partId}`, {
             method: 'DELETE',
-            headers: { ...authHeaders() },
         });
-        if (!res.ok) throw new Error('Failed to delete lesson part');
-        return res.json();
     }
 };

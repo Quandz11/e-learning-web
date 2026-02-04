@@ -798,5 +798,51 @@
             "send": "Send",
             "error": "Failed to send message"
         }
+    },
+    "notifications": {
+        "success": {
+            "title": "Success",
+            "loginSuccess": "Login successful!",
+            "registerSuccess": "Registration successful!",
+            "enrollSuccess": "Enrollment successful!",
+            "saveSuccess": "Saved successfully!",
+            "deleteSuccess": "Deleted successfully!",
+            "updateSuccess": "Updated successfully!",
+            "uploadSuccess": "Upload successful!"
+        },
+        "error": {
+            "title": "Error",
+            "loginFailed": "Login failed",
+            "invalidCredentials": "Invalid email or password",
+            "emailExists": "Email already exists",
+            "networkError": "Network connection error",
+            "serverError": "Server error",
+            "notFound": "Not found",
+            "forbidden": "You don't have permission to perform this action",
+            "unauthorized": "Unauthorized",
+            "validationError": "Validation error",
+            "uploadFailed": "Upload failed",
+            "alreadyEnrolled": "You are already enrolled in this course"
+        },
+        "warning": {
+            "title": "Warning"
+        },
+        "info": {
+            "title": "Information"
+        }
+    },
+    "modal": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "close": "Close",
+        "confirmDelete": {
+            "title": "Confirm Deletion",
+            "message": "Are you sure you want to delete {{item}}? This action cannot be undone.",
+            "course": "this course",
+            "user": "this user",
+            "instructor": "this instructor",
+            "lesson": "this lesson"
+        }
     }
 }

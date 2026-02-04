@@ -3,8 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { courseApi, type CourseResponse } from '../services/courseApi';
-import { enrollmentApi } from '../services/enrollmentApi';
 import { useTranslation } from 'react-i18next';
+import { enrollmentApi } from '../services/enrollmentApi';
 
 const StudentCourseDetailPage: React.FC = () => {
     const { t } = useTranslation();

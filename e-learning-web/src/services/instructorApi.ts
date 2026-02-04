@@ -1,6 +1,7 @@
-import { authApi } from './authApi';
+import { apiClient } from './apiClient';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
+
+
 
 export type InstructorStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
@@ -77,97 +78,48 @@ export interface UpdateInstructorRequest {
     avatarUrl?: string;
 }
 
-function authHeaders() {
-    const token = authApi.getAccessToken();
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-}
+
 
 export const instructorApi = {
     async getPaged(params: { search?: string; status?: string; page?: number; pageSize?: number }): Promise<PagedResult<InstructorDto>> {
-        const url = new URL(`${API_BASE_URL}/instructors`);
-        if (params.search) url.searchParams.set('search', params.search);
-        if (params.status) url.searchParams.set('status', params.status);
-        url.searchParams.set('page', String(params.page ?? 1));
-        url.searchParams.set('pageSize', String(params.pageSize ?? 20));
+        const searchParams = new URLSearchParams();
+        if (params.search) searchParams.set('search', params.search);
+        if (params.status) searchParams.set('status', params.status);
+        searchParams.set('page', String(params.page ?? 1));
+        searchParams.set('pageSize', String(params.pageSize ?? 20));
 
-        const res = await fetch(url.toString(), {
-            method: 'GET',
-            headers: authHeaders(),
-            credentials: 'include',
-        });
-        if (!res.ok) throw new Error('Failed to fetch instructors');
-        return res.json();
+        return apiClient(`/instructors?${searchParams.toString()}`);
     },
 
     async getById(id: string): Promise<InstructorDetailDto> {
-        const res = await fetch(`${API_BASE_URL}/instructors/${id}`, {
-            method: 'GET',
-            headers: authHeaders(),
-            credentials: 'include',
-        });
-        if (!res.ok) throw new Error('Failed to fetch instructor details');
-        return res.json();
+        return apiClient(`/instructors/${id}`);
     },
 
     async getStats(id: string): Promise<InstructorStatsDto> {
-        const res = await fetch(`${API_BASE_URL}/instructors/${id}/stats`, {
-            method: 'GET',
-            headers: authHeaders(),
-            credentials: 'include',
-        });
-        if (!res.ok) throw new Error('Failed to fetch instructor stats');
-        return res.json();
+        return apiClient(`/instructors/${id}/stats`);
     },
 
     async getCourses(id: string): Promise<InstructorCourseDto[]> {
-        const res = await fetch(`${API_BASE_URL}/instructors/${id}/courses`, {
-            method: 'GET',
-            headers: authHeaders(),
-            credentials: 'include',
-        });
-        if (!res.ok) throw new Error('Failed to fetch instructor courses');
-        return res.json();
+        return apiClient(`/instructors/${id}/courses`);
     },
 
     async create(payload: CreateInstructorRequest): Promise<InstructorDto> {
-        const res = await fetch(`${API_BASE_URL}/instructors`, {
+        return apiClient('/instructors', {
             method: 'POST',
-            headers: authHeaders(),
-            credentials: 'include',
             body: JSON.stringify(payload),
         });
-        if (!res.ok) {
-            const msg = await res.text();
-            throw new Error(msg || 'Create instructor failed');
-        }
-        return res.json();
     },
 
     async update(id: string, payload: UpdateInstructorRequest): Promise<InstructorDto> {
-        const res = await fetch(`${API_BASE_URL}/instructors/${id}`, {
+        return apiClient(`/instructors/${id}`, {
             method: 'PUT',
-            headers: authHeaders(),
-            credentials: 'include',
             body: JSON.stringify(payload),
         });
-        if (!res.ok) {
-            const msg = await res.text();
-            throw new Error(msg || 'Update instructor failed');
-        }
-        return res.json();
     },
 
     async delete(id: string): Promise<void> {
-        const res = await fetch(`${API_BASE_URL}/instructors/${id}`, {
+        return apiClient(`/instructors/${id}`, {
             method: 'DELETE',
-            headers: authHeaders(),
-            credentials: 'include',
         });
-        if (!res.ok) {
-            const msg = await res.text();
-            throw new Error(msg || 'Delete instructor failed');
-        }
     },
 };

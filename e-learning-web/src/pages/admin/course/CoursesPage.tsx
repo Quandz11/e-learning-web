@@ -6,9 +6,12 @@ import { courseApi } from '../../../services/courseApi';
 import type { CourseResponse } from '../../../services/courseApi';
 import { format } from 'date-fns';
 import CourseFormModal from './components/CourseFormModal';
+import ConfirmModal from '../../../components/ui/Modal/ConfirmModal';
+import { useToast } from '../../../contexts/ToastContext';
 
 const CoursesPage: React.FC = () => {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   // const navigate = useNavigate(); // Hook is unused if we link directly, but checking usage
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -18,6 +21,11 @@ const CoursesPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<CourseResponse | null>(null);
+
+  // Delete Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     load();
@@ -48,13 +56,24 @@ const CoursesPage: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.courses.form.deleteConfirm'))) return;
+  const handleDeleteClick = (id: string) => {
+    setDeletingId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    setIsDeleting(true);
     try {
-      await courseApi.remove(id);
+      await courseApi.remove(deletingId);
+      showToast(t('notifications.success.deleteSuccess'), 'success');
+      setShowDeleteModal(false);
       await load();
     } catch (err: any) {
-      setError(err.message || t('admin.courses.form.errors.deleteFailed'));
+      showToast(err.message || t('admin.courses.form.errors.deleteFailed'), 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -166,7 +185,7 @@ const CoursesPage: React.FC = () => {
                     </button>
                     <button
                       className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20"
-                      onClick={() => handleDelete(course.id)}
+                      onClick={() => handleDeleteClick(course.id)}
                     >
                       <span className="material-symbols-outlined text-[16px]">delete</span>
                       {t('admin.courses.buttons.delete')}
@@ -185,6 +204,18 @@ const CoursesPage: React.FC = () => {
         onSuccess={handleSuccess}
         courseId={editingId}
         initialData={selectedCourse}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title={t('modal.confirmDelete.title')}
+        message={t('modal.confirmDelete.message', { item: t('modal.confirmDelete.course') })}
+        confirmText={t('modal.delete')}
+        cancelText={t('modal.cancel')}
+        variant="danger"
+        isLoading={isDeleting}
       />
     </AdminLayout>
   );

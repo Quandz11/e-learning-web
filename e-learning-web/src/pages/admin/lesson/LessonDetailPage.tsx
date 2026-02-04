@@ -5,9 +5,12 @@ import AdminLayout from '../../../components/admin/AdminLayout';
 import { lessonApi, type LessonDto, type LessonPartDto } from '../../../services/lessonApi';
 import LessonFormModal from './components/LessonFormModal'; // To edit lesson info
 import SecureVideoPlayer from '../../../components/SecureVideoPlayer';
+import ConfirmModal from '../../../components/ui/Modal/ConfirmModal';
+import { useToast } from '../../../contexts/ToastContext';
 
 const LessonDetailPage: React.FC = () => {
     const { t } = useTranslation();
+    const { showToast } = useToast();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [lesson, setLesson] = useState<LessonDto | null>(null);
@@ -18,6 +21,11 @@ const LessonDetailPage: React.FC = () => {
 
     // Lesson Edit Modal
     const [showEditLesson, setShowEditLesson] = useState(false);
+
+    // Delete Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingPartId, setDeletingPartId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -52,13 +60,24 @@ const LessonDetailPage: React.FC = () => {
         navigate(`/admin/lessons/${id}/parts/${part.id}`);
     };
 
-    const handleDeletePart = async (partId: string) => {
-        if (!id || !confirm(t('admin.lessons.deletePartConfirm'))) return;
+    const handleDeletePartClick = (partId: string) => {
+        setDeletingPartId(partId);
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDeletePart = async () => {
+        if (!id || !deletingPartId) return;
+
+        setIsDeleting(true);
         try {
-            await lessonApi.deletePart(id, partId);
+            await lessonApi.deletePart(id, deletingPartId);
+            showToast(t('notifications.success.deleteSuccess'), 'success');
+            setShowDeleteModal(false);
             await load(id);
         } catch (err: any) {
-            alert(err.message);
+            showToast(err.message || t('admin.lessons.deleteError'), 'error');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -177,7 +196,7 @@ const LessonDetailPage: React.FC = () => {
                                                 <span className="material-symbols-outlined text-[20px]">edit</span>
                                             </button>
                                             <button
-                                                onClick={() => handleDeletePart(part.id)}
+                                                onClick={() => handleDeletePartClick(part.id)}
                                                 className="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-900/20 dark:hover:text-red-300"
                                             >
                                                 <span className="material-symbols-outlined text-[20px]">delete</span>
@@ -206,6 +225,18 @@ const LessonDetailPage: React.FC = () => {
                 onSuccess={handleEditLessonSuccess}
                 lessonId={lesson.id}
                 initialData={lesson}
+            />
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleConfirmDeletePart}
+                title={t('modal.confirmDelete.title')}
+                message={t('admin.lessons.deletePartConfirm')}
+                confirmText={t('modal.delete')}
+                cancelText={t('modal.cancel')}
+                variant="danger"
+                isLoading={isDeleting}
             />
         </AdminLayout>
     );

@@ -95,8 +95,8 @@ public class UserService : IUserService
             Role = request.Role.ToUpper(),
             Status = request.Status.ToUpper(),
             AvatarUrl = request.AvatarUrl,
-            IsEmailVerified = false,
-            IsPhoneVerified = false,
+            IsEmailVerified = true, // Admin creation implies verification
+            IsPhoneVerified = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             IsDeleted = false

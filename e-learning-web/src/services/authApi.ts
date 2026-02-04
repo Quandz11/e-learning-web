@@ -1,3 +1,5 @@
+import { apiClient } from './apiClient';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
 
 // Store access token in memory for Authorization header
@@ -34,18 +36,6 @@ class AuthApi {
     return accessToken;
   }
 
-  // Helper to get headers with Authorization
-  private getHeaders(includeAuth = false): Record<string, string> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    if (includeAuth && accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-
-    return headers;
-  }
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
@@ -141,38 +131,32 @@ class AuthApi {
 
   // 2FA Methods
   async setupTwoFactor(): Promise<{ secret: string; qrCodeUri: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/setup`, {
+    return apiClient('/auth/2fa/setup', {
       method: 'POST',
-      headers: this.getHeaders(true),
     });
-    if (!response.ok) throw new Error('Failed to setup 2FA');
-    return response.json();
   }
 
   async enableTwoFactor(secret: string, code: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/enable`, {
+    return apiClient('/auth/2fa/enable', {
       method: 'POST',
-      headers: this.getHeaders(true),
       body: JSON.stringify({ secret, code }),
     });
-    if (!response.ok) throw new Error('Failed to enable 2FA');
-    return response.json();
   }
 
   async disableTwoFactor(password: string): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/disable`, {
+    return apiClient('/auth/2fa/disable', {
       method: 'POST',
-      headers: this.getHeaders(true),
       body: JSON.stringify({ password }),
     });
-    if (!response.ok) throw new Error('Failed to disable 2FA');
-    return response.json();
   }
 
   async loginVerifyTwoFactor(code: string): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/2fa/login-verify`, {
       method: 'POST',
-      headers: this.getHeaders(true), // Uses the temp PreAuth token
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}` // PreAuth token
+      },
       body: JSON.stringify({ code }),
       credentials: 'include',
     });
@@ -188,7 +172,7 @@ class AuthApi {
 
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
 

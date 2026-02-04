@@ -8,12 +8,15 @@ import { loginStart, loginSuccess, loginFailure, updateUser } from '../../store/
 import { authApi } from '../../services/authApi';
 import { profileApi } from '../../services/profileApi';
 import { saveAuth } from '../../services/authStorage';
+import { useToast } from '../../contexts/ToastContext';
+import { extractErrorMessage, getErrorI18nKey } from '../../utils/errorHandler';
 
 const LoginPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const { requiresTwoFactor } = useSelector((state: RootState) => state.auth);
+    const { showToast } = useToast();
 
     const [twoFactorCode, setTwoFactorCode] = useState('');
 
@@ -22,7 +25,6 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const syncProfile = async () => {
         try {
@@ -42,7 +44,6 @@ const LoginPage = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError(null);
         setIsLoading(true);
 
         try {
@@ -89,6 +90,9 @@ const LoginPage = () => {
 
             saveAuth({ user, accessToken: response.accessToken, expiresAt: response.expiresAt });
 
+            // Show success toast
+            showToast(t('notifications.success.loginSuccess'), 'success');
+
             // Redirect based on role
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');
@@ -96,8 +100,11 @@ const LoginPage = () => {
                 navigate('/home'); // or appropriate page for other roles
             }
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Login failed';
-            setError(message);
+            const message = extractErrorMessage(err);
+            const i18nKey = getErrorI18nKey(message);
+            const displayMessage = i18nKey ? t(i18nKey) : message;
+
+            showToast(displayMessage, 'error');
             dispatch(loginFailure(message));
         } finally {
             setIsLoading(false);
@@ -106,7 +113,6 @@ const LoginPage = () => {
 
     const handle2FASubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
         setIsLoading(true);
 
         try {
@@ -130,14 +136,20 @@ const LoginPage = () => {
 
             saveAuth({ user, accessToken: response.accessToken, expiresAt: response.expiresAt });
 
+            showToast(t('notifications.success.loginSuccess'), 'success');
+
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');
             } else {
                 navigate('/home');
             }
         } catch (err: any) {
-            setError(err.message || 'Verification failed');
-            dispatch(loginFailure(err.message || 'Verification failed'));
+            const message = extractErrorMessage(err);
+            const i18nKey = getErrorI18nKey(message);
+            const displayMessage = i18nKey ? t(i18nKey) : message;
+
+            showToast(displayMessage, 'error');
+            dispatch(loginFailure(message));
         } finally {
             setIsLoading(false);
         }
@@ -150,12 +162,6 @@ const LoginPage = () => {
                     <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('auth.twoFactor.title')}</h2>
                     <p className="text-gray-500 dark:text-gray-400">{t('auth.twoFactor.desc')}</p>
                 </div>
-
-                {error && (
-                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-                        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                    </div>
-                )}
 
                 <form className="flex flex-col gap-5" onSubmit={handle2FASubmit}>
                     <div className="space-y-2">
@@ -199,13 +205,6 @@ const LoginPage = () => {
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('auth.welcomeBack')}</h2>
                 <p className="text-gray-500 dark:text-gray-400">{t('auth.enterDetails')}</p>
             </div>
-
-            {/* Error Message */}
-            {error && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-                    <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                </div>
-            )}
 
             <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
                 {/* Email Field */}

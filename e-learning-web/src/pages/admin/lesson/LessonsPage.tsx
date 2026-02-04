@@ -5,10 +5,13 @@ import AdminLayout from '../../../components/admin/AdminLayout';
 import { lessonApi, type LessonDto } from '../../../services/lessonApi';
 import { format } from 'date-fns';
 import LessonFormModal from './components/LessonFormModal';
+import ConfirmModal from '../../../components/ui/Modal/ConfirmModal';
+import { useToast } from '../../../contexts/ToastContext';
 
 const LessonsPage: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [lessons, setLessons] = useState<LessonDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -17,6 +20,11 @@ const LessonsPage: React.FC = () => {
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [selectedLesson, setSelectedLesson] = useState<LessonDto | null>(null);
+
+    // Delete Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         load();
@@ -50,13 +58,24 @@ const LessonsPage: React.FC = () => {
         navigate(`/admin/lessons/${id}`);
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm(t('admin.lessons.deleteConfirm'))) return;
+    const handleDeleteClick = (id: string) => {
+        setDeletingId(id);
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deletingId) return;
+
+        setIsDeleting(true);
         try {
-            await lessonApi.delete(id);
+            await lessonApi.delete(deletingId);
+            showToast(t('notifications.success.deleteSuccess'), 'success');
+            setShowDeleteModal(false);
             await load();
         } catch (err: any) {
-            setError(err.message || t('admin.lessons.deleteError'));
+            showToast(err.message || t('admin.lessons.deleteError'), 'error');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -145,7 +164,7 @@ const LessonsPage: React.FC = () => {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleDelete(lesson.id);
+                                                handleDeleteClick(lesson.id);
                                             }}
                                             className="rounded-full bg-white/90 p-2 text-red-500 shadow-sm backdrop-blur transition hover:bg-white hover:text-red-600 dark:bg-slate-900/80 dark:text-red-400 dark:hover:bg-slate-900 dark:hover:text-red-300"
                                             title={t('common.delete', { defaultValue: 'Delete' })}
@@ -197,6 +216,18 @@ const LessonsPage: React.FC = () => {
                 onSuccess={handleSuccess}
                 lessonId={editingId}
                 initialData={selectedLesson}
+            />
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleConfirmDelete}
+                title={t('modal.confirmDelete.title')}
+                message={t('modal.confirmDelete.message', { item: t('modal.confirmDelete.lesson') })}
+                confirmText={t('modal.delete')}
+                cancelText={t('modal.cancel')}
+                variant="danger"
+                isLoading={isDeleting}
             />
         </AdminLayout>
     );

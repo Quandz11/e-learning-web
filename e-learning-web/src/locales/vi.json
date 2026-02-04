@@ -815,5 +815,51 @@
             "send": "Gửi",
             "error": "Gửi tin nhắn thất bại"
         }
+    },
+    "notifications": {
+        "success": {
+            "title": "Thành công",
+            "loginSuccess": "Đăng nhập thành công!",
+            "registerSuccess": "Đăng ký thành công!",
+            "enrollSuccess": "Ghi danh thành công!",
+            "saveSuccess": "Lưu thành công!",
+            "deleteSuccess": "Xóa thành công!",
+            "updateSuccess": "Cập nhật thành công!",
+            "uploadSuccess": "Tải lên thành công!"
+        },
+        "error": {
+            "title": "Lỗi",
+            "loginFailed": "Đăng nhập thất bại",
+            "invalidCredentials": "Email hoặc mật khẩu không hợp lệ",
+            "emailExists": "Email đã tồn tại",
+            "networkError": "Lỗi kết nối mạng",
+            "serverError": "Lỗi máy chủ",
+            "notFound": "Không tìm thấy",
+            "forbidden": "Bạn không có quyền thực hiện thao tác này",
+            "unauthorized": "Chưa xác thực",
+            "validationError": "Lỗi validation",
+            "uploadFailed": "Tải lên thất bại",
+            "alreadyEnrolled": "Bạn đã ghi danh khóa học này"
+        },
+        "warning": {
+            "title": "Cảnh báo"
+        },
+        "info": {
+            "title": "Thông tin"
+        }
+    },
+    "modal": {
+        "confirm": "Xác nhận",
+        "cancel": "Hủy",
+        "delete": "Xóa",
+        "close": "Đóng",
+        "confirmDelete": {
+            "title": "Xác nhận xóa",
+            "message": "Bạn có chắc chắn muốn xóa {{item}}? Hành động này không thể hoàn tác.",
+            "course": "khóa học này",
+            "user": "người dùng này",
+            "instructor": "giảng viên này",
+            "lesson": "bài học này"
+        }
     }
 }

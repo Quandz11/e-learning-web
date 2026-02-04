@@ -1,6 +1,6 @@
-import { authApi } from './authApi';
+import { apiClient } from './apiClient';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
+
 
 import type { LessonDto } from './lessonApi';
 
@@ -50,80 +50,36 @@ export interface UploadThumbnailResponse {
   url: string;
 }
 
-function authHeaders() {
-  const token = authApi.getAccessToken();
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
-}
+
 
 export const courseApi = {
   async getAll(isPublished?: boolean): Promise<CourseResponse[]> {
-    const url = isPublished === undefined ? `${API_BASE_URL}/courses` : `${API_BASE_URL}/courses?isPublished=${isPublished}`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders(),
-      },
-      credentials: 'include',
-    });
-    if (!res.ok) throw new Error('Failed to fetch courses');
-    return res.json();
+    const url = isPublished === undefined ? '/courses' : `/courses?isPublished=${isPublished}`;
+    return apiClient(url);
   },
 
   async getById(id: string): Promise<CourseResponse> {
-    const res = await fetch(`${API_BASE_URL}/courses/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders(),
-      },
-      credentials: 'include',
-    });
-    if (!res.ok) throw new Error('Failed to fetch course');
-    return res.json();
+    return apiClient(`/courses/${id}`);
   },
 
   async create(payload: CourseInput): Promise<CourseResponse> {
-    const res = await fetch(`${API_BASE_URL}/courses`, {
+    return apiClient('/courses', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders(),
-      },
-      credentials: 'include',
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error('Failed to create course');
-    return res.json();
   },
 
   async update(id: string, payload: CourseInput): Promise<CourseResponse> {
-    const res = await fetch(`${API_BASE_URL}/courses/${id}`, {
+    return apiClient(`/courses/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders(),
-      },
-      credentials: 'include',
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error('Failed to update course');
-    return res.json();
   },
 
   async remove(id: string): Promise<void> {
-    const res = await fetch(`${API_BASE_URL}/courses/${id}`, {
+    return apiClient(`/courses/${id}`, {
       method: 'DELETE',
-      headers: {
-        ...authHeaders(),
-      },
-      credentials: 'include',
     });
-    if (!res.ok) throw new Error('Failed to delete course');
   },
 
   async uploadVideo(file: File, title?: string): Promise<VideoUploadResponse> {
@@ -131,39 +87,27 @@ export const courseApi = {
     formData.append('file', file);
     if (title) formData.append('title', title);
 
-    const res = await fetch(`${API_BASE_URL}/videos/upload`, {
-      method: 'POST',
-      headers: {
-        ...authHeaders(),
-      },
-      credentials: 'include',
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const message = await res.text();
-      throw new Error(message || 'Failed to upload video');
+    try {
+      return apiClient('/videos/upload', {
+        method: 'POST',
+        body: formData,
+      });
+    } catch (err) {
+      throw new Error('Failed to upload video');
     }
-
-    return res.json();
   },
 
   async uploadVideoThumbnail(videoId: string, file: File): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await fetch(`${API_BASE_URL}/videos/${videoId}/thumbnail`, {
-      method: 'POST',
-      headers: {
-        ...authHeaders(),
-      },
-      credentials: 'include',
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const message = await res.text();
-      throw new Error(message || 'Failed to upload video thumbnail');
+    try {
+      return apiClient(`/videos/${videoId}/thumbnail`, {
+        method: 'POST',
+        body: formData,
+      });
+    } catch (err) {
+      throw new Error('Failed to upload video thumbnail');
     }
   },
 
@@ -171,51 +115,28 @@ export const courseApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await fetch(`${API_BASE_URL}/courses/thumbnail`, {
-      method: 'POST',
-      headers: {
-        ...authHeaders(),
-      },
-      credentials: 'include',
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const message = await res.text();
-      throw new Error(message || 'Failed to upload thumbnail');
+    try {
+      return apiClient('/courses/thumbnail', {
+        method: 'POST',
+        body: formData,
+      });
+    } catch {
+      throw new Error('Failed to upload thumbnail');
     }
-
-    return res.json();
   },
 
 
   async syncVideoDuration(videoId: string): Promise<{ duration: number }> {
-    const res = await fetch(`${API_BASE_URL}/videos/${videoId}/sync-duration`, {
-      method: 'POST',
-      headers: {
-        ...authHeaders(),
-      },
-      credentials: 'include',
-    });
-
-    if (!res.ok) {
-      const message = await res.text();
-      throw new Error(message || 'Failed to sync video duration');
+    try {
+      return apiClient(`/videos/${videoId}/sync-duration`, {
+        method: 'POST',
+      });
+    } catch {
+      throw new Error('Failed to sync video duration');
     }
-
-    return res.json();
   },
 
   async getEnrolledStudents(id: string): Promise<StudentResponse[]> {
-    const res = await fetch(`${API_BASE_URL}/courses/${id}/students`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders(),
-      },
-      credentials: 'include',
-    });
-    if (!res.ok) throw new Error('Failed to fetch enrolled students');
-    return res.json();
+    return apiClient(`/courses/${id}/students`);
   },
 };

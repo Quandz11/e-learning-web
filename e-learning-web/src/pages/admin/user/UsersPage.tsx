@@ -6,12 +6,15 @@ import { userApi, type UserDto, type UserRole, type UserStatus } from '../../../
 import { format } from 'date-fns';
 import UserFormModal from './components/UserFormModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
+import ConfirmModal from '../../../components/ui/Modal/ConfirmModal';
+import { useToast } from '../../../contexts/ToastContext';
 
 const roles: UserRole[] = ['ADMIN', 'CARE', 'CABIN_OWNER', 'STUDENT', 'LECTURER'];
 const statuses: UserStatus[] = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
 
 const UsersPage: React.FC = () => {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [data, setData] = useState<UserDto[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -27,6 +30,11 @@ const UsersPage: React.FC = () => {
   const [showReset, setShowReset] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
+
+  // Delete Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
@@ -74,13 +82,24 @@ const UsersPage: React.FC = () => {
     setShowReset(true);
   };
 
-  const confirmDelete = async (id: string) => {
-    if (!confirm(t('admin.users.deleteConfirm'))) return;
+  const handleDeleteClick = (id: string) => {
+    setDeletingId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    setIsDeleting(true);
     try {
-      await userApi.delete(id);
+      await userApi.delete(deletingId);
+      showToast(t('notifications.success.deleteSuccess'), 'success');
+      setShowDeleteModal(false);
       await load();
     } catch (err: any) {
-      setError(err.message || t('admin.users.errors.deleteFailed'));
+      showToast(err.message || t('admin.users.errors.deleteFailed'), 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -202,7 +221,7 @@ const UsersPage: React.FC = () => {
                       </button>
                       <button
                         className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20"
-                        onClick={() => confirmDelete(u.id)}
+                        onClick={() => handleDeleteClick(u.id)}
                       >
                         {t('admin.users.buttons.delete')}
                       </button>
@@ -260,6 +279,18 @@ const UsersPage: React.FC = () => {
           userId={editingId}
         />
       )}
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title={t('modal.confirmDelete.title')}
+        message={t('modal.confirmDelete.message', { item: t('modal.confirmDelete.user') })}
+        confirmText={t('modal.delete')}
+        cancelText={t('modal.cancel')}
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </AdminLayout>
   );
 };

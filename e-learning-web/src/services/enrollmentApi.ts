@@ -1,14 +1,5 @@
-import { authApi } from './authApi';
+import { apiClient } from './apiClient';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
-
-const getAuthHeaders = () => {
-    const token = authApi.getAccessToken();
-    return {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
-};
 
 export interface EnrollmentResponse {
     id: string;
@@ -40,68 +31,27 @@ export interface LessonPartProgressDto {
 
 class EnrollmentApi {
     async enrollInCourse(courseId: string): Promise<EnrollmentResponse> {
-        const response = await fetch(`${API_URL}/enrollments`, {
+        return apiClient('/enrollments', {
             method: 'POST',
-            headers: getAuthHeaders(),
-            credentials: 'include',
             body: JSON.stringify({ courseId })
         });
-
-        if (!response.ok) {
-            let errorMessage = 'Failed to enroll in course';
-            try {
-                const error = await response.json();
-                errorMessage = error.message || errorMessage;
-            } catch {
-                errorMessage = response.statusText || errorMessage;
-            }
-            throw new Error(errorMessage);
-        }
-
-        return response.json();
     }
 
     async checkEnrollment(courseId: string): Promise<boolean> {
-        const response = await fetch(`${API_URL}/enrollments/check/${courseId}`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
+        try {
+            const data = await apiClient<{ isEnrolled: boolean }>(`/enrollments/check/${courseId}`);
+            return data.isEnrolled;
+        } catch {
             return false;
         }
-
-        const data = await response.json();
-        return data.isEnrolled;
     }
 
     async getUserEnrollments(): Promise<EnrollmentResponse[]> {
-        const response = await fetch(`${API_URL}/enrollments`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch enrollments');
-        }
-
-        return response.json();
+        return apiClient('/enrollments');
     }
 
     async getCourseProgress(courseId: string): Promise<CourseProgressResponse> {
-        const response = await fetch(`${API_URL}/enrollments/${courseId}/progress`, {
-            method: 'GET',
-            headers: getAuthHeaders(),
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch course progress');
-        }
-
-        return response.json();
+        return apiClient(`/enrollments/${courseId}/progress`);
     }
 
     async updateLessonProgress(courseId: string, lessonPartId: string, watchedDuration: number): Promise<void> {
@@ -119,50 +69,30 @@ class EnrollmentApi {
         // I will use `lessons` in URL if I didn't change the controller route attribute, BUT `lessonPartId` as value.
         // If I assume I updated the controller to be semantically correct, it should be `parts`.
         // Let's stick with `lessons/${lessonPartId}` for now unless I see 404.
-        const response = await fetch(`${API_URL}/enrollments/${courseId}/lessons/${lessonPartId}/progress`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            credentials: 'include',
-            body: JSON.stringify({ watchedDuration })
-        });
-
-        if (!response.ok) {
-            console.error('Failed to update progress', response.status);
-            let errorMessage = 'Failed to update lesson progress';
-            try {
-                const error = await response.json();
-                errorMessage = error.message || errorMessage;
-            } catch {
-                errorMessage = response.statusText || errorMessage;
-            }
-            throw new Error(errorMessage);
+        try {
+            await apiClient(`/enrollments/${courseId}/lessons/${lessonPartId}/progress`, {
+                method: 'POST',
+                body: JSON.stringify({ watchedDuration })
+            });
+        } catch (error: any) {
+            console.error('Failed to update progress', error);
+            throw new Error(error.message || 'Failed to update lesson progress');
         }
     }
 
     async markLessonComplete(courseId: string, lessonPartId: string): Promise<void> {
-        const response = await fetch(`${API_URL}/enrollments/${courseId}/lessons/${lessonPartId}/complete`, {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            credentials: 'include'
-        });
-
-        if (!response.ok) {
-            let errorMessage = 'Failed to mark lesson complete';
-            try {
-                const error = await response.json();
-                errorMessage = error.message || errorMessage;
-            } catch {
-                errorMessage = response.statusText || errorMessage;
-            }
-            throw new Error(errorMessage);
+        try {
+            await apiClient(`/enrollments/${courseId}/lessons/${lessonPartId}/complete`, {
+                method: 'POST',
+            });
+        } catch (error: any) {
+            throw new Error(error.message || 'Failed to mark lesson complete');
         }
     }
 
     async updateLastAccessed(courseId: string): Promise<void> {
-        await fetch(`${API_URL}/enrollments/${courseId}/access`, {
+        await apiClient(`/enrollments/${courseId}/access`, {
             method: 'PUT',
-            headers: getAuthHeaders(),
-            credentials: 'include'
         });
     }
 }

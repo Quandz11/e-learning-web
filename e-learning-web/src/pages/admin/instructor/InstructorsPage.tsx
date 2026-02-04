@@ -6,11 +6,14 @@ import { instructorApi, type InstructorDto, type InstructorStatus } from '../../
 import { format } from 'date-fns';
 import InstructorFormModal from './components/InstructorFormModal';
 import { userApi } from '../../../services/userApi';
+import ConfirmModal from '../../../components/ui/Modal/ConfirmModal';
+import { useToast } from '../../../contexts/ToastContext';
 
 const statuses: InstructorStatus[] = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
 
 const InstructorsPage: React.FC = () => {
     const { t } = useTranslation();
+    const { showToast } = useToast();
     const [data, setData] = useState<InstructorDto[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
@@ -24,6 +27,11 @@ const InstructorsPage: React.FC = () => {
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [selectedInstructor, setSelectedInstructor] = useState<InstructorDto | null>(null);
+
+    // Delete Modal State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
@@ -65,13 +73,24 @@ const InstructorsPage: React.FC = () => {
         setShowForm(true);
     };
 
-    const confirmDelete = async (id: string) => {
-        if (!confirm(t('admin.instructors.deleteConfirm'))) return;
+    const handleDeleteClick = (id: string) => {
+        setDeletingId(id);
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deletingId) return;
+
+        setIsDeleting(true);
         try {
-            await instructorApi.delete(id);
+            await instructorApi.delete(deletingId);
+            showToast(t('notifications.success.deleteSuccess'), 'success');
+            setShowDeleteModal(false);
             await load();
         } catch (err: any) {
-            setError(err.message || t('admin.instructors.errors.deleteFailed'));
+            showToast(err.message || t('admin.instructors.errors.deleteFailed'), 'error');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -202,7 +221,7 @@ const InstructorsPage: React.FC = () => {
                                             </button>
                                             <button
                                                 className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20"
-                                                onClick={() => confirmDelete(instructor.id)}
+                                                onClick={() => handleDeleteClick(instructor.id)}
                                             >
                                                 {t('admin.instructors.buttons.delete')}
                                             </button>
@@ -251,6 +270,18 @@ const InstructorsPage: React.FC = () => {
                 onSuccess={handleSuccess}
                 editingId={editingId}
                 initialData={selectedInstructor}
+            />
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleConfirmDelete}
+                title={t('modal.confirmDelete.title')}
+                message={t('modal.confirmDelete.message', { item: t('modal.confirmDelete.instructor') })}
+                confirmText={t('modal.delete')}
+                cancelText={t('modal.cancel')}
+                variant="danger"
+                isLoading={isDeleting}
             />
         </AdminLayout>
     );

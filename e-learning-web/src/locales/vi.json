@@ -157,7 +157,8 @@
             "lessons": "Bài học",
             "revenue": "Doanh thu",
             "settings": "Cài đặt",
-            "chat": "Quản lý Chat"
+            "chat": "Quản lý Chat",
+            "notifications": "Thông báo"
         },
         "header": {
             "searchPlaceholder": "Tìm kiếm học viên, khóa học, hoặc đơn hàng...",
@@ -518,6 +519,39 @@
                 "logoutAllError": "Đăng xuất tất cả thất bại",
                 "loadError": "Không thể tải lịch sử đăng nhập"
             }
+        },
+        "notifications": {
+            "title": "Gửi Thông báo Hệ thống",
+            "subtitle": "Gửi thông báo đến người dùng hoặc nhóm người dùng",
+            "viewAll": "Xem tất cả thông báo",
+            "markAllRead": "Đánh dấu tất cả đã đọc",
+            "empty": "Không có thông báo mới",
+            "form": {
+                "title": "Tiêu đề",
+                "content": "Nội dung",
+                "targetType": "Gửi đến",
+                "targetUser": "Người dùng cụ thể",
+                "targetRole": "Nhóm người dùng",
+                "send": "Gửi thông báo",
+                "sending": "Đang gửi...",
+                "success": "Đã gửi thông báo thành công",
+                "error": "Gửi thất bại"
+            },
+            "types": {
+                "USER": "Người dùng cụ thể",
+                "ROLE": "Nhóm người dùng (Role)",
+                "ALL": "Tất cả người dùng"
+            },
+            "roles": {
+                "STUDENT": "Học viên (Student)",
+                "LECTURER": "Giảng viên (Lecturer)",
+                "AGENT": "Đại lý (Agent)",
+                "CARE": "CSKH (Care)",
+                "ADMIN": "Quản trị viên (Admin)"
+            }
+        },
+        "buttons": {
+            "search": "Tìm kiếm"
         }
     },
     "common": {
@@ -868,7 +902,13 @@
         },
         "info": {
             "title": "Thông tin"
-        }
+        },
+        "title": "Thông báo",
+        "empty": "Không có thông báo nào",
+        "markAllRead": "Đánh dấu tất cả là đã đọc",
+        "new": "Mới",
+        "viewAll": "Xem tất cả",
+        "system": "Hệ thống"
     },
     "modal": {
         "confirm": "Xác nhận",

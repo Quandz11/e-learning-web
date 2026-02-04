@@ -32,6 +32,8 @@ import RootLayout from './components/layout/RootLayout';
 import { profileApi } from './services/profileApi';
 import { ToastProvider } from './contexts/ToastContext';
 import ToastContainer from './components/ui/Toast/ToastContainer';
+import { NotificationProvider } from './context/NotificationContext';
+import AdminNotificationPage from './pages/admin/notification/AdminNotificationPage';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -201,6 +203,14 @@ function App() {
               ),
             },
             {
+              path: 'admin/notifications',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminNotificationPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
               path: 'admin/instructors',
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
@@ -331,8 +341,10 @@ function App() {
 
   return (
     <ToastProvider>
-      <RouterProvider router={router} />
-      <ToastContainer />
+      <NotificationProvider>
+        <RouterProvider router={router} />
+        <ToastContainer />
+      </NotificationProvider>
     </ToastProvider>
   );
 }

@@ -91,20 +91,17 @@ public class EnrollmentService : IEnrollmentService
             // Notify Lecturer
             if (!string.IsNullOrEmpty(course.LecturerId.ToString()))
             {
-                await _notificationService.NotifyUserAsync(
-                    course.LecturerId.ToString(), 
+                await _notificationService.SendToUserAsync(
+                    course.LecturerId, 
                     "New Student Enrollment", 
-                    $"{studentName} has enrolled in your course: {course.Title}", 
-                    "enrollment", 
-                    new { courseId = course.Id, userId });
+                    $"{studentName} has enrolled in your course: {course.Title}");
             }
 
             // Notify Admins
-            await _notificationService.NotifyAdminsAsync(
+            await _notificationService.SendToRoleAsync(
+                "ADMIN", 
                 "New Enrollment", 
-                $"{studentName} enrolled in {course.Title}", 
-                "enrollment", 
-                new { courseId = course.Id, userId });
+                $"{studentName} enrolled in {course.Title}");
         }
         catch (Exception ex)
         {

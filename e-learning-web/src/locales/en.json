@@ -157,7 +157,8 @@
             "lessons": "Lessons",
             "revenue": "Revenue",
             "settings": "Settings",
-            "chat": "Chat Management"
+            "chat": "Chat Management",
+            "notifications": "Notifications"
         },
         "header": {
             "searchPlaceholder": "Search students, courses, or orders...",
@@ -502,6 +503,39 @@
                 "logoutAllError": "Logout all failed",
                 "loadError": "Failed to load login history"
             }
+        },
+        "notifications": {
+            "title": "System Notifications",
+            "subtitle": "Send notifications to users or groups",
+            "viewAll": "View All Notifications",
+            "markAllRead": "Mark all as read",
+            "empty": "No new notifications",
+            "form": {
+                "title": "Title",
+                "content": "Content",
+                "targetType": "Send To",
+                "targetUser": "Specific User",
+                "targetRole": "User Group",
+                "send": "Send Notification",
+                "sending": "Sending...",
+                "success": "Notification sent successfully",
+                "error": "Failed to send"
+            },
+            "types": {
+                "USER": "Specific User",
+                "ROLE": "User Group (Role)",
+                "ALL": "All Users"
+            },
+            "roles": {
+                "STUDENT": "Student",
+                "LECTURER": "Lecturer",
+                "AGENT": "Agent",
+                "CARE": "Care",
+                "ADMIN": "Admin"
+            }
+        },
+        "buttons": {
+            "search": "Search"
         }
     },
     "common": {
@@ -852,7 +886,13 @@
         },
         "info": {
             "title": "Information"
-        }
+        },
+        "title": "Notifications",
+        "empty": "No notifications yet",
+        "markAllRead": "Mark all as read",
+        "new": "New",
+        "viewAll": "View All",
+        "system": "System"
     },
     "modal": {
         "confirm": "Confirm",

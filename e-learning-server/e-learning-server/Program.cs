@@ -90,7 +90,8 @@ builder.Services.AddAuthentication(options =>
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/chat"))
+            if (!string.IsNullOrEmpty(accessToken) && 
+                (path.StartsWithSegments("/hubs/chat") || path.StartsWithSegments("/hubs/notification")))
             {
                 context.Token = accessToken;
             }
@@ -234,5 +235,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<SKVI.Infrastructure.Hubs.ChatHub>("/hubs/chat");
+app.MapHub<SKVI.Infrastructure.Hubs.NotificationHub>("/hubs/notification");
 
 app.Run();

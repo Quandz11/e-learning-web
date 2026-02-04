@@ -117,13 +117,13 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
         // Check content type json
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.indexOf('application/json') !== -1) {
-            return response.json();
+            return await response.json();
         }
         // Fallback for text/blob if needed, but for now assuming JSON mostly
         // If strict JSON is required we can keep it as is.
         // However, some endpoints return text strings.
         try {
-            return response.json();
+            return await response.json();
         } catch (e) {
             // If json parse fails, maybe it's just text
             return (await response.text()) as unknown as T;

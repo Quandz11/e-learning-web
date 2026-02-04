@@ -1,55 +1,200 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using SKVI.Application.DTOs.Notification;
 using SKVI.Application.Interfaces;
+using SKVI.Domain.Entities;
 using SKVI.Infrastructure.Hubs;
 
 namespace SKVI.Infrastructure.Services;
 
 public class NotificationService : INotificationService
 {
-    private readonly IHubContext<ChatHub> _hubContext;
+    private readonly ApplicationDbContext _context;
+    private readonly IHubContext<NotificationHub> _hubContext;
     private readonly ILogger<NotificationService> _logger;
 
-    public NotificationService(IHubContext<ChatHub> hubContext, ILogger<NotificationService> logger)
+    public NotificationService(
+        ApplicationDbContext context,
+        IHubContext<NotificationHub> hubContext,
+        ILogger<NotificationService> logger)
     {
+        _context = context;
         _hubContext = hubContext;
         _logger = logger;
     }
 
-    public async Task NotifyUserAsync(string userId, string title, string message, string type = "info", object? data = null)
+    public async Task SendToUserAsync(Guid userId, string title, string content)
     {
         try
         {
-            await _hubContext.Clients.Group($"user-{userId}").SendAsync("ReceiveNotification", new
+            var notification = new Notification
             {
+                Id = Guid.NewGuid(),
+                UserId = userId,
                 Title = title,
-                Message = message,
-                Type = type,
-                Data = data,
-                Timestamp = DateTime.UtcNow
-            });
+                Content = content,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
+            var dto = new NotificationDto
+            {
+                Id = notification.Id,
+                Title = notification.Title,
+                Content = notification.Content,
+                IsRead = notification.IsRead,
+                CreatedAt = notification.CreatedAt
+            };
+
+            await _hubContext.Clients.Group($"user-{userId}").SendAsync("ReceiveNotification", dto);
+            _logger.LogInformation("Sent notification {NotificationId} to user {UserId}", notification.Id, userId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send notification to user {UserId}", userId);
+            throw;
         }
     }
 
-    public async Task NotifyAdminsAsync(string title, string message, string type = "info", object? data = null)
+    public async Task SendToRoleAsync(string role, string title, string content)
     {
         try
         {
-            await _hubContext.Clients.Group("admin-group").SendAsync("ReceiveNotification", new
+            // Find users in role
+            var users = await _context.Users
+                .Where(u => u.Role == role)
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            if (!users.Any()) return;
+
+            var notifications = users.Select(uid => new Notification
             {
+                Id = Guid.NewGuid(),
+                UserId = uid,
                 Title = title,
-                Message = message,
-                Type = type,
-                Data = data,
-                Timestamp = DateTime.UtcNow
-            });
+                Content = content,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            }).ToList();
+
+            await _context.Notifications.AddRangeAsync(notifications);
+            await _context.SaveChangesAsync();
+
+            // Broadcast via SignalR to role group
+            // Note: This sends to online users. The dto passed here might act as a "generic" one
+            // OR we rely on the fact they will fetch latest notifications.
+            // But usually we want to show a toast.
+            // We can send a "generic" DTO for the toast.
+            var broadcastDto = new NotificationDto
+            {
+                Id = Guid.Empty, // Placeholder ID for broadcast toast, or generate one if client expects valid GUID
+                Title = title,
+                Content = content,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _hubContext.Clients.Group($"role-{role}").SendAsync("ReceiveNotification", broadcastDto);
+            _logger.LogInformation("Sent notification to {Count} users in role {Role}", users.Count, role);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send notification to admins");
+            _logger.LogError(ex, "Failed to send notification to role {Role}", role);
+            throw;
+        }
+    }
+
+    public async Task SendToAllAsync(string title, string content)
+    {
+        try
+        {
+            var users = await _context.Users.Select(u => u.Id).ToListAsync();
+            if (!users.Any()) return;
+
+            var notifications = users.Select(uid => new Notification
+            {
+                Id = Guid.NewGuid(),
+                UserId = uid,
+                Title = title,
+                Content = content,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            }).ToList();
+
+            // Use batch insert if available or just AddRange
+            await _context.Notifications.AddRangeAsync(notifications);
+            await _context.SaveChangesAsync();
+
+            var broadcastDto = new NotificationDto
+            {
+                Id = Guid.Empty,
+                Title = title,
+                Content = content,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _hubContext.Clients.Group("all-users").SendAsync("ReceiveNotification", broadcastDto);
+            _logger.LogInformation("Sent notification to all {Count} users", users.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send notification to all users");
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId)
+    {
+        return await _context.Notifications
+            .Where(n => n.UserId == userId)
+            .OrderByDescending(n => n.CreatedAt)
+            .Select(n => new NotificationDto
+            {
+                Id = n.Id,
+                Title = n.Title,
+                Content = n.Content,
+                IsRead = n.IsRead,
+                CreatedAt = n.CreatedAt
+            })
+            .ToListAsync();
+    }
+
+    public async Task<int> GetUnreadCountAsync(Guid userId)
+    {
+        return await _context.Notifications
+            .CountAsync(n => n.UserId == userId && !n.IsRead);
+    }
+
+    public async Task MarkAsReadAsync(Guid notificationId, Guid userId)
+    {
+        var notification = await _context.Notifications
+            .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
+
+        if (notification != null)
+        {
+            notification.IsRead = true;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task MarkAllAsReadAsync(Guid userId)
+    {
+        var notifications = await _context.Notifications
+            .Where(n => n.UserId == userId && !n.IsRead)
+            .ToListAsync();
+
+        if (notifications.Any())
+        {
+            foreach (var note in notifications)
+            {
+                note.IsRead = true;
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }

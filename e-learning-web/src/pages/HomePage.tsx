@@ -7,6 +7,7 @@ import { logout } from '../store/authSlice';
 import { authApi } from '../services/authApi';
 import { clearAuth } from '../services/authStorage';
 import { courseApi, type CourseResponse } from '../services/courseApi';
+import HeaderNotification from '../components/common/HeaderNotification';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -82,6 +83,9 @@ const HomePage: React.FC = () => {
             <div className="flex items-center gap-3">
               {isAuthenticated && user ? (
                 <>
+                  <div className="mr-2">
+                    <HeaderNotification />
+                  </div>
                   <span className="hidden sm:inline text-sm text-gray-600 dark:text-gray-300 font-display">
                     {t('home.header.welcome')}, <span className="font-medium text-gray-900 dark:text-white normal-case">{user.fullName}</span>
                   </span>
@@ -465,7 +469,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
+    </div >
   );
 };
 

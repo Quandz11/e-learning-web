@@ -6,6 +6,7 @@ import { authApi } from '../../../services/authApi';
 import { userApi } from '../../../services/userApi';
 import type { RootState } from '../../../store/store';
 import TwoFactorSetupModal from './components/TwoFactorSetupModal';
+import LoginHistory from './components/LoginHistory';
 
 const AdminSettingsPage = () => {
     const { t } = useTranslation();
@@ -104,6 +105,16 @@ const AdminSettingsPage = () => {
                                 <span>{t('admin.settings.security.statusEnabled')}</span>
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* Login History Section */}
+                <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-dashboard-surface-dark">
+                    <div className="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
+                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('admin.settings.loginHistory.sectionTitle')}</h2>
+                    </div>
+                    <div className="p-6">
+                        <LoginHistory />
                     </div>
                 </div>
             </div>

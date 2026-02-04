@@ -478,6 +478,29 @@
                 "successTitle": "Success!",
                 "successDesc": "Two-factor authentication has been enabled for your account.",
                 "errorQr": "Failed to load QR Code"
+            },
+            "loginHistory": {
+                "sectionTitle": "Login History",
+                "title": "Login History",
+                "subtitle": "Manage devices that are logged into your account",
+                "currentDevice": "Current Device",
+                "deviceName": "Device",
+                "browser": "Browser",
+                "ipAddress": "IP Address",
+                "loginTime": "Login Time",
+                "expiresAt": "Expires",
+                "logout": "Logout",
+                "logoutAll": "Logout All Other Devices",
+                "confirmLogout": "Confirm Logout",
+                "confirmLogoutMessage": "Are you sure you want to logout from this device?",
+                "confirmLogoutAll": "Logout All Devices?",
+                "confirmLogoutAllMessage": "Are you sure you want to logout from all other devices? You will need to login again on those devices.",
+                "noSessions": "No active sessions",
+                "logoutSuccess": "Logged out successfully",
+                "logoutError": "Logout failed",
+                "logoutAllSuccess": "Logged out from all other devices",
+                "logoutAllError": "Logout all failed",
+                "loadError": "Failed to load login history"
             }
         }
     },

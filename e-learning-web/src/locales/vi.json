@@ -236,7 +236,6 @@
                 "lecturerSelectPlaceholder": "Chọn giảng viên",
                 "selectedLecturerId": "Đã chọn ID: {{id}}",
                 "thumbnail": "Hình đại diện",
-                "uploadThumbnail": "Tải ảnh lên",
                 "description": "Mô tả",
                 "free": "Miễn phí",
                 "published": "Xuất bản",
@@ -495,6 +494,29 @@
                 "successTitle": "Thành công!",
                 "successDesc": "Xác thực 2 yếu tố đã được bật cho tài khoản của bạn.",
                 "errorQr": "Không thể tải mã QR"
+            },
+            "loginHistory": {
+                "sectionTitle": "Lịch sử đăng nhập",
+                "title": "Lịch sử đăng nhập",
+                "subtitle": "Quản lý các thiết bị đã đăng nhập vào tài khoản của bạn",
+                "currentDevice": "Thiết bị hiện tại",
+                "deviceName": "Thiết bị",
+                "browser": "Trình duyệt",
+                "ipAddress": "Địa chỉ IP",
+                "loginTime": "Thời gian đăng nhập",
+                "expiresAt": "Hết hạn",
+                "logout": "Đăng xuất",
+                "logoutAll": "Đăng xuất tất cả thiết bị khác",
+                "confirmLogout": "Xác nhận đăng xuất",
+                "confirmLogoutMessage": "Bạn có chắc muốn đăng xuất khỏi thiết bị này?",
+                "confirmLogoutAll": "Đăng xuất tất cả thiết bị?",
+                "confirmLogoutAllMessage": "Bạn có chắc muốn đăng xuất khỏi tất cả thiết bị khác? Bạn sẽ cần đăng nhập lại trên các thiết bị đó.",
+                "noSessions": "Không có phiên đăng nhập nào",
+                "logoutSuccess": "Đã đăng xuất thành công",
+                "logoutError": "Đăng xuất thất bại",
+                "logoutAllSuccess": "Đã đăng xuất tất cả thiết bị khác",
+                "logoutAllError": "Đăng xuất tất cả thất bại",
+                "loadError": "Không thể tải lịch sử đăng nhập"
             }
         }
     },
@@ -778,7 +800,7 @@
                 "contactSupport": "Liên hệ hỗ trợ",
                 "privacyPolicy": "Chính sách bảo mật"
             },
-            "copyright": "© 2024 SKVI Learning Inc. Bản quyền thuộc về.",
+            "copyright": "© 2026 SKVI Learning Inc. Bản quyền thuộc về.",
             "terms": "Điều khoản",
             "privacy": "Bảo mật",
             "cookies": "Cookies"

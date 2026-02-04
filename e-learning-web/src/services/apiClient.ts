@@ -59,7 +59,7 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
             if (isRefreshing) {
                 // If already refreshing, queue this request
                 try {
-                    const token = await new Promise<string>((resolve, reject) => {
+                    await new Promise<string>((resolve, reject) => {
                         failedQueue.push({ resolve, reject });
                     });
                     // Retry with new token

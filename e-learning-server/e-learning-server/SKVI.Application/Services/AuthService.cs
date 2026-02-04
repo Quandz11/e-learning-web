@@ -333,14 +333,94 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("2FA is not enabled for this user.");
         }
 
+
         var secretBytes = OtpNet.Base32Encoding.ToBytes(user.TwoFactorSecret);
         var totp = new OtpNet.Totp(secretBytes);
 
         if (!totp.VerifyTotp(code, out _, new OtpNet.VerificationWindow(2, 2)))
         {
-             throw new UnauthorizedAccessException("Invalid 2FA code.");
+            throw new UnauthorizedAccessException("Invalid 2FA code.");
         }
 
         return await GenerateTokensForUser(user, "Unknown", "Unknown"); // Should pass IP/UA
+    }
+
+    // Session Management Methods
+    public async Task<List<ActiveSessionDto>> GetActiveSessionsAsync(Guid userId, string? currentRefreshToken)
+    {
+        var sessions = await _context.RefreshTokens
+            .Where(rt => rt.UserId == userId && 
+                         rt.RevokedAt == null && 
+                         rt.ExpiresAt > DateTime.UtcNow)
+            .OrderByDescending(rt => rt.CreatedAt)
+            .ToListAsync();
+
+        return sessions.Select(s => new ActiveSessionDto
+        {
+            SessionId = s.Id,
+            DeviceName = ParseDeviceName(s.UserAgent),
+            Browser = ParseBrowser(s.UserAgent),
+            IpAddress = s.IpAddress ?? "Unknown",
+            LoginTime = s.CreatedAt,
+            ExpiresAt = s.ExpiresAt,
+            IsCurrentSession = !string.IsNullOrEmpty(currentRefreshToken) && s.TokenHash == currentRefreshToken
+        }).ToList();
+    }
+
+    public async Task RevokeSessionAsync(Guid userId, Guid sessionId)
+    {
+        var session = await _context.RefreshTokens
+            .FirstOrDefaultAsync(rt => rt.Id == sessionId && rt.UserId == userId);
+        
+        if (session == null)
+            throw new KeyNotFoundException("Session not found");
+        
+        session.RevokedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task RevokeAllSessionsAsync(Guid userId, string? currentRefreshToken)
+    {
+        var sessions = await _context.RefreshTokens
+            .Where(rt => rt.UserId == userId && 
+                         rt.RevokedAt == null && 
+                         (!string.IsNullOrEmpty(currentRefreshToken) ? rt.TokenHash != currentRefreshToken : true))
+            .ToListAsync();
+
+        foreach (var session in sessions)
+        {
+            session.RevokedAt = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    // Helper methods for parsing UserAgent
+    private string ParseDeviceName(string? userAgent)
+    {
+        if (string.IsNullOrEmpty(userAgent)) return "Unknown Device";
+        
+        if (userAgent.Contains("Windows NT 10")) return "Windows 10/11 PC";
+        if (userAgent.Contains("Windows")) return "Windows PC";
+        if (userAgent.Contains("Macintosh") || userAgent.Contains("Mac OS X")) return "Mac";
+        if (userAgent.Contains("iPhone")) return "iPhone";
+        if (userAgent.Contains("iPad")) return "iPad";
+        if (userAgent.Contains("Android")) return "Android Device";
+        if (userAgent.Contains("Linux")) return "Linux PC";
+        
+        return "Unknown Device";
+    }
+
+    private string ParseBrowser(string? userAgent)
+    {
+        if (string.IsNullOrEmpty(userAgent)) return "Unknown";
+        
+        if (userAgent.Contains("Edg/")) return "Edge";
+        if (userAgent.Contains("Chrome/")) return "Chrome";
+        if (userAgent.Contains("Firefox/")) return "Firefox";
+        if (userAgent.Contains("Safari/") && !userAgent.Contains("Chrome")) return "Safari";
+        if (userAgent.Contains("Opera") || userAgent.Contains("OPR")) return "Opera";
+        
+        return "Unknown Browser";
     }
 }

@@ -16,6 +16,11 @@ public interface IAuthService
     Task<AuthResponse> EnableTwoFactorAsync(Guid userId, string secret, string code);
     Task DisableTwoFactorAsync(Guid userId, string password);
     Task<AuthResponse> VerifyTwoFactorLoginAsync(Guid userId, string code);
+
+    // Session Management
+    Task<List<ActiveSessionDto>> GetActiveSessionsAsync(Guid userId, string? currentRefreshToken);
+    Task RevokeSessionAsync(Guid userId, Guid sessionId);
+    Task RevokeAllSessionsAsync(Guid userId, string? currentRefreshToken);
 }
 
 public interface ITokenService

@@ -101,7 +101,7 @@ export const getErrorI18nKey = (errorMessage: string): string | null => {
  */
 export const handleApiError = (
     error: unknown,
-    options: ErrorHandlerOptions = {}
+    _options: ErrorHandlerOptions = {}
 ): string => {
     const message = extractErrorMessage(error);
 

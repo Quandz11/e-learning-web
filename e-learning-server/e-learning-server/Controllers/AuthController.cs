@@ -26,7 +26,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var ipAddress = GetClientIpAddress();
             var userAgent = Request.Headers.UserAgent.ToString();
             
             var response = await _authService.LoginAsync(request, ipAddress, userAgent);
@@ -109,7 +109,7 @@ public class AuthController : ControllerBase
 
         try
         {
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var ipAddress = GetClientIpAddress();
             var userAgent = Request.Headers.UserAgent.ToString();
 
             var response = await _authService.RefreshTokenAsync(refreshToken, ipAddress, userAgent);
@@ -242,5 +242,97 @@ public class AuthController : ControllerBase
         };
         
         Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+    }
+
+    private string GetClientIpAddress()
+    {
+        // Check for X-Forwarded-For header (proxy/load balancer)
+        var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(forwardedFor))
+        {
+            // X-Forwarded-For can contain multiple IPs, take the first one
+            var ips = forwardedFor.Split(',');
+            if (ips.Length > 0)
+            {
+                return ips[0].Trim();
+            }
+        }
+
+        // Check for X-Real-IP header
+        var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(realIp))
+        {
+            return realIp;
+        }
+
+        // Fallback to RemoteIpAddress
+        return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+    }
+
+    // Session Management Endpoints
+    [Authorize]
+    [HttpGet("sessions")]
+    public async Task<IActionResult> GetActiveSessions()
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var currentRefreshToken = Request.Cookies["refreshToken"];
+            var sessions = await _authService.GetActiveSessionsAsync(Guid.Parse(userId), currentRefreshToken);
+            
+            return Ok(sessions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting active sessions");
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPost("sessions/revoke")]
+    public async Task<IActionResult> RevokeSession([FromBody] RevokeSessionRequest request)
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            await _authService.RevokeSessionAsync(Guid.Parse(userId), request.SessionId);
+            
+            return Ok(new { message = "Session revoked successfully" });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error revoking session");
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPost("sessions/revoke-all")]
+    public async Task<IActionResult> RevokeAllSessions()
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var currentRefreshToken = Request.Cookies["refreshToken"];
+            await _authService.RevokeAllSessionsAsync(Guid.Parse(userId), currentRefreshToken);
+            
+            return Ok(new { message = "All other sessions revoked successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error revoking all sessions");
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

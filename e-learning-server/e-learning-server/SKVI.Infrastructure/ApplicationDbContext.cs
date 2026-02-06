@@ -60,6 +60,16 @@ public class ApplicationDbContext : DbContext
     // Audit
     public DbSet<AuditLog> AuditLogs { get; set; }
 
+    // Quiz
+    public DbSet<Quiz> Quizzes { get; set; }
+    public DbSet<QuizQuestion> QuizQuestions { get; set; }
+    public DbSet<QuizQuestionOption> QuizQuestionOptions { get; set; }
+    public DbSet<QuizSubmission> QuizSubmissions { get; set; }
+    public DbSet<QuizAnswer> QuizAnswers { get; set; }
+
+    // Testimonials
+    public DbSet<Testimonial> Testimonials { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -247,6 +257,49 @@ public class ApplicationDbContext : DbContext
             .HasOne(m => m.Parent)
             .WithMany(m => m.Children)
             .HasForeignKey(m => m.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Quiz Configuration
+        modelBuilder.Entity<QuizQuestion>()
+            .HasOne(q => q.Quiz)
+            .WithMany(qz => qz.Questions)
+            .HasForeignKey(q => q.QuizId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<QuizQuestionOption>()
+            .HasOne(o => o.Question)
+            .WithMany(q => q.Options)
+            .HasForeignKey(o => o.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<QuizSubmission>()
+            .HasOne(s => s.Quiz)
+            .WithMany(q => q.Submissions)
+            .HasForeignKey(s => s.QuizId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        modelBuilder.Entity<QuizSubmission>()
+            .HasOne(s => s.User)
+            .WithMany()
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<QuizAnswer>()
+            .HasOne(a => a.Submission)
+            .WithMany(s => s.Answers)
+            .HasForeignKey(a => a.SubmissionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<QuizAnswer>()
+            .HasOne(a => a.Question)
+            .WithMany()
+            .HasForeignKey(a => a.QuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        modelBuilder.Entity<QuizAnswer>()
+            .HasOne(a => a.SelectedOption)
+            .WithMany()
+            .HasForeignKey(a => a.SelectedOptionId)
             .OnDelete(DeleteBehavior.Restrict);
             
         // Relationships are automatically configured by EF Core conventions based on navigation properties,

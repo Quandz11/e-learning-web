@@ -602,6 +602,96 @@
             "editCategory": "Edit Category",
             "createCategory": "Create Category"
         },
+        "testimonials": {
+            "title": "Testimonials",
+            "subtitle": "Manage student testimonials",
+            "create": "Create Testimonial",
+            "edit": "Edit Testimonial",
+            "loadError": "Failed to load testimonial(s)",
+            "table": {
+                "name": "Name",
+                "position": "Position",
+                "content": "Content",
+                "order": "Order",
+                "status": "Status",
+                "empty": "No testimonials found."
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "form": {
+                "name": "Name",
+                "namePlaceholder": "Enter name",
+                "position": "Position",
+                "positionPlaceholder": "e.g. Software Engineer",
+                "content": "Content",
+                "contentPlaceholder": "Enter testimonial content...",
+                "avatarUrl": "Avatar URL",
+                "order": "Display Order",
+                "isActive": "Active (Visible to users)"
+            }
+        },
+        "quiz": {
+            "title": "Quizzes",
+            "subtitle": "Manage your quizzes and surveys",
+            "create": "Create Quiz",
+            "edit": "Edit Quiz",
+            "notFound": "Quiz not found",
+            "loadError": "Failed to load quiz(zes)",
+            "deleteConfirm": "Are you sure you want to delete this quiz?",
+            "table": {
+                "title": "Title",
+                "status": "Status",
+                "created": "Created At",
+                "actions": "Actions",
+                "viewSubmissions": "View Submissions",
+                "viewAnswers": "View Answers",
+                "noQuizzes": "No quizzes found."
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "form": {
+                "basicInfo": "Basic Information",
+                "title": "Title",
+                "titlePlaceholder": "Quiz Title",
+                "description": "Description",
+                "descriptionPlaceholder": "Quiz Description",
+                "isActive": "Active (Visible to users)",
+                "questions": "Questions",
+                "addQuestion": "Add Question",
+                "noQuestions": "No questions added yet. Click 'Add Question' to begin.",
+                "questionText": "Question Text",
+                "type": "Type",
+                "required": "Required",
+                "order": "Order",
+                "options": "Options",
+                "addOption": "Add Option",
+                "optionText": "Option Text",
+                "optionPlaceholder": "Option Text",
+                "noOptions": "Add at least one option.",
+                "removeQuestion": "Remove Question",
+                "removeOption": "Remove Option",
+                "save": "Save Quiz",
+                "cancel": "Cancel"
+            },
+            "types": {
+                "text": "Text Input",
+                "multipleChoice": "Multiple Choice",
+                "singleChoice": "Single Choice",
+                "longText": "Long Text"
+            },
+            "submissions": {
+                "title": "Submissions",
+                "submittedAt": "Submitted At",
+                "contactInfo": "Contact Info",
+                "answers": "Answers",
+                "noAnswer": "No Answer",
+                "noSubmissions": "No submissions yet."
+            }
+        },
         "buttons": {
             "search": "Search"
         }
@@ -609,9 +699,23 @@
     "common": {
         "saving": "Saving...",
         "loading": "Loading...",
+        "sending": "Sending...",
         "cancel": "Cancel",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDelete": "Are you sure?",
+        "deleteSuccess": "Deleted successfully",
+        "deleteError": "Failed to delete",
+        "updateSuccess": "Updated successfully",
+        "createSuccess": "Created successfully",
+        "error": "An error occurred",
         "unnamed": "Unnamed User",
-        "backToList": "Back to List"
+        "backToList": "Back to List",
+        "title": "Title",
+        "status": "Status",
+        "created": "Created At",
+        "actions": "Actions"
     },
     "profile": {
         "title": "User Profile",
@@ -790,6 +894,45 @@
             "interactive": "Interactive Learning",
             "liveSession": "Live sessions & workshops"
         },
+        "fasting": {
+            "title": "Welcome to the Fasting Method",
+            "subtitle": "Intermittent Fasting for Weight Loss",
+            "description": "Experience the most comprehensive fasting program, proven by results and supported by a community.",
+            "takeQuiz": "Take the quiz to start"
+        },
+        "quiz": {
+            "title": "HEALTH SURVEY QUIZ",
+            "start": "Start Now",
+            "next": "Next",
+            "back": "Back",
+            "submit": "Submit Results",
+            "required": "This field is required",
+            "success": "Thank you! We received your information.",
+            "successMessage": "We will contact you shortly.",
+            "close": "Close",
+            "unavailable": "Survey is currently unavailable.",
+            "loadError": "Failed to load quiz",
+            "submitError": "Failed to submit quiz",
+            "contactInfo": "Contact Information",
+            "fields": {
+                "fullName": "Full Name",
+                "fullNamePlaceholder": "Enter your full name",
+                "phone": "Phone Number",
+                "phonePlaceholder": "Enter your phone number",
+                "email": "Email",
+                "emailPlaceholder": "Enter your email",
+                "answerPlaceholder": "Enter your answer...",
+                "metrics": "Body Metrics",
+                "height": "Height (cm)",
+                "weight": "Weight (kg)",
+                "waist": "Waist (cm)",
+                "history": "Medical History Summary"
+            }
+        },
+        "testimonials": {
+            "title": "What Our Students Say",
+            "subtitle": "Real feedback from our students"
+        },
         "courses": {
             "title": "Featured Courses",
             "subtitle": "Hand-picked by our experts for your career growth.",
@@ -836,26 +979,6 @@
                 "title": "24/7 Support",
                 "description": "Our dedicated support ensures you're never stuck."
             }
-        },
-        "testimonials": {
-            "title": "What our learners say",
-            "items": [
-                {
-                    "quote": "The flexibility of the courses allowed me to switch careers while working full-time. The content is incredibly up-to-date.",
-                    "name": "Michael Chen",
-                    "role": "Software Engineer"
-                },
-                {
-                    "quote": "I've taken courses on other platforms, but the instructor quality here is unmatched. The community support is also fantastic.",
-                    "name": "Sarah Johnson",
-                    "role": "Product Manager"
-                },
-                {
-                    "quote": "The agent support was a game changer. Any issue I had was resolved within minutes, letting me focus on learning.",
-                    "name": "David Ross",
-                    "role": "Marketing Specialist"
-                }
-            ]
         },
         "newsletter": {
             "title": "Ready to start your journey?",

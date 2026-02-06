@@ -40,6 +40,11 @@ import ArticleDetailPage from './pages/ArticleDetailPage';
 import AdminArticlesPage from './pages/admin/article/AdminArticlesPage';
 import AdminCategoriesPage from './pages/admin/article/AdminCategoriesPage';
 import UserLayout from './components/layout/UserLayout';
+import AdminQuizPage from './pages/admin/quiz/AdminQuizPage';
+import AdminQuizEditorPage from './pages/admin/quiz/AdminQuizEditorPage';
+import AdminQuizSubmissionsPage from './pages/admin/quiz/AdminQuizSubmissionsPage';
+import AdminTestimonialsPage from './pages/admin/testimonials/AdminTestimonialsPage';
+import AdminTestimonialEditorPage from './pages/admin/testimonials/AdminTestimonialEditorPage';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -272,6 +277,64 @@ function App() {
               ),
             },
             {
+              path: 'admin/quizzes',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminQuizPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/quizzes/new',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminQuizEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/quizzes/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminQuizEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+
+            // ... (in routes)
+            {
+              path: 'admin/quizzes/:id/submissions',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminQuizSubmissionsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/testimonials',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminTestimonialsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/testimonials/new',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminTestimonialEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/testimonials/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminTestimonialEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
               path: 'admin/instructors',
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
@@ -287,8 +350,8 @@ function App() {
                 </ProtectedRoute>
               ),
             },
-          ]
-        }
+          ],
+        },
       ]),
     []
   );

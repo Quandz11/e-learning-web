@@ -592,6 +592,96 @@
                 "ADMIN": "Quản trị viên (Admin)"
             }
         },
+        "testimonials": {
+            "title": "Đánh giá học viên",
+            "subtitle": "Quản lý đánh giá của học viên",
+            "create": "Tạo đánh giá",
+            "edit": "Sửa đánh giá",
+            "loadError": "Không thể tải đánh giá",
+            "table": {
+                "name": "Tên",
+                "position": "Vị trí",
+                "content": "Nội dung",
+                "order": "Thứ tự",
+                "status": "Trạng thái",
+                "empty": "Không có đánh giá nào."
+            },
+            "status": {
+                "active": "Hoạt động",
+                "inactive": "Không hoạt động"
+            },
+            "form": {
+                "name": "Tên",
+                "namePlaceholder": "Nhập tên",
+                "position": "Vị trí",
+                "positionPlaceholder": "VD: Kỹ sư phần mềm",
+                "content": "Nội dung",
+                "contentPlaceholder": "Nhập nội dung đánh giá...",
+                "avatarUrl": "Đường dẫn ảnh đại diện",
+                "order": "Thứ tự hiển thị",
+                "isActive": "Hoạt động (Hiển thị cho người dùng)"
+            }
+        },
+        "quiz": {
+            "title": "Bài kiểm tra",
+            "subtitle": "Quản lý các bài kiểm tra và khảo sát",
+            "create": "Tạo bài kiểm tra",
+            "edit": "Sửa bài kiểm tra",
+            "notFound": "Không tìm thấy bài kiểm tra",
+            "loadError": "Không thể tải bài kiểm tra",
+            "deleteConfirm": "Bạn có chắc chắn muốn xóa bài kiểm tra này?",
+            "table": {
+                "title": "Tiêu đề",
+                "status": "Trạng thái",
+                "created": "Ngày tạo",
+                "actions": "Hành động",
+                "viewSubmissions": "Xem bài nộp",
+                "viewAnswers": "Xem câu trả lời",
+                "noQuizzes": "Không tìm thấy bài kiểm tra nào."
+            },
+            "status": {
+                "active": "Hoạt động",
+                "inactive": "Không hoạt động"
+            },
+            "form": {
+                "basicInfo": "Thông tin cơ bản",
+                "title": "Tiêu đề",
+                "titlePlaceholder": "Tiêu đề bài kiểm tra",
+                "description": "Mô tả",
+                "descriptionPlaceholder": "Mô tả bài kiểm tra",
+                "isActive": "Hoạt động (Hiển thị cho người dùng)",
+                "questions": "Câu hỏi",
+                "addQuestion": "Thêm câu hỏi",
+                "noQuestions": "Chưa có câu hỏi nào. Nhấn 'Thêm câu hỏi' để bắt đầu.",
+                "questionText": "Nội dung câu hỏi",
+                "type": "Loại",
+                "required": "Bắt buộc",
+                "order": "Thứ tự",
+                "options": "Tùy chọn",
+                "addOption": "Thêm tùy chọn",
+                "optionText": "Nội dung tùy chọn",
+                "optionPlaceholder": "Nội dung tùy chọn",
+                "noOptions": "Thêm ít nhất một tùy chọn.",
+                "removeQuestion": "Xóa câu hỏi",
+                "removeOption": "Xóa tùy chọn",
+                "save": "Lưu bài kiểm tra",
+                "cancel": "Hủy"
+            },
+            "types": {
+                "text": "Nhập văn bản",
+                "multipleChoice": "Nhiều lựa chọn",
+                "singleChoice": "Một lựa chọn",
+                "longText": "Văn bản dài"
+            },
+            "submissions": {
+                "title": "Bài nộp",
+                "submittedAt": "Thời gian nộp",
+                "contactInfo": "Thông tin liên hệ",
+                "answers": "Câu trả lời",
+                "noAnswer": "Không có câu trả lời",
+                "noSubmissions": "Chưa có bài nộp nào."
+            }
+        },
         "buttons": {
             "search": "Tìm kiếm"
         }
@@ -599,13 +689,24 @@
     "common": {
         "saving": "Đang lưu...",
         "loading": "Đang tải...",
+        "sending": "Đang gửi...",
         "cancel": "Hủy",
         "save": "Lưu",
         "edit": "Sửa",
         "delete": "Xóa",
+        "confirmDelete": "Bạn có chắc chắn?",
+        "deleteSuccess": "Xóa thành công",
+        "deleteError": "Không thể xóa",
+        "updateSuccess": "Cập nhật thành công",
+        "createSuccess": "Tạo thành công",
+        "error": "Đã xảy ra lỗi",
         "home": "Trang chủ",
         "unnamed": "Người dùng chưa đặt tên",
-        "backToList": "Quay lại danh sách"
+        "backToList": "Quay lại danh sách",
+        "title": "Tiêu đề",
+        "status": "Trạng thái",
+        "created": "Ngày tạo",
+        "actions": "Hành động"
     },
     "articles": {
         "title": "Bài viết",
@@ -799,6 +900,45 @@
             "interactive": "Học tập tương tác",
             "liveSession": "Buổi học trực tiếp & hội thảo"
         },
+        "fasting": {
+            "title": "Chào mừng bạn đến với Phương pháp nhịn ăn",
+            "subtitle": "Nhịn ăn gián đoạn để giảm cân",
+            "description": "Trải nghiệm chương trình nhịn ăn toàn diện nhất, được chứng mình bằng kết quả và được hỗ trợ bởi cộng đồng.",
+            "takeQuiz": "Làm bài kiểm tra để bắt đầu"
+        },
+        "quiz": {
+            "title": "BẢNG KHẢO SÁT QUIZ",
+            "start": "Bắt đầu ngay",
+            "next": "Tiếp theo",
+            "back": "Quay lại",
+            "submit": "Gửi kết quả",
+            "required": "Trường này là bắt buộc",
+            "success": "Cảm ơn bạn! Chúng tôi đã nhận được thông tin.",
+            "successMessage": "Chúng tôi sẽ liên hệ với bạn sớm.",
+            "close": "Đóng",
+            "unavailable": "Khảo sát hiện không khả dụng.",
+            "loadError": "Không thể tải bài khảo sát",
+            "submitError": "Không thể gửi bài khảo sát",
+            "contactInfo": "Thông tin liên hệ",
+            "fields": {
+                "fullName": "Họ tên",
+                "fullNamePlaceholder": "Nhập họ tên của bạn",
+                "phone": "Số điện thoại",
+                "phonePlaceholder": "Nhập số điện thoại",
+                "email": "Email",
+                "emailPlaceholder": "Nhập địa chỉ email",
+                "answerPlaceholder": "Nhập câu trả lời...",
+                "metrics": "Chỉ số cơ thể",
+                "height": "Chiều cao (cm)",
+                "weight": "Cân nặng (kg)",
+                "waist": "Vòng eo (cm)",
+                "history": "Tóm tắt tiểu sử bệnh tật"
+            }
+        },
+        "testimonials": {
+            "title": "Học viên nói gì về chúng tôi",
+            "subtitle": "Những phản hồi chân thực từ học viên của chúng tôi"
+        },
         "courses": {
             "title": "Khóa học nổi bật",
             "subtitle": "Được chọn lọc bởi chuyên gia của chúng tôi cho sự phát triển sự nghiệp của bạn.",
@@ -845,26 +985,6 @@
                 "title": "Hỗ trợ 24/7",
                 "description": "Đội ngũ hỗ trợ tận tâm đảm bảo bạn không bao giờ bị kẹt."
             }
-        },
-        "testimonials": {
-            "title": "Học viên nói gì về chúng tôi",
-            "items": [
-                {
-                    "quote": "Sự linh hoạt của các khóa học cho phép tôi chuyển đổi sự nghiệp trong khi vẫn làm việc toàn thời gian. Nội dung cực kỳ cập nhật.",
-                    "name": "Michael Chen",
-                    "role": "Kỹ sư phần mềm"
-                },
-                {
-                    "quote": "Tôi đã tham gia khóa học trên các nền tảng khác, nhưng chất lượng giảng viên ở đây vô song. Sự hỗ trợ của cộng đồng cũng tuyệt vời.",
-                    "name": "Sarah Johnson",
-                    "role": "Quản lý Sản phẩm"
-                },
-                {
-                    "quote": "Hỗ trợ từ đội ngũ là yếu tố thay đổi cuộc chơi. Mọi vấn đề tôi gặp phải đều được giải quyết trong vài phút, giúp tôi tập trung vào học tập.",
-                    "name": "David Ross",
-                    "role": "Chuyên gia Marketing"
-                }
-            ]
         },
         "newsletter": {
             "title": "Sẵn sàng bắt đầu hành trình?",

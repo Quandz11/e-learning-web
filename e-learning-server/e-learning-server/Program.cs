@@ -43,6 +43,9 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IMenuService, MenuService>();
+builder.Services.AddScoped<IQuizService, QuizService>();
+builder.Services.AddScoped<IQuizSubmissionService, QuizSubmissionService>();
+builder.Services.AddScoped<ITestimonialService, TestimonialService>();
 
 // Guest Conversation Service (Singleton for in-memory storage)
 builder.Services.AddSingleton<IGuestConversationService, GuestConversationService>();

@@ -136,6 +136,28 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
               <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">chat</span>
               <span className="text-sm font-medium">{t('admin.sidebar.chat')}</span>
             </Link>
+            <Link
+              to="/admin/articles"
+              onClick={handleNav}
+              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/articles')
+                ? 'bg-dashboard-primary text-white shadow-dashboard-subtle'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
+                }`}
+            >
+              <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">article</span>
+              <span className="text-sm font-medium">{t('admin.sidebar.articles')}</span>
+            </Link>
+            <Link
+              to="/admin/categories"
+              onClick={handleNav}
+              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/categories')
+                ? 'bg-dashboard-primary text-white shadow-dashboard-subtle'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
+                }`}
+            >
+              <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">category</span>
+              <span className="text-sm font-medium">{t('admin.sidebar.categories')}</span>
+            </Link>
             <a
               href="#"
               className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300"
@@ -164,7 +186,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
           {/* User Mini Profile */}
           <div className="border-t border-slate-200 p-4 dark:border-slate-800">
             <Link
-              to="/profile"
+              to="/admin/profile"
               onClick={handleNav}
               className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
             >

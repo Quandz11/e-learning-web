@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
+import AdminLayout from './components/admin/AdminLayout';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from './store/store';
 import AuthLayout from './components/layout/AuthLayout';
@@ -34,6 +35,11 @@ import { ToastProvider } from './contexts/ToastContext';
 import ToastContainer from './components/ui/Toast/ToastContainer';
 import { NotificationProvider } from './context/NotificationContext';
 import AdminNotificationPage from './pages/admin/notification/AdminNotificationPage';
+import ArticlesPage from './pages/ArticlesPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
+import AdminArticlesPage from './pages/admin/article/AdminArticlesPage';
+import AdminCategoriesPage from './pages/admin/article/AdminCategoriesPage';
+import UserLayout from './components/layout/UserLayout';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -58,10 +64,6 @@ function App() {
           element: <RootLayout />,
           children: [
             {
-              path: '/',
-              element: <RootRedirect />,
-            },
-            {
               element: <AuthLayout />,
               children: [
                 {
@@ -83,28 +85,45 @@ function App() {
               ],
             },
             {
-              path: 'home',
-              element: (
-                <ProtectedRoute>
-                  <HomePage />
-                </ProtectedRoute>
-              ),
-            },
-            {
-              path: 'profile',
-              element: (
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              ),
-            },
-            {
-              path: 'courses',
-              element: <StudentCoursesPage />,
-            },
-            {
-              path: 'courses/:id',
-              element: <StudentCourseDetailPage />,
+              element: <UserLayout />,
+              children: [
+                {
+                  path: '/',
+                  element: <RootRedirect />,
+                },
+                {
+                  path: 'home',
+                  element: (
+                    <ProtectedRoute>
+                      <HomePage />
+                    </ProtectedRoute>
+                  ),
+                },
+                {
+                  path: 'profile',
+                  element: (
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  ),
+                },
+                {
+                  path: 'courses',
+                  element: <StudentCoursesPage />,
+                },
+                {
+                  path: 'courses/:id',
+                  element: <StudentCourseDetailPage />,
+                },
+                {
+                  path: 'articles',
+                  element: <ArticlesPage />,
+                },
+                {
+                  path: 'articles/:slug',
+                  element: <ArticleDetailPage />,
+                },
+              ],
             },
             {
               path: 'courses/:id/learn',
@@ -135,6 +154,14 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminChatPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/articles',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminArticlesPage />
                 </ProtectedRoute>
               ),
             },
@@ -195,6 +222,24 @@ function App() {
               ),
             },
             {
+              path: 'admin/users/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <UserDetailPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/profile',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminLayout>
+                    <ProfilePage />
+                  </AdminLayout>
+                </ProtectedRoute>
+              ),
+            },
+            {
               path: 'admin/settings',
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
@@ -207,6 +252,22 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminNotificationPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/articles',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminArticlesPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/categories',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminCategoriesPage />
                 </ProtectedRoute>
               ),
             },

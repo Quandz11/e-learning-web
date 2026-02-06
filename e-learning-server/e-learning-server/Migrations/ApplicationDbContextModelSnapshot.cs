@@ -22,6 +22,105 @@ namespace e_learning_server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("SKVI.Domain.Entities.Article", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Excerpt")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FeaturedImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MetaDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetaKeywords")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("IsPublished", "PublishedAt");
+
+                    b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ArticleCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("ArticleCategories");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -570,6 +669,51 @@ namespace e_learning_server.Migrations
                     b.ToTable("LessonProgresses");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.MenuItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MenuLocation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("OpenInNewTab")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("MenuLocation", "DisplayOrder");
+
+                    b.ToTable("MenuItems");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
@@ -906,6 +1050,24 @@ namespace e_learning_server.Migrations
                     b.ToTable("Videos");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.Article", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.ArticleCategory", "Category")
+                        .WithMany("Articles")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Cabin", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.User", "OwnerUser")
@@ -1105,6 +1267,16 @@ namespace e_learning_server.Migrations
                     b.Navigation("LessonPart");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.MenuItem", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.MenuItem", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Message", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.Conversation", "Conversation")
@@ -1195,6 +1367,11 @@ namespace e_learning_server.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.ArticleCategory", b =>
+                {
+                    b.Navigation("Articles");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Cabin", b =>
                 {
                     b.Navigation("CommissionLedgers");
@@ -1250,6 +1427,11 @@ namespace e_learning_server.Migrations
             modelBuilder.Entity("SKVI.Domain.Entities.LessonPart", b =>
                 {
                     b.Navigation("LessonProgresses");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.MenuItem", b =>
+                {
+                    b.Navigation("Children");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Order", b =>

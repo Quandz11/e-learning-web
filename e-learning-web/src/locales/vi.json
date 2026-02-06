@@ -158,7 +158,49 @@
             "revenue": "Doanh thu",
             "settings": "Cài đặt",
             "chat": "Quản lý Chat",
-            "notifications": "Thông báo"
+            "notifications": "Thông báo",
+            "articles": "Bài viết",
+            "categories": "Danh mục"
+        },
+        "articles": {
+            "title": "Quản lý Bài viết",
+            "subtitle": "Quản lý tất cả bài viết trên hệ thống",
+            "searchPlaceholder": "Tìm kiếm bài viết...",
+            "createNew": "Tạo bài viết mới",
+            "noArticles": "Chưa có bài viết nào",
+            "confirmDelete": "Bạn có chắc muốn xóa bài viết này?",
+            "deleteFailed": "Xóa bài viết thất bại",
+            "saveFailed": "Lưu bài viết thất bại",
+            "published": "Đã xuất bản",
+            "draft": "Nháp",
+            "table": {
+                "title": "Tiêu đề",
+                "category": "Danh mục",
+                "author": "Tác giả",
+                "status": "Trạng thái",
+                "views": "Lượt xem",
+                "date": "Ngày tạo",
+                "actions": "Thao tác"
+            },
+            "form": {
+                "title": "Tiêu đề",
+                "slug": "Slug (URL)",
+                "slugHint": "Tự động tạo từ tiêu đề",
+                "category": "Danh mục",
+                "selectCategory": "Chọn danh mục",
+                "featuredImage": "URL ảnh đại diện",
+                "excerpt": "Tóm tắt",
+                "content": "Nội dung",
+                "contentPlaceholder": "Nhập nội dung bài viết (hỗ trợ HTML)...",
+                "contentHint": "Hỗ trợ HTML. Sử dụng thẻ <p>, <h2>, <h3>, <strong>, <em>, <ul>, <ol>, <li>, v.v.",
+                "seoSection": "SEO",
+                "metaDescription": "Meta Description",
+                "metaKeywords": "Meta Keywords",
+                "keywordsPlaceholder": "từ khóa 1, từ khóa 2, ...",
+                "publishNow": "Xuất bản ngay"
+            },
+            "editArticle": "Sửa bài viết",
+            "createArticle": "Tạo bài viết mới"
         },
         "header": {
             "searchPlaceholder": "Tìm kiếm học viên, khóa học, hoặc đơn hàng...",
@@ -558,8 +600,27 @@
         "saving": "Đang lưu...",
         "loading": "Đang tải...",
         "cancel": "Hủy",
+        "save": "Lưu",
+        "edit": "Sửa",
+        "delete": "Xóa",
+        "home": "Trang chủ",
         "unnamed": "Người dùng chưa đặt tên",
         "backToList": "Quay lại danh sách"
+    },
+    "articles": {
+        "title": "Bài viết",
+        "subtitle": "Khám phá kiến thức và chia sẻ từ cộng đồng",
+        "search": "Tìm kiếm",
+        "searchPlaceholder": "Tìm kiếm bài viết...",
+        "categories": "Danh mục",
+        "allCategories": "Tất cả",
+        "noArticles": "Chưa có bài viết nào",
+        "views": "lượt xem",
+        "notFound": "Bài viết không tồn tại",
+        "backToList": "Quay lại danh sách",
+        "share": "Chia sẻ:",
+        "copyLink": "Sao chép link",
+        "linkCopied": "Đã sao chép link!"
     },
     "profile": {
         "title": "Hồ sơ cá nhân",

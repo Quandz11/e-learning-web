@@ -41,6 +41,8 @@ builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<IMenuService, MenuService>();
 
 // Guest Conversation Service (Singleton for in-memory storage)
 builder.Services.AddSingleton<IGuestConversationService, GuestConversationService>();

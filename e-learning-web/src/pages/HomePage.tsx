@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { RootState, AppDispatch } from '../store/store';
-import { logout } from '../store/authSlice';
-import { authApi } from '../services/authApi';
-import { clearAuth } from '../services/authStorage';
 import { courseApi, type CourseResponse } from '../services/courseApi';
-import HeaderNotification from '../components/common/HeaderNotification';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
 
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(true);
@@ -36,87 +27,8 @@ const HomePage: React.FC = () => {
     fetchCourses();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await authApi.logout();
-      dispatch(logout());
-      clearAuth();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
   return (
-    <div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display text-[#0c1c1d] dark:text-white overflow-x-hidden">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-50 w-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
-              <div className="size-8 text-primary flex items-center justify-center">
-                <span className="material-symbols-outlined text-4xl">school</span>
-              </div>
-              <h2 className="text-[#0c1c1d] dark:text-white text-xl font-bold tracking-tight">
-                SKVI Learning<span className="text-primary">.</span>
-              </h2>
-            </Link>
-
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-8">
-              <Link className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-semibold" to="/">
-                {t('home.header.nav.home')}
-              </Link>
-              <a className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium" href="#courses">
-                {t('home.header.nav.courses')}
-              </a>
-              <a className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium" href="#benefits">
-                {t('home.header.nav.benefits')}
-              </a>
-              <a className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium" href="#testimonials">
-                {t('home.header.nav.testimonials')}
-              </a>
-            </nav>
-
-            {/* Auth Buttons */}
-            <div className="flex items-center gap-3">
-              {isAuthenticated && user ? (
-                <>
-                  <div className="mr-2">
-                    <HeaderNotification />
-                  </div>
-                  <span className="hidden sm:inline text-sm text-gray-600 dark:text-gray-300 font-display">
-                    {t('home.header.welcome')}, <span className="font-medium text-gray-900 dark:text-white normal-case">{user.fullName}</span>
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="flex h-10 items-center justify-center rounded-lg px-5 bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-md shadow-primary/20 transition-all hover:scale-105"
-                  >
-                    {t('home.header.logout')}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="hidden sm:flex h-10 items-center justify-center rounded-lg px-4 text-primary font-bold text-sm hover:bg-primary/10 transition-colors"
-                  >
-                    {t('auth.logIn')}
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="flex h-10 items-center justify-center rounded-lg px-5 bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-md shadow-primary/20 transition-all hover:scale-105"
-                  >
-                    {t('auth.signUp')}
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="font-display text-[#0c1c1d] dark:text-white">
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative py-12 lg:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -208,12 +120,12 @@ const HomePage: React.FC = () => {
                 {t('home.courses.subtitle')}
               </p>
             </div>
-            <button
-              onClick={() => navigate('/courses')}
+            <Link
+              to="/courses"
               className="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all"
             >
               {t('home.courses.viewAll')} <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </button>
+            </Link>
           </div>
 
           {/* Course Grid */}
@@ -417,58 +329,6 @@ const HomePage: React.FC = () => {
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-background-dark text-white pt-16 pb-8 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-3xl">school</span>
-                <span className="text-xl font-bold">SKVI Learning.</span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                {t('home.footer.description')}
-              </p>
-            </div>
-            <div>
-              <h3 className="font-bold mb-4">{t('home.footer.platform.title')}</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a className="hover:text-primary transition-colors" href="#courses">{t('home.footer.platform.browseCourses')}</a></li>
-                <li><a className="hover:text-primary transition-colors" href="#testimonials">{t('home.footer.platform.successStories')}</a></li>
-                <li><a className="hover:text-primary transition-colors" href="#">{t('home.footer.platform.pricing')}</a></li>
-                <li><a className="hover:text-primary transition-colors" href="#">{t('home.footer.platform.forBusiness')}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold mb-4">{t('home.footer.portals.title')}</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link className="hover:text-primary transition-colors" to="/login">{t('home.footer.portals.studentLogin')}</Link></li>
-                <li><Link className="hover:text-primary transition-colors" to="/login">{t('home.footer.portals.instructorDashboard')}</Link></li>
-                <li><Link className="hover:text-primary transition-colors" to="/login">{t('home.footer.portals.agentPortal')}</Link></li>
-                <li><Link className="hover:text-primary transition-colors" to="/admin/dashboard">{t('home.footer.portals.adminAccess')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold mb-4">{t('home.footer.connect.title')}</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a className="hover:text-primary transition-colors" href="#">{t('home.footer.connect.aboutUs')}</a></li>
-                <li><a className="hover:text-primary transition-colors" href="#">{t('home.footer.connect.careers')}</a></li>
-                <li><a className="hover:text-primary transition-colors" href="#">{t('home.footer.connect.contactSupport')}</a></li>
-                <li><a className="hover:text-primary transition-colors" href="#">{t('home.footer.connect.privacyPolicy')}</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-            <p>{t('home.footer.copyright')}</p>
-            <div className="flex gap-6">
-              <a className="hover:text-white transition-colors" href="#">{t('home.footer.terms')}</a>
-              <a className="hover:text-white transition-colors" href="#">{t('home.footer.privacy')}</a>
-              <a className="hover:text-white transition-colors" href="#">{t('home.footer.cookies')}</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div >
   );
 };

@@ -158,7 +158,9 @@
             "revenue": "Revenue",
             "settings": "Settings",
             "chat": "Chat Management",
-            "notifications": "Notifications"
+            "notifications": "Notifications",
+            "articles": "Articles",
+            "categories": "Categories"
         },
         "header": {
             "searchPlaceholder": "Search students, courses, or orders...",
@@ -533,6 +535,72 @@
                 "CARE": "Care",
                 "ADMIN": "Admin"
             }
+        },
+        "articles": {
+            "title": "Article Management",
+            "subtitle": "Manage all articles in the system",
+            "searchPlaceholder": "Search articles...",
+            "createNew": "Create New Article",
+            "noArticles": "No articles yet",
+            "confirmDelete": "Are you sure you want to delete this article?",
+            "deleteFailed": "Failed to delete article",
+            "saveFailed": "Failed to save article",
+            "published": "Published",
+            "draft": "Draft",
+            "table": {
+                "title": "Title",
+                "category": "Category",
+                "author": "Author",
+                "status": "Status",
+                "views": "Views",
+                "date": "Created",
+                "actions": "Actions"
+            },
+            "form": {
+                "title": "Title",
+                "slug": "Slug (URL)",
+                "slugHint": "Auto-generated from title",
+                "category": "Category",
+                "selectCategory": "Select category",
+                "featuredImage": "Featured Image URL",
+                "excerpt": "Excerpt",
+                "content": "Content",
+                "contentPlaceholder": "Enter article content (HTML supported)...",
+                "contentHint": "HTML supported. Use tags like <p>, <h2>, <h3>, <strong>, <em>, <ul>, <ol>, <li>, etc.",
+                "seoSection": "SEO",
+                "metaDescription": "Meta Description",
+                "metaKeywords": "Meta Keywords",
+                "keywordsPlaceholder": "keyword 1, keyword 2, ...",
+                "publishNow": "Publish Now"
+            },
+            "editArticle": "Edit Article",
+            "createArticle": "Create New Article"
+        },
+        "categories": {
+            "title": "Category Management",
+            "subtitle": "Manage article categories",
+            "createNew": "Create Category",
+            "noCategories": "No categories yet",
+            "confirmDelete": "Are you sure you want to delete this category?",
+            "deleteFailed": "Failed to delete category",
+            "saveFailed": "Failed to save category",
+            "table": {
+                "name": "Name",
+                "slug": "Slug",
+                "description": "Description",
+                "articles": "Articles",
+                "actions": "Actions"
+            },
+            "form": {
+                "name": "Category Name",
+                "slug": "Slug",
+                "slugHint": "Auto-generated from name",
+                "description": "Description",
+                "save": "Save Category",
+                "cancel": "Cancel"
+            },
+            "editCategory": "Edit Category",
+            "createCategory": "Create Category"
         },
         "buttons": {
             "search": "Search"

@@ -52,6 +52,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
 
+    // Articles
+    public DbSet<Article> Articles { get; set; }
+    public DbSet<ArticleCategory> ArticleCategories { get; set; }
+    public DbSet<MenuItem> MenuItems { get; set; }
+
     // Audit
     public DbSet<AuditLog> AuditLogs { get; set; }
 
@@ -204,6 +209,44 @@ public class ApplicationDbContext : DbContext
             .HasOne(c => c.Cabin)
             .WithMany(cb => cb.CommissionLedgers)
             .HasForeignKey(c => c.CabinId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Articles
+        modelBuilder.Entity<Article>()
+            .HasIndex(a => a.Slug)
+            .IsUnique();
+        
+        modelBuilder.Entity<Article>()
+            .HasIndex(a => new { a.IsPublished, a.PublishedAt });
+        
+        modelBuilder.Entity<Article>()
+            .HasIndex(a => a.CategoryId);
+
+        modelBuilder.Entity<Article>()
+            .HasOne(a => a.Author)
+            .WithMany()
+            .HasForeignKey(a => a.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Article>()
+            .HasOne(a => a.Category)
+            .WithMany(c => c.Articles)
+            .HasForeignKey(a => a.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // ArticleCategories
+        modelBuilder.Entity<ArticleCategory>()
+            .HasIndex(c => c.Slug)
+            .IsUnique();
+
+        // MenuItems
+        modelBuilder.Entity<MenuItem>()
+            .HasIndex(m => new { m.MenuLocation, m.DisplayOrder });
+
+        modelBuilder.Entity<MenuItem>()
+            .HasOne(m => m.Parent)
+            .WithMany(m => m.Children)
+            .HasForeignKey(m => m.ParentId)
             .OnDelete(DeleteBehavior.Restrict);
             
         // Relationships are automatically configured by EF Core conventions based on navigation properties,

@@ -1,19 +1,16 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
 @theme {
   --font-display: 'Roboto', sans-serif;
   --font-sans: 'Roboto', sans-serif;
+  --font-dashboard: 'Roboto', sans-serif;
 
   --color-primary: #007b80;
   --color-background-light: #f9f7f6;
   --color-background-dark: #1c1f22;
-
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-
-  /* Dashboard Theme extensions */
-  --font-dashboard: 'Roboto', sans-serif;
   --color-dashboard-primary: #155879;
   --color-dashboard-primary-dark: #0e3f57;
   --color-dashboard-accent: #d97706;
@@ -21,13 +18,34 @@
   --color-dashboard-background-dark: #121b20;
   --color-dashboard-surface-light: #ffffff;
   --color-dashboard-surface-dark: #1a262e;
-  
-  --shadow-dashboard-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-dashboard-lift: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 @layer base {
   html {
     font-family: var(--font-display);
+  }
+
+  body {
+    background-color: light-dark(var(--color-background-light), var(--color-background-dark));
+  }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'liga';
   }
 }

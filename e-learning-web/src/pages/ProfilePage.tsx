@@ -180,7 +180,7 @@ const ProfilePage: React.FC = () => {
     const statusLabel = t(`admin.users.statuses.${profile.status}`);
 
     return (
-        <AdminLayout>
+        <div className="container mx-auto max-w-5xl">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('profile.title')}</h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t('profile.subtitle')}</p>
@@ -444,7 +444,7 @@ const ProfilePage: React.FC = () => {
                     </form>
                 )}
             </div>
-        </AdminLayout>
+        </div>
     );
 };
 

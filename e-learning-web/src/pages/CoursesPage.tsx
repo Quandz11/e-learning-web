@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { courseApi, type CourseResponse } from '../services/courseApi';
 
 const CoursesPage: React.FC = () => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
 
     const [courses, setCourses] = useState<CourseResponse[]>([]);
     const [filteredCourses, setFilteredCourses] = useState<CourseResponse[]>([]);
@@ -53,28 +52,7 @@ const CoursesPage: React.FC = () => {
     }, [searchQuery, priceFilter, courses]);
 
     return (
-        <div className="min-h-screen bg-background-light dark:bg-background-dark">
-            {/* Header */}
-            <header className="sticky top-0 z-50 w-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-20">
-                        <Link to="/" className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-primary text-4xl">school</span>
-                            <h2 className="text-[#0c1c1d] dark:text-white text-xl font-bold tracking-tight">
-                                SKVI Learning<span className="text-primary">.</span>
-                            </h2>
-                        </Link>
-                        <button
-                            onClick={() => navigate('/')}
-                            className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-primary transition-colors"
-                        >
-                            <span className="material-symbols-outlined">arrow_back</span>
-                            <span className="hidden sm:inline">{t('common.backToList', { defaultValue: 'Back' })}</span>
-                        </button>
-                    </div>
-                </div>
-            </header>
-
+        <div className="min-h-screen">
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Page Header */}

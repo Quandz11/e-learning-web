@@ -1,11 +1,20 @@
 import { apiClient } from './apiClient';
 
+export const TestimonialType = {
+    Text: 0,
+    Video: 1
+} as const;
+
+export type TestimonialType = typeof TestimonialType[keyof typeof TestimonialType];
+
 export interface TestimonialDto {
     id: string;
     name: string;
     position?: string;
     content: string;
     avatarUrl?: string;
+    videoUrl?: string;
+    type: TestimonialType;
     order: number;
     isActive: boolean;
     createdAt: string;
@@ -16,6 +25,8 @@ export interface CreateTestimonialRequest {
     position?: string;
     content: string;
     avatarUrl?: string;
+    videoUrl?: string;
+    type: TestimonialType;
     order: number;
     isActive: boolean;
 }
@@ -25,6 +36,8 @@ export interface UpdateTestimonialRequest {
     position?: string;
     content: string;
     avatarUrl?: string;
+    videoUrl?: string;
+    type: TestimonialType;
     order: number;
     isActive: boolean;
 }

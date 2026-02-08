@@ -242,7 +242,7 @@ const StudentCourseDetailPage: React.FC = () => {
                         <div className="lg:col-span-1">
                             <div className="sticky top-24 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                                 {/* Preview Image */}
-                                <div className="aspect-video bg-gradient-to-br from-primary/20 to-blue-500/20 relative">
+                                <div className="aspect-square bg-gradient-to-br from-primary/20 to-blue-500/20 relative">
                                     {course.thumbnailUrl ? (
                                         <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
                                     ) : (

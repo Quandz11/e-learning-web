@@ -66,6 +66,12 @@
         "title": "Unlock your potential with every lesson.",
         "subtitle": "Join a community of lifelong learners and master new skills at your own pace. Your future starts here."
     },
+    "fasting": {
+        "title": "Welcome to the Fasting Method",
+        "subtitle": "Intermittent Fasting for Weight Loss",
+        "description": "Experience the most comprehensive fasting program.",
+        "takeQuiz": "Take the quiz to start"
+    },
     "admin": {
         "lessons": {
             "title": "Lesson Management",
@@ -715,7 +721,34 @@
         "title": "Title",
         "status": "Status",
         "created": "Created At",
-        "actions": "Actions"
+        "actions": "Actions",
+        "forum": {
+            "title": "Forum Management",
+            "subtitle": "Manage forum categories and discussions",
+            "create": "Create Category",
+            "edit": "Edit Category",
+            "loadError": "Failed to load categories",
+            "table": {
+                "icon": "Icon",
+                "name": "Name",
+                "description": "Description",
+                "threads": "Threads",
+                "order": "Order",
+                "status": "Status",
+                "empty": "No categories found."
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "form": {
+                "name": "Category Name",
+                "description": "Description",
+                "icon": "Icon (Emoji)",
+                "order": "Order",
+                "active": "Active"
+            }
+        }
     },
     "profile": {
         "title": "User Profile",
@@ -873,6 +906,8 @@
             "nav": {
                 "home": "Home",
                 "courses": "Courses",
+                "articles": "Articles",
+                "forum": "Forum",
                 "benefits": "Benefits",
                 "testimonials": "Testimonials"
             },
@@ -930,8 +965,8 @@
             }
         },
         "testimonials": {
-            "title": "What Our Students Say",
-            "subtitle": "Real feedback from our students"
+            "title": "Student Feedback",
+            "subtitle": "Hear from our students about their learning journey"
         },
         "courses": {
             "title": "Featured Courses",
@@ -1098,5 +1133,38 @@
             "instructor": "this instructor",
             "lesson": "this lesson"
         }
+    },
+    "forum": {
+        "title": "Community Forum",
+        "subtitle": "Connect with fellow learners, ask questions, and share knowledge",
+        "noCategories": "No forum categories available yet",
+        "threads": "threads",
+        "totalThreads": "Total Discussions",
+        "categories": "Categories",
+        "active": "Active",
+        "community": "Community",
+        "backToForum": "Back to Forum",
+        "newThread": "New Thread",
+        "noThreads": "No discussions yet",
+        "startFirst": "Start the first discussion",
+        "backToCategory": "Back to",
+        "categoryNotFound": "Category not found",
+        "threadNotFound": "Thread not found",
+        "postReply": "Post a Reply",
+        "replyPlaceholder": "Write your reply...",
+        "posting": "Posting...",
+        "replyPosted": "Reply posted successfully",
+        "replyFailed": "Failed to post reply",
+        "edited": "edited",
+        "loginToReply": "Please login to post a reply",
+        "createNewThread": "Create New Thread",
+        "threadTitle": "Title",
+        "titlePlaceholder": "Enter a descriptive title for your thread",
+        "threadContent": "Content",
+        "contentPlaceholder": "Write your question or discussion topic...",
+        "creating": "Creating...",
+        "createThread": "Create Thread",
+        "threadCreated": "Thread created successfully",
+        "threadFailed": "Failed to create thread"
     }
 }

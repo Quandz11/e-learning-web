@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { testimonialApi, type TestimonialDto } from '../../services/testimonialApi';
+import { Link } from 'react-router-dom';
+import { testimonialApi, type TestimonialDto, TestimonialType } from '../../services/testimonialApi';
 
 const TestimonialsSection: React.FC = () => {
     const { t } = useTranslation();
@@ -14,7 +15,8 @@ const TestimonialsSection: React.FC = () => {
     const fetchTestimonials = async () => {
         try {
             const data = await testimonialApi.getActive();
-            setTestimonials(data);
+            // Limit to 3 testimonials for homepage
+            setTestimonials(data.slice(0, 3));
         } catch (error) {
             console.error('Failed to load testimonials:', error);
         } finally {
@@ -46,10 +48,10 @@ const TestimonialsSection: React.FC = () => {
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                        {t('home.testimonials.title', { defaultValue: 'Học viên nói gì về chúng tôi' })}
+                        {t('home.testimonials.title')}
                     </h2>
                     <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                        {t('home.testimonials.subtitle', { defaultValue: 'Những phản hồi chân thực từ học viên của chúng tôi' })}
+                        {t('home.testimonials.subtitle')}
                     </p>
                 </div>
 
@@ -59,38 +61,55 @@ const TestimonialsSection: React.FC = () => {
                             key={testimonial.id}
                             className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700"
                         >
-                            {/* Quote Icon */}
-                            <div className="flex justify-center mb-6">
-                                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-primary text-2xl">
-                                        format_quote
-                                    </span>
+                            {testimonial.type === TestimonialType.Video && testimonial.videoUrl ? (
+                                /* Video Testimonial */
+                                <div className="mb-6">
+                                    <video
+                                        controls
+                                        className="w-full rounded-lg"
+                                        poster={testimonial.avatarUrl}
+                                    >
+                                        <source src={testimonial.videoUrl} type="video/mp4" />
+                                        Your browser does not support the video tag.
+                                    </video>
                                 </div>
-                            </div>
+                            ) : (
+                                /* Text Testimonial */
+                                <>
+                                    {/* Quote Icon */}
+                                    <div className="flex justify-center mb-6">
+                                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-primary text-2xl">
+                                                format_quote
+                                            </span>
+                                        </div>
+                                    </div>
 
-                            {/* Content */}
-                            <p className="text-slate-600 dark:text-slate-300 text-center mb-6 italic leading-relaxed">
-                                "{testimonial.content}"
-                            </p>
+                                    {/* Content */}
+                                    <p className="text-slate-600 dark:text-slate-300 text-center mb-6 italic leading-relaxed">
+                                        "{testimonial.content}"
+                                    </p>
 
-                            {/* Divider */}
-                            <div className="w-16 h-1 bg-gradient-to-r from-primary to-primary/50 mx-auto mb-6"></div>
+                                    {/* Divider */}
+                                    <div className="w-16 h-1 bg-gradient-to-r from-primary to-primary/50 mx-auto mb-6"></div>
+                                </>
+                            )}
 
                             {/* Author */}
                             <div className="flex items-center justify-center gap-4">
-                                {testimonial.avatarUrl ? (
+                                {testimonial.avatarUrl && testimonial.type === TestimonialType.Text ? (
                                     <img
                                         src={testimonial.avatarUrl}
                                         alt={testimonial.name}
                                         className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
                                     />
-                                ) : (
+                                ) : testimonial.type === TestimonialType.Text ? (
                                     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                                         <span className="material-symbols-outlined text-primary text-xl">
                                             person
                                         </span>
                                     </div>
-                                )}
+                                ) : null}
                                 <div>
                                     <h4 className="font-bold text-slate-900 dark:text-white">
                                         {testimonial.name}
@@ -105,9 +124,23 @@ const TestimonialsSection: React.FC = () => {
                         </div>
                     ))}
                 </div>
+
+                {/* View All Button */}
+                <div className="text-center mt-12">
+                    <Link
+                        to="/testimonials"
+                        className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-full font-semibold hover:bg-primary/90 transition-colors shadow-lg hover:shadow-xl"
+                    >
+                        {t('home.testimonials.viewAll', { defaultValue: 'Xem tất cả' })}
+                        <span className="material-symbols-outlined text-xl">
+                            arrow_forward
+                        </span>
+                    </Link>
+                </div>
             </div>
         </section>
     );
 };
 
 export default TestimonialsSection;
+

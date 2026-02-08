@@ -66,6 +66,12 @@
         "title": "Mở khóa tiềm năng của bạn qua từng bài học.",
         "subtitle": "Tham gia cộng đồng học tập suốt đời và làm chủ các kỹ năng mới theo tốc độ của riêng bạn. Tương lai của bạn bắt đầu từ đây."
     },
+    "fasting": {
+        "title": "Chào mừng đến với Phương pháp Nhịn ăn",
+        "subtitle": "Nhịn ăn gián đoạn để giảm cân",
+        "description": "Trải nghiệm chương trình nhịn ăn toàn diện nhất.",
+        "takeQuiz": "Bắt đầu với bài kiểm tra"
+    },
     "admin": {
         "lessons": {
             "title": "Quản lý Bài học",
@@ -706,7 +712,34 @@
         "title": "Tiêu đề",
         "status": "Trạng thái",
         "created": "Ngày tạo",
-        "actions": "Hành động"
+        "actions": "Hành động",
+        "forum": {
+            "title": "Quản lý Diễn đàn",
+            "subtitle": "Quản lý danh mục và thảo luận diễn đàn",
+            "create": "Tạo danh mục",
+            "edit": "Chỉnh sửa danh mục",
+            "loadError": "Không thể tải danh mục",
+            "table": {
+                "icon": "Icon",
+                "name": "Tên",
+                "description": "Mô tả",
+                "threads": "Chủ đề",
+                "order": "Thứ tự",
+                "status": "Trạng thái",
+                "empty": "Chưa có danh mục nào."
+            },
+            "status": {
+                "active": "Hoạt động",
+                "inactive": "Không hoạt động"
+            },
+            "form": {
+                "name": "Tên danh mục",
+                "description": "Mô tả",
+                "icon": "Icon (Emoji)",
+                "order": "Thứ tự",
+                "active": "Hoạt động"
+            }
+        }
     },
     "articles": {
         "title": "Bài viết",
@@ -879,6 +912,8 @@
             "nav": {
                 "home": "Trang chủ",
                 "courses": "Khóa học",
+                "articles": "Bài viết",
+                "forum": "Diễn đàn",
                 "benefits": "Lợi ích",
                 "testimonials": "Đánh giá"
             },
@@ -936,7 +971,7 @@
             }
         },
         "testimonials": {
-            "title": "Học viên nói gì về chúng tôi",
+            "title": "Phản hồi học viên",
             "subtitle": "Những phản hồi chân thực từ học viên của chúng tôi"
         },
         "courses": {
@@ -1104,5 +1139,38 @@
             "instructor": "giảng viên này",
             "lesson": "bài học này"
         }
+    },
+    "forum": {
+        "title": "Diễn đàn cộng đồng",
+        "subtitle": "Kết nối với học viên, đặt câu hỏi và chia sẻ kiến thức",
+        "noCategories": "Chưa có danh mục diễn đàn nào",
+        "threads": "chủ đề",
+        "totalThreads": "Tổng thảo luận",
+        "categories": "Danh mục",
+        "active": "Hoạt động",
+        "community": "Cộng đồng",
+        "backToForum": "Quay lại Diễn đàn",
+        "newThread": "Chủ đề mới",
+        "noThreads": "Chưa có thảo luận nào",
+        "startFirst": "Bắt đầu thảo luận đầu tiên",
+        "backToCategory": "Quay lại",
+        "categoryNotFound": "Không tìm thấy danh mục",
+        "threadNotFound": "Không tìm thấy chủ đề",
+        "postReply": "Đăng trả lời",
+        "replyPlaceholder": "Viết câu trả lời của bạn...",
+        "posting": "Đang đăng...",
+        "replyPosted": "Đã đăng trả lời thành công",
+        "replyFailed": "Không thể đăng trả lời",
+        "edited": "đã chỉnh sửa",
+        "loginToReply": "Vui lòng đăng nhập để trả lời",
+        "createNewThread": "Tạo chủ đề mới",
+        "threadTitle": "Tiêu đề",
+        "titlePlaceholder": "Nhập tiêu đề mô tả cho chủ đề của bạn",
+        "threadContent": "Nội dung",
+        "contentPlaceholder": "Viết câu hỏi hoặc chủ đề thảo luận của bạn...",
+        "creating": "Đang tạo...",
+        "createThread": "Tạo chủ đề",
+        "threadCreated": "Đã tạo chủ đề thành công",
+        "threadFailed": "Không thể tạo chủ đề"
     }
 }

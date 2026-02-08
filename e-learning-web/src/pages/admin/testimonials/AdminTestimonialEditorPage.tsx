@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../../components/admin/AdminLayout';
-import { testimonialApi, type CreateTestimonialRequest } from '../../../services/testimonialApi';
+import { testimonialApi, type CreateTestimonialRequest, TestimonialType } from '../../../services/testimonialApi';
 import { toast } from 'react-hot-toast';
 
 const AdminTestimonialEditorPage: React.FC = () => {
@@ -19,6 +19,8 @@ const AdminTestimonialEditorPage: React.FC = () => {
         position: '',
         content: '',
         avatarUrl: '',
+        videoUrl: '',
+        type: TestimonialType.Text,
         order: 0,
         isActive: true,
     });
@@ -38,6 +40,8 @@ const AdminTestimonialEditorPage: React.FC = () => {
                 position: data.position || '',
                 content: data.content,
                 avatarUrl: data.avatarUrl || '',
+                videoUrl: data.videoUrl || '',
+                type: data.type,
                 order: data.order,
                 isActive: data.isActive,
             });
@@ -160,6 +164,49 @@ const AdminTestimonialEditorPage: React.FC = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Testimonial Type */}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    {t('admin.testimonials.form.type', { defaultValue: 'Type' })} <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    className="w-full rounded-lg border border-slate-300 px-4 py-2 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                                    value={formData.type}
+                                    onChange={e => setFormData({ ...formData, type: Number(e.target.value) as TestimonialType })}
+                                >
+                                    <option value={TestimonialType.Text}>{t('admin.testimonials.form.typeText', { defaultValue: 'Text' })}</option>
+                                    <option value={TestimonialType.Video}>{t('admin.testimonials.form.typeVideo', { defaultValue: 'Video' })}</option>
+                                </select>
+                            </div>
+
+                            {/* Video URL - Only show for video type */}
+                            {formData.type === TestimonialType.Video && (
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                        {t('admin.testimonials.form.videoUrl', { defaultValue: 'Video URL' })} <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="url"
+                                        required={formData.type === TestimonialType.Video}
+                                        className="w-full rounded-lg border border-slate-300 px-4 py-2 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                                        value={formData.videoUrl}
+                                        onChange={e => setFormData({ ...formData, videoUrl: e.target.value })}
+                                        placeholder="https://example.com/video.mp4"
+                                    />
+                                    {formData.videoUrl && (
+                                        <div className="mt-2">
+                                            <video controls className="w-full max-w-md rounded-lg">
+                                                <source src={formData.videoUrl} type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </div>
+                                    )}
+                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                        {t('admin.testimonials.form.videoUrlHint', { defaultValue: 'Direct link to MP4 video file' })}
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Order */}
                             <div>

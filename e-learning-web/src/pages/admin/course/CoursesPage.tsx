@@ -126,7 +126,7 @@ const CoursesPage: React.FC = () => {
                 key={course.id}
                 className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/60 bg-white/90 shadow-sm shadow-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-dashboard-surface-dark"
               >
-                <Link to={`/admin/courses/${course.id}`} className="relative h-44 overflow-hidden block">
+                <Link to={`/admin/courses/${course.id}`} className="relative aspect-square overflow-hidden block">
                   {course.thumbnailUrl ? (
                     <img
                       src={course.thumbnailUrl}

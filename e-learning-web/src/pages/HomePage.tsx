@@ -21,13 +21,13 @@ const HomePage: React.FC = () => {
 
         <div className="relative mx-auto max-w-7xl text-center">
           <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl animate-fadeDown">
-            {t('fasting.title', { defaultValue: 'Welcome to the Fasting Method' })}
+            {t('fasting.title')}
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-xl text-white/90 animate-fadeIn delay-100">
-            {t('fasting.subtitle', { defaultValue: 'Intermittent Fasting for Weight Loss' })}
+            {t('fasting.subtitle')}
           </p>
           <p className="mx-auto mb-10 max-w-3xl text-lg text-white/80 animate-fadeIn delay-200">
-            {t('fasting.description', { defaultValue: 'Experience the most comprehensive fasting program.' })}
+            {t('fasting.description')}
           </p>
 
           <div className="flex justify-center animate-fadeIn delay-300">
@@ -35,7 +35,7 @@ const HomePage: React.FC = () => {
               onClick={() => setIsQuizOpen(true)}
               className="transform rounded-full bg-white px-8 py-4 text-lg font-bold text-primary shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-white/50"
             >
-              {t('fasting.takeQuiz', { defaultValue: 'Take the quiz to start' })}
+              {t('fasting.takeQuiz')}
             </button>
           </div>
         </div>

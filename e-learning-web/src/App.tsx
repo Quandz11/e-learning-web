@@ -45,6 +45,12 @@ import AdminQuizEditorPage from './pages/admin/quiz/AdminQuizEditorPage';
 import AdminQuizSubmissionsPage from './pages/admin/quiz/AdminQuizSubmissionsPage';
 import AdminTestimonialsPage from './pages/admin/testimonials/AdminTestimonialsPage';
 import AdminTestimonialEditorPage from './pages/admin/testimonials/AdminTestimonialEditorPage';
+import TestimonialsPage from './pages/TestimonialsPage';
+import ForumPage from './pages/ForumPage';
+import ForumCategoryPage from './pages/ForumCategoryPage';
+import ForumThreadPage from './pages/ForumThreadPage';
+import NewThreadPage from './pages/NewThreadPage';
+import AdminForumCategoriesPage from './pages/admin/forum/AdminForumCategoriesPage';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -127,6 +133,30 @@ function App() {
                 {
                   path: 'articles/:slug',
                   element: <ArticleDetailPage />,
+                },
+                {
+                  path: 'testimonials',
+                  element: <TestimonialsPage />,
+                },
+                {
+                  path: 'forum',
+                  element: <ForumPage />,
+                },
+                {
+                  path: 'forum/category/:categoryId',
+                  element: <ForumCategoryPage />,
+                },
+                {
+                  path: 'forum/thread/:threadId',
+                  element: <ForumThreadPage />,
+                },
+                {
+                  path: 'forum/category/:categoryId/new-thread',
+                  element: (
+                    <ProtectedRoute>
+                      <NewThreadPage />
+                    </ProtectedRoute>
+                  ),
                 },
               ],
             },
@@ -331,6 +361,14 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminTestimonialEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/forum/categories',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminForumCategoriesPage />
                 </ProtectedRoute>
               ),
             },

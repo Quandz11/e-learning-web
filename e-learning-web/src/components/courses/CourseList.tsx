@@ -41,7 +41,7 @@ const CourseList: React.FC<CourseListProps> = ({ limit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[0, 1, 2].slice(0, limit || 3).map((i) => (
                     <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
-                        <div className="aspect-video bg-gray-200 dark:bg-gray-700" />
+                        <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
                         <div className="p-5 space-y-3">
                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
                             <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
@@ -77,7 +77,7 @@ const CourseList: React.FC<CourseListProps> = ({ limit }) => {
                     to={`/courses/${course.id}`}
                     className="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden"
                 >
-                    <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
+                    <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
                         {course.thumbnailUrl ? (
                             <img
                                 src={course.thumbnailUrl}

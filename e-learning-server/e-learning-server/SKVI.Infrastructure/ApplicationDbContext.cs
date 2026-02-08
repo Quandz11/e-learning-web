@@ -70,6 +70,11 @@ public class ApplicationDbContext : DbContext
     // Testimonials
     public DbSet<Testimonial> Testimonials { get; set; }
 
+    // Forum
+    public DbSet<ForumCategory> ForumCategories { get; set; }
+    public DbSet<ForumThread> ForumThreads { get; set; }
+    public DbSet<ForumPost> ForumPosts { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -300,6 +305,46 @@ public class ApplicationDbContext : DbContext
             .HasOne(a => a.SelectedOption)
             .WithMany()
             .HasForeignKey(a => a.SelectedOptionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Forum Configuration
+        modelBuilder.Entity<ForumCategory>()
+            .HasIndex(fc => fc.Order);
+
+        modelBuilder.Entity<ForumThread>()
+            .HasIndex(ft => new { ft.CategoryId, ft.LastPostAt });
+
+        modelBuilder.Entity<ForumThread>()
+            .HasIndex(ft => ft.AuthorId);
+
+        modelBuilder.Entity<ForumThread>()
+            .HasOne(ft => ft.Category)
+            .WithMany(fc => fc.Threads)
+            .HasForeignKey(ft => ft.CategoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ForumThread>()
+            .HasOne(ft => ft.Author)
+            .WithMany()
+            .HasForeignKey(ft => ft.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ForumPost>()
+            .HasIndex(fp => new { fp.ThreadId, fp.CreatedAt });
+
+        modelBuilder.Entity<ForumPost>()
+            .HasIndex(fp => fp.AuthorId);
+
+        modelBuilder.Entity<ForumPost>()
+            .HasOne(fp => fp.Thread)
+            .WithMany(ft => ft.Posts)
+            .HasForeignKey(fp => fp.ThreadId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ForumPost>()
+            .HasOne(fp => fp.Author)
+            .WithMany()
+            .HasForeignKey(fp => fp.AuthorId)
             .OnDelete(DeleteBehavior.Restrict);
             
         // Relationships are automatically configured by EF Core conventions based on navigation properties,

@@ -518,6 +518,113 @@ namespace e_learning_server.Migrations
                     b.ToTable("Enrollments");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.ForumCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Order");
+
+                    b.ToTable("ForumCategories");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ForumPost", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ThreadId", "CreatedAt");
+
+                    b.ToTable("ForumPosts");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ForumThread", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastPostAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CategoryId", "LastPostAt");
+
+                    b.ToTable("ForumThreads");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Lead", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1132,6 +1239,12 @@ namespace e_learning_server.Migrations
                     b.Property<string>("Position")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VideoUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Testimonials");
@@ -1381,6 +1494,44 @@ namespace e_learning_server.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ForumPost", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.ForumThread", "Thread")
+                        .WithMany("Posts")
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Thread");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ForumThread", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.ForumCategory", "Category")
+                        .WithMany("Threads")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Lead", b =>
@@ -1651,6 +1802,16 @@ namespace e_learning_server.Migrations
             modelBuilder.Entity("SKVI.Domain.Entities.Enrollment", b =>
                 {
                     b.Navigation("LessonProgress");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ForumCategory", b =>
+                {
+                    b.Navigation("Threads");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ForumThread", b =>
+                {
+                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Lead", b =>

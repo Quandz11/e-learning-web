@@ -60,12 +60,12 @@ const UserHeader: React.FC = () => {
                         >
                             {t('home.header.nav.articles', { defaultValue: 'Bài viết' })}
                         </Link>
-                        <a
+                        <Link
                             className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                            href="#benefits"
+                            to="/forum"
                         >
-                            {t('home.header.nav.benefits')}
-                        </a>
+                            {t('home.header.nav.forum', { defaultValue: 'Diễn đàn' })}
+                        </Link>
                         <a
                             className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
                             href="#testimonials"

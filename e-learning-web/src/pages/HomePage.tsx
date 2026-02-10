@@ -41,9 +41,6 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <TestimonialsSection />
-
       {/* Featured Courses Section */}
       <section className="bg-gray-50 dark:bg-gray-800 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -69,6 +66,9 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
 
       {/* Benefits / Social Proof (Simplified for now) */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">

@@ -202,9 +202,10 @@ const CourseDetailPage: React.FC = () => {
                           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
                             {t('courseDetail.sections.description')}
                           </h3>
-                          <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base">
-                            {course.description}
-                          </p>
+                          <div
+                            className="rich-text text-slate-600 dark:text-slate-300 leading-relaxed text-base"
+                            dangerouslySetInnerHTML={{ __html: course.description || '' }}
+                          />
                         </div>
 
                         {/* Learning Outcomes */}

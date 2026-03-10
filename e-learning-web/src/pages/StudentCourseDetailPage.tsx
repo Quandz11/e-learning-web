@@ -158,164 +158,117 @@ const StudentCourseDetailPage: React.FC = () => {
                 </div>
             </header>
 
-            {/* Hero Section */}
-            <div className="bg-gradient-to-br from-primary/10 to-blue-500/10 dark:from-primary/20 dark:to-blue-500/20 border-b border-gray-200 dark:border-gray-800">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="grid lg:grid-cols-3 gap-8">
-                        {/* Course Info */}
-                        <div className="lg:col-span-2 space-y-6">
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    {course.isFree ? (
-                                        <span className="px-3 py-1 rounded-full bg-green-500 text-white text-xs font-bold">
-                                            {t('courseDetail.freeCourse')}
-                                        </span>
-                                    ) : (
-                                        <span className="px-3 py-1 rounded-full bg-primary text-white text-xs font-bold">
-                                            {t('courseDetail.premium')}
-                                        </span>
-                                    )}
-                                    {isEnrolled && (
-                                        <span className="px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-bold">
-                                            ✓ {t('courseDetail.enrolled')}
-                                        </span>
-                                    )}
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${course.isPublished
-                                        ? 'bg-success/10 text-success border border-success/20'
-                                        : 'bg-gray-100 text-gray-500'
-                                        }`}>
-                                        {course.isPublished ? t('courseDetail.meta.statusPublished') : t('courseDetail.meta.statusDraft')}
+            {/* Page Content - single 2-col layout */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <div className="grid lg:grid-cols-3 gap-8 items-start">
+
+                    {/* LEFT: hero info + what you'll learn + curriculum */}
+                    <div className="lg:col-span-2 space-y-8">
+
+                        {/* Hero info */}
+                        <div className="space-y-5">
+                            {/* Badges */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                                {course.isFree ? (
+                                    <span className="px-3 py-1 rounded-full bg-green-500 text-white text-xs font-bold">
+                                        {t('courseDetail.freeCourse')}
                                     </span>
-                                </div>
-                                <h1 className="text-4xl lg:text-5xl font-bold text-[#0c1c1d] dark:text-white mb-4">
-                                    {course.title}
-                                </h1>
-                                <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                                    {course.description}
-                                </p>
+                                ) : (
+                                    <span className="px-3 py-1 rounded-full bg-primary text-white text-xs font-bold">
+                                        {t('courseDetail.premium')}
+                                    </span>
+                                )}
+                                {isEnrolled && (
+                                    <span className="px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-bold">
+                                        ✓ {t('courseDetail.enrolled')}
+                                    </span>
+                                )}
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${course.isPublished
+                                    ? 'bg-success/10 text-success border border-success/20'
+                                    : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                    {course.isPublished ? t('courseDetail.meta.statusPublished') : t('courseDetail.meta.statusDraft')}
+                                </span>
                             </div>
 
+                            {/* Title */}
+                            <h1 className="text-4xl lg:text-5xl font-bold text-[#0c1c1d] dark:text-white">
+                                {course.title}
+                            </h1>
+
+                            {/* Description */}
+                            <div
+                                className="rich-text text-gray-700 dark:text-gray-300"
+                                dangerouslySetInnerHTML={{ __html: course.description || '' }}
+                            />
+
                             {/* Stats */}
-                            <div className="flex flex-wrap gap-6 text-sm">
+                            <div className="flex flex-wrap gap-5 text-sm">
                                 <div className="flex items-center gap-2">
                                     <span className="material-symbols-outlined text-yellow-400">star</span>
                                     <span className="font-bold text-gray-900 dark:text-white">4.8</span>
-                                    <span className="text-gray-600 dark:text-gray-400">(128 reviews)</span>
+                                    <span className="text-gray-500 dark:text-gray-400">(128 reviews)</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="material-symbols-outlined text-primary">groups</span>
-                                    <span className="text-gray-900 dark:text-white font-medium">1,240 students</span>
+                                    <span className="text-gray-700 dark:text-gray-200 font-medium">1,240 students</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="material-symbols-outlined text-primary">schedule</span>
-                                    <span className="text-gray-900 dark:text-white font-medium">{t('courseDetail.durationMinutes', { minutes: totalDuration })}</span>
+                                    <span className="text-gray-700 dark:text-gray-200 font-medium">{t('courseDetail.durationMinutes', { minutes: totalDuration })}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="material-symbols-outlined text-primary">play_circle</span>
-                                    <span className="text-gray-900 dark:text-white font-medium">{totalLessons} {t('courseDetail.lessons')}</span>
+                                    <span className="text-gray-700 dark:text-gray-200 font-medium">{totalLessons} {t('courseDetail.lessons')}</span>
                                 </div>
                             </div>
 
                             {/* Instructor */}
                             {course.lecturer && (
-                                <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <div className="inline-flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                                     {course.lecturer.avatarUrl ? (
-                                        <img
-                                            src={course.lecturer.avatarUrl}
-                                            alt={course.lecturer.fullName}
-                                            className="w-14 h-14 rounded-full object-cover"
-                                        />
+                                        <img src={course.lecturer.avatarUrl} alt={course.lecturer.fullName} className="w-10 h-10 rounded-full object-cover" />
                                     ) : (
-                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold">
                                             {course.lecturer.fullName.charAt(0)}
                                         </div>
                                     )}
                                     <div>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('courseDetail.instructor')}</p>
-                                        <p className="font-bold text-gray-900 dark:text-white">{course.lecturer.fullName}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{t('courseDetail.instructor')}</p>
+                                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{course.lecturer.fullName}</p>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Enrollment Card */}
-                        <div className="lg:col-span-1">
-                            <div className="sticky top-24 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                                {/* Preview Image */}
-                                <div className="aspect-square bg-gradient-to-br from-primary/20 to-blue-500/20 relative">
-                                    {course.thumbnailUrl ? (
-                                        <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-6xl text-primary/50">school</span>
-                                        </div>
-                                    )}
-                                </div>
+                        <hr className="border-gray-200 dark:border-gray-700" />
 
-                                <div className="p-6 space-y-4">
-                                    {/* Price */}
-                                    <div className="text-center">
-                                        <p className="text-4xl font-bold text-primary">
-                                            {course.isFree ? t('courseDetail.free') : `${course.price.toLocaleString('vi-VN')} VND`}
-                                        </p>
-                                    </div>
-
-                                    {/* Enroll/Start Learning Button */}
-                                    <button
-                                        onClick={handleButtonClick}
-                                        disabled={enrolling}
-                                        className={`w-full py-4 ${isEnrolled
-                                            ? 'bg-blue-600 hover:bg-blue-700'
-                                            : 'bg-primary hover:bg-primary/90'
-                                            } text-white font-bold rounded-lg transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
-                                    >
-                                        {getEnrollButtonText()}
-                                    </button>
-
-                                    {/* Features */}
-                                    <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                        <div className="flex items-center gap-3 text-sm">
-                                            <span className="material-symbols-outlined text-primary">all_inclusive</span>
-                                            <span className="text-gray-700 dark:text-gray-300">{t('courseDetail.features.lifetimeAccess')}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 text-sm">
-                                            <span className="material-symbols-outlined text-primary">phone_iphone</span>
-                                            <span className="text-gray-700 dark:text-gray-300">{t('courseDetail.features.mobileAccess')}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 text-sm">
-                                            <span className="material-symbols-outlined text-primary">workspace_premium</span>
-                                            <span className="text-gray-700 dark:text-gray-300">{t('courseDetail.features.certificate')}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                        {/* What You'll Learn */}
+                        {course.learningOutcomes && course.learningOutcomes.length > 0 && (
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                                    {t('courseDetail.sections.whatLearn')}
+                                </h2>
+                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {course.learningOutcomes.map((item, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-sm">
+                                            <span className="material-symbols-outlined text-success text-lg shrink-0 mt-0.5">check_circle</span>
+                                            <span className="text-gray-700 dark:text-gray-300">{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        )}
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Left Column - Course Content */}
-                    <div className="lg:col-span-2 space-y-8">
                         {/* Curriculum */}
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                                 {t('courseDetail.curriculumTab')}
                             </h2>
                             <div className="border border-gray-200 dark:border-gray-700 rounded-xl divide-y divide-gray-200 dark:divide-gray-700 overflow-hidden">
                                 {course.lessons?.map((lesson, lIdx) => {
                                     const lessonId = lesson.id || `${lIdx}`;
                                     const isExpanded = expandedSections.has(lessonId);
-                                    // Calculate duration sum from parts. Assuming parts have VideoDuration or similar? 
-                                    // LessonDto has Parts. LessonPartDto has VideoDuration?
-                                    // Let's assume we can sum up durations if available or derived.
-                                    // Only Video parts have duration usually.
-                                    // For now, let's sum up durations if explicit property exists or 0.
-                                    // Actually LessonDto (Step 628) has `Duration` on Lesson? 
-                                    // No, LessonDto has Parts.
-                                    // LessonPartDto has VideoDuration.
                                     const lessonDuration = lesson.parts?.reduce((sum, p) => sum + (p.videoDuration || 0), 0) || 0;
                                     const partCount = lesson.parts?.length || 0;
 
@@ -333,7 +286,7 @@ const StudentCourseDetailPage: React.FC = () => {
                                                         {lesson.title}
                                                     </span>
                                                 </div>
-                                                <span className="text-sm text-gray-500">
+                                                <span className="text-sm text-gray-500 shrink-0 ml-4">
                                                     {partCount} parts • {Math.round(lessonDuration / 60)} min
                                                 </span>
                                             </button>
@@ -351,7 +304,7 @@ const StudentCourseDetailPage: React.FC = () => {
                                                                 </span>
                                                                 <span className="text-sm text-gray-700 dark:text-gray-300">{part.title}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2">
+                                                            <div className="flex items-center gap-2 shrink-0 ml-4">
                                                                 {part.type === 'Video' && (
                                                                     <span className="text-xs text-gray-500">{Math.round((part.videoDuration || 0) / 60)} min</span>
                                                                 )}
@@ -370,23 +323,58 @@ const StudentCourseDetailPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Right Column - Additional Info */}
-                    <div className="lg:col-span-1 space-y-6">
-                        {/* What You'll Learn */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                                {t('courseDetail.sections.whatLearn')}
-                            </h3>
-                            <ul className="space-y-3">
-                                {['Master the fundamentals', 'Build real-world projects', 'Learn best practices', 'Get certified'].map((item, i) => (
-                                    <li key={i} className="flex items-start gap-2 text-sm">
-                                        <span className="material-symbols-outlined text-success text-lg shrink-0">check_circle</span>
-                                        <span className="text-gray-700 dark:text-gray-300">{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                    {/* RIGHT: Enrollment Card (sticky) */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-24 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            {/* Thumbnail */}
+                            <div className="aspect-video bg-gradient-to-br from-primary/20 to-blue-500/20 relative">
+                                {course.thumbnailUrl ? (
+                                    <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-6xl text-primary/50">school</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-6 space-y-4">
+                                {/* Price */}
+                                <p className="text-3xl font-bold text-primary text-center">
+                                    {course.isFree ? t('courseDetail.free') : `${course.price.toLocaleString('vi-VN')} VND`}
+                                </p>
+
+                                {/* Button */}
+                                <button
+                                    onClick={handleButtonClick}
+                                    disabled={enrolling}
+                                    className={`w-full py-4 ${isEnrolled ? 'bg-blue-600 hover:bg-blue-700' : 'bg-primary hover:bg-primary/90'} text-white font-bold rounded-lg transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {getEnrollButtonText()}
+                                </button>
+
+                                {/* Features */}
+                                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm">
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-symbols-outlined text-primary text-[20px]">play_circle</span>
+                                        <span className="text-gray-700 dark:text-gray-300">{totalLessons} {t('courseDetail.lessons')}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-symbols-outlined text-primary text-[20px]">all_inclusive</span>
+                                        <span className="text-gray-700 dark:text-gray-300">{t('courseDetail.features.lifetimeAccess')}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-symbols-outlined text-primary text-[20px]">phone_iphone</span>
+                                        <span className="text-gray-700 dark:text-gray-300">{t('courseDetail.features.mobileAccess')}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-symbols-outlined text-primary text-[20px]">workspace_premium</span>
+                                        <span className="text-gray-700 dark:text-gray-300">{t('courseDetail.features.certificate')}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>

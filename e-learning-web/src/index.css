@@ -49,3 +49,38 @@
     font-feature-settings: 'liga';
   }
 }
+
+/* Rich text output (rendered HTML from Quill editor) */
+.rich-text h1 { font-size: 1.75rem; font-weight: 700; margin: 0.75rem 0 0.5rem; }
+.rich-text h2 { font-size: 1.4rem; font-weight: 700; margin: 0.75rem 0 0.5rem; }
+.rich-text h3 { font-size: 1.15rem; font-weight: 600; margin: 0.5rem 0 0.375rem; }
+.rich-text p  { margin: 0 0 0.5rem; line-height: 1.7; }
+.rich-text strong { font-weight: 700; }
+.rich-text em { font-style: italic; }
+.rich-text u  { text-decoration: underline; }
+.rich-text s  { text-decoration: line-through; }
+.rich-text ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+.rich-text ol { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+.rich-text li { margin: 0.2rem 0; line-height: 1.6; }
+.rich-text a  { color: var(--color-primary); text-decoration: underline; }
+.rich-text blockquote { border-left: 4px solid var(--color-primary); padding-left: 1rem; margin: 0.75rem 0; opacity: 0.8; }
+
+/* Quill inline color & background-color spans – inline styles take priority, just add visual polish */
+.rich-text span[style*="background-color"] { padding: 1px 3px; border-radius: 3px; }
+
+/* Quill editor dark mode */
+.dark .ql-toolbar { background: #1e293b; border-color: #334155 !important; }
+.dark .ql-toolbar .ql-stroke { stroke: #94a3b8; }
+.dark .ql-toolbar .ql-fill  { fill: #94a3b8; }
+.dark .ql-toolbar .ql-picker-label { color: #94a3b8; }
+.dark .ql-toolbar .ql-picker-options { background: #1e293b; border-color: #334155; }
+.dark .ql-toolbar button:hover .ql-stroke,
+.dark .ql-toolbar button.ql-active .ql-stroke { stroke: #38bdf8; }
+.dark .ql-toolbar button:hover .ql-fill,
+.dark .ql-toolbar button.ql-active .ql-fill  { fill: #38bdf8; }
+.dark .ql-container { background: #0f172a; border-color: #334155 !important; }
+.dark .ql-editor { color: #e2e8f0; }
+.dark .ql-editor.ql-blank::before { color: #64748b; }
+
+/* Quill editor min-height */
+.quill-wrapper .ql-editor { min-height: 160px; }

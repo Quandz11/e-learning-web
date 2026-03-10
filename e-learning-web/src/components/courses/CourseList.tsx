@@ -2,31 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { courseApi, type CourseResponse } from '../../services/courseApi';
+import { stripHtml } from '../../utils/html';
 
 interface CourseListProps {
     limit?: number;
+    pageSize?: number;
     showFilter?: boolean;
+    showPagination?: boolean;
+    cols?: 3 | 4;
 }
 
-const CourseList: React.FC<CourseListProps> = ({ limit }) => {
+const CourseList: React.FC<CourseListProps> = ({
+    limit,
+    pageSize = 12,
+    showPagination = false,
+    cols = 3,
+}) => {
     const { t } = useTranslation();
+    const [allCourses, setAllCourses] = useState<CourseResponse[]>([]);
     const [courses, setCourses] = useState<CourseResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         const fetchCourses = async () => {
             try {
                 setLoading(true);
-                const allCourses = await courseApi.getAll();
-                // Filter only published courses for students
-                const publishedCourses = allCourses.filter(c => c.isPublished);
-
-                if (limit) {
-                    setCourses(publishedCourses.slice(0, limit));
-                } else {
-                    setCourses(publishedCourses);
-                }
+                const fetched = await courseApi.getAll();
+                const published = fetched.filter(c => c.isPublished);
+                setAllCourses(published);
             } catch (err: any) {
                 setError(err.message || 'Failed to load courses');
             } finally {
@@ -34,12 +39,29 @@ const CourseList: React.FC<CourseListProps> = ({ limit }) => {
             }
         };
         fetchCourses();
-    }, [limit]);
+    }, []);
+
+    useEffect(() => {
+        if (showPagination) {
+            const start = (page - 1) * pageSize;
+            setCourses(allCourses.slice(start, start + pageSize));
+        } else if (limit) {
+            setCourses(allCourses.slice(0, limit));
+        } else {
+            setCourses(allCourses);
+        }
+    }, [allCourses, page, limit, pageSize, showPagination]);
+
+    const totalPages = showPagination ? Math.ceil(allCourses.length / pageSize) : 1;
+    const gridClass = cols === 4
+        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+        : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 
     if (loading) {
+        const skeletonCount = showPagination ? pageSize : (limit ?? 3);
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[0, 1, 2].slice(0, limit || 3).map((i) => (
+            <div className={gridClass}>
+                {Array.from({ length: Math.min(skeletonCount, 12) }).map((_, i) => (
                     <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
                         <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
                         <div className="p-5 space-y-3">
@@ -70,7 +92,8 @@ const CourseList: React.FC<CourseListProps> = ({ limit }) => {
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <>
+        <div className={gridClass}>
             {courses.map((course) => (
                 <Link
                     key={course.id}
@@ -106,7 +129,7 @@ const CourseList: React.FC<CourseListProps> = ({ limit }) => {
                             {course.title}
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
-                            {course.description}
+                            {stripHtml(course.description)}
                         </p>
                         <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -131,6 +154,49 @@ const CourseList: React.FC<CourseListProps> = ({ limit }) => {
                 </Link>
             ))}
         </div>
+
+        {/* Pagination */}
+        {showPagination && totalPages > 1 && (
+            <div className="mt-10 flex items-center justify-center gap-2">
+                <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                    <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                </button>
+
+                {Array.from({ length: totalPages }).map((_, i) => {
+                    const p = i + 1;
+                    const show = p === 1 || p === totalPages || Math.abs(p - page) <= 1;
+                    const showDot = !show && (p === page - 2 || p === page + 2);
+                    if (showDot) return <span key={p} className="text-gray-400">…</span>;
+                    if (!show) return null;
+                    return (
+                        <button
+                            key={p}
+                            onClick={() => setPage(p)}
+                            className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors ${
+                                p === page
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300'
+                            }`}
+                        >
+                            {p}
+                        </button>
+                    );
+                })}
+
+                <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                    <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                </button>
+            </div>
+        )}
+        </>
     );
 };
 

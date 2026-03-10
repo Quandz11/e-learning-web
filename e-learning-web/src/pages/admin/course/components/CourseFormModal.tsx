@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import { useTranslation } from 'react-i18next';
 import { courseApi, type CourseInput, type CourseResponse } from '../../../../services/courseApi';
 import { userApi, type UserDto } from '../../../../services/userApi';
@@ -21,6 +23,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const quillRef = React.useRef<any>(null);
 
     // Form State
     const [title, setTitle] = useState('');
@@ -98,6 +101,18 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
             setLecturerSearch('');
         }
     }, [isOpen, initialData, courseId, currentUserLecturerId]);
+
+    // Set Quill content imperatively after mount (avoids controlled value timing issues)
+    useEffect(() => {
+        if (!isOpen) return;
+        const timer = setTimeout(() => {
+            if (quillRef.current) {
+                const editor = quillRef.current.getEditor();
+                editor.clipboard.dangerouslyPasteHTML(initialData?.description || '');
+            }
+        }, 50);
+        return () => clearTimeout(timer);
+    }, [isOpen, initialData]);
 
     // Fetch lecturers
     useEffect(() => {
@@ -295,12 +310,26 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.description')}</label>
-                        <textarea
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
-                            rows={3}
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                        />
+                        <div className="quill-wrapper rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
+                            <ReactQuill
+                                ref={quillRef}
+                                theme="snow"
+                                value={description}
+                                onChange={setDescription}
+                                modules={{
+                                    toolbar: [
+                                        [{ header: [1, 2, 3, false] }],
+                                        ['bold', 'italic', 'underline', 'strike'],
+                                        [{ color: [] }, { background: [] }],
+                                        [{ list: 'ordered' }, { list: 'bullet' }],
+                                        [{ indent: '-1' }, { indent: '+1' }],
+                                        ['link', 'clean'],
+                                    ],
+                                }}
+                                formats={['header', 'bold', 'italic', 'underline', 'strike', 'color', 'background', 'list', 'indent', 'link']}
+                                style={{ minHeight: '160px' }}
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-2">

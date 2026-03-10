@@ -36,7 +36,7 @@ public class EnrollmentService : IEnrollmentService
             throw new InvalidOperationException("Course not found or not published");
         }
 
-        // For now, only allow free course enrollment (payment will be implemented later)
+        // Only free courses can be enrolled directly; paid courses require purchase
         if (!course.IsFree)
         {
             throw new InvalidOperationException("This course requires payment. Please purchase the course first.");
@@ -58,11 +58,12 @@ public class EnrollmentService : IEnrollmentService
                 EnrolledAt = existingEnrollment.EnrolledAt,
                 ProgressPercentage = existingEnrollment.ProgressPercentage,
                 CompletedAt = existingEnrollment.CompletedAt,
-                LastAccessedAt = existingEnrollment.LastAccessedAt
+                LastAccessedAt = existingEnrollment.LastAccessedAt,
+                Status = existingEnrollment.Status
             };
         }
 
-        // Create new enrollment
+        // Create new enrollment — free courses are ACTIVE immediately
         var enrollment = new Enrollment
         {
             Id = Guid.NewGuid(),
@@ -70,7 +71,8 @@ public class EnrollmentService : IEnrollmentService
             CourseId = courseId,
             EnrolledAt = DateTime.UtcNow,
             LastAccessedAt = DateTime.UtcNow,
-            ProgressPercentage = 0
+            ProgressPercentage = 0,
+            Status = "ACTIVE"
         };
 
         _context.Enrollments.Add(enrollment);
@@ -117,25 +119,26 @@ public class EnrollmentService : IEnrollmentService
             EnrolledAt = enrollment.EnrolledAt,
             ProgressPercentage = enrollment.ProgressPercentage,
             CompletedAt = enrollment.CompletedAt,
-            LastAccessedAt = enrollment.LastAccessedAt
+            LastAccessedAt = enrollment.LastAccessedAt,
+            Status = enrollment.Status
         };
     }
 
     public async Task<bool> IsEnrolledAsync(Guid userId, Guid courseId)
     {
-        // Optimized: Use Any() which stops at first match
+        // Only ACTIVE enrollments grant access
         return await _context.Enrollments
             .AsNoTracking()
-            .AnyAsync(e => e.UserId == userId && e.CourseId == courseId);
+            .AnyAsync(e => e.UserId == userId && e.CourseId == courseId && e.Status == "ACTIVE");
     }
 
     public async Task<List<EnrollmentResponse>> GetUserEnrollmentsAsync(Guid userId)
     {
-        // Optimized: Use Include to avoid N+1 queries
+        // Only return ACTIVE enrollments to user-facing endpoints
         var enrollments = await _context.Enrollments
             .AsNoTracking()
             .Include(e => e.Course)
-            .Where(e => e.UserId == userId)
+            .Where(e => e.UserId == userId && e.Status == "ACTIVE")
             .OrderByDescending(e => e.LastAccessedAt)
             .Select(e => new EnrollmentResponse
             {
@@ -145,11 +148,138 @@ public class EnrollmentService : IEnrollmentService
                 EnrolledAt = e.EnrolledAt,
                 ProgressPercentage = e.ProgressPercentage,
                 CompletedAt = e.CompletedAt,
-                LastAccessedAt = e.LastAccessedAt
+                LastAccessedAt = e.LastAccessedAt,
+                Status = e.Status
             })
             .ToListAsync();
 
         return enrollments;
+    }
+
+    // ─── Admin Methods ────────────────────────────────────────────────────────
+
+    public async Task<List<AdminEnrollmentResponse>> AdminGetUserEnrollmentsAsync(Guid userId)
+    {
+        return await _context.Enrollments
+            .AsNoTracking()
+            .Include(e => e.Course)
+            .Include(e => e.User)
+            .Where(e => e.UserId == userId)
+            .OrderByDescending(e => e.EnrolledAt)
+            .Select(e => new AdminEnrollmentResponse
+            {
+                Id = e.Id.ToString(),
+                CourseId = e.CourseId.ToString(),
+                CourseTitle = e.Course.Title,
+                CourseThumbnail = e.Course.ThumbnailUrl,
+                UserId = e.UserId.ToString(),
+                UserEmail = e.User.Email,
+                UserFullName = e.User.FullName,
+                EnrolledAt = e.EnrolledAt,
+                ProgressPercentage = e.ProgressPercentage,
+                CompletedAt = e.CompletedAt,
+                LastAccessedAt = e.LastAccessedAt,
+                Status = e.Status
+            })
+            .ToListAsync();
+    }
+
+    public async Task<AdminEnrollmentResponse> AdminAddEnrollmentAsync(Guid userId, string courseIdStr)
+    {
+        if (!Guid.TryParse(courseIdStr, out var courseId))
+            throw new ArgumentException("Invalid course ID format");
+
+        var course = await _context.Courses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == courseId)
+            ?? throw new InvalidOperationException("Course not found");
+
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId)
+            ?? throw new InvalidOperationException("User not found");
+
+        var existing = await _context.Enrollments
+            .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
+
+        if (existing != null)
+        {
+            // If already exists but inactive, re-activate
+            existing.Status = "ACTIVE";
+            await _context.SaveChangesAsync();
+            return new AdminEnrollmentResponse
+            {
+                Id = existing.Id.ToString(), CourseId = course.Id.ToString(),
+                CourseTitle = course.Title, CourseThumbnail = course.ThumbnailUrl,
+                UserId = userId.ToString(), UserEmail = user.Email, UserFullName = user.FullName,
+                EnrolledAt = existing.EnrolledAt, ProgressPercentage = existing.ProgressPercentage,
+                CompletedAt = existing.CompletedAt, LastAccessedAt = existing.LastAccessedAt,
+                Status = existing.Status
+            };
+        }
+
+        var enrollment = new Enrollment
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            CourseId = courseId,
+            EnrolledAt = DateTime.UtcNow,
+            LastAccessedAt = DateTime.UtcNow,
+            ProgressPercentage = 0,
+            Status = "ACTIVE"
+        };
+        _context.Enrollments.Add(enrollment);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Admin manually added enrollment: User {UserId} → Course {CourseId}", userId, courseId);
+
+        return new AdminEnrollmentResponse
+        {
+            Id = enrollment.Id.ToString(), CourseId = course.Id.ToString(),
+            CourseTitle = course.Title, CourseThumbnail = course.ThumbnailUrl,
+            UserId = userId.ToString(), UserEmail = user.Email, UserFullName = user.FullName,
+            EnrolledAt = enrollment.EnrolledAt, ProgressPercentage = 0,
+            CompletedAt = null, LastAccessedAt = enrollment.LastAccessedAt,
+            Status = enrollment.Status
+        };
+    }
+
+    public async Task AdminRemoveEnrollmentAsync(Guid userId, Guid courseId)
+    {
+        var enrollment = await _context.Enrollments
+            .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId)
+            ?? throw new InvalidOperationException("Enrollment not found");
+
+        _context.Enrollments.Remove(enrollment);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Admin removed enrollment: User {UserId} → Course {CourseId}", userId, courseId);
+    }
+
+    public async Task<AdminEnrollmentResponse> AdminSetEnrollmentStatusAsync(Guid enrollmentId, string status)
+    {
+        if (status != "ACTIVE" && status != "INACTIVE")
+            throw new ArgumentException("Status must be ACTIVE or INACTIVE");
+
+        var enrollment = await _context.Enrollments
+            .Include(e => e.Course)
+            .Include(e => e.User)
+            .FirstOrDefaultAsync(e => e.Id == enrollmentId)
+            ?? throw new InvalidOperationException("Enrollment not found");
+
+        enrollment.Status = status;
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Admin set enrollment {EnrollmentId} status to {Status}", enrollmentId, status);
+
+        return new AdminEnrollmentResponse
+        {
+            Id = enrollment.Id.ToString(), CourseId = enrollment.CourseId.ToString(),
+            CourseTitle = enrollment.Course.Title, CourseThumbnail = enrollment.Course.ThumbnailUrl,
+            UserId = enrollment.UserId.ToString(), UserEmail = enrollment.User.Email,
+            UserFullName = enrollment.User.FullName,
+            EnrolledAt = enrollment.EnrolledAt, ProgressPercentage = enrollment.ProgressPercentage,
+            CompletedAt = enrollment.CompletedAt, LastAccessedAt = enrollment.LastAccessedAt,
+            Status = enrollment.Status
+        };
     }
 
     public async Task<CourseProgressResponse> GetCourseProgressAsync(Guid userId, Guid courseId)

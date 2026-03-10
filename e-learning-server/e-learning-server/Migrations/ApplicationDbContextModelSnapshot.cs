@@ -501,6 +501,10 @@ namespace e_learning_server.Migrations
                     b.Property<int>("ProgressPercentage")
                         .HasColumnType("int");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 

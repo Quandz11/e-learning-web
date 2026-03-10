@@ -3,9 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { userApi, type UserDto, type UserRole, type UserStatus } from '../../../services/userApi';
+import { adminEnrollmentApi, type AdminEnrollmentResponse } from '../../../services/adminEnrollmentApi';
 import { format } from 'date-fns';
 import UserFormModal from './components/UserFormModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
+import AddEnrollmentModal from './components/AddEnrollmentModal';
 
 const UserDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -22,6 +24,13 @@ const UserDetailPage: React.FC = () => {
 
     // Tabs state
     const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'activity'>('overview');
+
+    // Enrollment management
+    const [enrollments, setEnrollments] = useState<AdminEnrollmentResponse[]>([]);
+    const [enrollmentsLoading, setEnrollmentsLoading] = useState(false);
+    const [showAddCourseModal, setShowAddCourseModal] = useState(false);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
+    const [removingId, setRemovingId] = useState<string | null>(null);
 
     const roleLabel = (value: UserRole) => t(`admin.users.roles.${value}`);
     const statusLabel = (value: UserStatus) => t(`admin.users.statuses.${value}`);
@@ -46,6 +55,52 @@ const UserDetailPage: React.FC = () => {
 
     const handleEditSuccess = () => {
         if (id) void fetchUser(id);
+    };
+
+    const fetchEnrollments = async (userId: string) => {
+        setEnrollmentsLoading(true);
+        try {
+            const data = await adminEnrollmentApi.getUserEnrollments(userId);
+            setEnrollments(data);
+        } catch {
+            // silently fail
+        } finally {
+            setEnrollmentsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'courses' && id) {
+            void fetchEnrollments(id);
+        }
+    }, [activeTab, id]);
+
+    const handleToggleStatus = async (enrollment: AdminEnrollmentResponse) => {
+        if (!id) return;
+        setTogglingId(enrollment.id);
+        try {
+            const newStatus = enrollment.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            await adminEnrollmentApi.setEnrollmentStatus(id, enrollment.id, newStatus);
+            void fetchEnrollments(id);
+        } catch {
+            // ignore
+        } finally {
+            setTogglingId(null);
+        }
+    };
+
+    const handleRemoveEnrollment = async (enrollment: AdminEnrollmentResponse) => {
+        if (!id) return;
+        if (!window.confirm(t('admin.users.enrollment.removeConfirm'))) return;
+        setRemovingId(enrollment.id);
+        try {
+            await adminEnrollmentApi.removeEnrollment(id, enrollment.courseId);
+            void fetchEnrollments(id);
+        } catch {
+            // ignore
+        } finally {
+            setRemovingId(null);
+        }
     };
 
     if (loading) {
@@ -177,8 +232,108 @@ const UserDetailPage: React.FC = () => {
                                 </div>
                             )}
                             {activeTab === 'courses' && (
-                                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                                    <p>{t('admin.users.detail.coursesEmpty')}</p>
+                                <div>
+                                    {/* Action bar */}
+                                    <div className="mb-4 flex items-center justify-between">
+                                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                                            {t('admin.users.enrollment.title')} ({enrollments.length})
+                                        </h3>
+                                        <button
+                                            onClick={() => setShowAddCourseModal(true)}
+                                            className="inline-flex items-center gap-1.5 rounded-lg bg-dashboard-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-dashboard-primary-dark"
+                                        >
+                                            <span className="material-symbols-outlined text-[15px]">add</span>
+                                            {t('admin.users.enrollment.addCourse')}
+                                        </button>
+                                    </div>
+
+                                    {enrollmentsLoading ? (
+                                        <div className="flex h-32 items-center justify-center">
+                                            <div className="h-6 w-6 animate-spin rounded-full border-4 border-dashboard-primary border-t-transparent" />
+                                        </div>
+                                    ) : enrollments.length === 0 ? (
+                                        <div className="py-10 text-center text-slate-500 dark:text-slate-400">
+                                            <span className="material-symbols-outlined mb-2 text-[40px] text-slate-300">school</span>
+                                            <p className="text-sm">{t('admin.users.enrollment.empty')}</p>
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                                <thead>
+                                                    <tr className="border-b border-slate-200 dark:border-slate-700">
+                                                        <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.course')}</th>
+                                                        <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.enrolledAt')}</th>
+                                                        <th className="pb-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.progress')}</th>
+                                                        <th className="pb-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.status')}</th>
+                                                        <th className="pb-2 text-right text-xs font-semibold text-slate-500 dark:text-slate-400"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                    {enrollments.map(enrollment => (
+                                                        <tr key={enrollment.id}>
+                                                            <td className="py-3 pr-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    {enrollment.courseThumbnail ? (
+                                                                        <img src={enrollment.courseThumbnail} alt={enrollment.courseTitle} className="h-8 w-12 flex-shrink-0 rounded object-cover" />
+                                                                    ) : (
+                                                                        <div className="flex h-8 w-12 flex-shrink-0 items-center justify-center rounded bg-slate-100 dark:bg-slate-800">
+                                                                            <span className="material-symbols-outlined text-[15px] text-slate-400">school</span>
+                                                                        </div>
+                                                                    )}
+                                                                    <span className="font-medium text-slate-900 dark:text-white line-clamp-1">{enrollment.courseTitle}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-3 pr-4 text-slate-500 dark:text-slate-400">
+                                                                {format(new Date(enrollment.enrolledAt), 'dd/MM/yyyy')}
+                                                            </td>
+                                                            <td className="py-3 pr-4 text-center">
+                                                                <div className="flex items-center justify-center gap-1.5">
+                                                                    <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                                                                        <div
+                                                                            className="h-full rounded-full bg-dashboard-primary"
+                                                                            style={{ width: `${enrollment.progressPercentage}%` }}
+                                                                        />
+                                                                    </div>
+                                                                    <span className="text-xs text-slate-500">{enrollment.progressPercentage}%</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-3 pr-4 text-center">
+                                                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                                    enrollment.status === 'ACTIVE'
+                                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                                                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                                                }`}>
+                                                                    {t(`admin.users.enrollment.statuses.${enrollment.status}`)}
+                                                                </span>
+                                                            </td>
+                                                            <td className="py-3 text-right">
+                                                                <div className="flex items-center justify-end gap-1">
+                                                                    <button
+                                                                        onClick={() => void handleToggleStatus(enrollment)}
+                                                                        disabled={togglingId === enrollment.id}
+                                                                        title={enrollment.status === 'ACTIVE' ? t('admin.users.enrollment.deactivate') : t('admin.users.enrollment.activate')}
+                                                                        className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40 dark:hover:bg-slate-800"
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-[18px]">
+                                                                            {enrollment.status === 'ACTIVE' ? 'block' : 'check_circle'}
+                                                                        </span>
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => void handleRemoveEnrollment(enrollment)}
+                                                                        disabled={removingId === enrollment.id}
+                                                                        title={t('admin.users.enrollment.remove')}
+                                                                        className="rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40 dark:hover:bg-red-900/20"
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {activeTab === 'activity' && (
@@ -198,15 +353,25 @@ const UserDetailPage: React.FC = () => {
                             {/* Stat Items placeholder */}
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-slate-500 dark:text-slate-400">{t('admin.users.detail.stats.coursesEnrolled')}</span>
-                                <span className="font-semibold text-slate-900 dark:text-white">0</span>
+                                <span className="font-semibold text-slate-900 dark:text-white">
+                                    {enrollments.filter(e => e.status === 'ACTIVE').length}
+                                </span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-slate-500 dark:text-slate-400">{t('admin.users.detail.stats.completionRate')}</span>
-                                <span className="font-semibold text-slate-900 dark:text-white">0%</span>
+                                <span className="font-semibold text-slate-900 dark:text-white">
+                                    {enrollments.length > 0
+                                        ? `${Math.round(enrollments.reduce((sum, e) => sum + e.progressPercentage, 0) / enrollments.length)}%`
+                                        : '0%'}
+                                </span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-slate-500 dark:text-slate-400">{t('admin.users.detail.stats.lastActive')}</span>
-                                <span className="font-semibold text-slate-900 dark:text-white">{format(new Date(), 'MMM dd, yyyy')}</span>
+                                <span className="font-semibold text-slate-900 dark:text-white">
+                                    {enrollments.length > 0
+                                        ? format(new Date(Math.max(...enrollments.map(e => new Date(e.lastAccessedAt).getTime()))), 'dd/MM/yyyy')
+                                        : '-'}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -228,6 +393,19 @@ const UserDetailPage: React.FC = () => {
                 onClose={() => setShowResetModal(false)}
                 userId={user.id}
             />
+
+            {id && (
+                <AddEnrollmentModal
+                    isOpen={showAddCourseModal}
+                    userId={id}
+                    enrolledCourseIds={enrollments.map(e => e.courseId)}
+                    onClose={() => setShowAddCourseModal(false)}
+                    onSuccess={() => {
+                        setShowAddCourseModal(false);
+                        void fetchEnrollments(id);
+                    }}
+                />
+            )}
         </AdminLayout>
     );
 };

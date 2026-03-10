@@ -51,6 +51,7 @@ import ForumCategoryPage from './pages/ForumCategoryPage';
 import ForumThreadPage from './pages/ForumThreadPage';
 import NewThreadPage from './pages/NewThreadPage';
 import AdminForumCategoriesPage from './pages/admin/forum/AdminForumCategoriesPage';
+import MyCoursesPage from './pages/MyCoursesPage';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -125,6 +126,14 @@ function App() {
                 {
                   path: 'courses/:id',
                   element: <StudentCourseDetailPage />,
+                },
+                {
+                  path: 'my-courses',
+                  element: (
+                    <ProtectedRoute>
+                      <MyCoursesPage />
+                    </ProtectedRoute>
+                  ),
                 },
                 {
                   path: 'articles',

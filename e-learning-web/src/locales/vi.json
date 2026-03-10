@@ -435,6 +435,30 @@
                     "completionRate": "Tỷ lệ hoàn thành",
                     "lastActive": "Hoạt động gần nhất"
                 }
+            },
+            "enrollment": {
+                "title": "Danh sách khóa học",
+                "addCourse": "Thêm khóa học",
+                "empty": "Người dùng chưa đăng ký khóa học nào.",
+                "course": "Khóa học",
+                "enrolledAt": "Ngày đăng ký",
+                "progress": "Tiến độ",
+                "status": "Trạng thái",
+                "activate": "Kích hoạt",
+                "deactivate": "Hủy kích hoạt",
+                "remove": "Xóa",
+                "removeConfirm": "Xóa khóa học này khỏi người dùng?",
+                "addFailed": "Thêm khóa học thất bại",
+                "loadCoursesFailed": "Không thể tải danh sách khóa học",
+                "searchCourses": "Tìm kiếm khóa học...",
+                "noCoursesFound": "Không tìm thấy khóa học",
+                "alreadyEnrolled": "Đã đăng ký",
+                "add": "Thêm",
+                "free": "Miễn phí",
+                "statuses": {
+                    "ACTIVE": "Hoạt động",
+                    "INACTIVE": "Đã khóa"
+                }
             }
         },
         "instructors": {
@@ -846,6 +870,7 @@
         "sections": {
             "description": "Mô tả khóa học",
             "whatLearn": "Học viên sẽ học được gì",
+            "includes": "Khóa học bao gồm",
             "structure": "Cấu trúc khóa học",
             "statistics": "Thống kê khóa học",
             "internalNotes": "Ghi chú nội bộ"
@@ -907,6 +932,22 @@
         "previous": "Trước",
         "next": "Tiếp theo"
     },
+    "courses": {
+        "userTitle": "Danh sách các khóa học",
+        "userSubtitle": "Khám phá bộ sưu tập khóa học đa dạng và phù hợp với bạn."
+    },
+    "myCourses": {
+        "subtitle": "Danh sách tất cả các khóa học bạn đã đăng ký và mua.",
+        "count": "{{count}} khóa học",
+        "emptyTitle": "Bạn chưa có khóa học nào",
+        "emptyDesc": "Hãy khám phá và đăng ký các khóa học phù hợp với bạn.",
+        "browseCourses": "Khám phá khóa học",
+        "progress": "Tiến độ",
+        "enrolledAt": "Đăng ký ngày",
+        "completed": "Hoàn thành",
+        "continueLearning": "Tiếp tục học",
+        "loadFailed": "Không thể tải danh sách khóa học"
+    },
     "home": {
         "header": {
             "nav": {
@@ -915,7 +956,8 @@
                 "articles": "Bài viết",
                 "forum": "Diễn đàn",
                 "benefits": "Lợi ích",
-                "testimonials": "Đánh giá"
+                "testimonials": "Đánh giá",
+                "myCourses": "Khóa học của tôi"
             },
             "logout": "Đăng xuất",
             "welcome": "Chào mừng"

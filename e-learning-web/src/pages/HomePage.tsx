@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import CourseList from '../components/courses/CourseList';
 import QuizModal from '../components/quiz/QuizModal';
 import TestimonialsSection from '../components/home/TestimonialsSection';
@@ -53,17 +52,7 @@ const HomePage: React.FC = () => {
             </p>
           </div>
 
-          <CourseList limit={3} showFilter={false} />
-
-          <div className="mt-12 text-center">
-            <Link
-              to="/courses"
-              className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
-            >
-              {t('home.courses.viewAll')}
-              <span className="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
-            </Link>
-          </div>
+          <CourseList pageSize={12} showPagination cols={4} showFilter={false} />
         </div>
       </section>
 

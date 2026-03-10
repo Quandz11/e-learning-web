@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../../components/admin/AdminLayout';
+import { stripHtml } from '../../../utils/html';
 import { courseApi } from '../../../services/courseApi';
 import type { CourseResponse } from '../../../services/courseApi';
 import { format } from 'date-fns';
@@ -162,7 +163,7 @@ const CoursesPage: React.FC = () => {
                     </span>
                   </div>
 
-                  <p className="line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{course.description || t('admin.courses.table.noData')}</p>
+                  <p className="line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{stripHtml(course.description || '') || t('admin.courses.table.noData')}</p>
 
                   <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
                     <div className="flex flex-col">

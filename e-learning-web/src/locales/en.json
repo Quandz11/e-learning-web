@@ -379,6 +379,30 @@
                     "completionRate": "Completion Rate",
                     "lastActive": "Last Active"
                 }
+            },
+            "enrollment": {
+                "title": "Course List",
+                "addCourse": "Add Course",
+                "empty": "This user has not enrolled in any courses yet.",
+                "course": "Course",
+                "enrolledAt": "Enrolled At",
+                "progress": "Progress",
+                "status": "Status",
+                "activate": "Activate",
+                "deactivate": "Deactivate",
+                "remove": "Remove",
+                "removeConfirm": "Remove this course from the user?",
+                "addFailed": "Failed to add course",
+                "loadCoursesFailed": "Failed to load courses",
+                "searchCourses": "Search courses...",
+                "noCoursesFound": "No courses found",
+                "alreadyEnrolled": "Enrolled",
+                "add": "Add",
+                "free": "Free",
+                "statuses": {
+                    "ACTIVE": "Active",
+                    "INACTIVE": "Inactive"
+                }
             }
         },
         "instructors": {
@@ -840,6 +864,7 @@
         "sections": {
             "description": "Course Description",
             "whatLearn": "What Students Will Learn",
+            "includes": "Course Includes",
             "structure": "Course Structure",
             "statistics": "Course Statistics",
             "internalNotes": "Internal Notes"
@@ -901,6 +926,23 @@
         "previous": "Previous",
         "next": "Next"
     },
+    "courses": {
+        "userTitle": "Course List",
+        "userSubtitle": "Explore our comprehensive collection of courses."
+    },
+    "myCourses": {
+        "title": "My Courses",
+        "subtitle": "All courses you have enrolled in or purchased.",
+        "count": "{{count}} courses",
+        "emptyTitle": "You have no courses yet",
+        "emptyDesc": "Browse and enroll in courses that interest you.",
+        "browseCourses": "Browse Courses",
+        "progress": "Progress",
+        "enrolledAt": "Enrolled",
+        "completed": "Completed",
+        "continueLearning": "Continue Learning",
+        "loadFailed": "Failed to load courses"
+    },
     "home": {
         "header": {
             "nav": {
@@ -909,7 +951,8 @@
                 "articles": "Articles",
                 "forum": "Forum",
                 "benefits": "Benefits",
-                "testimonials": "Testimonials"
+                "testimonials": "Testimonials",
+                "myCourses": "My Courses"
             },
             "logout": "Logout",
             "welcome": "Welcome"

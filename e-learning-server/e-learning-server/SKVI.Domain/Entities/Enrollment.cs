@@ -23,6 +23,10 @@ public class Enrollment
 
     public DateTime LastAccessedAt { get; set; }
 
+    /// <summary>ACTIVE | INACTIVE</summary>
+    [Required]
+    public string Status { get; set; } = "ACTIVE";
+
     // Navigation properties
     public User User { get; set; } = null!;
     public Course Course { get; set; } = null!;

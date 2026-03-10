@@ -14,6 +14,33 @@ public class EnrollmentResponse
     public int ProgressPercentage { get; set; }
     public DateTime? CompletedAt { get; set; }
     public DateTime LastAccessedAt { get; set; }
+    public string Status { get; set; } = "ACTIVE";
+}
+
+public class AdminEnrollmentResponse
+{
+    public required string Id { get; set; }
+    public required string CourseId { get; set; }
+    public required string CourseTitle { get; set; }
+    public string? CourseThumbnail { get; set; }
+    public required string UserId { get; set; }
+    public required string UserEmail { get; set; }
+    public string? UserFullName { get; set; }
+    public required DateTime EnrolledAt { get; set; }
+    public int ProgressPercentage { get; set; }
+    public DateTime? CompletedAt { get; set; }
+    public DateTime LastAccessedAt { get; set; }
+    public required string Status { get; set; }
+}
+
+public class AdminAddEnrollmentRequest
+{
+    public required string CourseId { get; set; }
+}
+
+public class AdminSetEnrollmentStatusRequest
+{
+    public required string Status { get; set; } // ACTIVE | INACTIVE
 }
 
 public class CourseProgressResponse

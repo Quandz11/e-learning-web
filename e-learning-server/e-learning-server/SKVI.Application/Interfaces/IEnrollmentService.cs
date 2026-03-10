@@ -9,6 +9,12 @@ public interface IEnrollmentService
     Task<List<EnrollmentResponse>> GetUserEnrollmentsAsync(Guid userId);
     Task<CourseProgressResponse> GetCourseProgressAsync(Guid userId, Guid courseId);
     Task UpdateLastAccessedAsync(Guid userId, Guid courseId);
+
+    // Admin methods
+    Task<List<AdminEnrollmentResponse>> AdminGetUserEnrollmentsAsync(Guid userId);
+    Task<AdminEnrollmentResponse> AdminAddEnrollmentAsync(Guid userId, string courseIdStr);
+    Task AdminRemoveEnrollmentAsync(Guid userId, Guid courseId);
+    Task<AdminEnrollmentResponse> AdminSetEnrollmentStatusAsync(Guid enrollmentId, string status);
 }
 
 public interface ILessonProgressService

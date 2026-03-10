@@ -66,6 +66,14 @@ const UserHeader: React.FC = () => {
                         >
                             {t('home.header.nav.forum', { defaultValue: 'Diễn đàn' })}
                         </Link>
+                        {isAuthenticated && user && (
+                            <Link
+                                className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
+                                to="/my-courses"
+                            >
+                                {t('home.header.nav.myCourses')}
+                            </Link>
+                        )}
                         <a
                             className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
                             href="#testimonials"

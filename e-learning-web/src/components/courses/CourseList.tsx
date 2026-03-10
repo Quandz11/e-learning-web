@@ -129,7 +129,7 @@ const CourseList: React.FC<CourseListProps> = ({
                             {course.title}
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
-                            {stripHtml(course.description)}
+                            {stripHtml(course.description || '')}
                         </p>
                         <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-2">

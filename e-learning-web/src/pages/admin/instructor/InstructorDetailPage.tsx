@@ -222,7 +222,7 @@ const InstructorDetailPage: React.FC = () => {
                                     <h3 className="font-semibold text-slate-900 group-hover:text-dashboard-primary dark:text-white">
                                         {course.title}
                                     </h3>
-                                    <p className="mt-1 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">{stripHtml(course.description)}</p>
+                                    <p className="mt-1 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">{stripHtml(course.description || '')}</p>
                                     <div className="mt-3 flex items-center justify-between">
                                         <span className={`text-sm font-semibold ${course.isFree ? 'text-green-600' : 'text-dashboard-primary'}`}>
                                             {course.isFree ? t('courseDetail.free') : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(course.price)}

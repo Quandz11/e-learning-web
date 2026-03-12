@@ -127,7 +127,10 @@ builder.Services.AddCors(options =>
                 "http://localhost:5174",
                 "https://localhost:5174",
                 "https://lemon-water-0b4792900.2.azurestaticapps.net",
-                "https://salmon-river-0d2751800.4.azurestaticapps.net"
+                "https://salmon-river-0d2751800.4.azurestaticapps.net",
+                "https://www.nhinanchualanh.vn",
+                "https://nhinanchualanh.vn"
+                "nhinanchualanh.vn"
               )
               .AllowAnyHeader()
               .AllowAnyMethod()

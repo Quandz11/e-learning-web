@@ -188,7 +188,7 @@ const CoursesPage: React.FC = () => {
                                                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-blue-600" />
                                             )}
                                             <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate max-w-[120px]">
-                                                {course.lecturer?.fullName || 'SKVI Instructor'}
+                                                {course.lecturer?.fullName || 'NhinAnChuaLanh Instructor'}
                                             </span>
                                         </div>
                                         <span className="text-primary font-bold text-lg">

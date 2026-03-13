@@ -6,6 +6,7 @@ import type { AppDispatch, RootState } from '../../store/store';
 import { logout } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
 import { clearAuth } from '../../services/authStorage';
+import logoImg from '../../assets/logo.jpg';
 
 interface AdminSidebarProps {
   isMobileOpen?: boolean;
@@ -54,10 +55,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
           {/* Logo */}
           <div className="flex h-16 items-center border-b border-slate-100 px-6 dark:border-slate-800/50">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-dashboard-primary text-white">
-                <span className="material-symbols-outlined text-[20px]">school</span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full overflow-hidden bg-white border border-slate-200 shadow-sm">
+                <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">SKVI Admin</h1>
+              <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">NhinAnChuaLanh</h1>
             </div>
             <button
               onClick={onClose}
@@ -168,6 +169,17 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
             >
               <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">quiz</span>
               <span className="text-sm font-medium">{t('admin.sidebar.quizzes', { defaultValue: 'Quizzes' })}</span>
+            </Link>
+            <Link
+              to="/admin/home-section"
+              onClick={handleNav}
+              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/home-section')
+                ? 'bg-dashboard-primary text-white shadow-dashboard-subtle'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
+                }`}
+            >
+              <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">home_and_garden</span>
+              <span className="text-sm font-medium">Trang chủ</span>
             </Link>
             <Link
               to="/admin/testimonials"

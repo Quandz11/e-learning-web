@@ -57,6 +57,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<ArticleCategory> ArticleCategories { get; set; }
     public DbSet<MenuItem> MenuItems { get; set; }
 
+    // HomePage
+    public DbSet<HomeVideoSection> HomeVideoSections { get; set; }
+
     // Audit
     public DbSet<AuditLog> AuditLogs { get; set; }
 
@@ -263,6 +266,13 @@ public class ApplicationDbContext : DbContext
             .WithMany(m => m.Children)
             .HasForeignKey(m => m.ParentId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // HomeVideoSection
+        modelBuilder.Entity<HomeVideoSection>()
+            .HasOne(h => h.Video)
+            .WithMany()
+            .HasForeignKey(h => h.VideoId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Quiz Configuration
         modelBuilder.Entity<QuizQuestion>()

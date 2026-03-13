@@ -5,6 +5,7 @@ import type { RootState } from '../store/store';
 import { courseApi, type CourseResponse } from '../services/courseApi';
 import { useTranslation } from 'react-i18next';
 import { enrollmentApi } from '../services/enrollmentApi';
+import logoImg from '../assets/logo.jpg';
 
 const StudentCourseDetailPage: React.FC = () => {
     const { t } = useTranslation();
@@ -142,9 +143,11 @@ const StudentCourseDetailPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-20">
                         <Link to="/" className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-primary text-4xl">school</span>
+                            <div className="size-10 flex items-center justify-center overflow-hidden rounded-full border-2 border-primary">
+                                <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
+                            </div>
                             <h2 className="text-[#0c1c1d] dark:text-white text-xl font-bold tracking-tight">
-                                SKVI Learning<span className="text-primary">.</span>
+                                NhinAnChuaLanh<span className="text-primary">.</span>
                             </h2>
                         </Link>
                         <button
@@ -163,7 +166,7 @@ const StudentCourseDetailPage: React.FC = () => {
                 <div className="grid lg:grid-cols-3 gap-8 items-start">
 
                     {/* LEFT: hero info + what you'll learn + curriculum */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-8 lg:pr-8">
 
                         {/* Hero info */}
                         <div className="space-y-5">
@@ -198,7 +201,7 @@ const StudentCourseDetailPage: React.FC = () => {
 
                             {/* Description */}
                             <div
-                                className="rich-text text-gray-700 dark:text-gray-300"
+                                className="rich-text text-gray-700 dark:text-gray-300 break-words"
                                 dangerouslySetInnerHTML={{ __html: course.description || '' }}
                             />
 

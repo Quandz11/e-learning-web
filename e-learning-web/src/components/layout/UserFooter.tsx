@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import logoImg from '../../assets/logo.jpg';
 
 const UserFooter: React.FC = () => {
     const { t } = useTranslation();
@@ -13,9 +14,9 @@ const UserFooter: React.FC = () => {
                     {/* Company Info */}
                     <div className="col-span-1 md:col-span-2">
                         <Link to="/" className="flex items-center gap-3 mb-4">
-                            <span className="material-symbols-outlined text-primary text-4xl">school</span>
+                            <img src={logoImg} alt="Logo" className="w-20 h-20 object-cover rounded-full border border-primary bg-white shadow-sm" />
                             <h3 className="text-[#0c1c1d] dark:text-white text-xl font-bold tracking-tight">
-                                SKVI Learning<span className="text-primary">.</span>
+                                NhinAnChuaLanh<span className="text-primary">.</span>
                             </h3>
                         </Link>
                         <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 max-w-md">
@@ -133,7 +134,7 @@ const UserFooter: React.FC = () => {
                 {/* Copyright */}
                 <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
                     <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
-                        © {currentYear} SKVI Learning. {t('footer.copyright', { defaultValue: 'Tất cả quyền được bảo lưu.' })}
+                        © {currentYear} NhinAnChuaLanh. {t('footer.copyright', { defaultValue: 'Tất cả quyền được bảo lưu.' })}
                     </p>
                 </div>
             </div>

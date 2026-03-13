@@ -52,6 +52,7 @@ import ForumThreadPage from './pages/ForumThreadPage';
 import NewThreadPage from './pages/NewThreadPage';
 import AdminForumCategoriesPage from './pages/admin/forum/AdminForumCategoriesPage';
 import MyCoursesPage from './pages/MyCoursesPage';
+import AdminHomeSectionPage from './pages/admin/home-section/AdminHomeSectionPage';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -394,6 +395,14 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <InstructorDetailPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/home-section',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminHomeSectionPage />
                 </ProtectedRoute>
               ),
             },

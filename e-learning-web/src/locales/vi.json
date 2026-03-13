@@ -1,6 +1,6 @@
 {
     "app": {
-        "name": "SKVILearn"
+        "name": "NhinAnChuaLanh"
     },
     "auth": {
         "welcomeBack": "Chào mừng trở lại",
@@ -937,6 +937,7 @@
         "userSubtitle": "Khám phá bộ sưu tập khóa học đa dạng và phù hợp với bạn."
     },
     "myCourses": {
+        "title": "Khóa học của tôi",
         "subtitle": "Danh sách tất cả các khóa học bạn đã đăng ký và mua.",
         "count": "{{count}} khóa học",
         "emptyTitle": "Bạn chưa có khóa học nào",
@@ -1043,7 +1044,7 @@
             ]
         },
         "benefits": {
-            "title": "Tại sao chọn SKVI Learning?",
+            "title": "Tại sao chọn NhinAnChuaLanh?",
             "subtitle": "Nền tảng của chúng tôi được thiết kế để cung cấp trải nghiệm học tập toàn diện và linh hoạt.",
             "certifiedInstructors": {
                 "title": "Giảng viên được chứng nhận",

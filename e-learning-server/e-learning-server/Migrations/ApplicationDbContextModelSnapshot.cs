@@ -629,6 +629,36 @@ namespace e_learning_server.Migrations
                     b.ToTable("ForumThreads");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.HomeVideoSection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentHtml")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("VideoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("VideoType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VideoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VideoId");
+
+                    b.ToTable("HomeVideoSections");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Lead", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1536,6 +1566,16 @@ namespace e_learning_server.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.HomeVideoSection", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.Video", "Video")
+                        .WithMany()
+                        .HasForeignKey("VideoId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Video");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Lead", b =>

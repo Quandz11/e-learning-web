@@ -7,7 +7,7 @@ import { logout } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
 import { clearAuth } from '../../services/authStorage';
 import HeaderNotification from '../common/HeaderNotification';
-import LanguageSwitcher from '../common/LanguageSwitcher';
+import LanguageSwitcher from '../common/LanguageSwitcher'; import logoImg from '../../assets/logo.jpg';
 
 const UserHeader: React.FC = () => {
     const { t } = useTranslation();
@@ -32,11 +32,11 @@ const UserHeader: React.FC = () => {
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3">
-                        <div className="size-8 text-primary flex items-center justify-center">
-                            <span className="material-symbols-outlined text-4xl">school</span>
+                        <div className="size-12 flex items-center justify-center overflow-hidden rounded-full border-2 border-primary">
+                            <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <h2 className="text-[#0c1c1d] dark:text-white text-xl font-bold tracking-tight">
-                            SKVI Learning<span className="text-primary">.</span>
+                            NhinAnChuaLanh<span className="text-primary">.</span>
                         </h2>
                     </Link>
 

@@ -311,7 +311,7 @@ const OtpVerifyPage = () => {
 
             {/* Footer Info */}
             <div className="mt-8 text-xs text-gray-400 dark:text-gray-600 text-center w-full px-4">
-                <p>© 2024 SKVI E-Learning. Secure Verification System.</p>
+                <p>© 2024 NhinAnChuaLanh. Secure Verification System.</p>
             </div>
         </div>
     );

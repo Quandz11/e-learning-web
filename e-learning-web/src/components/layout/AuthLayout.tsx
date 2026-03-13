@@ -1,5 +1,6 @@
 
 import { Outlet } from 'react-router-dom';
+import logoImg from '../../assets/logo.jpg';
 
 const AuthLayout = () => {
     return (
@@ -16,8 +17,8 @@ const AuthLayout = () => {
                 </div>
                 <div className="relative z-10 text-white max-w-md">
                     <div className="flex items-center gap-2 mb-8">
-                        <span className="material-symbols-outlined text-4xl">school</span>
-                        <span className="text-2xl font-bold tracking-tight">SKVI-Learning</span>
+                        <img src={logoImg} alt="Logo" className="w-20 h-20 object-cover rounded-full border-2 border-white bg-white shadow-sm" />
+                        <span className="text-3xl font-bold tracking-tight">NhinAnChuaLanh</span>
                     </div>
                     <h1 className="text-5xl font-bold leading-tight mb-6">Khai phá tiềm năng của bạn qua mỗi bài học.</h1>
                     <p className="text-lg opacity-90 leading-relaxed">Tham gia cộng đồng những người học tập suốt đời và làm chủ các kỹ năng mới theo tốc độ của riêng bạn.</p>
@@ -35,8 +36,8 @@ const AuthLayout = () => {
                     {/* Mobile Branding */}
                     <div className="lg:hidden flex justify-center mb-4">
                         <div className="flex items-center gap-2 text-primary dark:text-white">
-                            <span className="material-symbols-outlined text-4xl">school</span>
-                            <span className="text-2xl font-bold tracking-tight">SKVI-learning</span>
+                            <img src={logoImg} alt="Logo" className="w-16 h-16 object-cover rounded-full border-2 border-primary bg-white shadow-sm" />
+                            <span className="text-3xl font-bold tracking-tight">NhinAnChuaLanh</span>
                         </div>
                     </div>
 

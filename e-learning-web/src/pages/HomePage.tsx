@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import CourseList from '../components/courses/CourseList';
 import QuizModal from '../components/quiz/QuizModal';
 import TestimonialsSection from '../components/home/TestimonialsSection';
+import { homeSectionApi, type HomeVideoSectionDto } from '../services/homeSectionApi';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
   const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [homeSection, setHomeSection] = useState<HomeVideoSectionDto | null>(null);
+
+  useEffect(() => {
+    homeSectionApi.getHomeSection()
+      .then(setHomeSection)
+      .catch(() => {}); // Silently fail if not configured yet
+  }, []);
+
+  const getYoutubeId = (url: string) => {
+    const match = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : null;
+  };
 
   return (
     <>
@@ -39,6 +52,53 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Home Video Section */}
+      {homeSection && (homeSection.contentHtml || homeSection.videoUrl || homeSection.videoId) && (
+        <section className="bg-white dark:bg-gray-900 py-16 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+              {/* Left: Text Content */}
+              <div
+                className="rich-text text-gray-700 dark:text-gray-300 text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: homeSection.contentHtml || '' }}
+              />
+              {/* Right: Video */}
+              <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-100 dark:border-gray-800">
+                {homeSection.videoType === 'youtube' && homeSection.videoUrl ? (() => {
+                  const ytId = getYoutubeId(homeSection.videoUrl);
+                  if (ytId) {
+                    return (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${ytId}`}
+                        className="w-full aspect-video"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    );
+                  }
+                  if (homeSection.videoUrl.includes('<iframe')) {
+                    return (
+                      <div
+                        className="w-full aspect-video [&>iframe]:w-full [&>iframe]:h-full"
+                        dangerouslySetInnerHTML={{ __html: homeSection.videoUrl }}
+                      />
+                    );
+                  }
+                  return null;
+                })() : homeSection.videoType === 'bunny' && homeSection.bunnyVideoId ? (
+                  <iframe
+                    src={`https://iframe.mediadelivery.net/embed/${homeSection.bunnyVideoId}`}
+                    className="w-full aspect-video"
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Courses Section */}
       <section className="bg-gray-50 dark:bg-gray-800 py-16">

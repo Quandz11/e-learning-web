@@ -166,7 +166,8 @@
             "chat": "Chat Management",
             "notifications": "Notifications",
             "articles": "Articles",
-            "categories": "Categories"
+            "categories": "Categories",
+            "whyChooseUs": "Why Choose Us"
         },
         "header": {
             "searchPlaceholder": "Search students, courses, or orders...",
@@ -632,6 +633,41 @@
             "editCategory": "Edit Category",
             "createCategory": "Create Category"
         },
+        "whyChooseUs": {
+            "title": "Why Choose Us",
+            "subtitle": "Manage the 'Why Choose Us?' section on the homepage",
+            "addItem": "Add Item",
+            "editItem": "Edit Item",
+            "createItem": "Create Item",
+            "saveChanges": "Save Changes",
+            "loadError": "Failed to load items",
+            "deleteConfirm": "Are you sure you want to delete this item?",
+            "noItems": "No items found. Add your first item.",
+            "table": {
+                "icon": "Icon",
+                "title": "Title",
+                "description": "Description",
+                "order": "Order",
+                "status": "Status"
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "form": {
+                "icon": "Icon (Material Symbol name)",
+                "iconPlaceholder": "e.g. school, schedule, workspace_premium",
+                "iconHint": "Browse all icons at fonts.google.com/icons",
+                "title": "Title",
+                "titlePlaceholder": "e.g. Expert Instructors",
+                "description": "Description",
+                "descriptionPlaceholder": "e.g. Learn from the best in the industry.",
+                "order": "Display Order",
+                "orderHint": "Lower number appears first.",
+                "isActive": "Active",
+                "isActiveHint": "Show this item on the homepage"
+            }
+        },
         "testimonials": {
             "title": "Testimonials",
             "subtitle": "Manage student testimonials",
@@ -1010,6 +1046,10 @@
         "testimonials": {
             "title": "Student Feedback",
             "subtitle": "Hear from our students about their learning journey"
+        },
+        "whyChooseUs": {
+            "title": "Why Choose Us?",
+            "subtitle": "The best way to learn and grow."
         },
         "courses": {
             "title": "Featured Courses",

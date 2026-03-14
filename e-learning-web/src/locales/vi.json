@@ -166,7 +166,8 @@
             "chat": "Quản lý Chat",
             "notifications": "Thông báo",
             "articles": "Bài viết",
-            "categories": "Danh mục"
+            "categories": "Danh mục",
+            "whyChooseUs": "Tại sao chọn chúng tôi"
         },
         "articles": {
             "title": "Quản lý Bài viết",
@@ -622,6 +623,41 @@
                 "ADMIN": "Quản trị viên (Admin)"
             }
         },
+        "whyChooseUs": {
+            "title": "Tại sao chọn chúng tôi?",
+            "subtitle": "Quản lý phần 'Tại sao chọn chúng tôi?' trên trang chủ",
+            "addItem": "Thêm mục",
+            "editItem": "Sửa mục",
+            "createItem": "Tạo mục",
+            "saveChanges": "Lưu thay đổi",
+            "loadError": "Không thể tải danh sách",
+            "deleteConfirm": "Bạn có chắc chắn muốn xóa mục này?",
+            "noItems": "Chưa có mục nào. Hãy thêm mục đầu tiên.",
+            "table": {
+                "icon": "Biểu tượng",
+                "title": "Tiêu đề",
+                "description": "Mô tả",
+                "order": "Thứ tự",
+                "status": "Trạng thái"
+            },
+            "status": {
+                "active": "Hoạt động",
+                "inactive": "Không hoạt động"
+            },
+            "form": {
+                "icon": "Biểu tượng (tên Material Symbol)",
+                "iconPlaceholder": "VD: school, schedule, workspace_premium",
+                "iconHint": "Xem tất cả biểu tượng tại fonts.google.com/icons",
+                "title": "Tiêu đề",
+                "titlePlaceholder": "VD: Giảng viên chuyên nghiệp",
+                "description": "Mô tả",
+                "descriptionPlaceholder": "VD: Học từ những chuyên gia hàng đầu trong ngành.",
+                "order": "Thứ tự hiển thị",
+                "orderHint": "Số nhỏ hơn hiển thị trước.",
+                "isActive": "Hoạt động",
+                "isActiveHint": "Hiển thị mục này trên trang chủ"
+            }
+        },
         "testimonials": {
             "title": "Đánh giá học viên",
             "subtitle": "Quản lý đánh giá của học viên",
@@ -1016,6 +1052,10 @@
         "testimonials": {
             "title": "Phản hồi học viên",
             "subtitle": "Những phản hồi chân thực từ học viên của chúng tôi"
+        },
+        "whyChooseUs": {
+            "title": "Tại sao chọn chúng tôi?",
+            "subtitle": "Cách tốt nhất để học và phát triển."
         },
         "courses": {
             "title": "Khóa học nổi bật",

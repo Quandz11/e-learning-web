@@ -46,6 +46,8 @@ import AdminQuizSubmissionsPage from './pages/admin/quiz/AdminQuizSubmissionsPag
 import AdminTestimonialsPage from './pages/admin/testimonials/AdminTestimonialsPage';
 import AdminTestimonialEditorPage from './pages/admin/testimonials/AdminTestimonialEditorPage';
 import TestimonialsPage from './pages/TestimonialsPage';
+import AdminWhyChooseUsPage from './pages/admin/why-choose-us/AdminWhyChooseUsPage';
+import AdminWhyChooseUsEditorPage from './pages/admin/why-choose-us/AdminWhyChooseUsEditorPage';
 import ForumPage from './pages/ForumPage';
 import ForumCategoryPage from './pages/ForumCategoryPage';
 import ForumThreadPage from './pages/ForumThreadPage';
@@ -403,6 +405,30 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminHomeSectionPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/why-choose-us',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminWhyChooseUsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/why-choose-us/new',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminWhyChooseUsEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/why-choose-us/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminWhyChooseUsEditorPage />
                 </ProtectedRoute>
               ),
             },

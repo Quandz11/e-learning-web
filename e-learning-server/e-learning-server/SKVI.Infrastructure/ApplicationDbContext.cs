@@ -73,6 +73,9 @@ public class ApplicationDbContext : DbContext
     // Testimonials
     public DbSet<Testimonial> Testimonials { get; set; }
 
+    // Why Choose Us
+    public DbSet<WhyChooseUsItem> WhyChooseUsItems { get; set; }
+
     // Forum
     public DbSet<ForumCategory> ForumCategories { get; set; }
     public DbSet<ForumThread> ForumThreads { get; set; }

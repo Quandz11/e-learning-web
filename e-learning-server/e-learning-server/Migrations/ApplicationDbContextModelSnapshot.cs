@@ -1372,6 +1372,38 @@ namespace e_learning_server.Migrations
                     b.ToTable("Videos");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.WhyChooseUsItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WhyChooseUsItems");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Article", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.User", "Author")

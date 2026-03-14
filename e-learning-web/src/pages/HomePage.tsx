@@ -4,16 +4,21 @@ import CourseList from '../components/courses/CourseList';
 import QuizModal from '../components/quiz/QuizModal';
 import TestimonialsSection from '../components/home/TestimonialsSection';
 import { homeSectionApi, type HomeVideoSectionDto } from '../services/homeSectionApi';
+import { whyChooseUsApi, type WhyChooseUsItemDto } from '../services/whyChooseUsApi';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [homeSection, setHomeSection] = useState<HomeVideoSectionDto | null>(null);
+  const [whyChooseUsItems, setWhyChooseUsItems] = useState<WhyChooseUsItemDto[]>([]);
 
   useEffect(() => {
     homeSectionApi.getHomeSection()
       .then(setHomeSection)
       .catch(() => {}); // Silently fail if not configured yet
+    whyChooseUsApi.getActive()
+      .then(setWhyChooseUsItems)
+      .catch(() => {});
   }, []);
 
   const getYoutubeId = (url: string) => {
@@ -119,34 +124,28 @@ const HomePage: React.FC = () => {
       {/* Testimonials Section */}
       <TestimonialsSection />
 
-      {/* Benefits / Social Proof (Simplified for now) */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0c1c1d] dark:text-white mb-4">
-            Why Choose Us?
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            The best way to learn and grow.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <span className="material-symbols-outlined text-4xl text-primary mb-4">school</span>
-            <h3 className="text-xl font-bold mb-2 dark:text-white">Expert Instructors</h3>
-            <p className="text-gray-600 dark:text-gray-400">Learn from the best in the industry.</p>
+      {/* Why Choose Us Section */}
+      {whyChooseUsItems.length > 0 && (
+        <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0c1c1d] dark:text-white mb-4">
+              {t('home.whyChooseUs.title')}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              {t('home.whyChooseUs.subtitle')}
+            </p>
           </div>
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <span className="material-symbols-outlined text-4xl text-primary mb-4">schedule</span>
-            <h3 className="text-xl font-bold mb-2 dark:text-white">Flexible Learning</h3>
-            <p className="text-gray-600 dark:text-gray-400">Study at your own pace, anytime, anywhere.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            {whyChooseUsItems.map(item => (
+              <div key={item.id} className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <span className="material-symbols-outlined text-4xl text-primary mb-4 block">{item.icon}</span>
+                <h3 className="text-xl font-bold mb-2 dark:text-white">{item.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{item.description}</p>
+              </div>
+            ))}
           </div>
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <span className="material-symbols-outlined text-4xl text-primary mb-4">workspace_premium</span>
-            <h3 className="text-xl font-bold mb-2 dark:text-white">Certified</h3>
-            <p className="text-gray-600 dark:text-gray-400">Earn certificates upon completion.</p>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
     </>

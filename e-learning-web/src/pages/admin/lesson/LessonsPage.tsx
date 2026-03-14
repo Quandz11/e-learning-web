@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { lessonApi, type LessonDto } from '../../../services/lessonApi';
+import { categoryApi, type CategoryDto } from '../../../services/categoryApi';
 import { format } from 'date-fns';
 import LessonFormModal from './components/LessonFormModal';
 import ConfirmModal from '../../../components/ui/Modal/ConfirmModal';
@@ -13,8 +14,16 @@ const LessonsPage: React.FC = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
     const [lessons, setLessons] = useState<LessonDto[]>([]);
+    const [filteredLessons, setFilteredLessons] = useState<LessonDto[]>([]);
+    const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Search & Filter State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
+    const [partsFilter, setPartsFilter] = useState<'all' | 'with-parts' | 'no-parts'>('all');
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 
     // Modal State
     const [showForm, setShowForm] = useState(false);
@@ -30,11 +39,51 @@ const LessonsPage: React.FC = () => {
         load();
     }, []);
 
+    // Apply filters and search
+    useEffect(() => {
+        let result = [...lessons];
+
+        // Search filter
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(
+                (lesson) =>
+                    lesson.title.toLowerCase().includes(query) ||
+                    lesson.description?.toLowerCase().includes(query)
+            );
+        }
+
+        // Parts filter
+        if (partsFilter === 'with-parts') {
+            result = result.filter((lesson) => lesson.parts && lesson.parts.length > 0);
+        } else if (partsFilter === 'no-parts') {
+            result = result.filter((lesson) => !lesson.parts || lesson.parts.length === 0);
+        }
+
+        // Category filter
+        if (selectedCategoryId) {
+            result = result.filter((lesson) => lesson.categoryId === selectedCategoryId);
+        }
+
+        // Sort
+        result.sort((a, b) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
+        });
+
+        setFilteredLessons(result);
+    }, [lessons, searchQuery, sortBy, partsFilter, selectedCategoryId]);
+
     const load = async () => {
         try {
             setLoading(true);
-            const data = await lessonApi.getAll();
-            setLessons(data);
+            const [lessonsData, categoriesData] = await Promise.all([
+                lessonApi.getAll(),
+                categoryApi.getAll(),
+            ]);
+            setLessons(lessonsData);
+            setCategories(categoriesData);
         } catch (err: any) {
             setError(err.message || t('admin.lessons.loadError'));
         } finally {
@@ -106,6 +155,79 @@ const LessonsPage: React.FC = () => {
                 </button>
             </div>
 
+            {/* Search & Filters */}
+            <div className="mb-6 rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-dashboard-surface-dark">
+                <div className="grid gap-3 md:grid-cols-4">
+                    {/* Search */}
+                    <div>
+                        <div className="relative">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                            <input
+                                type="text"
+                                placeholder={t('admin.lessons.searchPlaceholder', { defaultValue: 'Search...' })}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm placeholder-slate-500 focus:border-dashboard-primary focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Sort */}
+                    <div>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest')}
+                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                            title={t('admin.lessons.sortBy', { defaultValue: 'Sort By' })}
+                        >
+                            <option value="newest">{t('admin.lessons.sortNewest', { defaultValue: 'Newest' })}</option>
+                            <option value="oldest">{t('admin.lessons.sortOldest', { defaultValue: 'Oldest' })}</option>
+                        </select>
+                    </div>
+
+                    {/* Filter by Parts */}
+                    <div>
+                        <select
+                            value={partsFilter}
+                            onChange={(e) => setPartsFilter(e.target.value as 'all' | 'with-parts' | 'no-parts')}
+                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                            title={t('admin.lessons.filterByParts', { defaultValue: 'Filter by Content' })}
+                        >
+                            <option value="all">{t('admin.lessons.filterAll', { defaultValue: 'All' })}</option>
+                            <option value="with-parts">{t('admin.lessons.filterWithParts', { defaultValue: 'With Content' })}</option>
+                            <option value="no-parts">{t('admin.lessons.filterNoParts', { defaultValue: 'No Content' })}</option>
+                        </select>
+                    </div>
+
+                    {/* Filter by Category */}
+                    <div>
+                        <select
+                            value={selectedCategoryId}
+                            onChange={(e) => setSelectedCategoryId(e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-dashboard-primary focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                            title={t('admin.lessons.filterByCategory', { defaultValue: 'Filter by Category' })}
+                        >
+                            <option value="">{t('admin.lessons.filterAllCategories', { defaultValue: 'All Categories' })}</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Results count */}
+                {(searchQuery || sortBy !== 'newest' || partsFilter !== 'all' || selectedCategoryId) && (
+                    <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        {t('admin.lessons.resultsCount', { 
+                            defaultValue: `Found {{count}} lesson(s)`, 
+                            count: filteredLessons.length 
+                        })}
+                    </div>
+                )}
+            </div>
+
             {error && (
                 <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200">
                     {error}
@@ -122,14 +244,22 @@ const LessonsPage: React.FC = () => {
                             />
                         ))}
                     </div>
-                ) : lessons.length === 0 ? (
+                ) : filteredLessons.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-slate-300 bg-white/80 p-10 text-center text-slate-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
-                        <p className="text-base font-semibold">{t('admin.lessons.emptyTitle')}</p>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('admin.lessons.emptyDesc')}</p>
+                        <p className="text-base font-semibold">
+                            {searchQuery || sortBy !== 'newest' || partsFilter !== 'all'
+                                ? t('admin.lessons.noResults', { defaultValue: 'No lessons match your filters' })
+                                : t('admin.lessons.emptyTitle')}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            {searchQuery || sortBy !== 'newest' || partsFilter !== 'all'
+                                ? t('admin.lessons.tryOtherFilters', { defaultValue: 'Try adjusting your search or filters' })
+                                : t('admin.lessons.emptyDesc')}
+                        </p>
                     </div>
                 ) : (
                     <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                        {lessons.map((lesson) => (
+                        {filteredLessons.map((lesson) => (
                             <div
                                 key={lesson.id}
                                 className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/60 bg-white/90 shadow-sm shadow-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-dashboard-surface-dark"

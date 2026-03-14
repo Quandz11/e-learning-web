@@ -98,6 +98,20 @@
             "deletePartConfirm": "Are you sure you want to delete this part?",
             "loadLessonError": "Failed to load lesson",
             "notFound": "Lesson not found",
+            "search": "Search lessons",
+            "searchPlaceholder": "Search by title or description...",
+            "sortBy": "Sort By",
+            "sortNewest": "Newest First",
+            "sortOldest": "Oldest First",
+            "filterByParts": "Filter by Content",
+            "filterAll": "All",
+            "filterWithParts": "With Content",
+            "filterNoParts": "No Content",
+            "noResults": "No lessons match your filters",
+            "tryOtherFilters": "Try adjusting your search or filters",
+            "resultsCount": "Found {{count}} lesson(s)",
+            "filterByCategory": "Filter by Category",
+            "filterAllCategories": "All Categories",
             "form": {
                 "newTitle": "New Lesson",
                 "editTitle": "Edit Lesson",
@@ -105,6 +119,8 @@
                 "titlePlaceholder": "Lesson Title",
                 "description": "Description",
                 "descriptionPlaceholder": "Lesson Description (Optional)",
+                "category": "Category",
+                "selectCategory": "Select a category (optional)",
                 "thumbnail": "Thumbnail",
                 "uploadThumbnail": "Upload Thumbnail",
                 "save": "Save Lesson",
@@ -153,6 +169,33 @@
                 "addButton": "Add {{count}} Lessons"
             }
         },
+        "lessonCategories": {
+            "title": "Lesson Categories",
+            "subtitle": "Manage lesson categories",
+            "create": "Create Category",
+            "edit": "Edit Category",
+            "loadError": "Failed to load categories",
+            "table": {
+                "name": "Name",
+                "description": "Description",
+                "order": "Order",
+                "status": "Status",
+                "empty": "No categories found."
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "form": {
+                "name": "Category Name",
+                "namePlaceholder": "e.g. Ập luyện, Dinh dưỡng, Thiền...",
+                "description": "Description",
+                "descriptionPlaceholder": "Enter category description...",
+                "order": "Display Order",
+                "orderPlaceholder": "e.g. 1, 2, 3...",
+                "isActive": "Active"
+            }
+        },
         "sidebar": {
             "dashboard": "Dashboard",
             "users": "Users",
@@ -161,12 +204,13 @@
             "agents": "Agents",
             "courses": "Courses",
             "lessons": "Lessons",
+            "categories": "Lesson Categories",
+            "articleCategories": "Article Categories",
             "revenue": "Revenue",
             "settings": "Settings",
             "chat": "Chat Management",
             "notifications": "Notifications",
             "articles": "Articles",
-            "categories": "Categories",
             "whyChooseUs": "Why Choose Us"
         },
         "header": {
@@ -782,6 +826,33 @@
         "status": "Status",
         "created": "Created At",
         "actions": "Actions",
+        "categories": {
+            "title": "Lesson Categories",
+            "subtitle": "Manage lesson categories",
+            "create": "Create Category",
+            "edit": "Edit Category",
+            "loadError": "Failed to load categories",
+            "table": {
+                "name": "Name",
+                "description": "Description",
+                "order": "Order",
+                "status": "Status",
+                "empty": "No categories found."
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "form": {
+                "name": "Category Name",
+                "namePlaceholder": "e.g. Ập luyện, Dinh dưỡng, Thiền...",
+                "description": "Description",
+                "descriptionPlaceholder": "Enter category description...",
+                "order": "Display Order",
+                "orderPlaceholder": "e.g. 1, 2, 3...",
+                "isActive": "Active"
+            }
+        },
         "forum": {
             "title": "Forum Management",
             "subtitle": "Manage forum categories and discussions",

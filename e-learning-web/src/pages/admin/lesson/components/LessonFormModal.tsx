@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { lessonApi, type CreateLessonRequest, type LessonDto } from '../../../../services/lessonApi';
+import { categoryApi, type CategoryDto } from '../../../../services/categoryApi';
 import { courseApi } from '../../../../services/courseApi'; // Reusing for thumbnail
 
 interface LessonFormModalProps {
@@ -18,20 +19,26 @@ const LessonFormModal: React.FC<LessonFormModalProps> = ({ isOpen, onClose, onSu
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [thumbnailUrl, setThumbnailUrl] = useState('');
+    const [categoryId, setCategoryId] = useState('');
+    const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
     const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isOpen) {
             setError(null);
+            // Load categories
+            categoryApi.getAll().then(setCategories).catch(err => console.error('Failed to load categories', err));
             if (initialData) {
                 setTitle(initialData.title);
                 setDescription(initialData.description || '');
                 setThumbnailUrl(initialData.thumbnailUrl || '');
+                setCategoryId(initialData.categoryId || '');
             } else {
                 setTitle('');
                 setDescription('');
                 setThumbnailUrl('');
+                setCategoryId('');
             }
         }
     }, [isOpen, initialData]);
@@ -69,7 +76,8 @@ const LessonFormModal: React.FC<LessonFormModalProps> = ({ isOpen, onClose, onSu
         const payload: CreateLessonRequest = {
             title,
             description,
-            thumbnailUrl
+            thumbnailUrl,
+            categoryId: categoryId || undefined
         };
 
         try {
@@ -131,6 +139,22 @@ const LessonFormModal: React.FC<LessonFormModalProps> = ({ isOpen, onClose, onSu
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder={t('admin.lessons.form.descriptionPlaceholder')}
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.lessons.form.category', { defaultValue: 'Category' })}</label>
+                        <select
+                            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
+                        >
+                            <option value="">{t('admin.lessons.form.selectCategory', { defaultValue: 'Select a category (optional)' })}</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="space-y-2">

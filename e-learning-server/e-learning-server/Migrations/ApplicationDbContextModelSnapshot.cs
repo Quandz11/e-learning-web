@@ -239,6 +239,33 @@ namespace e_learning_server.Migrations
                     b.ToTable("CareNotes");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Chat", b =>
                 {
                     b.Property<Guid>("Id")
@@ -710,6 +737,9 @@ namespace e_learning_server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -727,6 +757,8 @@ namespace e_learning_server.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Lessons");
                 });
@@ -1627,6 +1659,15 @@ namespace e_learning_server.Migrations
                     b.Navigation("AssignedCare");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.Lesson", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.Category", "Category")
+                        .WithMany("Lessons")
+                        .HasForeignKey("CategoryId");
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.LessonPart", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.Document", "Document")
@@ -1847,6 +1888,11 @@ namespace e_learning_server.Migrations
                     b.Navigation("Leads");
 
                     b.Navigation("Payouts");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Lessons");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Chat", b =>

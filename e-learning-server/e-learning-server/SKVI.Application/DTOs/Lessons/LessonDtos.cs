@@ -8,6 +8,8 @@ public class LessonDto
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? ThumbnailUrl { get; set; }
+    public Guid? CategoryId { get; set; }
+    public string? CategoryName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public List<LessonPartDto> Parts { get; set; } = new();
@@ -39,6 +41,7 @@ public class CreateLessonRequest
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? ThumbnailUrl { get; set; }
+    public Guid? CategoryId { get; set; }
 }
 
 public class UpdateLessonRequest
@@ -47,4 +50,5 @@ public class UpdateLessonRequest
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? ThumbnailUrl { get; set; }
+    public Guid? CategoryId { get; set; }
 }

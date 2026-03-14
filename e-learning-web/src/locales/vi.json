@@ -98,6 +98,20 @@
             "deletePartConfirm": "Bạn có chắc muốn xóa phần này?",
             "loadLessonError": "Tải bài học thất bại",
             "notFound": "Không tìm thấy bài học",
+            "search": "Tìm kiếm bài học",
+            "searchPlaceholder": "Tìm kiếm theo tiêu đề hoặc mô tả...",
+            "sortBy": "Sắp xếp theo",
+            "sortNewest": "Mới nhất",
+            "sortOldest": "Cũ nhất",
+            "filterByParts": "Lọc theo Nội dung",
+            "filterAll": "Tất cả",
+            "filterWithParts": "Có nội dung",
+            "filterNoParts": "Không có nội dung",
+            "noResults": "Không tìm thấy bài học phù hợp với bộ lọc của bạn",
+            "tryOtherFilters": "Hãy thử điều chỉnh tìm kiếm hoặc bộ lọc",
+            "resultsCount": "Tìm thấy {{count}} bài học",
+            "filterByCategory": "Lọc theo Phân loại",
+            "filterAllCategories": "Tất cả Phân loại",
             "form": {
                 "newTitle": "Bài học mới",
                 "editTitle": "Sửa bài học",
@@ -105,6 +119,8 @@
                 "titlePlaceholder": "Tiêu đề bài học",
                 "description": "Mô tả",
                 "descriptionPlaceholder": "Mô tả bài học (Tùy chọn)",
+                "category": "Phân loại",
+                "selectCategory": "Chọn phân loại (tùy chọn)",
                 "thumbnail": "Hình thu nhỏ",
                 "uploadThumbnail": "Tải ảnh lên",
                 "save": "Lưu bài học",
@@ -153,6 +169,33 @@
                 "addButton": "Thêm {{count}} Bài học"
             }
         },
+        "lessonCategories": {
+            "title": "Phân loại Bài học",
+            "subtitle": "Quản lý phân loại bài học",
+            "create": "Tạo phân loại",
+            "edit": "Chỉnh sửa phân loại",
+            "loadError": "Không thể tải phân loại",
+            "table": {
+                "name": "Tên",
+                "description": "Mô tả",
+                "order": "Thứ tự",
+                "status": "Trạng thái",
+                "empty": "Không tìm thấy phân loại nào."
+            },
+            "status": {
+                "active": "Kích hoạt",
+                "inactive": "Tắt"
+            },
+            "form": {
+                "name": "Tên phân loại",
+                "namePlaceholder": "Ví dụ: Ập luyện, Dinh dưỡng, Thiền...",
+                "description": "Mô tả",
+                "descriptionPlaceholder": "Nhập mô tả phân loại...",
+                "order": "Thứ tự hiển thị",
+                "orderPlaceholder": "Ví dụ: 1, 2, 3...",
+                "isActive": "Kích hoạt"
+            }
+        },
         "sidebar": {
             "dashboard": "Bảng điều khiển",
             "users": "Người dùng",
@@ -161,12 +204,13 @@
             "agents": "Đại lý",
             "courses": "Khóa học",
             "lessons": "Bài học",
+            "categories": "Phân loại Bài học",
+            "articleCategories": "Danh mục Bài viết",
             "revenue": "Doanh thu",
             "settings": "Cài đặt",
             "chat": "Quản lý Chat",
             "notifications": "Thông báo",
             "articles": "Bài viết",
-            "categories": "Danh mục",
             "whyChooseUs": "Tại sao chọn chúng tôi"
         },
         "articles": {
@@ -773,6 +817,33 @@
         "status": "Trạng thái",
         "created": "Ngày tạo",
         "actions": "Hành động",
+        "categories": {
+            "title": "Phân loại Bài học",
+            "subtitle": "Quản lý phân loại bài học",
+            "create": "Tạo Phân loại",
+            "edit": "Chỉnh sửa Phân loại",
+            "loadError": "Không thể tải phân loại",
+            "table": {
+                "name": "Tên",
+                "description": "Mô tả",
+                "order": "Thứ tự",
+                "status": "Trạng thái",
+                "empty": "Không tìm thấy phân loại nào."
+            },
+            "status": {
+                "active": "Hoạt động",
+                "inactive": "Vô hiệu hóa"
+            },
+            "form": {
+                "name": "Tên Phân loại",
+                "namePlaceholder": "ví dụ: Ập luyện, Dinh dưỡng, Thiền...",
+                "description": "Mô tả",
+                "descriptionPlaceholder": "Nhập mô tả phân loại...",
+                "order": "Thứ tự Hiển thị",
+                "orderPlaceholder": "ví dụ: 1, 2, 3...",
+                "isActive": "Hoạt động"
+            }
+        },
         "forum": {
             "title": "Quản lý Diễn đàn",
             "subtitle": "Quản lý danh mục và thảo luận diễn đàn",

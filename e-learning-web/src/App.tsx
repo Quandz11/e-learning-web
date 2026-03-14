@@ -46,6 +46,8 @@ import AdminQuizSubmissionsPage from './pages/admin/quiz/AdminQuizSubmissionsPag
 import AdminTestimonialsPage from './pages/admin/testimonials/AdminTestimonialsPage';
 import AdminTestimonialEditorPage from './pages/admin/testimonials/AdminTestimonialEditorPage';
 import TestimonialsPage from './pages/TestimonialsPage';
+import AdminLessonCategoriesPage from './pages/admin/categories/AdminCategoriesPage';
+import AdminLessonCategoryEditorPage from './pages/admin/categories/AdminCategoryEditorPage';
 import AdminWhyChooseUsPage from './pages/admin/why-choose-us/AdminWhyChooseUsPage';
 import AdminWhyChooseUsEditorPage from './pages/admin/why-choose-us/AdminWhyChooseUsEditorPage';
 import ForumPage from './pages/ForumPage';
@@ -373,6 +375,30 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminTestimonialEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/lesson-categories',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminLessonCategoriesPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/lesson-categories/new',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminLessonCategoryEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/lesson-categories/:id',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminLessonCategoryEditorPage />
                 </ProtectedRoute>
               ),
             },

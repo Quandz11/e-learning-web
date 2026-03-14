@@ -23,6 +23,7 @@ public class ApplicationDbContext : DbContext
 
     // Course
     public DbSet<Course> Courses { get; set; }
+    public DbSet<Category> Categories { get; set; }
     public DbSet<Lesson> Lessons { get; set; }
     public DbSet<LessonPart> LessonParts { get; set; }
     public DbSet<CourseLesson> CourseLessons { get; set; }

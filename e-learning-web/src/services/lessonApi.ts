@@ -21,6 +21,8 @@ export interface LessonDto {
     title: string;
     description?: string;
     thumbnailUrl?: string;
+    categoryId?: string;
+    categoryName?: string;
     createdAt: string;
     updatedAt?: string;
     parts: LessonPartDto[];
@@ -30,12 +32,14 @@ export interface CreateLessonRequest {
     title: string;
     description?: string;
     thumbnailUrl?: string;
+    categoryId?: string;
 }
 
 export interface UpdateLessonRequest {
     title: string;
     description?: string;
     thumbnailUrl?: string;
+    categoryId?: string;
 }
 
 export interface CreateLessonPartRequest {

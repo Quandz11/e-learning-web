@@ -35,8 +35,8 @@ const UserHeader: React.FC = () => {
                         <div className="size-12 flex items-center justify-center overflow-hidden rounded-full border-2 border-primary">
                             <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
                         </div>
-                        <h2 className="text-[#0c1c1d] dark:text-white text-xl font-bold tracking-tight">
-                            NhinAnChuaLanh<span className="text-primary">.</span>
+                        <h2 className="text-[#0c1c1d] dark:text-white text-l font-bold tracking-tight">
+                            NhinAnChuaLanh<span className="text-primary">.vn</span>
                         </h2>
                     </Link>
 

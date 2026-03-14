@@ -20,6 +20,7 @@ public class LessonService : ILessonService
     public async Task<IReadOnlyList<LessonDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var lessons = await _context.Lessons
+            .Include(l => l.Category)
             .Include(l => l.LessonParts)
                 .ThenInclude(p => p.Video)
             .Include(l => l.LessonParts)
@@ -34,6 +35,7 @@ public class LessonService : ILessonService
     public async Task<LessonDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var lesson = await _context.Lessons
+            .Include(l => l.Category)
             .Include(l => l.LessonParts)
                 .ThenInclude(p => p.Video)
             .Include(l => l.LessonParts)
@@ -57,6 +59,7 @@ public class LessonService : ILessonService
             Title = request.Title,
             Description = request.Description,
             ThumbnailUrl = request.ThumbnailUrl,
+            CategoryId = request.CategoryId,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -78,6 +81,7 @@ public class LessonService : ILessonService
         lesson.Title = request.Title;
         lesson.Description = request.Description;
         lesson.ThumbnailUrl = request.ThumbnailUrl;
+        lesson.CategoryId = request.CategoryId;
         lesson.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -177,6 +181,8 @@ public class LessonService : ILessonService
             Title = lesson.Title,
             Description = lesson.Description,
             ThumbnailUrl = lesson.ThumbnailUrl,
+            CategoryId = lesson.CategoryId,
+            CategoryName = lesson.Category?.Name,
             CreatedAt = lesson.CreatedAt,
             UpdatedAt = lesson.UpdatedAt,
             Parts = new List<LessonPartDto>()

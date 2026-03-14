@@ -173,12 +173,19 @@ namespace e_learning_server.Migrations
                     b.Property<Guid>("OwnerUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ReferralCode")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("WalletBalance")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerUserId");
+
+                    b.HasIndex("ReferralCode")
+                        .IsUnique()
+                        .HasFilter("[ReferralCode] IS NOT NULL");
 
                     b.ToTable("Cabins");
                 });
@@ -525,8 +532,15 @@ namespace e_learning_server.Migrations
                     b.Property<DateTime>("LastAccessedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("ProgressPercentage")
                         .HasColumnType("int");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -540,6 +554,8 @@ namespace e_learning_server.Migrations
                     b.HasIndex("CourseId");
 
                     b.HasIndex("LastAccessedAt");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("UserId");
 
@@ -960,11 +976,23 @@ namespace e_learning_server.Migrations
                     b.Property<Guid>("BuyerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CabinId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastPaymentStatus")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("PayOSOrderCode")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -976,6 +1004,12 @@ namespace e_learning_server.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BuyerId");
+
+                    b.HasIndex("CabinId");
+
+                    b.HasIndex("PayOSOrderCode")
+                        .IsUnique()
+                        .HasFilter("[PayOSOrderCode] IS NOT NULL");
 
                     b.HasIndex("Status", "BuyerId");
 
@@ -1014,7 +1048,7 @@ namespace e_learning_server.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -1024,6 +1058,9 @@ namespace e_learning_server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("PaymentMethods");
                 });
@@ -1043,8 +1080,15 @@ namespace e_learning_server.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("PaymentLinkId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<Guid>("PaymentMethodId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProviderTransactionId")
                         .HasColumnType("nvarchar(max)");
@@ -1052,13 +1096,23 @@ namespace e_learning_server.Migrations
                     b.Property<string>("RawPayload")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Reference")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("WebhookProcessedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("PaymentLinkId")
+                        .IsUnique()
+                        .HasFilter("[PaymentLinkId] IS NOT NULL");
 
                     b.HasIndex("PaymentMethodId");
 
@@ -1583,6 +1637,11 @@ namespace e_learning_server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SKVI.Domain.Entities.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("SKVI.Domain.Entities.User", "User")
                         .WithMany("Enrollments")
                         .HasForeignKey("UserId")
@@ -1590,6 +1649,8 @@ namespace e_learning_server.Migrations
                         .IsRequired();
 
                     b.Navigation("Course");
+
+                    b.Navigation("Order");
 
                     b.Navigation("User");
                 });
@@ -1747,7 +1808,14 @@ namespace e_learning_server.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("SKVI.Domain.Entities.Cabin", "Cabin")
+                        .WithMany("Orders")
+                        .HasForeignKey("CabinId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Buyer");
+
+                    b.Navigation("Cabin");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.OrderItem", b =>
@@ -1886,6 +1954,8 @@ namespace e_learning_server.Migrations
                     b.Navigation("CommissionLedgers");
 
                     b.Navigation("Leads");
+
+                    b.Navigation("Orders");
 
                     b.Navigation("Payouts");
                 });

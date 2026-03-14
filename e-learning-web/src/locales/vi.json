@@ -211,6 +211,7 @@
             "chat": "Quản lý Chat",
             "notifications": "Thông báo",
             "articles": "Bài viết",
+            "referrals": "Mã giới thiệu",
             "whyChooseUs": "Tại sao chọn chúng tôi"
         },
         "articles": {
@@ -950,6 +951,8 @@
         "enrollPremium": "Mua ngay",
         "enrolling": "Đang đăng ký...",
         "startLearning": "Bắt đầu học",
+        "addToCart": "Thêm vào giỏ hàng",
+        "addedToCart": "Đã thêm vào giỏ hàng",
         "paymentRequired": "Yêu cầu thanh toán - Sắp ra mắt!",
         "enrolled": "ĐÃ ĐĂNG KÝ",
         "freeCourse": "KHÓA HỌC MIỄN PHÍ",
@@ -1065,8 +1068,10 @@
                 "forum": "Diễn đàn",
                 "benefits": "Lợi ích",
                 "testimonials": "Đánh giá",
-                "myCourses": "Khóa học của tôi"
+                "myCourses": "Khóa học của tôi",
+                "myOrders": "Đơn hàng của tôi"
             },
+            "cartTitle": "Giỏ hàng",
             "logout": "Đăng xuất",
             "welcome": "Chào mừng"
         },
@@ -1326,5 +1331,197 @@
         "createThread": "Tạo chủ đề",
         "threadCreated": "Đã tạo chủ đề thành công",
         "threadFailed": "Không thể tạo chủ đề"
+    },
+    "payments": {
+        "common": {
+            "currency": "VND",
+            "free": "Miễn phí"
+        },
+        "status": {
+            "PAID": "Đã thanh toán",
+            "PENDING": "Đang chờ thanh toán",
+            "FAILED": "Thanh toán thất bại",
+            "CANCELLED": "Đã hủy",
+            "PROCESSING": "Đang xử lý",
+            "INIT": "Khởi tạo"
+        },
+        "checkout": {
+            "title": "Thanh toán khóa học",
+            "subtitle": "Kiểm tra đơn hàng trước khi tạo mã thanh toán PayOS VietQR.",
+            "continueCourses": "Tiếp tục chọn khóa học",
+            "courseListTitle": "Danh sách khóa học",
+            "emptyCart": "Giỏ hàng đang trống.",
+            "errors": {
+                "loadInfo": "Không thể tải thông tin checkout.",
+                "noQrData": "Không nhận được dữ liệu QR thanh toán. Vui lòng thử lại.",
+                "create": "Không thể tạo đơn thanh toán. Vui lòng thử lại.",
+                "checkStatus": "Không thể kiểm tra trạng thái đơn hàng."
+            },
+            "referral": {
+                "title": "Mã giới thiệu",
+                "placeholder": "Nhập mã referral",
+                "hint": "Nếu mã hợp lệ, hoa hồng sẽ được ghi nhận sau khi thanh toán thành công."
+            },
+            "summary": {
+                "title": "Tổng quan thanh toán",
+                "courseCount": "Số khóa học",
+                "totalAmount": "Tổng tiền",
+                "note": "Đơn hàng được tạo với hạn thanh toán 15 phút. Kết quả cuối cùng được xác nhận bởi webhook PayOS."
+            },
+            "actions": {
+                "creatingOrder": "Đang tạo đơn hàng...",
+                "payWithVietQr": "Thanh toán với VietQR",
+                "confirmFreeCourses": "Xác nhận nhận khóa học",
+                "checkingStatus": "Đang kiểm tra...",
+                "iPaid": "Tôi đã thanh toán",
+                "openFallback": "Mở trang PayOS dự phòng"
+            },
+            "pending": {
+                "title": "Quét QR để thanh toán",
+                "orderMeta": "Mã đơn: #{{orderCode}} | Trạng thái: {{status}}",
+                "waitingBadge": "Đợi thanh toán",
+                "noQrData": "Chưa có dữ liệu QR",
+                "expiresAt": "Hết hạn lúc: {{time}}",
+                "expiresAtFallback": "Vui lòng hoàn tất thanh toán trong thời gian hiệu lực của mã.",
+                "orderDetailSection": "Chi tiết đơn hàng",
+                "view": "Xem",
+                "scanInstruction": "Mở ứng dụng ngân hàng bất kỳ để quét mã VietQR hoặc chuyển khoản chính xác theo thông tin bên dưới.",
+                "scanHint": "Quét mã để thanh toán nhanh",
+                "bank": "Ngân hàng",
+                "bankFallback": "Ngân hàng liên kết PayOS",
+                "accountName": "Chủ tài khoản",
+                "accountNumber": "Số tài khoản",
+                "amount": "Số tiền",
+                "transferContent": "Nội dung",
+                "copy": "Sao chép",
+                "copied": "Đã chép",
+                "noData": "-",
+                "exactAmountNote": "Lưu ý: Nhập chính xác số tiền {{amount}} khi chuyển khoản.",
+                "orderInfoTitle": "Thông tin đơn hàng",
+                "orderId": "Order ID",
+                "orderCode": "PayOS Order Code",
+                "createdAt": "Thời gian tạo",
+                "statusLabel": "Trạng thái",
+                "expiresAtLabel": "Hạn thanh toán",
+                "courseList": "Khóa học trong đơn"
+            }
+        },
+        "orders": {
+            "title": "Lịch sử đơn hàng",
+            "subtitle": "Tổng {{total}} đơn hàng, {{paid}} đơn đã thanh toán thành công.",
+            "openCheckout": "Mở checkout",
+            "empty": "Bạn chưa có đơn hàng nào.",
+            "table": {
+                "order": "Đơn hàng",
+                "createdAt": "Ngày tạo",
+                "status": "Trạng thái",
+                "totalAmount": "Tổng tiền",
+                "courses": "Khóa học",
+                "detail": "Chi tiết"
+            },
+            "moreCourses": "+{{count}} khóa học khác",
+            "view": "Xem",
+            "errors": {
+                "loadFailed": "Không thể tải lịch sử đơn hàng."
+            }
+        },
+        "result": {
+            "title": "Kết quả thanh toán",
+            "subtitle": "Trang này ưu tiên dữ liệu webhook để xác nhận giao dịch.",
+            "loading": "Đang kiểm tra trạng thái đơn hàng...",
+            "errors": {
+                "orderCodeMissing": "Không tìm thấy mã đơn hàng trong URL.",
+                "loadFailed": "Không thể tải thông tin đơn hàng."
+            },
+            "tone": {
+                "paid": {
+                    "title": "Thanh toán thành công",
+                    "subtitle": "Khóa học đã được kích hoạt vào tài khoản của bạn."
+                },
+                "failed": {
+                    "title": "Thanh toán thất bại hoặc đã hủy",
+                    "subtitle": "Bạn có thể tạo lại đơn hàng mới từ trang checkout."
+                },
+                "pending": {
+                    "title": "Đơn hàng đang xử lý",
+                    "subtitle": "Hệ thống đang đợi xác nhận thanh toán từ PayOS."
+                }
+            },
+            "orderInfo": {
+                "title": "Thông tin đơn hàng",
+                "orderId": "Order ID",
+                "orderCode": "PayOS Order Code",
+                "status": "Trạng thái",
+                "lastPaymentStatus": "Trạng thái payment gần nhất",
+                "totalAmount": "Tổng tiền",
+                "paidAt": "Thanh toán lúc",
+                "courses": "Khóa học"
+            },
+            "actions": {
+                "refresh": "Kiểm tra lại trạng thái",
+                "checking": "Đang kiểm tra...",
+                "orderHistory": "Lịch sử đơn hàng",
+                "myCourses": "Đến khóa học của tôi"
+            }
+        }
+    },
+    "adminReferrals": {
+        "title": "Mã giới thiệu",
+        "subtitle": "Quản lý mã giới thiệu cho checkout. Đang có {{total}} cabin, {{active}} cabin đang hoạt động.",
+        "actions": {
+            "create": "Tạo referral",
+            "update": "Cập nhật",
+            "deactivate": "Vô hiệu hóa",
+            "cancel": "Hủy",
+            "saving": "Đang lưu..."
+        },
+        "searchPlaceholder": "Tìm theo tên cabin, mã referral, owner",
+        "filters": {
+            "all": "Tất cả",
+            "active": "Đang hoạt động",
+            "inactive": "Đã vô hiệu"
+        },
+        "table": {
+            "referral": "Referral",
+            "cabin": "Cabin",
+            "owner": "Owner",
+            "commission": "Hoa hồng",
+            "wallet": "Ví",
+            "status": "Trạng thái",
+            "actions": "Thao tác",
+            "loading": "Đang tải dữ liệu...",
+            "empty": "Chưa có referral nào.",
+            "noName": "(Chưa có tên)"
+        },
+        "status": {
+            "active": "ACTIVE",
+            "inactive": "INACTIVE"
+        },
+        "dialog": {
+            "createTitle": "Tạo referral mới",
+            "editTitle": "Cập nhật referral",
+            "fields": {
+                "cabinName": "Tên cabin",
+                "owner": "Cabin owner",
+                "selectOwner": "Chọn owner",
+                "referralCode": "Referral code",
+                "commissionRate": "Commission rate (%)",
+                "isActive": "Kích hoạt referral"
+            }
+        },
+        "confirmDeactivate": "Vô hiệu hóa mã referral {{code}}?",
+        "validation": {
+            "required": "Vui lòng điền đầy đủ thông tin.",
+            "invalidRate": "Commission rate không hợp lệ."
+        },
+        "toasts": {
+            "loadReferralsFailed": "Không thể tải danh sách referral",
+            "loadOwnersFailed": "Không thể tải danh sách cabin owner",
+            "updateSuccess": "Cập nhật referral thành công.",
+            "createSuccess": "Tạo referral thành công.",
+            "saveFailed": "Không thể lưu referral.",
+            "deactivateSuccess": "Đã vô hiệu hóa referral.",
+            "deactivateFailed": "Không thể vô hiệu hóa referral."
+        }
     }
 }

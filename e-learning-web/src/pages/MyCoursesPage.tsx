@@ -91,7 +91,7 @@ const MyCoursesPage: React.FC = () => {
                             {enrollments.map((enrollment) => (
                                 <Link
                                     key={enrollment.id}
-                                    to={`/learn/${enrollment.courseId}`}
+                                    to={`/courses/${enrollment.courseId.toLowerCase()}/learn`}
                                     className="group flex flex-col rounded-2xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden"
                                 >
                                     {/* Thumbnail / Progress overlay */}

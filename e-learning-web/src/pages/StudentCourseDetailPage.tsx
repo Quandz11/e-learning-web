@@ -6,6 +6,7 @@ import { courseApi, type CourseResponse } from '../services/courseApi';
 import { useTranslation } from 'react-i18next';
 import { enrollmentApi } from '../services/enrollmentApi';
 import logoImg from '../assets/logo.jpg';
+import { paymentCart } from '../services/paymentCart';
 
 const StudentCourseDetailPage: React.FC = () => {
     const { t } = useTranslation();
@@ -19,6 +20,7 @@ const StudentCourseDetailPage: React.FC = () => {
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
     const [isEnrolled, setIsEnrolled] = useState(false);
     const [enrolling, setEnrolling] = useState(false);
+    const [isInCart, setIsInCart] = useState(false);
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -54,6 +56,11 @@ const StudentCourseDetailPage: React.FC = () => {
         checkEnrollment();
     }, [id, isAuthenticated, course]);
 
+    useEffect(() => {
+        if (!course) return;
+        setIsInCart(paymentCart.hasCourse(course.id));
+    }, [course]);
+
     const toggleSection = (sectionId: string) => {
         setExpandedSections(prev => {
             const newSet = new Set(prev);
@@ -86,8 +93,23 @@ const StudentCourseDetailPage: React.FC = () => {
                 setEnrolling(false);
             }
         } else {
-            alert(t('courseDetail.paymentRequired'));
+            navigate(`/checkout?courseIds=${course.id}&single=1`);
         }
+    };
+
+    const handleToggleCart = () => {
+        if (!course || course.isFree || isEnrolled) {
+            return;
+        }
+
+        if (isInCart) {
+            paymentCart.removeCourse(course.id);
+            setIsInCart(false);
+            return;
+        }
+
+        paymentCart.addCourse(course);
+        setIsInCart(true);
     };
 
     const totalLessons = course?.lessons?.length || 0; // It is Lessons count now
@@ -354,6 +376,15 @@ const StudentCourseDetailPage: React.FC = () => {
                                 >
                                     {getEnrollButtonText()}
                                 </button>
+
+                                {!course.isFree && !isEnrolled && (
+                                    <button
+                                        onClick={handleToggleCart}
+                                        className="w-full py-3 border border-primary text-primary font-semibold rounded-lg transition-colors hover:bg-primary/10"
+                                    >
+                                        {isInCart ? t('courseDetail.addedToCart') : t('courseDetail.addToCart')}
+                                    </button>
+                                )}
 
                                 {/* Features */}
                                 <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm">

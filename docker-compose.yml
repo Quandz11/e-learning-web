@@ -13,6 +13,14 @@ services:
       - JwtSettings__Secret=ReplaceThisWithAStrongSecretKeyAtLeast256BitsLong_SuperSecretKey123!
       - JwtSettings__Issuer=SKVI_Server
       - JwtSettings__Audience=SKVI_Client
+      - PayOSSettings__ClientId=
+      - PayOSSettings__ApiKey=
+      - PayOSSettings__ChecksumKey=
+      - PayOSSettings__ApiBaseUrl=https://api-merchant.payos.vn
+      - PayOSSettings__ReturnUrl=http://localhost:5173/payment/result
+      - PayOSSettings__CancelUrl=http://localhost:5173/payment/result
+      - PayOSSettings__WebhookUrl=http://localhost:8080/api/payments/webhook/payos
+      - PayOSSettings__ExpiredMinutes=15
     networks:
       - elearning-network
 

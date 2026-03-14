@@ -211,6 +211,7 @@
             "chat": "Chat Management",
             "notifications": "Notifications",
             "articles": "Articles",
+            "referrals": "Referral Codes",
             "whyChooseUs": "Why Choose Us"
         },
         "header": {
@@ -944,6 +945,8 @@
         "enrollPremium": "Buy Now",
         "enrolling": "Enrolling...",
         "startLearning": "Start Learning",
+        "addToCart": "Add to cart",
+        "addedToCart": "Added to cart",
         "paymentRequired": "Payment required - Coming soon!",
         "enrolled": "ENROLLED",
         "freeCourse": "FREE COURSE",
@@ -1059,8 +1062,10 @@
                 "forum": "Forum",
                 "benefits": "Benefits",
                 "testimonials": "Testimonials",
-                "myCourses": "My Courses"
+                "myCourses": "My Courses",
+                "myOrders": "My Orders"
             },
+            "cartTitle": "Cart",
             "logout": "Logout",
             "welcome": "Welcome"
         },
@@ -1320,5 +1325,197 @@
         "createThread": "Create Thread",
         "threadCreated": "Thread created successfully",
         "threadFailed": "Failed to create thread"
+    },
+    "payments": {
+        "common": {
+            "currency": "VND",
+            "free": "Free"
+        },
+        "status": {
+            "PAID": "Paid",
+            "PENDING": "Pending payment",
+            "FAILED": "Payment failed",
+            "CANCELLED": "Cancelled",
+            "PROCESSING": "Processing",
+            "INIT": "Initialized"
+        },
+        "checkout": {
+            "title": "Course Checkout",
+            "subtitle": "Review your order before creating a PayOS VietQR payment code.",
+            "continueCourses": "Continue browsing courses",
+            "courseListTitle": "Course list",
+            "emptyCart": "Your cart is empty.",
+            "errors": {
+                "loadInfo": "Failed to load checkout information.",
+                "noQrData": "No payment QR data was returned. Please try again.",
+                "create": "Failed to create checkout order. Please try again.",
+                "checkStatus": "Failed to check order status."
+            },
+            "referral": {
+                "title": "Referral code",
+                "placeholder": "Enter referral code",
+                "hint": "If valid, commission will be recorded after successful payment."
+            },
+            "summary": {
+                "title": "Payment summary",
+                "courseCount": "Courses",
+                "totalAmount": "Total amount",
+                "note": "Orders expire after 15 minutes. Final status is confirmed by PayOS webhook."
+            },
+            "actions": {
+                "creatingOrder": "Creating order...",
+                "payWithVietQr": "Pay with VietQR",
+                "confirmFreeCourses": "Confirm free enrollment",
+                "checkingStatus": "Checking...",
+                "iPaid": "I have paid",
+                "openFallback": "Open PayOS fallback page"
+            },
+            "pending": {
+                "title": "Scan QR to pay",
+                "orderMeta": "Order: #{{orderCode}} | Status: {{status}}",
+                "waitingBadge": "Awaiting payment",
+                "noQrData": "QR data is not available",
+                "expiresAt": "Expires at: {{time}}",
+                "expiresAtFallback": "Please complete payment within the valid time window.",
+                "orderDetailSection": "Order details",
+                "view": "View",
+                "scanInstruction": "Open any banking app to scan this VietQR code or transfer exactly with the payment details below.",
+                "scanHint": "Scan to pay quickly",
+                "bank": "Bank",
+                "bankFallback": "PayOS linked bank",
+                "accountName": "Account name",
+                "accountNumber": "Account number",
+                "amount": "Amount",
+                "transferContent": "Transfer note",
+                "copy": "Copy",
+                "copied": "Copied",
+                "noData": "-",
+                "exactAmountNote": "Note: Please transfer the exact amount {{amount}}.",
+                "orderInfoTitle": "Order information",
+                "orderId": "Order ID",
+                "orderCode": "PayOS Order Code",
+                "createdAt": "Created at",
+                "statusLabel": "Status",
+                "expiresAtLabel": "Payment deadline",
+                "courseList": "Courses in this order"
+            }
+        },
+        "orders": {
+            "title": "Order History",
+            "subtitle": "{{total}} total orders, {{paid}} successfully paid.",
+            "openCheckout": "Open checkout",
+            "empty": "You do not have any orders yet.",
+            "table": {
+                "order": "Order",
+                "createdAt": "Created at",
+                "status": "Status",
+                "totalAmount": "Total",
+                "courses": "Courses",
+                "detail": "Details"
+            },
+            "moreCourses": "+{{count}} more courses",
+            "view": "View",
+            "errors": {
+                "loadFailed": "Failed to load order history."
+            }
+        },
+        "result": {
+            "title": "Payment Result",
+            "subtitle": "This page prioritizes webhook-confirmed transaction data.",
+            "loading": "Checking order status...",
+            "errors": {
+                "orderCodeMissing": "Order code was not found in URL.",
+                "loadFailed": "Failed to load order details."
+            },
+            "tone": {
+                "paid": {
+                    "title": "Payment successful",
+                    "subtitle": "Your courses have been activated on your account."
+                },
+                "failed": {
+                    "title": "Payment failed or cancelled",
+                    "subtitle": "You can create a new order from the checkout page."
+                },
+                "pending": {
+                    "title": "Order is processing",
+                    "subtitle": "The system is waiting for payment confirmation from PayOS."
+                }
+            },
+            "orderInfo": {
+                "title": "Order information",
+                "orderId": "Order ID",
+                "orderCode": "PayOS Order Code",
+                "status": "Status",
+                "lastPaymentStatus": "Latest payment status",
+                "totalAmount": "Total amount",
+                "paidAt": "Paid at",
+                "courses": "Courses"
+            },
+            "actions": {
+                "refresh": "Refresh status",
+                "checking": "Checking...",
+                "orderHistory": "Order history",
+                "myCourses": "Go to my courses"
+            }
+        }
+    },
+    "adminReferrals": {
+        "title": "Referral Codes",
+        "subtitle": "Manage referral codes for checkout. There are {{total}} cabins, {{active}} currently active.",
+        "actions": {
+            "create": "Create referral",
+            "update": "Update",
+            "deactivate": "Deactivate",
+            "cancel": "Cancel",
+            "saving": "Saving..."
+        },
+        "searchPlaceholder": "Search by cabin name, referral code, owner",
+        "filters": {
+            "all": "All",
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "table": {
+            "referral": "Referral",
+            "cabin": "Cabin",
+            "owner": "Owner",
+            "commission": "Commission",
+            "wallet": "Wallet",
+            "status": "Status",
+            "actions": "Actions",
+            "loading": "Loading data...",
+            "empty": "No referrals yet.",
+            "noName": "(No name)"
+        },
+        "status": {
+            "active": "ACTIVE",
+            "inactive": "INACTIVE"
+        },
+        "dialog": {
+            "createTitle": "Create new referral",
+            "editTitle": "Update referral",
+            "fields": {
+                "cabinName": "Cabin name",
+                "owner": "Cabin owner",
+                "selectOwner": "Select owner",
+                "referralCode": "Referral code",
+                "commissionRate": "Commission rate (%)",
+                "isActive": "Activate referral"
+            }
+        },
+        "confirmDeactivate": "Deactivate referral code {{code}}?",
+        "validation": {
+            "required": "Please fill in all required fields.",
+            "invalidRate": "Commission rate is invalid."
+        },
+        "toasts": {
+            "loadReferralsFailed": "Failed to load referrals",
+            "loadOwnersFailed": "Failed to load cabin owners",
+            "updateSuccess": "Referral updated successfully.",
+            "createSuccess": "Referral created successfully.",
+            "saveFailed": "Failed to save referral.",
+            "deactivateSuccess": "Referral deactivated successfully.",
+            "deactivateFailed": "Failed to deactivate referral."
+        }
     }
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -7,13 +7,31 @@ import { logout } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
 import { clearAuth } from '../../services/authStorage';
 import HeaderNotification from '../common/HeaderNotification';
-import LanguageSwitcher from '../common/LanguageSwitcher'; import logoImg from '../../assets/logo.jpg';
+import LanguageSwitcher from '../common/LanguageSwitcher';
+import logoImg from '../../assets/logo.jpg';
+import { paymentCart, PAYMENT_CART_CHANGED_EVENT } from '../../services/paymentCart';
 
 const UserHeader: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        const syncCartCount = () => {
+            setCartCount(paymentCart.count());
+        };
+
+        syncCartCount();
+        window.addEventListener(PAYMENT_CART_CHANGED_EVENT, syncCartCount);
+        window.addEventListener('storage', syncCartCount);
+
+        return () => {
+            window.removeEventListener(PAYMENT_CART_CHANGED_EVENT, syncCartCount);
+            window.removeEventListener('storage', syncCartCount);
+        };
+    }, []);
 
     const handleLogout = async () => {
         try {
@@ -28,7 +46,7 @@ const UserHeader: React.FC = () => {
 
     return (
         <header className="sticky top-0 z-50 w-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="w-full px-3 sm:px-4 lg:px-5">
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-3">
@@ -74,6 +92,14 @@ const UserHeader: React.FC = () => {
                                 {t('home.header.nav.myCourses')}
                             </Link>
                         )}
+                        {isAuthenticated && user && (
+                            <Link
+                                className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
+                                to="/my-orders"
+                            >
+                                {t('home.header.nav.myOrders')}
+                            </Link>
+                        )}
                         <a
                             className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
                             href="#testimonials"
@@ -87,6 +113,18 @@ const UserHeader: React.FC = () => {
                         <LanguageSwitcher />
                         {isAuthenticated && user ? (
                             <>
+                                <Link
+                                    to="/checkout"
+                                    className="relative inline-flex h-10 items-center justify-center rounded-lg border border-primary px-3 text-primary hover:bg-primary/10 transition-colors"
+                                    title={t('home.header.cartTitle')}
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
+                                    {cartCount > 0 && (
+                                        <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
                                 <div className="mr-2">
                                     <HeaderNotification />
                                 </div>

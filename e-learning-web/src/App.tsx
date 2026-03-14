@@ -57,6 +57,10 @@ import NewThreadPage from './pages/NewThreadPage';
 import AdminForumCategoriesPage from './pages/admin/forum/AdminForumCategoriesPage';
 import MyCoursesPage from './pages/MyCoursesPage';
 import AdminHomeSectionPage from './pages/admin/home-section/AdminHomeSectionPage';
+import CheckoutPage from './pages/CheckoutPage';
+import PaymentResultPage from './pages/PaymentResultPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
+import AdminReferralsPage from './pages/admin/referrals/AdminReferralsPage';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -137,6 +141,30 @@ function App() {
                   element: (
                     <ProtectedRoute>
                       <MyCoursesPage />
+                    </ProtectedRoute>
+                  ),
+                },
+                {
+                  path: 'checkout',
+                  element: (
+                    <ProtectedRoute>
+                      <CheckoutPage />
+                    </ProtectedRoute>
+                  ),
+                },
+                {
+                  path: 'payment/result',
+                  element: (
+                    <ProtectedRoute>
+                      <PaymentResultPage />
+                    </ProtectedRoute>
+                  ),
+                },
+                {
+                  path: 'my-orders',
+                  element: (
+                    <ProtectedRoute>
+                      <OrderHistoryPage />
                     </ProtectedRoute>
                   ),
                 },
@@ -431,6 +459,14 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminHomeSectionPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/referrals',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminReferralsPage />
                 </ProtectedRoute>
               ),
             },

@@ -23,6 +23,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.Configure<BunnySettings>(builder.Configuration.GetSection("BunnySettings"));
+builder.Services.Configure<PayOSSettings>(builder.Configuration.GetSection("PayOSSettings"));
 
 // Services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -37,6 +38,7 @@ builder.Services.AddScoped<ILessonService, LessonService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<ICheckoutService, CheckoutService>();
 builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
 builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
 builder.Services.AddScoped<IChatService, ChatService>();
@@ -65,6 +67,12 @@ builder.Services.AddScoped<IVideoSecurityService>(sp =>
 });
 
 builder.Services.AddHttpClient<IBunnyStreamService, BunnyStreamService>();
+builder.Services.AddHttpClient<IPayOSService, PayOSService>((sp, client) =>
+{
+    var settings = sp.GetRequiredService<IOptions<PayOSSettings>>().Value;
+    client.BaseAddress = new Uri(settings.ApiBaseUrl.TrimEnd('/'));
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
 
 // Authentication & JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;

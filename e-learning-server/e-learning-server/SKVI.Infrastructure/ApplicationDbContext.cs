@@ -103,8 +103,17 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Order>()
             .HasIndex(o => new { o.Status, o.BuyerId });
         modelBuilder.Entity<Order>()
+            .HasIndex(o => o.PayOSOrderCode)
+            .IsUnique()
+            .HasFilter("[PayOSOrderCode] IS NOT NULL");
+        modelBuilder.Entity<Order>()
             .Property(o => o.TotalAmount)
             .HasColumnType("decimal(18,2)");
+
+        // Payment methods
+        modelBuilder.Entity<PaymentMethod>()
+            .HasIndex(pm => pm.Code)
+            .IsUnique();
 
         // Enrollments - Optimized composite index + unique constraint
         modelBuilder.Entity<Enrollment>()
@@ -142,6 +151,10 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Cabin>()
             .Property(c => c.WalletBalance)
             .HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<Cabin>()
+            .HasIndex(c => c.ReferralCode)
+            .IsUnique()
+            .HasFilter("[ReferralCode] IS NOT NULL");
 
         // Courses
         modelBuilder.Entity<Course>()
@@ -157,6 +170,10 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<PaymentTransaction>()
             .Property(p => p.Amount)
             .HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<PaymentTransaction>()
+            .HasIndex(p => p.PaymentLinkId)
+            .IsUnique()
+            .HasFilter("[PaymentLinkId] IS NOT NULL");
             
         // Payouts
         modelBuilder.Entity<Payout>()
@@ -212,6 +229,13 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(o => o.BuyerId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Order - Cabin (optional attribution)
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Cabin)
+            .WithMany(c => c.Orders)
+            .HasForeignKey(o => o.CabinId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Lead - AssignedCare (User)
         modelBuilder.Entity<Lead>()
             .HasOne(l => l.AssignedCare)
@@ -232,6 +256,13 @@ public class ApplicationDbContext : DbContext
             .WithMany(cb => cb.CommissionLedgers)
             .HasForeignKey(c => c.CabinId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Enrollment - Order (optional paid/free source tracking)
+        modelBuilder.Entity<Enrollment>()
+            .HasOne(e => e.Order)
+            .WithMany()
+            .HasForeignKey(e => e.OrderId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Articles
         modelBuilder.Entity<Article>()

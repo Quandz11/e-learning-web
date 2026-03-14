@@ -13,6 +13,8 @@ public class Enrollment
     [Required]
     public Guid CourseId { get; set; }
 
+    public Guid? OrderId { get; set; }
+
     [Required]
     public DateTime EnrolledAt { get; set; }
 
@@ -27,8 +29,13 @@ public class Enrollment
     [Required]
     public string Status { get; set; } = "ACTIVE";
 
+    /// <summary>FREE | PAYMENT | ADMIN</summary>
+    [Required]
+    public string SourceType { get; set; } = "FREE";
+
     // Navigation properties
     public User User { get; set; } = null!;
     public Course Course { get; set; } = null!;
+    public Order? Order { get; set; }
     public ICollection<LessonProgress> LessonProgress { get; set; } = new List<LessonProgress>();
 }

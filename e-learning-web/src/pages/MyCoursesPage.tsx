@@ -8,6 +8,22 @@ const MyCoursesPage: React.FC = () => {
     const [enrollments, setEnrollments] = useState<EnrollmentResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [brokenThumbnails, setBrokenThumbnails] = useState<Record<string, boolean>>({});
+
+    const apiBase = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
+    const rootUrl = apiBase.replace(/\/api\/?$/, '');
+
+    const getThumbnailUrl = (url?: string) => {
+        if (!url) {
+            return null;
+        }
+
+        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
+            return url;
+        }
+
+        return `${rootUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    };
 
     useEffect(() => {
         const fetchEnrollments = async () => {
@@ -96,7 +112,17 @@ const MyCoursesPage: React.FC = () => {
                                 >
                                     {/* Thumbnail / Progress overlay */}
                                     <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500" />
+                                        {enrollment.courseThumbnail && !brokenThumbnails[enrollment.courseId] ? (
+                                            <img
+                                                src={getThumbnailUrl(enrollment.courseThumbnail) || undefined}
+                                                alt={enrollment.courseTitle}
+                                                className="absolute inset-0 h-full w-full object-cover"
+                                                onError={() => setBrokenThumbnails((prev) => ({ ...prev, [enrollment.courseId]: true }))}
+                                                loading="lazy"
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500" />
+                                        )}
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
 
                                         {/* Progress badge */}

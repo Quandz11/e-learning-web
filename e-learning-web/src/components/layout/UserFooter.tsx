@@ -27,7 +27,7 @@ const UserFooter: React.FC = () => {
                         {/* Social Links */}
                         <div className="flex items-center gap-3">
                             <a
-                                href="https://facebook.com"
+                                href="https://www.facebook.com/nhinanchualanhvn"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-colors"
@@ -36,22 +36,13 @@ const UserFooter: React.FC = () => {
                                 <span className="material-symbols-outlined text-xl">facebook</span>
                             </a>
                             <a
-                                href="https://twitter.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-colors"
-                                aria-label="Twitter"
-                            >
-                                <span className="material-symbols-outlined text-xl">tag</span>
-                            </a>
-                            <a
-                                href="https://youtube.com"
+                                href="https://www.youtube.com/@nhinanchualanhvn"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-colors"
                                 aria-label="YouTube"
                             >
-                                <span className="material-symbols-outlined text-xl">play_circle</span>
+                                <span className="material-symbols-outlined text-xl">youtube_video</span>
                             </a>
                         </div>
                     </div>

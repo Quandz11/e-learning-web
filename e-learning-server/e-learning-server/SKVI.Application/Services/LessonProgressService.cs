@@ -19,6 +19,11 @@ public class LessonProgressService : ILessonProgressService
 
     public async Task UpdateProgressAsync(Guid userId, Guid courseId, Guid lessonPartId, int watchedDuration)
     {
+        if (watchedDuration < 0)
+        {
+            throw new InvalidOperationException("Watched duration must be non-negative");
+        }
+
         // Get or create enrollment
         var enrollment = await _context.Enrollments
             .Include(e => e.LessonProgress)
@@ -27,6 +32,16 @@ public class LessonProgressService : ILessonProgressService
         if (enrollment == null)
         {
             throw new InvalidOperationException("User is not enrolled in this course");
+        }
+
+        var isPartInCourse = await _context.CourseLessons
+            .Where(cl => cl.CourseId == courseId)
+            .SelectMany(cl => cl.Lesson.LessonParts)
+            .AnyAsync(part => part.Id == lessonPartId);
+
+        if (!isPartInCourse)
+        {
+            throw new InvalidOperationException("Lesson part does not belong to this course");
         }
 
         // Get or create lesson progress
@@ -83,6 +98,17 @@ public class LessonProgressService : ILessonProgressService
                 throw new InvalidOperationException("User is not enrolled in this course");
             }
 
+            var currentPartIds = enrollment.Course.CourseLessons
+                .Where(cl => cl.Lesson != null)
+                .SelectMany(cl => cl.Lesson.LessonParts)
+                .Select(part => part.Id)
+                .ToHashSet();
+
+            if (!currentPartIds.Contains(lessonPartId))
+            {
+                throw new InvalidOperationException("Lesson part does not belong to this course");
+            }
+
             // Get or create lesson progress
             // Handle potential duplicates (self-healing)
             var allProgressForPart = enrollment.LessonProgress
@@ -134,13 +160,10 @@ public class LessonProgressService : ILessonProgressService
 
             // Calculate progress percentage
             // Flatten: Course -> CourseLesson -> Lesson -> LessonPart
-            var totalParts = enrollment.Course.CourseLessons
-                .Where(cl => cl.Lesson != null)
-                .SelectMany(cl => cl.Lesson.LessonParts)
-                .Count();
+            var totalParts = currentPartIds.Count;
 
             var completedParts = enrollment.LessonProgress
-                .Where(lp => lp.IsCompleted)
+                .Where(lp => lp.IsCompleted && currentPartIds.Contains(lp.LessonPartId))
                 .Select(lp => lp.LessonPartId)
                 .Distinct()
                 .Count();
@@ -158,6 +181,10 @@ public class LessonProgressService : ILessonProgressService
             {
                 enrollment.CompletedAt = DateTime.UtcNow;
                 _logger.LogInformation("User {UserId} completed course {CourseId}", userId, courseId);
+            }
+            else if (progressPercentage < 100 && enrollment.CompletedAt != null)
+            {
+                enrollment.CompletedAt = null;
             }
 
             await _context.SaveChangesAsync();

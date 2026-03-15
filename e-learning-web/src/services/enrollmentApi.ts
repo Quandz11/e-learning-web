@@ -5,6 +5,7 @@ export interface EnrollmentResponse {
     id: string;
     courseId: string;
     courseTitle: string;
+    courseThumbnail?: string;
     enrolledAt: string;
     progressPercentage: number;
     completedAt: string | null;
@@ -29,6 +30,54 @@ export interface LessonPartProgressDto {
     lastWatchedAt: string;
 }
 
+interface CourseProgressResponseRaw {
+    enrollmentId?: unknown;
+    progressPercentage?: unknown;
+    completedParts?: unknown;
+    totalParts?: unknown;
+    completedLessons?: unknown;
+    totalLessons?: unknown;
+    completedAt?: unknown;
+    partProgress?: unknown;
+    lessonProgress?: unknown;
+}
+
+const toNumber = (value: unknown, fallback = 0): number => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+    }
+    return fallback;
+};
+
+const toStringValue = (value: unknown, fallback = ''): string => {
+    if (typeof value === 'string') {
+        return value;
+    }
+    return fallback;
+};
+
+const toNullableString = (value: unknown): string | null => {
+    if (typeof value === 'string') {
+        return value;
+    }
+    return null;
+};
+
+const normalizePartProgress = (value: unknown): LessonPartProgressDto[] => {
+    const rows = Array.isArray(value) ? value : [];
+
+    return rows
+        .filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === 'object')
+        .map((row) => ({
+            lessonPartId: toStringValue(row.lessonPartId ?? row.lessonId),
+            lessonPartTitle: toStringValue(row.lessonPartTitle ?? row.lessonTitle),
+            isCompleted: Boolean(row.isCompleted),
+            watchedDuration: toNumber(row.watchedDuration),
+            completedAt: toNullableString(row.completedAt),
+            lastWatchedAt: toStringValue(row.lastWatchedAt, new Date(0).toISOString())
+        }));
+};
+
 class EnrollmentApi {
     async enrollInCourse(courseId: string): Promise<EnrollmentResponse> {
         return apiClient('/enrollments', {
@@ -51,24 +100,19 @@ class EnrollmentApi {
     }
 
     async getCourseProgress(courseId: string): Promise<CourseProgressResponse> {
-        return apiClient(`/enrollments/${courseId}/progress`);
+        const raw = await apiClient<CourseProgressResponseRaw>(`/enrollments/${courseId}/progress`);
+
+        return {
+            enrollmentId: toStringValue(raw.enrollmentId),
+            progressPercentage: toNumber(raw.progressPercentage),
+            completedParts: toNumber(raw.completedParts, toNumber(raw.completedLessons)),
+            totalParts: toNumber(raw.totalParts, toNumber(raw.totalLessons)),
+            completedAt: toNullableString(raw.completedAt),
+            partProgress: normalizePartProgress(raw.partProgress ?? raw.lessonProgress)
+        };
     }
 
     async updateLessonProgress(courseId: string, lessonPartId: string, watchedDuration: number): Promise<void> {
-        // Backend route might still be /lessons/{id}/progress or updated to /parts/{id}/progress?
-        // Assuming backend route param name 'lessonId' in controller might map to partId, or I should check controller route.
-        // If I haven't changed the Controller ROUTE attribute, it uses whatever was there.
-        // Summary said: "LessonProgressService: Modified to use LessonPartId". 
-        // "EnrollmentService: Fixed type conversion errors".
-        // It didn't explicitly say "EnrollmentsController route changed".
-        // But likely I updated it to use `lessonPartId`. 
-        // Let's assume the URL is `/enrollments/${courseId}/parts/${lessonPartId}/progress` OR I kept `lessons` but pass part ID.
-        // For safety, I'll use `parts` if I renamed it, but if I am unsure, I'll stick to `lessons` but pass partId.
-        // Wait, "Lesson -> Part" hierarchy means "Lesson" is a container. "Part" is the content.
-        // So progress is definitely on Part.
-        // I will use `lessons` in URL if I didn't change the controller route attribute, BUT `lessonPartId` as value.
-        // If I assume I updated the controller to be semantically correct, it should be `parts`.
-        // Let's stick with `lessons/${lessonPartId}` for now unless I see 404.
         try {
             await apiClient(`/enrollments/${courseId}/lessons/${lessonPartId}/progress`, {
                 method: 'POST',

@@ -136,21 +136,26 @@ public class EnrollmentsController : ControllerBase
     /// <summary>
     /// Update lesson progress (watch time)
     /// </summary>
-    [HttpPost("{courseId}/lessons/{lessonId}/progress")]
+    [HttpPost("{courseId}/lessons/{lessonPartId}/progress")]
     public async Task<IActionResult> UpdateLessonProgress(
         string courseId,
-        string lessonId,
+        string lessonPartId,
         [FromBody] UpdateProgressRequest request)
     {
         try
         {
-            if (!Guid.TryParse(courseId, out var courseGuid) || !Guid.TryParse(lessonId, out var lessonGuid))
+            if (!Guid.TryParse(courseId, out var courseGuid) || !Guid.TryParse(lessonPartId, out var lessonPartGuid))
             {
-                return BadRequest(new { message = "Invalid course or lesson ID" });
+                return BadRequest(new { message = "Invalid course or lesson part ID" });
+            }
+
+            if (request.WatchedDuration < 0)
+            {
+                return BadRequest(new { message = "Watched duration must be non-negative" });
             }
 
             var userId = GetUserId();
-            await _lessonProgressService.UpdateProgressAsync(userId, courseGuid, lessonGuid, request.WatchedDuration);
+            await _lessonProgressService.UpdateProgressAsync(userId, courseGuid, lessonPartGuid, request.WatchedDuration);
             return Ok(new { message = "Progress updated" });
         }
         catch (InvalidOperationException ex)
@@ -167,18 +172,18 @@ public class EnrollmentsController : ControllerBase
     /// <summary>
     /// Mark lesson as complete
     /// </summary>
-    [HttpPost("{courseId}/lessons/{lessonId}/complete")]
-    public async Task<IActionResult> MarkLessonComplete(string courseId, string lessonId)
+    [HttpPost("{courseId}/lessons/{lessonPartId}/complete")]
+    public async Task<IActionResult> MarkLessonComplete(string courseId, string lessonPartId)
     {
         try
         {
-            if (!Guid.TryParse(courseId, out var courseGuid) || !Guid.TryParse(lessonId, out var lessonGuid))
+            if (!Guid.TryParse(courseId, out var courseGuid) || !Guid.TryParse(lessonPartId, out var lessonPartGuid))
             {
-                return BadRequest(new { message = "Invalid course or lesson ID" });
+                return BadRequest(new { message = "Invalid course or lesson part ID" });
             }
 
             var userId = GetUserId();
-            await _lessonProgressService.MarkLessonCompleteAsync(userId, courseGuid, lessonGuid);
+            await _lessonProgressService.MarkLessonCompleteAsync(userId, courseGuid, lessonPartGuid);
             return Ok(new { message = "Lesson marked as complete" });
         }
         catch (InvalidOperationException ex)

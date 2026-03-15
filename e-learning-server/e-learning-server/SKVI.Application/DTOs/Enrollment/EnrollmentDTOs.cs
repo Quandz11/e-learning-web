@@ -10,6 +10,7 @@ public class EnrollmentResponse
     public required string Id { get; set; }
     public required string CourseId { get; set; }
     public required string CourseTitle { get; set; }
+    public string? CourseThumbnail { get; set; }
     public required DateTime EnrolledAt { get; set; }
     public int ProgressPercentage { get; set; }
     public DateTime? CompletedAt { get; set; }
@@ -47,10 +48,10 @@ public class CourseProgressResponse
 {
     public required string EnrollmentId { get; set; }
     public int ProgressPercentage { get; set; }
-    public int CompletedLessons { get; set; }
-    public int TotalLessons { get; set; }
+    public int CompletedParts { get; set; }
+    public int TotalParts { get; set; }
     public DateTime? CompletedAt { get; set; }
-    public List<LessonProgressDto> LessonProgress { get; set; } = new();
+    public List<LessonProgressDto> PartProgress { get; set; } = new();
 }
 
 public class LessonProgressDto
@@ -65,8 +66,7 @@ public class LessonProgressDto
 
 public class UpdateProgressRequest
 {
-    public required string LessonId { get; set; }
-    public required int WatchedDuration { get; set; } // seconds
+    public int WatchedDuration { get; set; } // seconds
 }
 
 public class MarkCompleteRequest

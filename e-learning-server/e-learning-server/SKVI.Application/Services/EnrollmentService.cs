@@ -55,6 +55,7 @@ public class EnrollmentService : IEnrollmentService
                 Id = existingEnrollment.Id.ToString(),
                 CourseId = course.Id.ToString(),
                 CourseTitle = course.Title,
+                CourseThumbnail = course.ThumbnailUrl,
                 EnrolledAt = existingEnrollment.EnrolledAt,
                 ProgressPercentage = existingEnrollment.ProgressPercentage,
                 CompletedAt = existingEnrollment.CompletedAt,
@@ -116,6 +117,7 @@ public class EnrollmentService : IEnrollmentService
             Id = enrollment.Id.ToString(),
             CourseId = course.Id.ToString(),
             CourseTitle = course.Title,
+            CourseThumbnail = course.ThumbnailUrl,
             EnrolledAt = enrollment.EnrolledAt,
             ProgressPercentage = enrollment.ProgressPercentage,
             CompletedAt = enrollment.CompletedAt,
@@ -136,24 +138,47 @@ public class EnrollmentService : IEnrollmentService
     {
         // Only return ACTIVE enrollments to user-facing endpoints
         var enrollments = await _context.Enrollments
-            .AsNoTracking()
             .Include(e => e.Course)
+                .ThenInclude(c => c.CourseLessons)
+                    .ThenInclude(cl => cl.Lesson)
+                        .ThenInclude(l => l.LessonParts)
+            .Include(e => e.LessonProgress)
             .Where(e => e.UserId == userId && e.Status == "ACTIVE")
             .OrderByDescending(e => e.LastAccessedAt)
-            .Select(e => new EnrollmentResponse
-            {
-                Id = e.Id.ToString(),
-                CourseId = e.CourseId.ToString(),
-                CourseTitle = e.Course.Title,
-                EnrolledAt = e.EnrolledAt,
-                ProgressPercentage = e.ProgressPercentage,
-                CompletedAt = e.CompletedAt,
-                LastAccessedAt = e.LastAccessedAt,
-                Status = e.Status
-            })
+            .AsSplitQuery()
             .ToListAsync();
 
-        return enrollments;
+        var hasChanges = false;
+        var responses = new List<EnrollmentResponse>(enrollments.Count);
+
+        foreach (var enrollment in enrollments)
+        {
+            var calculation = CalculateEnrollmentProgress(enrollment);
+            if (ApplyCalculatedProgress(enrollment, calculation))
+            {
+                hasChanges = true;
+            }
+
+            responses.Add(new EnrollmentResponse
+            {
+                Id = enrollment.Id.ToString(),
+                CourseId = enrollment.CourseId.ToString(),
+                CourseTitle = enrollment.Course.Title,
+                CourseThumbnail = enrollment.Course.ThumbnailUrl,
+                EnrolledAt = enrollment.EnrolledAt,
+                ProgressPercentage = enrollment.ProgressPercentage,
+                CompletedAt = enrollment.CompletedAt,
+                LastAccessedAt = enrollment.LastAccessedAt,
+                Status = enrollment.Status
+            });
+        }
+
+        if (hasChanges)
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        return responses;
     }
 
     // ─── Admin Methods ────────────────────────────────────────────────────────
@@ -298,45 +323,18 @@ public class EnrollmentService : IEnrollmentService
             throw new InvalidOperationException("Enrollment not found");
         }
 
-        // Get all lessons (parts) via Flattening
-        var allParts = enrollment.Course.CourseLessons
-            .Where(cl => cl.Lesson != null)
-            .SelectMany(cl => cl.Lesson.LessonParts)
-            .ToList();
+        var calculation = CalculateEnrollmentProgress(enrollment);
 
-        // Calculate progress percentage
-        var totalParts = allParts.Count;
-        var completedParts = enrollment.LessonProgress
-            .Where(lp => lp.IsCompleted)
-            .Select(lp => lp.LessonPartId)
-            .Distinct()
-            .Count();
-        
-        var calculatedPercentage = totalParts > 0 
-            ? (int)Math.Floor((completedParts / (double)totalParts) * 100) 
-            : 0;
-
-        // Sync with DB if different (e.g. new lessons added)
-        if (enrollment.ProgressPercentage != calculatedPercentage)
+        if (ApplyCalculatedProgress(enrollment, calculation))
         {
-            enrollment.ProgressPercentage = calculatedPercentage;
-            // Also check if completed status needs to change
-            if (calculatedPercentage < 100 && enrollment.CompletedAt != null)
-            {
-                enrollment.CompletedAt = null; // Revert completion if new lessons added
-            }
-            else if (calculatedPercentage == 100 && enrollment.CompletedAt == null)
-            {
-                enrollment.CompletedAt = DateTime.UtcNow;
-            }
-            
             await _context.SaveChangesAsync();
         }
 
         // Map lesson progress
-        var lessonProgressDtos = allParts.Select(part =>
+        var lessonProgressDtos = calculation.AllParts.Select(part =>
         {
-            var progress = enrollment.LessonProgress.FirstOrDefault(lp => lp.LessonPartId == part.Id);
+            calculation.ProgressByPartId.TryGetValue(part.Id, out var progress);
+
             return new LessonProgressDto
             {
                 LessonPartId = part.Id.ToString(),
@@ -351,13 +349,87 @@ public class EnrollmentService : IEnrollmentService
         return new CourseProgressResponse
         {
             EnrollmentId = enrollment.Id.ToString(),
-            ProgressPercentage = calculatedPercentage,
-            CompletedLessons = completedParts,
-            TotalLessons = totalParts,
+            ProgressPercentage = calculation.ProgressPercentage,
+            CompletedParts = calculation.CompletedParts,
+            TotalParts = calculation.TotalParts,
             CompletedAt = enrollment.CompletedAt,
-            LessonProgress = lessonProgressDtos
+            PartProgress = lessonProgressDtos
         };
     }
+
+    private static EnrollmentProgressCalculation CalculateEnrollmentProgress(Enrollment enrollment)
+    {
+        var allParts = enrollment.Course.CourseLessons
+            .Where(cl => cl.Lesson != null)
+            .OrderBy(cl => cl.OrderIndex)
+            .SelectMany(cl => cl.Lesson.LessonParts.OrderBy(part => part.OrderIndex))
+            .GroupBy(part => part.Id)
+            .Select(group => group.First())
+            .ToList();
+
+        var currentPartIds = allParts
+            .Select(part => part.Id)
+            .ToHashSet();
+
+        var progressByPartId = enrollment.LessonProgress
+            .Where(lp => currentPartIds.Contains(lp.LessonPartId))
+            .GroupBy(lp => lp.LessonPartId)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .OrderByDescending(lp => lp.IsCompleted)
+                    .ThenByDescending(lp => lp.CompletedAt ?? DateTime.MinValue)
+                    .ThenByDescending(lp => lp.LastWatchedAt)
+                    .ThenByDescending(lp => lp.WatchedDuration)
+                    .First());
+
+        var completedParts = progressByPartId.Values
+            .Count(lp => lp.IsCompleted);
+
+        var totalParts = allParts.Count;
+        var progressPercentage = totalParts > 0
+            ? (int)Math.Floor((completedParts / (double)totalParts) * 100)
+            : 0;
+
+        DateTime? completedAt = progressPercentage == 100
+            ? enrollment.CompletedAt ?? DateTime.UtcNow
+            : null;
+
+        return new EnrollmentProgressCalculation(
+            allParts,
+            progressByPartId,
+            completedParts,
+            totalParts,
+            progressPercentage,
+            completedAt);
+    }
+
+    private static bool ApplyCalculatedProgress(Enrollment enrollment, EnrollmentProgressCalculation calculation)
+    {
+        var isChanged = false;
+
+        if (enrollment.ProgressPercentage != calculation.ProgressPercentage)
+        {
+            enrollment.ProgressPercentage = calculation.ProgressPercentage;
+            isChanged = true;
+        }
+
+        if (enrollment.CompletedAt != calculation.CompletedAt)
+        {
+            enrollment.CompletedAt = calculation.CompletedAt;
+            isChanged = true;
+        }
+
+        return isChanged;
+    }
+
+    private sealed record EnrollmentProgressCalculation(
+        List<LessonPart> AllParts,
+        Dictionary<Guid, LessonProgress> ProgressByPartId,
+        int CompletedParts,
+        int TotalParts,
+        int ProgressPercentage,
+        DateTime? CompletedAt);
 
     public async Task UpdateLastAccessedAsync(Guid userId, Guid courseId)
     {

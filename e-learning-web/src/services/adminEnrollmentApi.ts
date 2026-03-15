@@ -12,6 +12,8 @@ export interface AdminEnrollmentResponse {
     progressPercentage: number;
     completedAt: string | null;
     lastAccessedAt: string;
+    accessDurationDays?: number | null;
+    accessExpiresAt?: string | null;
     status: 'ACTIVE' | 'INACTIVE';
 }
 
@@ -26,10 +28,10 @@ export const adminEnrollmentApi = {
     /**
      * [ADMIN] Manually add enrollment for a user
      */
-    addEnrollment(userId: string, courseId: string): Promise<AdminEnrollmentResponse> {
+    addEnrollment(userId: string, courseId: string, accessDurationDays?: number | null): Promise<AdminEnrollmentResponse> {
         return apiClient(`/admin/users/${userId}/enrollments`, {
             method: 'POST',
-            body: JSON.stringify({ courseId }),
+            body: JSON.stringify({ courseId, accessDurationDays }),
         });
     },
 

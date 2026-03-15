@@ -487,8 +487,17 @@ public class CheckoutService : ICheckoutService
         }
 
         var userId = order.BuyerId;
+        var now = DateTime.UtcNow;
         foreach (var item in order.OrderItems)
         {
+            var defaultDurationDays = item.Course?.DefaultAccessDurationDays;
+            var accessDurationDays = defaultDurationDays.HasValue && defaultDurationDays.Value > 0
+                ? defaultDurationDays.Value
+                : (int?)null;
+            var accessExpiresAt = accessDurationDays.HasValue
+                ? (DateTime?)now.AddDays(accessDurationDays.Value)
+                : null;
+
             var existingEnrollment = await _context.Enrollments
                 .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == item.CourseId, cancellationToken);
 
@@ -500,18 +509,34 @@ public class CheckoutService : ICheckoutService
                     UserId = userId,
                     CourseId = item.CourseId,
                     OrderId = order.Id,
-                    EnrolledAt = DateTime.UtcNow,
-                    LastAccessedAt = DateTime.UtcNow,
+                    EnrolledAt = now,
+                    LastAccessedAt = now,
                     ProgressPercentage = 0,
                     Status = "ACTIVE",
-                    SourceType = "PAYMENT"
+                    SourceType = "PAYMENT",
+                    AccessDurationDays = accessDurationDays,
+                    AccessExpiresAt = accessExpiresAt
                 });
             }
             else
             {
                 existingEnrollment.Status = "ACTIVE";
-                existingEnrollment.OrderId ??= order.Id;
-                existingEnrollment.SourceType = existingEnrollment.SourceType == "FREE" ? "PAYMENT" : existingEnrollment.SourceType;
+
+                var isDuplicatePaidCallback = existingEnrollment.OrderId == order.Id
+                    && existingEnrollment.SourceType == "PAYMENT";
+
+                if (!isDuplicatePaidCallback)
+                {
+                    existingEnrollment.OrderId = order.Id;
+                    existingEnrollment.LastAccessedAt = now;
+                    existingEnrollment.AccessDurationDays = accessDurationDays;
+                    existingEnrollment.AccessExpiresAt = accessExpiresAt;
+                }
+
+                if (existingEnrollment.SourceType == "FREE" || existingEnrollment.SourceType == "ADMIN")
+                {
+                    existingEnrollment.SourceType = "PAYMENT";
+                }
             }
         }
 

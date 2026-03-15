@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace SKVI.Application.DTOs.Enrollment;
 
 public class EnrollmentRequest
@@ -15,6 +17,9 @@ public class EnrollmentResponse
     public int ProgressPercentage { get; set; }
     public DateTime? CompletedAt { get; set; }
     public DateTime LastAccessedAt { get; set; }
+    public int? AccessDurationDays { get; set; }
+    public DateTime? AccessExpiresAt { get; set; }
+    public bool IsExpired { get; set; }
     public string Status { get; set; } = "ACTIVE";
 }
 
@@ -31,12 +36,17 @@ public class AdminEnrollmentResponse
     public int ProgressPercentage { get; set; }
     public DateTime? CompletedAt { get; set; }
     public DateTime LastAccessedAt { get; set; }
+    public int? AccessDurationDays { get; set; }
+    public DateTime? AccessExpiresAt { get; set; }
     public required string Status { get; set; }
 }
 
 public class AdminAddEnrollmentRequest
 {
     public required string CourseId { get; set; }
+
+    [Range(1, 3650)]
+    public int? AccessDurationDays { get; set; }
 }
 
 public class AdminSetEnrollmentStatusRequest
@@ -51,6 +61,9 @@ public class CourseProgressResponse
     public int CompletedParts { get; set; }
     public int TotalParts { get; set; }
     public DateTime? CompletedAt { get; set; }
+    public int? AccessDurationDays { get; set; }
+    public DateTime? AccessExpiresAt { get; set; }
+    public bool IsExpired { get; set; }
     public List<LessonProgressDto> PartProgress { get; set; } = new();
 }
 

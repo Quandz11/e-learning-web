@@ -99,6 +99,7 @@ public class CourseService : ICourseService
             LecturerId = request.LecturerId,
             ThumbnailUrl = request.ThumbnailUrl,
             IsPublished = request.IsPublished,
+            DefaultAccessDurationDays = request.DefaultAccessDurationDays,
             LearningOutcomes = request.LearningOutcomes != null ? JsonSerializer.Serialize(request.LearningOutcomes) : null,
             CreatedAt = DateTime.UtcNow
         };
@@ -141,6 +142,7 @@ public class CourseService : ICourseService
         course.LecturerId = request.LecturerId;
         course.ThumbnailUrl = request.ThumbnailUrl;
         course.IsPublished = request.IsPublished;
+        course.DefaultAccessDurationDays = request.DefaultAccessDurationDays;
         course.LearningOutcomes = request.LearningOutcomes != null ? JsonSerializer.Serialize(request.LearningOutcomes) : null;
         
         // Update Course Lessons (Links)
@@ -201,6 +203,7 @@ public class CourseService : ICourseService
             } : null,
             ThumbnailUrl = course.ThumbnailUrl,
             IsPublished = course.IsPublished,
+            DefaultAccessDurationDays = course.DefaultAccessDurationDays,
             LearningOutcomes = !string.IsNullOrEmpty(course.LearningOutcomes) 
                 ? JsonSerializer.Deserialize<List<string>>(course.LearningOutcomes) ?? new List<string>() 
                 : new List<string>(),

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { courseApi, type CourseResponse } from '../services/courseApi';
 import { useTranslation } from 'react-i18next';
-import { enrollmentApi } from '../services/enrollmentApi';
+import { enrollmentApi, type EnrollmentResponse } from '../services/enrollmentApi';
 import { paymentCart } from '../services/paymentCart';
 
 const StudentCourseDetailPage: React.FC = () => {
@@ -18,6 +18,7 @@ const StudentCourseDetailPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
     const [isEnrolled, setIsEnrolled] = useState(false);
+    const [enrollmentInfo, setEnrollmentInfo] = useState<EnrollmentResponse | null>(null);
     const [enrolling, setEnrolling] = useState(false);
     const [isInCart, setIsInCart] = useState(false);
 
@@ -46,8 +47,17 @@ const StudentCourseDetailPage: React.FC = () => {
             if (!id || !isAuthenticated || !course) return;
 
             try {
-                const enrolled = await enrollmentApi.checkEnrollment(id);
-                setIsEnrolled(enrolled);
+                const enrollments = await enrollmentApi.getUserEnrollments();
+                const normalizedId = id.toLowerCase();
+                const matchedEnrollment = enrollments.find((item) => item.courseId.toLowerCase() === normalizedId) || null;
+
+                setEnrollmentInfo(matchedEnrollment);
+
+                const isExpired = Boolean(
+                    matchedEnrollment?.isExpired
+                    || (matchedEnrollment?.accessExpiresAt && new Date(matchedEnrollment.accessExpiresAt).getTime() <= Date.now())
+                );
+                setIsEnrolled(Boolean(matchedEnrollment && !isExpired));
             } catch (err) {
                 console.error('Failed to check enrollment:', err);
             }
@@ -83,7 +93,20 @@ const StudentCourseDetailPage: React.FC = () => {
         if (course.isFree) {
             try {
                 setEnrolling(true);
-                await enrollmentApi.enrollInCourse(course.id);
+                const enrollment = await enrollmentApi.enrollInCourse(course.id);
+                setEnrollmentInfo(enrollment);
+
+                const isExpired = Boolean(
+                    enrollment.isExpired
+                    || (enrollment.accessExpiresAt && new Date(enrollment.accessExpiresAt).getTime() <= Date.now())
+                );
+
+                if (isExpired) {
+                    alert(t('courseDetail.accessExpired', { defaultValue: 'Your access to this course has expired.' }));
+                    setIsEnrolled(false);
+                    return;
+                }
+
                 setIsEnrolled(true);
                 navigate(`/courses/${id}/learn`);
             } catch (err: any) {
@@ -95,6 +118,36 @@ const StudentCourseDetailPage: React.FC = () => {
             navigate(`/checkout?courseIds=${course.id}&single=1`);
         }
     };
+
+    const hasExpiredEnrollment = Boolean(
+        enrollmentInfo?.isExpired
+        || (enrollmentInfo?.accessExpiresAt && new Date(enrollmentInfo.accessExpiresAt).getTime() <= Date.now())
+    );
+
+    const accessFeatureText = (() => {
+        if (hasExpiredEnrollment && enrollmentInfo?.accessExpiresAt) {
+            return t('courseDetail.features.accessExpiredOn', {
+                defaultValue: 'Access expired on {{date}}',
+                date: new Date(enrollmentInfo.accessExpiresAt).toLocaleDateString('vi-VN'),
+            });
+        }
+
+        if (enrollmentInfo?.accessExpiresAt) {
+            return t('courseDetail.features.accessUntil', {
+                defaultValue: 'Access until {{date}}',
+                date: new Date(enrollmentInfo.accessExpiresAt).toLocaleDateString('vi-VN'),
+            });
+        }
+
+        if (course?.defaultAccessDurationDays) {
+            return t('courseDetail.features.accessDaysFromEnrollment', {
+                defaultValue: '{{days}} days access from enrollment date',
+                days: course.defaultAccessDurationDays,
+            });
+        }
+
+        return t('courseDetail.features.lifetimeAccess');
+    })();
 
     const handleToggleCart = () => {
         if (!course || course.isFree || isEnrolled) {
@@ -146,12 +199,19 @@ const StudentCourseDetailPage: React.FC = () => {
     const getEnrollButtonText = () => {
         if (enrolling) return t('courseDetail.enrolling');
         if (isEnrolled) return t('courseDetail.startLearning');
+        if (hasExpiredEnrollment) {
+            return course.isFree
+                ? t('courseDetail.accessExpired', { defaultValue: 'Access expired' })
+                : t('courseDetail.enrollPremium');
+        }
         return course.isFree ? t('courseDetail.enrollFree') : t('courseDetail.enrollPremium');
     };
 
     const handleButtonClick = () => {
         if (isEnrolled) {
             navigate(`/courses/${id}/learn`);
+        } else if (hasExpiredEnrollment && course?.isFree) {
+            alert(t('courseDetail.accessExpired', { defaultValue: 'Your access to this course has expired.' }));
         } else {
             handleEnroll();
         }
@@ -213,6 +273,11 @@ const StudentCourseDetailPage: React.FC = () => {
                                         ✓ {t('courseDetail.enrolled')}
                                     </span>
                                 )}
+                                {hasExpiredEnrollment && (
+                                    <span className="px-2.5 py-1 rounded-full bg-red-500 text-white text-[11px] sm:text-xs font-bold">
+                                        {t('courseDetail.accessExpired', { defaultValue: 'Access expired' })}
+                                    </span>
+                                )}
                                 <span className={`px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold ${course.isPublished
                                     ? 'bg-success/10 text-success border border-success/20'
                                     : 'bg-gray-100 text-gray-500'
@@ -250,6 +315,10 @@ const StudentCourseDetailPage: React.FC = () => {
                                 <div className="flex items-start gap-2 min-w-0">
                                     <span className="material-symbols-outlined text-primary">play_circle</span>
                                     <span className="text-gray-700 dark:text-gray-200 font-medium break-normal">{totalLessons} {t('courseDetail.lessons')}</span>
+                                </div>
+                                <div className="flex items-start gap-2 min-w-0 sm:col-span-2">
+                                    <span className="material-symbols-outlined text-primary">schedule</span>
+                                    <span className="text-gray-700 dark:text-gray-200 font-medium break-normal">{accessFeatureText}</span>
                                 </div>
                             </div>
 
@@ -405,7 +474,7 @@ const StudentCourseDetailPage: React.FC = () => {
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="material-symbols-outlined text-primary text-[20px]">all_inclusive</span>
-                                        <span className="text-gray-700 dark:text-gray-300 break-normal">{t('courseDetail.features.lifetimeAccess')}</span>
+                                        <span className="text-gray-700 dark:text-gray-300 break-normal">{accessFeatureText}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="material-symbols-outlined text-primary text-[20px]">phone_iphone</span>

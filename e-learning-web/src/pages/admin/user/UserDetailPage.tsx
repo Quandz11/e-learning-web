@@ -35,6 +35,23 @@ const UserDetailPage: React.FC = () => {
     const roleLabel = (value: UserRole) => t(`admin.users.roles.${value}`);
     const statusLabel = (value: UserStatus) => t(`admin.users.statuses.${value}`);
 
+    const renderAccessExpiry = (enrollment: AdminEnrollmentResponse) => {
+        if (!enrollment.accessExpiresAt) {
+            return t('admin.courses.form.durationLifetime', { defaultValue: 'Lifetime' });
+        }
+
+        const expiresAt = new Date(enrollment.accessExpiresAt);
+        const now = new Date();
+        const diffDays = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        const base = format(expiresAt, 'dd/MM/yyyy');
+
+        if (diffDays < 0) {
+            return `${base} (${t('admin.users.enrollment.expired', { defaultValue: 'Expired' })})`;
+        }
+
+        return `${base} (${t('admin.users.enrollment.daysRemaining', { defaultValue: '{{days}} days left', days: diffDays })})`;
+    };
+
     useEffect(() => {
         if (id) {
             void fetchUser(id);
@@ -263,6 +280,7 @@ const UserDetailPage: React.FC = () => {
                                                     <tr className="border-b border-slate-200 dark:border-slate-700">
                                                         <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.course')}</th>
                                                         <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.enrolledAt')}</th>
+                                                        <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.expiresAt', { defaultValue: 'Expires At' })}</th>
                                                         <th className="pb-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.progress')}</th>
                                                         <th className="pb-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{t('admin.users.enrollment.status')}</th>
                                                         <th className="pb-2 text-right text-xs font-semibold text-slate-500 dark:text-slate-400"></th>
@@ -285,6 +303,9 @@ const UserDetailPage: React.FC = () => {
                                                             </td>
                                                             <td className="py-3 pr-4 text-slate-500 dark:text-slate-400">
                                                                 {format(new Date(enrollment.enrolledAt), 'dd/MM/yyyy')}
+                                                            </td>
+                                                            <td className="py-3 pr-4 text-slate-500 dark:text-slate-400">
+                                                                {renderAccessExpiry(enrollment)}
                                                             </td>
                                                             <td className="py-3 pr-4 text-center">
                                                                 <div className="flex items-center justify-center gap-1.5">

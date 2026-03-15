@@ -26,6 +26,8 @@ public class EnrollmentService : IEnrollmentService
             throw new ArgumentException("Invalid course ID format");
         }
 
+        var now = DateTime.UtcNow;
+
         // Check if course exists and is published
         var course = await _context.Courses
             .AsNoTracking()
@@ -60,9 +62,14 @@ public class EnrollmentService : IEnrollmentService
                 ProgressPercentage = existingEnrollment.ProgressPercentage,
                 CompletedAt = existingEnrollment.CompletedAt,
                 LastAccessedAt = existingEnrollment.LastAccessedAt,
+                AccessDurationDays = existingEnrollment.AccessDurationDays,
+                AccessExpiresAt = existingEnrollment.AccessExpiresAt,
+                IsExpired = IsEnrollmentExpired(existingEnrollment, now),
                 Status = existingEnrollment.Status
             };
         }
+
+        var accessDurationDays = NormalizeDurationDays(course.DefaultAccessDurationDays);
 
         // Create new enrollment — free courses are ACTIVE immediately
         var enrollment = new Enrollment
@@ -70,10 +77,13 @@ public class EnrollmentService : IEnrollmentService
             Id = Guid.NewGuid(),
             UserId = userId,
             CourseId = courseId,
-            EnrolledAt = DateTime.UtcNow,
-            LastAccessedAt = DateTime.UtcNow,
+            EnrolledAt = now,
+            LastAccessedAt = now,
             ProgressPercentage = 0,
-            Status = "ACTIVE"
+            Status = "ACTIVE",
+            SourceType = "FREE",
+            AccessDurationDays = accessDurationDays,
+            AccessExpiresAt = CalculateAccessExpiresAt(now, accessDurationDays)
         };
 
         _context.Enrollments.Add(enrollment);
@@ -122,6 +132,9 @@ public class EnrollmentService : IEnrollmentService
             ProgressPercentage = enrollment.ProgressPercentage,
             CompletedAt = enrollment.CompletedAt,
             LastAccessedAt = enrollment.LastAccessedAt,
+            AccessDurationDays = enrollment.AccessDurationDays,
+            AccessExpiresAt = enrollment.AccessExpiresAt,
+            IsExpired = IsEnrollmentExpired(enrollment, now),
             Status = enrollment.Status
         };
     }
@@ -129,14 +142,20 @@ public class EnrollmentService : IEnrollmentService
     public async Task<bool> IsEnrolledAsync(Guid userId, Guid courseId)
     {
         // Only ACTIVE enrollments grant access
+        var now = DateTime.UtcNow;
         return await _context.Enrollments
             .AsNoTracking()
-            .AnyAsync(e => e.UserId == userId && e.CourseId == courseId && e.Status == "ACTIVE");
+            .AnyAsync(e =>
+                e.UserId == userId
+                && e.CourseId == courseId
+                && e.Status == "ACTIVE"
+                && (e.AccessExpiresAt == null || e.AccessExpiresAt > now));
     }
 
     public async Task<List<EnrollmentResponse>> GetUserEnrollmentsAsync(Guid userId)
     {
         // Only return ACTIVE enrollments to user-facing endpoints
+        var now = DateTime.UtcNow;
         var enrollments = await _context.Enrollments
             .Include(e => e.Course)
                 .ThenInclude(c => c.CourseLessons)
@@ -169,6 +188,9 @@ public class EnrollmentService : IEnrollmentService
                 ProgressPercentage = enrollment.ProgressPercentage,
                 CompletedAt = enrollment.CompletedAt,
                 LastAccessedAt = enrollment.LastAccessedAt,
+                AccessDurationDays = enrollment.AccessDurationDays,
+                AccessExpiresAt = enrollment.AccessExpiresAt,
+                IsExpired = IsEnrollmentExpired(enrollment, now),
                 Status = enrollment.Status
             });
         }
@@ -204,14 +226,16 @@ public class EnrollmentService : IEnrollmentService
                 ProgressPercentage = e.ProgressPercentage,
                 CompletedAt = e.CompletedAt,
                 LastAccessedAt = e.LastAccessedAt,
+                AccessDurationDays = e.AccessDurationDays,
+                AccessExpiresAt = e.AccessExpiresAt,
                 Status = e.Status
             })
             .ToListAsync();
     }
 
-    public async Task<AdminEnrollmentResponse> AdminAddEnrollmentAsync(Guid userId, string courseIdStr)
+    public async Task<AdminEnrollmentResponse> AdminAddEnrollmentAsync(Guid userId, AdminAddEnrollmentRequest request)
     {
-        if (!Guid.TryParse(courseIdStr, out var courseId))
+        if (!Guid.TryParse(request.CourseId, out var courseId))
             throw new ArgumentException("Invalid course ID format");
 
         var course = await _context.Courses
@@ -224,13 +248,20 @@ public class EnrollmentService : IEnrollmentService
             .FirstOrDefaultAsync(u => u.Id == userId)
             ?? throw new InvalidOperationException("User not found");
 
+        var now = DateTime.UtcNow;
+        var accessDurationDays = ResolveAccessDurationDays(request.AccessDurationDays, course.DefaultAccessDurationDays);
+        var accessExpiresAt = CalculateAccessExpiresAt(now, accessDurationDays);
+
         var existing = await _context.Enrollments
             .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
 
         if (existing != null)
         {
-            // If already exists but inactive, re-activate
+            // Re-grant access window from now when admin manually adds again.
             existing.Status = "ACTIVE";
+            existing.LastAccessedAt = now;
+            existing.AccessDurationDays = accessDurationDays;
+            existing.AccessExpiresAt = accessExpiresAt;
             await _context.SaveChangesAsync();
             return new AdminEnrollmentResponse
             {
@@ -239,6 +270,8 @@ public class EnrollmentService : IEnrollmentService
                 UserId = userId.ToString(), UserEmail = user.Email, UserFullName = user.FullName,
                 EnrolledAt = existing.EnrolledAt, ProgressPercentage = existing.ProgressPercentage,
                 CompletedAt = existing.CompletedAt, LastAccessedAt = existing.LastAccessedAt,
+                AccessDurationDays = existing.AccessDurationDays,
+                AccessExpiresAt = existing.AccessExpiresAt,
                 Status = existing.Status
             };
         }
@@ -248,10 +281,13 @@ public class EnrollmentService : IEnrollmentService
             Id = Guid.NewGuid(),
             UserId = userId,
             CourseId = courseId,
-            EnrolledAt = DateTime.UtcNow,
-            LastAccessedAt = DateTime.UtcNow,
+            EnrolledAt = now,
+            LastAccessedAt = now,
             ProgressPercentage = 0,
-            Status = "ACTIVE"
+            Status = "ACTIVE",
+            SourceType = "ADMIN",
+            AccessDurationDays = accessDurationDays,
+            AccessExpiresAt = accessExpiresAt
         };
         _context.Enrollments.Add(enrollment);
         await _context.SaveChangesAsync();
@@ -265,6 +301,8 @@ public class EnrollmentService : IEnrollmentService
             UserId = userId.ToString(), UserEmail = user.Email, UserFullName = user.FullName,
             EnrolledAt = enrollment.EnrolledAt, ProgressPercentage = 0,
             CompletedAt = null, LastAccessedAt = enrollment.LastAccessedAt,
+            AccessDurationDays = enrollment.AccessDurationDays,
+            AccessExpiresAt = enrollment.AccessExpiresAt,
             Status = enrollment.Status
         };
     }
@@ -303,6 +341,8 @@ public class EnrollmentService : IEnrollmentService
             UserFullName = enrollment.User.FullName,
             EnrolledAt = enrollment.EnrolledAt, ProgressPercentage = enrollment.ProgressPercentage,
             CompletedAt = enrollment.CompletedAt, LastAccessedAt = enrollment.LastAccessedAt,
+            AccessDurationDays = enrollment.AccessDurationDays,
+            AccessExpiresAt = enrollment.AccessExpiresAt,
             Status = enrollment.Status
         };
     }
@@ -321,6 +361,17 @@ public class EnrollmentService : IEnrollmentService
         if (enrollment == null)
         {
             throw new InvalidOperationException("Enrollment not found");
+        }
+
+        var now = DateTime.UtcNow;
+        if (enrollment.Status != "ACTIVE")
+        {
+            throw new UnauthorizedAccessException("Enrollment is inactive");
+        }
+
+        if (IsEnrollmentExpired(enrollment, now))
+        {
+            throw new UnauthorizedAccessException("Enrollment expired");
         }
 
         var calculation = CalculateEnrollmentProgress(enrollment);
@@ -353,8 +404,53 @@ public class EnrollmentService : IEnrollmentService
             CompletedParts = calculation.CompletedParts,
             TotalParts = calculation.TotalParts,
             CompletedAt = enrollment.CompletedAt,
+            AccessDurationDays = enrollment.AccessDurationDays,
+            AccessExpiresAt = enrollment.AccessExpiresAt,
+            IsExpired = IsEnrollmentExpired(enrollment, now),
             PartProgress = lessonProgressDtos
         };
+    }
+
+    private static bool IsEnrollmentExpired(Enrollment enrollment, DateTime utcNow)
+    {
+        return enrollment.AccessExpiresAt.HasValue && enrollment.AccessExpiresAt.Value <= utcNow;
+    }
+
+    private static bool IsEnrollmentAccessible(Enrollment enrollment, DateTime utcNow)
+    {
+        return enrollment.Status == "ACTIVE" && !IsEnrollmentExpired(enrollment, utcNow);
+    }
+
+    private static int? ResolveAccessDurationDays(int? requestedDurationDays, int? courseDefaultDurationDays)
+    {
+        if (requestedDurationDays.HasValue)
+        {
+            if (requestedDurationDays.Value <= 0)
+            {
+                throw new ArgumentException("Access duration days must be greater than zero");
+            }
+
+            return requestedDurationDays.Value;
+        }
+
+        return NormalizeDurationDays(courseDefaultDurationDays);
+    }
+
+    private static int? NormalizeDurationDays(int? durationDays)
+    {
+        if (!durationDays.HasValue)
+        {
+            return null;
+        }
+
+        return durationDays.Value > 0 ? durationDays.Value : null;
+    }
+
+    private static DateTime? CalculateAccessExpiresAt(DateTime accessStartAtUtc, int? accessDurationDays)
+    {
+        return accessDurationDays.HasValue
+            ? accessStartAtUtc.AddDays(accessDurationDays.Value)
+            : null;
     }
 
     private static EnrollmentProgressCalculation CalculateEnrollmentProgress(Enrollment enrollment)
@@ -436,9 +532,10 @@ public class EnrollmentService : IEnrollmentService
         var enrollment = await _context.Enrollments
             .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
 
-        if (enrollment != null)
+        var now = DateTime.UtcNow;
+        if (enrollment != null && IsEnrollmentAccessible(enrollment, now))
         {
-            enrollment.LastAccessedAt = DateTime.UtcNow;
+            enrollment.LastAccessedAt = now;
             await _context.SaveChangesAsync();
         }
     }

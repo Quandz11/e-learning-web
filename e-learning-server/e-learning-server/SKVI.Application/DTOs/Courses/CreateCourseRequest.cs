@@ -21,6 +21,9 @@ public class CreateCourseRequest
 
     public bool IsPublished { get; set; }
 
+    [Range(1, 3650)]
+    public int? DefaultAccessDurationDays { get; set; }
+
     public List<string> LearningOutcomes { get; set; } = new();
 
     public List<Guid> LessonIds { get; set; } = new();

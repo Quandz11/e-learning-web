@@ -54,7 +54,7 @@ public class AdminEnrollmentsController : ControllerBase
 
         try
         {
-            var enrollment = await _enrollmentService.AdminAddEnrollmentAsync(userGuid, request.CourseId);
+            var enrollment = await _enrollmentService.AdminAddEnrollmentAsync(userGuid, request);
             return Ok(enrollment);
         }
         catch (ArgumentException ex)

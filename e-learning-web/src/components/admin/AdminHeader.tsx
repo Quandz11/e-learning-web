@@ -60,7 +60,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ onToggleMobileNav }) => {
                 </button>
                 <div className="mx-1 hidden h-8 w-[1px] bg-slate-200 dark:bg-slate-700 sm:block"></div>
                 {/* Mini Profile for Mobile (Simplified) */}
-                <Link to="/profile" className="flex items-center gap-2 lg:hidden">
+                <Link to="/admin/profile" className="flex items-center gap-2 lg:hidden">
                     <div className="h-8 w-8 rounded-full border border-slate-200 bg-dashboard-primary/10 flex items-center justify-center overflow-hidden dark:border-slate-700">
                         {user?.avatarUrl ? (
                             <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />

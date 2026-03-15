@@ -12,6 +12,7 @@ export interface CourseInput {
   lecturerId: string;
   thumbnailUrl?: string;
   isPublished: boolean;
+  defaultAccessDurationDays?: number | null;
   learningOutcomes?: string[];
   lessonIds: string[];
 }

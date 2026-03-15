@@ -34,6 +34,8 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
     const [thumbnailUrl, setThumbnailUrl] = useState('');
     const [isPublished, setIsPublished] = useState(false);
     const [learningOutcomes, setLearningOutcomes] = useState<string[]>([]);
+    const [durationMode, setDurationMode] = useState<'7' | '30' | '90' | 'lifetime' | 'custom'>('lifetime');
+    const [customDurationDays, setCustomDurationDays] = useState('');
 
     // Lessons State
     const [selectedLessons, setSelectedLessons] = useState<LessonDto[]>([]);
@@ -47,6 +49,35 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
     const thumbnailInputRef = React.useRef<HTMLInputElement>(null);
 
     const currentUserLecturerId = useMemo(() => user?.id || '', [user]);
+
+    const applyDurationState = (durationDays?: number | null) => {
+        if (!durationDays) {
+            setDurationMode('lifetime');
+            setCustomDurationDays('');
+            return;
+        }
+
+        if (durationDays === 7) {
+            setDurationMode('7');
+            setCustomDurationDays('');
+            return;
+        }
+
+        if (durationDays === 30) {
+            setDurationMode('30');
+            setCustomDurationDays('');
+            return;
+        }
+
+        if (durationDays === 90) {
+            setDurationMode('90');
+            setCustomDurationDays('');
+            return;
+        }
+
+        setDurationMode('custom');
+        setCustomDurationDays(String(durationDays));
+    };
 
     const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -85,6 +116,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                 setThumbnailUrl(initialData.thumbnailUrl || '');
                 setIsPublished(initialData.isPublished);
                 setLearningOutcomes(initialData.learningOutcomes || []);
+                applyDurationState(initialData.defaultAccessDurationDays);
                 setSelectedLessons(initialData.lessons || []);
             } else {
                 // Reset form
@@ -96,6 +128,8 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                 setThumbnailUrl('');
                 setIsPublished(false);
                 setLearningOutcomes([]);
+                setDurationMode('lifetime');
+                setCustomDurationDays('');
                 setSelectedLessons([]);
             }
             setLecturerSearch('');
@@ -146,6 +180,23 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
             return;
         }
 
+        let defaultAccessDurationDays: number | null = null;
+        if (durationMode === '7') {
+            defaultAccessDurationDays = 7;
+        } else if (durationMode === '30') {
+            defaultAccessDurationDays = 30;
+        } else if (durationMode === '90') {
+            defaultAccessDurationDays = 90;
+        } else if (durationMode === 'custom') {
+            const parsed = Number(customDurationDays);
+            if (!Number.isInteger(parsed) || parsed < 1 || parsed > 3650) {
+                setError(t('admin.courses.form.errors.durationInvalid', { defaultValue: 'Duration must be between 1 and 3650 days' }));
+                return;
+            }
+
+            defaultAccessDurationDays = parsed;
+        }
+
         const payload: CourseInput = {
             title,
             description,
@@ -154,6 +205,7 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
             lecturerId,
             thumbnailUrl,
             isPublished,
+            defaultAccessDurationDays,
             learningOutcomes,
             lessonIds: selectedLessons.map(l => l.id)
         };
@@ -367,6 +419,52 @@ const CourseFormModal: React.FC<CourseFormModalProps> = ({ isOpen, onClose, onSu
                                 {t('admin.courses.form.addLearningOutcome')}
                             </button>
                         </div>
+                    </div>
+
+                    <div className="space-y-3 rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('admin.courses.form.accessDuration', { defaultValue: 'Course access duration' })}</label>
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                            {[
+                                { value: '7', label: t('admin.courses.form.duration7', { defaultValue: '7 days' }) },
+                                { value: '30', label: t('admin.courses.form.duration30', { defaultValue: '30 days' }) },
+                                { value: '90', label: t('admin.courses.form.duration90', { defaultValue: '90 days' }) },
+                                { value: 'lifetime', label: t('admin.courses.form.durationLifetime', { defaultValue: 'Lifetime' }) },
+                                { value: 'custom', label: t('admin.courses.form.durationCustom', { defaultValue: 'Custom' }) },
+                            ].map((option) => (
+                                <label
+                                    key={option.value}
+                                    className={`flex cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold transition ${durationMode === option.value
+                                        ? 'border-dashboard-primary bg-dashboard-primary/10 text-dashboard-primary'
+                                        : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                                        }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="course-duration"
+                                        value={option.value}
+                                        checked={durationMode === option.value}
+                                        onChange={() => setDurationMode(option.value as '7' | '30' | '90' | 'lifetime' | 'custom')}
+                                        className="sr-only"
+                                    />
+                                    {option.label}
+                                </label>
+                            ))}
+                        </div>
+
+                        {durationMode === 'custom' && (
+                            <div className="space-y-1">
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={3650}
+                                    value={customDurationDays}
+                                    onChange={(e) => setCustomDurationDays(e.target.value)}
+                                    placeholder={t('admin.courses.form.durationCustomPlaceholder', { defaultValue: 'Enter days (1-3650)' })}
+                                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-dashboard-primary focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                                />
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('admin.courses.form.durationHint', { defaultValue: 'Access starts from each enrollment date.' })}</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex flex-wrap gap-4">

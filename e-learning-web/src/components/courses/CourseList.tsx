@@ -128,7 +128,7 @@ const CourseList: React.FC<CourseListProps> = ({
                         <h3 className="mb-1.5 line-clamp-2 text-sm font-semibold leading-snug text-[#0c1c1d] dark:text-white sm:mb-2 sm:text-lg md:text-xl">
                             {course.title}
                         </h3>
-                        <p className="mb-4 hidden line-clamp-2 text-sm text-gray-500 dark:text-gray-400 sm:mb-4 sm:block">
+                        <p className="mb-4 hidden line-clamp-2 text-sm text-gray-500 dark:text-gray-400 sm:mb-4">
                             {stripHtml(course.description || '')}
                         </p>
                         <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-2.5 dark:border-gray-700 sm:gap-3 sm:pt-4">

@@ -103,15 +103,26 @@ const MyCoursesPage: React.FC = () => {
                         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
                             {t('myCourses.count', { count: enrollments.length })}
                         </p>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {enrollments.map((enrollment) => (
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4">
+                            {enrollments.map((enrollment) => {
+                                const isExpired = Boolean(
+                                    enrollment.isExpired
+                                    || (enrollment.accessExpiresAt && new Date(enrollment.accessExpiresAt).getTime() <= Date.now())
+                                );
+                                const expiresAtDate = enrollment.accessExpiresAt ? new Date(enrollment.accessExpiresAt) : null;
+                                const daysRemaining = expiresAtDate
+                                    ? Math.ceil((expiresAtDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                                    : null;
+                                const isExpiringSoon = !isExpired && daysRemaining !== null && daysRemaining <= 7;
+
+                                return (
                                 <Link
                                     key={enrollment.id}
-                                    to={`/courses/${enrollment.courseId.toLowerCase()}/learn`}
+                                    to={isExpired ? `/courses/${enrollment.courseId.toLowerCase()}` : `/courses/${enrollment.courseId.toLowerCase()}/learn`}
                                     className="group flex flex-col rounded-2xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden"
                                 >
                                     {/* Thumbnail / Progress overlay */}
-                                    <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
+                                    <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
                                         {enrollment.courseThumbnail && !brokenThumbnails[enrollment.courseId] ? (
                                             <img
                                                 src={getThumbnailUrl(enrollment.courseThumbnail) || undefined}
@@ -137,6 +148,24 @@ const MyCoursesPage: React.FC = () => {
                                             <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-green-500 px-2.5 py-1 text-xs font-bold text-white">
                                                 <span className="material-symbols-outlined text-[14px]">check_circle</span>
                                                 {t('myCourses.completed')}
+                                            </div>
+                                        )}
+
+                                        {!enrollment.completedAt && isExpired && (
+                                            <div className="absolute top-3 left-3 rounded-full bg-red-500 px-2.5 py-1 text-xs font-bold text-white">
+                                                {t('myCourses.expired', { defaultValue: 'Expired' })}
+                                            </div>
+                                        )}
+
+                                        {!isExpired && !enrollment.completedAt && isExpiringSoon && (
+                                            <div className="absolute top-3 left-3 rounded-full bg-amber-500 px-2.5 py-1 text-xs font-bold text-white">
+                                                {t('myCourses.expiringSoon', { defaultValue: 'Expiring soon' })}
+                                            </div>
+                                        )}
+
+                                        {!isExpired && !isExpiringSoon && !enrollment.accessExpiresAt && (
+                                            <div className="absolute bottom-3 left-3 rounded-full bg-blue-500 px-2.5 py-1 text-xs font-bold text-white">
+                                                {t('myCourses.lifetime', { defaultValue: 'Lifetime' })}
                                             </div>
                                         )}
 
@@ -171,10 +200,25 @@ const MyCoursesPage: React.FC = () => {
                                                 {t('myCourses.enrolledAt')}{' '}
                                                 {new Date(enrollment.enrolledAt).toLocaleDateString('vi-VN')}
                                             </p>
+
+                                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                {!enrollment.accessExpiresAt
+                                                    ? t('myCourses.lifetime', { defaultValue: 'Lifetime' })
+                                                    : isExpired
+                                                        ? t('myCourses.expiredOn', {
+                                                            defaultValue: 'Expired on {{date}}',
+                                                            date: expiresAtDate?.toLocaleDateString('vi-VN') || '-',
+                                                        })
+                                                        : t('myCourses.expiresOn', {
+                                                            defaultValue: 'Expires on {{date}}',
+                                                            date: expiresAtDate?.toLocaleDateString('vi-VN') || '-',
+                                                        })}
+                                            </p>
                                         </div>
                                     </div>
                                 </Link>
-                            ))}
+                                );
+                            })}
                         </div>
                     </>
                 )}

@@ -307,6 +307,15 @@
                 "editTitle": "Edit Course",
                 "title": "Course Title",
                 "price": "Price (VND)",
+                "accessDuration": "Course access duration",
+                "duration7": "7 days",
+                "duration30": "30 days",
+                "duration90": "90 days",
+                "durationLifetime": "Lifetime",
+                "durationCustom": "Custom",
+                "durationCustomPlaceholder": "Enter days (1-3650)",
+                "durationHint": "Access starts from each enrollment date.",
+                "durationDaysValue": "{{days}} days",
                 "lecturer": "Lecturer",
                 "lecturerSearchPlaceholder": "Search lecturer...",
                 "lecturerSelectPlaceholder": "Select Lecturer",
@@ -328,6 +337,7 @@
                     "fileSize": "File size exceeds 5MB",
                     "uploadFailed": "Failed to upload thumbnail",
                     "lecturer": "Lecturer is required",
+                    "durationInvalid": "Duration must be between 1 and 3650 days",
                     "saveFailed": "Failed to save course"
                 }
             }
@@ -432,6 +442,8 @@
                 "empty": "This user has not enrolled in any courses yet.",
                 "course": "Course",
                 "enrolledAt": "Enrolled At",
+                "expiresAt": "Expires At",
+                "accessDuration": "Access duration",
                 "progress": "Progress",
                 "status": "Status",
                 "activate": "Activate",
@@ -443,6 +455,9 @@
                 "searchCourses": "Search courses...",
                 "noCoursesFound": "No courses found",
                 "alreadyEnrolled": "Enrolled",
+                "daysRemaining": "{{days}} days left",
+                "expired": "Expired",
+                "durationInvalid": "Duration must be between 1 and 3650 days",
                 "add": "Add",
                 "free": "Free",
                 "statuses": {
@@ -805,6 +820,33 @@
         },
         "buttons": {
             "search": "Search"
+        },
+        "forum": {
+            "title": "Forum Management",
+            "subtitle": "Manage forum categories and discussions",
+            "create": "Create Category",
+            "edit": "Edit Category",
+            "loadError": "Failed to load categories",
+            "table": {
+                "icon": "Icon",
+                "name": "Name",
+                "description": "Description",
+                "threads": "Threads",
+                "order": "Order",
+                "status": "Status",
+                "empty": "No categories found."
+            },
+            "status": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "form": {
+                "name": "Category Name",
+                "description": "Description",
+                "icon": "Icon (Emoji)",
+                "order": "Order",
+                "active": "Active"
+            }
         }
     },
     "common": {
@@ -852,33 +894,6 @@
                 "order": "Display Order",
                 "orderPlaceholder": "e.g. 1, 2, 3...",
                 "isActive": "Active"
-            }
-        },
-        "forum": {
-            "title": "Forum Management",
-            "subtitle": "Manage forum categories and discussions",
-            "create": "Create Category",
-            "edit": "Edit Category",
-            "loadError": "Failed to load categories",
-            "table": {
-                "icon": "Icon",
-                "name": "Name",
-                "description": "Description",
-                "threads": "Threads",
-                "order": "Order",
-                "status": "Status",
-                "empty": "No categories found."
-            },
-            "status": {
-                "active": "Active",
-                "inactive": "Inactive"
-            },
-            "form": {
-                "name": "Category Name",
-                "description": "Description",
-                "icon": "Icon (Emoji)",
-                "order": "Order",
-                "active": "Active"
             }
         }
     },
@@ -945,6 +960,7 @@
         "enrollPremium": "Buy Now",
         "enrolling": "Enrolling...",
         "startLearning": "Start Learning",
+        "accessExpired": "Access expired",
         "addToCart": "Add to cart",
         "addedToCart": "Added to cart",
         "paymentRequired": "Payment required - Coming soon!",
@@ -953,6 +969,9 @@
         "premium": "PREMIUM",
         "features": {
             "lifetimeAccess": "Lifetime access",
+            "accessDaysFromEnrollment": "{{days}} days access from enrollment date",
+            "accessUntil": "Access until {{date}}",
+            "accessExpiredOn": "Access expired on {{date}}",
             "mobileAccess": "Access on mobile and desktop",
             "certificate": "Certificate of completion"
         },
@@ -1022,6 +1041,8 @@
         "noVideo": "Video is not available",
         "noPdf": "Document is not available",
         "loadError": "Failed to load course",
+        "enrollmentExpired": "Your access to this course has expired.",
+        "reenrollCourse": "Go to course page",
         "markCompleteError": "Failed to mark lesson as complete. Please try again.",
         "contentNotFound": "Course content not found",
         "parts": "parts",
@@ -1050,6 +1071,11 @@
         "progress": "Progress",
         "enrolledAt": "Enrolled",
         "completed": "Completed",
+        "lifetime": "Lifetime",
+        "expired": "Expired",
+        "expiringSoon": "Expiring soon",
+        "expiresOn": "Expires on {{date}}",
+        "expiredOn": "Expired on {{date}}",
         "continueLearning": "Continue Learning",
         "loadFailed": "Failed to load courses"
     },

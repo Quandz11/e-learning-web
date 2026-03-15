@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { courseApi, type CourseResponse } from '../services/courseApi';
-import { enrollmentApi, type CourseProgressResponse } from '../services/enrollmentApi';
+import { enrollmentApi, isEnrollmentExpiredError, type CourseProgressResponse } from '../services/enrollmentApi';
 import { type LessonPartDto } from '../services/lessonApi';
 import SecureVideoPlayer from '../components/SecureVideoPlayer';
 import PdfViewer from '../components/PdfViewer';
@@ -31,6 +31,7 @@ const LearningPage: React.FC = () => {
     const [currentPartIndex, setCurrentPartIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isEnrollmentExpired, setIsEnrollmentExpired] = useState(false);
     const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 
     // Expand lessons in sidebar
@@ -73,6 +74,7 @@ const LearningPage: React.FC = () => {
 
             try {
                 setLoading(true);
+                setIsEnrollmentExpired(false);
                 const [courseData, progressData] = await Promise.all([
                     courseApi.getById(id),
                     enrollmentApi.getCourseProgress(id)
@@ -130,8 +132,15 @@ const LearningPage: React.FC = () => {
 
                 setCurrentPartIndex(initialPartIndex);
             } catch (err: any) {
-                setError(err.message || t('learn.loadError'));
-                if (err.message.includes('Enrollment not found') || err.message.includes('Not Found')) {
+                if (isEnrollmentExpiredError(err)) {
+                    setIsEnrollmentExpired(true);
+                    setError(t('learn.enrollmentExpired', { defaultValue: 'Your access to this course has expired.' }));
+                    return;
+                }
+
+                const errorMessage = typeof err?.message === 'string' ? err.message : '';
+                setError(errorMessage || t('learn.loadError'));
+                if (errorMessage.includes('Enrollment not found') || errorMessage.includes('Not Found')) {
                     setTimeout(() => navigate(`/courses/${id}`), 2000);
                 }
             } finally {
@@ -152,6 +161,12 @@ const LearningPage: React.FC = () => {
                 try {
                     await enrollmentApi.updateLessonProgress(id, currentPart.id, Math.floor(video.currentTime));
                 } catch (err) {
+                    if (isEnrollmentExpiredError(err)) {
+                        setIsEnrollmentExpired(true);
+                        setError(t('learn.enrollmentExpired', { defaultValue: 'Your access to this course has expired.' }));
+                        return;
+                    }
+
                     console.error('Failed to save progress:', err);
                 }
             }
@@ -188,6 +203,12 @@ const LearningPage: React.FC = () => {
                 setCurrentPartIndex(prev => prev + 1);
             }
         } catch (err) {
+            if (isEnrollmentExpiredError(err)) {
+                setIsEnrollmentExpired(true);
+                setError(t('learn.enrollmentExpired', { defaultValue: 'Your access to this course has expired.' }));
+                return;
+            }
+
             console.error('Failed to mark lesson complete:', err);
             alert(t('learn.markCompleteError'));
         } finally {
@@ -222,13 +243,15 @@ const LearningPage: React.FC = () => {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center">
-                    <span className="material-symbols-outlined text-6xl text-red-500 mb-4">error</span>
-                    <p className="text-red-500 mb-4">{error || t('learn.contentNotFound')}</p>
+                    <span className={`material-symbols-outlined text-6xl mb-4 ${isEnrollmentExpired ? 'text-amber-500' : 'text-red-500'}`}>{isEnrollmentExpired ? 'schedule' : 'error'}</span>
+                    <p className={`${isEnrollmentExpired ? 'text-amber-600' : 'text-red-500'} mb-4`}>{error || t('learn.contentNotFound')}</p>
                     <button
                         onClick={() => navigate(`/courses/${id}`)}
                         className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90"
                     >
-                        {t('learn.backToCourse')}
+                        {isEnrollmentExpired
+                            ? t('learn.reenrollCourse', { defaultValue: 'Go to course page' })
+                            : t('learn.backToCourse')}
                     </button>
                 </div>
             </div>

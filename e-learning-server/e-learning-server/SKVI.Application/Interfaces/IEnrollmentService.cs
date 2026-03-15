@@ -12,7 +12,7 @@ public interface IEnrollmentService
 
     // Admin methods
     Task<List<AdminEnrollmentResponse>> AdminGetUserEnrollmentsAsync(Guid userId);
-    Task<AdminEnrollmentResponse> AdminAddEnrollmentAsync(Guid userId, string courseIdStr);
+    Task<AdminEnrollmentResponse> AdminAddEnrollmentAsync(Guid userId, AdminAddEnrollmentRequest request);
     Task AdminRemoveEnrollmentAsync(Guid userId, Guid courseId);
     Task<AdminEnrollmentResponse> AdminSetEnrollmentStatusAsync(Guid enrollmentId, string status);
 }

@@ -28,6 +28,17 @@ const CoursesPage: React.FC = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const formatAccessDuration = (days?: number | null) => {
+    if (!days) {
+      return t('admin.courses.form.durationLifetime', { defaultValue: 'Lifetime' });
+    }
+
+    return t('admin.courses.form.durationDaysValue', {
+      defaultValue: '{{days}} days',
+      days,
+    });
+  };
+
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -163,7 +174,7 @@ const CoursesPage: React.FC = () => {
                     </span>
                   </div>
 
-                  <p className="line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{stripHtml(course.description || '') || t('admin.courses.table.noData')}</p>
+                  <p className="line-clamp-2 text-sm text-slate-600 dark:text-slate-300 hidden">{stripHtml(course.description || '') || t('admin.courses.table.noData')}</p>
 
                   <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
                     <div className="flex flex-col">
@@ -174,6 +185,11 @@ const CoursesPage: React.FC = () => {
                       <span className="text-xs text-slate-500 dark:text-slate-400">{t('admin.courses.table.created')}</span>
                       <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{format(new Date(course.createdAt), 'MMM d, yyyy')}</span>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
+                    <span className="material-symbols-outlined text-[16px]">schedule</span>
+                    <span>{t('admin.courses.form.accessDuration', { defaultValue: 'Access duration' })}: {formatAccessDuration(course.defaultAccessDurationDays)}</span>
                   </div>
 
                   <div className="flex items-center justify-between gap-2">

@@ -34,6 +34,8 @@ public class LessonProgressService : ILessonProgressService
             throw new InvalidOperationException("User is not enrolled in this course");
         }
 
+        EnsureEnrollmentAccessible(enrollment);
+
         var isPartInCourse = await _context.CourseLessons
             .Where(cl => cl.CourseId == courseId)
             .SelectMany(cl => cl.Lesson.LessonParts)
@@ -97,6 +99,8 @@ public class LessonProgressService : ILessonProgressService
             {
                 throw new InvalidOperationException("User is not enrolled in this course");
             }
+
+            EnsureEnrollmentAccessible(enrollment);
 
             var currentPartIds = enrollment.Course.CourseLessons
                 .Where(cl => cl.Lesson != null)
@@ -216,6 +220,8 @@ public class LessonProgressService : ILessonProgressService
             return null;
         }
 
+        EnsureEnrollmentAccessible(enrollment);
+
         var part = enrollment.Course.CourseLessons
             .Where(cl => cl.Lesson != null)
             .SelectMany(cl => cl.Lesson.LessonParts)
@@ -237,5 +243,18 @@ public class LessonProgressService : ILessonProgressService
             CompletedAt = progress?.CompletedAt,
             LastWatchedAt = progress?.LastWatchedAt ?? DateTime.MinValue
         };
+    }
+
+    private static void EnsureEnrollmentAccessible(Enrollment enrollment)
+    {
+        if (enrollment.Status != "ACTIVE")
+        {
+            throw new UnauthorizedAccessException("Enrollment is inactive");
+        }
+
+        if (enrollment.AccessExpiresAt.HasValue && enrollment.AccessExpiresAt.Value <= DateTime.UtcNow)
+        {
+            throw new UnauthorizedAccessException("Enrollment expired");
+        }
     }
 }

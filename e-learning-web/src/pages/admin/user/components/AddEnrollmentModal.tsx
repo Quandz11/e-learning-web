@@ -18,14 +18,32 @@ const AddEnrollmentModal: React.FC<Props> = ({ isOpen, userId, enrolledCourseIds
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [durationMode, setDurationMode] = useState<'7' | '30' | '90' | 'lifetime' | 'custom'>('lifetime');
+    const [customDurationDays, setCustomDurationDays] = useState('');
 
     useEffect(() => {
         if (isOpen) {
             void loadCourses();
             setSearch('');
             setError(null);
+            setDurationMode('lifetime');
+            setCustomDurationDays('');
         }
     }, [isOpen]);
+
+    const resolveDurationDays = (): number | null => {
+        if (durationMode === '7') return 7;
+        if (durationMode === '30') return 30;
+        if (durationMode === '90') return 90;
+        if (durationMode === 'lifetime') return null;
+
+        const parsed = Number(customDurationDays);
+        if (!Number.isInteger(parsed) || parsed < 1 || parsed > 3650) {
+            throw new Error(t('admin.users.enrollment.durationInvalid', { defaultValue: 'Duration must be between 1 and 3650 days' }));
+        }
+
+        return parsed;
+    };
 
     const loadCourses = async () => {
         setLoading(true);
@@ -43,10 +61,11 @@ const AddEnrollmentModal: React.FC<Props> = ({ isOpen, userId, enrolledCourseIds
         setSaving(course.id);
         setError(null);
         try {
-            await adminEnrollmentApi.addEnrollment(userId, course.id);
+            const accessDurationDays = resolveDurationDays();
+            await adminEnrollmentApi.addEnrollment(userId, course.id, accessDurationDays);
             onSuccess();
-        } catch {
-            setError(t('admin.users.enrollment.addFailed'));
+        } catch (err: any) {
+            setError(err?.message || t('admin.users.enrollment.addFailed'));
         } finally {
             setSaving(null);
         }
@@ -85,6 +104,50 @@ const AddEnrollmentModal: React.FC<Props> = ({ isOpen, userId, enrolledCourseIds
                         className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-dashboard-primary focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                         autoFocus
                     />
+                </div>
+
+                <div className="px-6 pb-2">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        {t('admin.users.enrollment.accessDuration', { defaultValue: 'Access duration' })}
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                        {[
+                            { value: '7', label: t('admin.courses.form.duration7', { defaultValue: '7 days' }) },
+                            { value: '30', label: t('admin.courses.form.duration30', { defaultValue: '30 days' }) },
+                            { value: '90', label: t('admin.courses.form.duration90', { defaultValue: '90 days' }) },
+                            { value: 'lifetime', label: t('admin.courses.form.durationLifetime', { defaultValue: 'Lifetime' }) },
+                            { value: 'custom', label: t('admin.courses.form.durationCustom', { defaultValue: 'Custom' }) },
+                        ].map((option) => (
+                            <label
+                                key={option.value}
+                                className={`flex cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-semibold transition ${durationMode === option.value
+                                    ? 'border-dashboard-primary bg-dashboard-primary/10 text-dashboard-primary'
+                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                                    }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="enrollment-duration"
+                                    value={option.value}
+                                    checked={durationMode === option.value}
+                                    onChange={() => setDurationMode(option.value as '7' | '30' | '90' | 'lifetime' | 'custom')}
+                                    className="sr-only"
+                                />
+                                {option.label}
+                            </label>
+                        ))}
+                    </div>
+                    {durationMode === 'custom' && (
+                        <input
+                            type="number"
+                            min={1}
+                            max={3650}
+                            value={customDurationDays}
+                            onChange={(e) => setCustomDurationDays(e.target.value)}
+                            placeholder={t('admin.courses.form.durationCustomPlaceholder', { defaultValue: 'Enter days (1-3650)' })}
+                            className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-dashboard-primary focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                        />
+                    )}
                 </div>
 
                 {/* Error */}

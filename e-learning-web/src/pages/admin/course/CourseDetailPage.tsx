@@ -65,6 +65,12 @@ const CourseDetailPage: React.FC = () => {
   const totalParts = useMemo(() => course?.lessons?.reduce((acc, l) => acc + (l.parts?.length || 0), 0) ?? 0, [course]);
   const statusLabel = course?.isPublished ? t('courseDetail.meta.statusPublished') : t('courseDetail.meta.statusDraft');
   const priceLabel = course?.isFree ? t('courseDetail.free') : `${(course?.price ?? 0).toLocaleString('vi-VN')} VND`;
+  const accessDurationLabel = !course?.defaultAccessDurationDays
+    ? t('admin.courses.form.durationLifetime', { defaultValue: 'Lifetime' })
+    : t('admin.courses.form.durationDaysValue', {
+      defaultValue: '{{days}} days',
+      days: course.defaultAccessDurationDays,
+    });
 
   // Handlers
   const toggleLesson = (lessonId: string) => {
@@ -128,6 +134,10 @@ const CourseDetailPage: React.FC = () => {
                     : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-700 dark:text-slate-400'
                     }`}>
                     {statusLabel}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                    <span className="material-symbols-outlined text-[14px]">schedule</span>
+                    {accessDurationLabel}
                   </span>
                 </div>
               </div>
@@ -414,6 +424,14 @@ const CourseDetailPage: React.FC = () => {
                       <span className="text-xs text-slate-500 block mb-1">{t('courseDetail.stats.lastUpdated')}</span>
                       <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
                         {new Date(course.createdAt).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+
+                    <div className="col-span-2 lg:col-span-1">
+                      <span className="text-xs text-slate-500 block mb-1">{t('admin.courses.form.accessDuration', { defaultValue: 'Access duration' })}</span>
+                      <span className="text-sm font-medium text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary text-base">schedule</span>
+                        {accessDurationLabel}
                       </span>
                     </div>
 

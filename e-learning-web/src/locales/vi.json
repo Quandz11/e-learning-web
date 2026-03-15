@@ -326,6 +326,15 @@
                 "editTitle": "Chỉnh sửa khóa học",
                 "title": "Tên khóa học",
                 "price": "Giá (VND)",
+                "accessDuration": "Thời hạn truy cập khóa học",
+                "duration7": "7 ngày",
+                "duration30": "30 ngày",
+                "duration90": "90 ngày",
+                "durationLifetime": "Trọn đời",
+                "durationCustom": "Tùy chỉnh",
+                "durationCustomPlaceholder": "Nhập số ngày (1-3650)",
+                "durationHint": "Thời hạn bắt đầu từ ngày học viên đăng ký.",
+                "durationDaysValue": "{{days}} ngày",
                 "lecturer": "Giảng viên",
                 "lecturerSearchPlaceholder": "Tìm kiếm giảng viên...",
                 "lecturerSelectPlaceholder": "Chọn giảng viên",
@@ -343,6 +352,7 @@
                     "fileSize": "Kích thước tệp quá lớn (>5MB)",
                     "uploadFailed": "Tải ảnh thất bại",
                     "title": "Vui lòng nhập tên khóa học",
+                    "durationInvalid": "Thời hạn phải từ 1 đến 3650 ngày",
                     "saveFailed": "Lưu khóa học thất bại"
                 },
                 "curriculum": "Giáo trình",
@@ -488,6 +498,8 @@
                 "empty": "Người dùng chưa đăng ký khóa học nào.",
                 "course": "Khóa học",
                 "enrolledAt": "Ngày đăng ký",
+                "expiresAt": "Ngày hết hạn",
+                "accessDuration": "Thời hạn truy cập",
                 "progress": "Tiến độ",
                 "status": "Trạng thái",
                 "activate": "Kích hoạt",
@@ -499,6 +511,9 @@
                 "searchCourses": "Tìm kiếm khóa học...",
                 "noCoursesFound": "Không tìm thấy khóa học",
                 "alreadyEnrolled": "Đã đăng ký",
+                "daysRemaining": "Còn {{days}} ngày",
+                "expired": "Đã hết hạn",
+                "durationInvalid": "Thời hạn phải từ 1 đến 3650 ngày",
                 "add": "Thêm",
                 "free": "Miễn phí",
                 "statuses": {
@@ -795,6 +810,33 @@
         },
         "buttons": {
             "search": "Tìm kiếm"
+        },
+        "forum": {
+            "title": "Quản lý Diễn đàn",
+            "subtitle": "Quản lý danh mục và thảo luận diễn đàn",
+            "create": "Tạo danh mục",
+            "edit": "Chỉnh sửa danh mục",
+            "loadError": "Không thể tải danh mục",
+            "table": {
+                "icon": "Biểu tượng",
+                "name": "Tên",
+                "description": "Mô tả",
+                "threads": "Chủ đề",
+                "order": "Thứ tự",
+                "status": "Trạng thái",
+                "empty": "Chưa có danh mục nào."
+            },
+            "status": {
+                "active": "Hoạt động",
+                "inactive": "Không hoạt động"
+            },
+            "form": {
+                "name": "Tên danh mục",
+                "description": "Mô tả",
+                "icon": "Biểu tượng (Emoji)",
+                "order": "Thứ tự",
+                "active": "Hoạt động"
+            }
         }
     },
     "common": {
@@ -843,33 +885,6 @@
                 "order": "Thứ tự Hiển thị",
                 "orderPlaceholder": "ví dụ: 1, 2, 3...",
                 "isActive": "Hoạt động"
-            }
-        },
-        "forum": {
-            "title": "Quản lý Diễn đàn",
-            "subtitle": "Quản lý danh mục và thảo luận diễn đàn",
-            "create": "Tạo danh mục",
-            "edit": "Chỉnh sửa danh mục",
-            "loadError": "Không thể tải danh mục",
-            "table": {
-                "icon": "Icon",
-                "name": "Tên",
-                "description": "Mô tả",
-                "threads": "Chủ đề",
-                "order": "Thứ tự",
-                "status": "Trạng thái",
-                "empty": "Chưa có danh mục nào."
-            },
-            "status": {
-                "active": "Hoạt động",
-                "inactive": "Không hoạt động"
-            },
-            "form": {
-                "name": "Tên danh mục",
-                "description": "Mô tả",
-                "icon": "Icon (Emoji)",
-                "order": "Thứ tự",
-                "active": "Hoạt động"
             }
         }
     },
@@ -951,6 +966,7 @@
         "enrollPremium": "Mua ngay",
         "enrolling": "Đang đăng ký...",
         "startLearning": "Bắt đầu học",
+        "accessExpired": "Truy cập đã hết hạn",
         "addToCart": "Thêm vào giỏ hàng",
         "addedToCart": "Đã thêm vào giỏ hàng",
         "paymentRequired": "Yêu cầu thanh toán - Sắp ra mắt!",
@@ -959,6 +975,9 @@
         "premium": "CAO CẤP",
         "features": {
             "lifetimeAccess": "Truy cập trọn đời",
+            "accessDaysFromEnrollment": "Truy cập {{days}} ngày kể từ ngày đăng ký",
+            "accessUntil": "Truy cập đến {{date}}",
+            "accessExpiredOn": "Đã hết hạn truy cập từ {{date}}",
             "mobileAccess": "Học trên mọi thiết bị",
             "certificate": "Chứng chỉ hoàn thành"
         },
@@ -1028,6 +1047,8 @@
         "noVideo": "Video chưa sẵn sàng",
         "noPdf": "Tài liệu chưa sẵn sàng",
         "loadError": "Tải khóa học thất bại",
+        "enrollmentExpired": "Quyền truy cập khóa học của bạn đã hết hạn.",
+        "reenrollCourse": "Về trang khóa học",
         "markCompleteError": "Đánh dấu hoàn thành thất bại. Vui lòng thử lại.",
         "contentNotFound": "Không tìm thấy nội dung khóa học",
         "parts": "phần",
@@ -1056,6 +1077,11 @@
         "progress": "Tiến độ",
         "enrolledAt": "Đăng ký ngày",
         "completed": "Hoàn thành",
+        "lifetime": "Trọn đời",
+        "expired": "Đã hết hạn",
+        "expiringSoon": "Sắp hết hạn",
+        "expiresOn": "Hết hạn vào {{date}}",
+        "expiredOn": "Đã hết hạn vào {{date}}",
         "continueLearning": "Tiếp tục học",
         "loadFailed": "Không thể tải danh sách khóa học"
     },

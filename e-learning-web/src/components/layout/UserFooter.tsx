@@ -16,7 +16,7 @@ const UserFooter: React.FC = () => {
                         <Link to="/" className="flex items-center gap-3 mb-4">
                             <img src={logoImg} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full border border-primary bg-white shadow-sm" />
                             <h3 className="text-[#0c1c1d] dark:text-white text-lg sm:text-xl font-bold tracking-tight">
-                                NhinAnChuaLanh<span className="text-primary">.</span>
+                                NhinAnChuaLanh<span className="text-primary">.vn</span>
                             </h3>
                         </Link>
                         <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 max-w-md leading-relaxed">
@@ -125,7 +125,7 @@ const UserFooter: React.FC = () => {
                 {/* Copyright */}
                 <div className="mt-8 pt-6 sm:pt-8 border-t border-gray-200 dark:border-gray-800">
                     <p className="text-center text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                        © {currentYear} NhinAnChuaLanh. {t('footer.copyright', { defaultValue: 'Tất cả quyền được bảo lưu.' })}
+                        © {currentYear} NhinAnChuaLanh.vn {t('footer.copyright', { defaultValue: 'Tất cả quyền được bảo lưu.' })}
                     </p>
                 </div>
             </div>

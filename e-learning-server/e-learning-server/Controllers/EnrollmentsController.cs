@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SKVI.Application.DTOs.Enrollment;
 using SKVI.Application.Interfaces;
@@ -33,6 +34,15 @@ public class EnrollmentsController : ControllerBase
             throw new UnauthorizedAccessException("Invalid user ID");
         }
         return userId;
+    }
+
+    private IActionResult BuildEnrollmentForbiddenResponse(UnauthorizedAccessException ex)
+    {
+        var code = ex.Message.Contains("expired", StringComparison.OrdinalIgnoreCase)
+            ? "ENROLLMENT_EXPIRED"
+            : "ENROLLMENT_ACCESS_DENIED";
+
+        return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message, code });
     }
 
     /// <summary>
@@ -122,6 +132,10 @@ public class EnrollmentsController : ControllerBase
             var progress = await _enrollmentService.GetCourseProgressAsync(userId, courseGuid);
             return Ok(progress);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return BuildEnrollmentForbiddenResponse(ex);
+        }
         catch (InvalidOperationException ex)
         {
             return NotFound(new { message = ex.Message });
@@ -158,6 +172,10 @@ public class EnrollmentsController : ControllerBase
             await _lessonProgressService.UpdateProgressAsync(userId, courseGuid, lessonPartGuid, request.WatchedDuration);
             return Ok(new { message = "Progress updated" });
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return BuildEnrollmentForbiddenResponse(ex);
+        }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
@@ -185,6 +203,10 @@ public class EnrollmentsController : ControllerBase
             var userId = GetUserId();
             await _lessonProgressService.MarkLessonCompleteAsync(userId, courseGuid, lessonPartGuid);
             return Ok(new { message = "Lesson marked as complete" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return BuildEnrollmentForbiddenResponse(ex);
         }
         catch (InvalidOperationException ex)
         {

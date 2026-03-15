@@ -11,6 +11,7 @@ public class CourseResponse
     public LecturerInfo? Lecturer { get; set; }
     public string? ThumbnailUrl { get; set; }
     public bool IsPublished { get; set; }
+    public int? DefaultAccessDurationDays { get; set; }
     public List<string> LearningOutcomes { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public List<SKVI.Application.DTOs.Lessons.LessonDto> Lessons { get; set; } = new();

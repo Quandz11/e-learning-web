@@ -18,6 +18,10 @@ public class Enrollment
     [Required]
     public DateTime EnrolledAt { get; set; }
 
+    public int? AccessDurationDays { get; set; }
+
+    public DateTime? AccessExpiresAt { get; set; }
+
     public DateTime? CompletedAt { get; set; }
 
     [Range(0, 100)]

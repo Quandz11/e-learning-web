@@ -129,6 +129,9 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Enrollment>()
             .HasIndex(e => e.LastAccessedAt); // For sorting recent courses
 
+        modelBuilder.Entity<Enrollment>()
+            .HasIndex(e => e.AccessExpiresAt); // For expiry checks/filtering
+
         // LessonProgress - Composite index for fast lookup
         modelBuilder.Entity<LessonProgress>()
             .HasIndex(lp => new { lp.EnrollmentId, lp.LessonPartId })

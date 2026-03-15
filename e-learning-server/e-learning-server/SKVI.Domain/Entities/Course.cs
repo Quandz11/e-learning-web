@@ -11,6 +11,7 @@ public class Course
     public string? ThumbnailUrl { get; set; }
     public bool IsPublished { get; set; }
     public string? LearningOutcomes { get; set; }
+    public int? DefaultAccessDurationDays { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation properties

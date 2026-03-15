@@ -10,6 +10,10 @@ export interface EnrollmentResponse {
     progressPercentage: number;
     completedAt: string | null;
     lastAccessedAt: string;
+    accessDurationDays?: number | null;
+    accessExpiresAt?: string | null;
+    isExpired?: boolean;
+    status?: string;
 }
 
 export interface CourseProgressResponse {
@@ -18,6 +22,9 @@ export interface CourseProgressResponse {
     completedParts: number;
     totalParts: number;
     completedAt: string | null;
+    accessDurationDays?: number | null;
+    accessExpiresAt?: string | null;
+    isExpired?: boolean;
     partProgress: LessonPartProgressDto[];
 }
 
@@ -38,6 +45,9 @@ interface CourseProgressResponseRaw {
     completedLessons?: unknown;
     totalLessons?: unknown;
     completedAt?: unknown;
+    accessDurationDays?: unknown;
+    accessExpiresAt?: unknown;
+    isExpired?: unknown;
     partProgress?: unknown;
     lessonProgress?: unknown;
 }
@@ -60,6 +70,14 @@ const toNullableString = (value: unknown): string | null => {
     if (typeof value === 'string') {
         return value;
     }
+    return null;
+};
+
+const toNullableNumber = (value: unknown): number | null => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+    }
+
     return null;
 };
 
@@ -108,6 +126,9 @@ class EnrollmentApi {
             completedParts: toNumber(raw.completedParts, toNumber(raw.completedLessons)),
             totalParts: toNumber(raw.totalParts, toNumber(raw.totalLessons)),
             completedAt: toNullableString(raw.completedAt),
+            accessDurationDays: toNullableNumber(raw.accessDurationDays),
+            accessExpiresAt: toNullableString(raw.accessExpiresAt),
+            isExpired: Boolean(raw.isExpired),
             partProgress: normalizePartProgress(raw.partProgress ?? raw.lessonProgress)
         };
     }
@@ -118,9 +139,9 @@ class EnrollmentApi {
                 method: 'POST',
                 body: JSON.stringify({ watchedDuration })
             });
-        } catch (error: any) {
+        } catch (error) {
             console.error('Failed to update progress', error);
-            throw new Error(error.message || 'Failed to update lesson progress');
+            throw error;
         }
     }
 
@@ -129,8 +150,8 @@ class EnrollmentApi {
             await apiClient(`/enrollments/${courseId}/lessons/${lessonPartId}/complete`, {
                 method: 'POST',
             });
-        } catch (error: any) {
-            throw new Error(error.message || 'Failed to mark lesson complete');
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -142,3 +163,10 @@ class EnrollmentApi {
 }
 
 export const enrollmentApi = new EnrollmentApi();
+
+export const isEnrollmentExpiredError = (error: unknown): boolean => {
+    const candidate = error as { statusCode?: number; message?: string };
+    const message = (candidate.message || '').toLowerCase();
+
+    return candidate.statusCode === 403 && message.includes('expired');
+};

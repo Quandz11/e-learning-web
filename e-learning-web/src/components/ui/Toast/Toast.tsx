@@ -96,7 +96,8 @@ const Toast: React.FC<ToastProps> = ({ toast, onClose }) => {
         <div
             className={`
         ${getBackgroundColor()}
-        border rounded-lg shadow-lg p-4 mb-3 min-w-[320px] max-w-md
+        border rounded-lg shadow-lg p-3 sm:p-4 mb-3
+        min-w-[16rem] max-w-[calc(100vw-1rem)] sm:max-w-md
         transform transition-all duration-300 ease-out
         ${isExiting ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'}
       `}

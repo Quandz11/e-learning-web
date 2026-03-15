@@ -82,12 +82,12 @@ const AdminDashboardPage: React.FC = () => {
                     <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t('admin.dashboard.overview')}</h2>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('admin.dashboard.overviewSubtitle')}</p>
                 </div>
-                <div className="flex gap-3">
-                    <button className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-dashboard-surface-dark dark:text-slate-200 dark:hover:bg-slate-800">
+                <div className="flex w-full md:w-auto flex-col sm:flex-row gap-2 sm:gap-3">
+                    <button className="flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-dashboard-surface-dark dark:text-slate-200 dark:hover:bg-slate-800">
                         <span className="material-symbols-outlined text-[18px]">calendar_today</span>
                         <span>{t('admin.dashboard.last30Days')}</span>
                     </button>
-                    <button className="flex items-center gap-2 rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-medium text-white shadow-sm shadow-dashboard-primary/20 transition-colors hover:bg-dashboard-primary-dark">
+                    <button className="flex h-11 items-center justify-center gap-2 rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-medium text-white shadow-sm shadow-dashboard-primary/20 transition-colors hover:bg-dashboard-primary-dark">
                         <span className="material-symbols-outlined text-[18px]">download</span>
                         <span>{t('admin.dashboard.exportReport')}</span>
                     </button>
@@ -95,7 +95,7 @@ const AdminDashboardPage: React.FC = () => {
             </div>
 
             {/* Metrics Grid */}
-            <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {/* Card 1: Total Students */}
                 <StatsCard
                     title={t('admin.dashboard.totalStudents')}

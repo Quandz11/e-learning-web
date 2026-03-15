@@ -49,7 +49,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
         onClick={onClose}
       />
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 lg:z-20 w-64 flex-col justify-between border-r border-slate-200 bg-dashboard-surface-light flex-shrink-0 dark:border-slate-800 dark:bg-dashboard-surface-dark transform transition-transform duration-200 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex`}
+        className={`fixed lg:static inset-y-0 left-0 z-50 lg:z-20 w-[85vw] max-w-72 lg:w-64 flex-col justify-between border-r border-slate-200 bg-dashboard-surface-light flex-shrink-0 dark:border-slate-800 dark:bg-dashboard-surface-dark transform transition-transform duration-200 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -58,7 +58,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
               <div className="flex h-12 w-12 items-center justify-center rounded-full overflow-hidden bg-white border border-slate-200 shadow-sm">
                 <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">NhinAnChuaLanh.vn</h1>
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate">NhinAnChuaLanh.vn</h1>
             </div>
             <button
               onClick={onClose}

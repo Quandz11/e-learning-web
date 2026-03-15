@@ -172,15 +172,15 @@ const AdminReferralsPage: React.FC = () => {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex items-center gap-2 rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-semibold text-white hover:bg-dashboard-primary-dark"
+          className="inline-flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-semibold text-white hover:bg-dashboard-primary-dark"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           {t('adminReferrals.actions.create')}
         </button>
       </div>
 
-      <div className="mb-4 grid gap-3 md:grid-cols-3">
-        <div className="md:col-span-2">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="sm:col-span-2 lg:col-span-2">
           <input
             type="text"
             value={search}
@@ -193,7 +193,7 @@ const AdminReferralsPage: React.FC = () => {
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value as 'all' | 'active' | 'inactive')}
-          className="rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-dashboard-primary focus:outline-none"
+          className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-dashboard-primary focus:outline-none"
         >
           <option value="all">{t('adminReferrals.filters.all')}</option>
           <option value="active">{t('adminReferrals.filters.active')}</option>
@@ -202,8 +202,63 @@ const AdminReferralsPage: React.FC = () => {
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-dashboard-surface-dark overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="md:hidden divide-y divide-slate-200 dark:divide-slate-700">
+          {loading ? (
+            <div className="px-4 py-8 text-sm text-slate-500 dark:text-slate-400">{t('adminReferrals.table.loading')}</div>
+          ) : referrals.length === 0 ? (
+            <div className="px-4 py-8 text-sm text-slate-500 dark:text-slate-400">{t('adminReferrals.table.empty')}</div>
+          ) : (
+            referrals.map((item) => (
+              <div key={item.id} className="space-y-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-mono text-sm font-semibold text-slate-900 dark:text-white">{item.referralCode || '-'}</p>
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      item.isActive
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                    }`}
+                  >
+                    {item.isActive ? t('adminReferrals.status.active') : t('adminReferrals.status.inactive')}
+                  </span>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{item.name}</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.ownerName || t('adminReferrals.table.noName')}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 break-all">{item.ownerEmail}</p>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600 dark:text-slate-300">{item.commissionRate}%</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-100">{formatCurrency(item.walletBalance)}</span>
+                </div>
+
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openEdit(item)}
+                    className="h-10 rounded-md px-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-300 dark:hover:bg-slate-800"
+                  >
+                    {t('common.edit')}
+                  </button>
+                  {item.isActive && (
+                    <button
+                      type="button"
+                      onClick={() => void handleDeactivate(item)}
+                      className="h-10 rounded-md px-3 text-sm text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-900/20"
+                    >
+                      {t('adminReferrals.actions.deactivate')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
+          <table className="min-w-[980px] w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
               <tr>
                 <th className="px-6 py-4 font-semibold">{t('adminReferrals.table.referral')}</th>
@@ -285,9 +340,9 @@ const AdminReferralsPage: React.FC = () => {
       </div>
 
       {dialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-5 py-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-2 py-2 sm:items-center sm:px-4 sm:py-4">
+          <div className="w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-4 sm:px-5 py-4">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                 {editing ? t('adminReferrals.dialog.editTitle') : t('adminReferrals.dialog.createTitle')}
               </h2>
@@ -300,7 +355,7 @@ const AdminReferralsPage: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
+            <form onSubmit={handleSubmit} className="space-y-4 px-4 sm:px-5 py-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{t('adminReferrals.dialog.fields.cabinName')}</label>
@@ -371,18 +426,18 @@ const AdminReferralsPage: React.FC = () => {
                 </label>
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700 pt-4">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 border-t border-slate-200 dark:border-slate-700 pt-4">
                 <button
                   type="button"
                   onClick={closeDialog}
-                  className="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200"
+                  className="h-11 w-full sm:w-auto rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200"
                   disabled={submitting}
                 >
                   {t('adminReferrals.actions.cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-semibold text-white hover:bg-dashboard-primary-dark disabled:opacity-70"
+                  className="h-11 w-full sm:w-auto rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-semibold text-white hover:bg-dashboard-primary-dark disabled:opacity-70"
                   disabled={submitting}
                 >
                   {submitting ? t('adminReferrals.actions.saving') : editing ? t('adminReferrals.actions.update') : t('adminReferrals.actions.create')}

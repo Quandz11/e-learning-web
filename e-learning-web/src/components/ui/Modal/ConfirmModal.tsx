@@ -73,7 +73,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-2 sm:p-4">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
@@ -83,13 +83,13 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
             {/* Modal */}
             <div
-                className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full transform transition-all animate-in fade-in zoom-in-95 duration-200"
+                className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto transform transition-all animate-in fade-in zoom-in-95 duration-200"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="modal-title"
             >
                 {/* Header */}
-                <div className="p-6 pb-4">
+                <div className="p-4 sm:p-6 pb-3 sm:pb-4">
                     <div className="flex items-start gap-4">
                         {/* Icon */}
                         <div
@@ -130,11 +130,11 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 rounded-b-xl flex gap-3 justify-end">
+                <div className="px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-900/50 rounded-b-xl flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:justify-end">
                     <button
                         onClick={onClose}
                         disabled={isLoading}
-                        className="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-full sm:w-auto h-11 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {cancelText || t('modal.cancel')}
                     </button>
@@ -142,7 +142,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                         onClick={onConfirm}
                         disabled={isLoading}
                         className={`
-              px-4 py-2.5 text-sm font-medium rounded-lg
+              w-full sm:w-auto h-11 px-4 py-2.5 text-sm font-medium rounded-lg
               focus:outline-none focus:ring-2 focus:ring-offset-2
               disabled:opacity-50 disabled:cursor-not-allowed
               transition-colors flex items-center gap-2

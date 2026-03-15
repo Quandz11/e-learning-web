@@ -23,10 +23,31 @@
 @layer base {
   html {
     font-family: var(--font-display);
+    min-height: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
+    margin: 0;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
     background-color: light-dark(var(--color-background-light), var(--color-background-dark));
+  }
+
+  #root {
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: clip;
+  }
+
+  button,
+  [role='button'],
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
   }
 }
 
@@ -51,6 +72,12 @@
 }
 
 /* Rich text output (rendered HTML from Quill editor) */
+.rich-text {
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
 .rich-text h1 { font-size: 1.75rem; font-weight: 700; margin: 0.75rem 0 0.5rem; }
 .rich-text h2 { font-size: 1.4rem; font-weight: 700; margin: 0.75rem 0 0.5rem; }
 .rich-text h3 { font-size: 1.15rem; font-weight: 600; margin: 0.5rem 0 0.375rem; }
@@ -64,6 +91,72 @@
 .rich-text li { margin: 0.2rem 0; line-height: 1.6; }
 .rich-text a  { color: var(--color-primary); text-decoration: underline; }
 .rich-text blockquote { border-left: 4px solid var(--color-primary); padding-left: 1rem; margin: 0.75rem 0; opacity: 0.8; }
+
+.rich-text *,
+.rich-text p,
+.rich-text li,
+.rich-text span,
+.rich-text div {
+  white-space: normal !important;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.rich-text [style*="white-space"] {
+  white-space: normal !important;
+}
+
+.rich-text a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.rich-text img,
+.rich-text video,
+.rich-text iframe,
+.rich-text table {
+  max-width: 100%;
+}
+
+.rich-text img,
+.rich-text video,
+.rich-text iframe {
+  height: auto;
+}
+
+.rich-text iframe {
+  width: 100%;
+  min-height: 180px;
+  border: 0;
+}
+
+.rich-text table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.rich-text th,
+.rich-text td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.rich-text pre,
+.rich-text code {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.rich-text pre [style*="white-space"],
+.rich-text code [style*="white-space"] {
+  white-space: pre-wrap !important;
+}
 
 /* Quill inline color & background-color spans – inline styles take priority, just add visual polish */
 .rich-text span[style*="background-color"] { padding: 1px 3px; border-radius: 3px; }

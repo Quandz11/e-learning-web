@@ -4,7 +4,7 @@ import logoImg from '../../assets/logo.jpg';
 
 const AuthLayout = () => {
     return (
-        <div className="flex flex-1 w-full min-h-screen bg-background-light dark:bg-background-dark font-display text-[#1c1f22] dark:text-[#f9f7f6]">
+        <div className="flex min-h-screen w-full flex-col bg-background-light font-display text-[#1c1f22] dark:bg-background-dark dark:text-[#f9f7f6] lg:flex-row">
             {/* Visual Panel (Left side) */}
             <div className="hidden lg:flex w-5/12 relative flex-col justify-end p-12 bg-primary overflow-hidden">
                 <div className="absolute inset-0 z-0">
@@ -32,13 +32,13 @@ const AuthLayout = () => {
             </div>
 
             {/* Form Panel (Right side) */}
-            <div className="w-full lg:w-7/12 flex flex-col items-center justify-center p-6 sm:p-12 overflow-y-auto">
-                <div className="w-full max-w-md flex flex-col gap-8">
+            <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-8 sm:px-6 sm:py-10 lg:w-7/12 lg:px-10 xl:px-12">
+                <div className="flex w-full max-w-md flex-col gap-6 sm:gap-8">
                     {/* Mobile Branding */}
-                    <div className="lg:hidden flex justify-center mb-4">
+                    <div className="mb-2 flex justify-center sm:mb-4 lg:hidden">
                         <div className="flex items-center gap-2 text-primary dark:text-white">
-                            <img src={logoImg} alt="Logo" className="w-16 h-16 object-cover rounded-full border-2 border-primary bg-white shadow-sm" />
-                            <span className="text-3xl font-bold tracking-tight">NhinAnChuaLanh</span>
+                            <img src={logoImg} alt="Logo" className="h-12 w-12 rounded-full border-2 border-primary bg-white object-cover shadow-sm sm:h-14 sm:w-14" />
+                            <span className="max-w-[70vw] truncate text-2xl font-bold tracking-tight sm:text-3xl">NhinAnChuaLanh</span>
                         </div>
                     </div>
 

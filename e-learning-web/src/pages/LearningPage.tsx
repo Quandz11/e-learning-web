@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { courseApi, type CourseResponse } from '../services/courseApi';
@@ -19,7 +19,12 @@ const LearningPage: React.FC = () => {
     const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const partIdFromQuery = React.useMemo(
+        () => new URLSearchParams(location.search).get('partId') || '',
+        [location.search]
+    );
 
     const [course, setCourse] = useState<CourseResponse | null>(null);
     const [progress, setProgress] = useState<CourseProgressResponse | null>(null);
@@ -30,6 +35,7 @@ const LearningPage: React.FC = () => {
 
     // Expand lessons in sidebar
     const [expandedLessons, setExpandedLessons] = useState<Set<string>>(new Set());
+    const [isCurriculumOpen, setIsCurriculumOpen] = useState(false);
 
     const progressSaveInterval = useRef<number | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -80,42 +86,49 @@ const LearningPage: React.FC = () => {
                     setExpandedLessons(new Set(courseData.lessons.map(l => l.id)));
                 }
 
-                // Find last watched part or start from beginning
-                let lastWatchedIndex = 0;
-                if (progressData && progressData.partProgress && progressData.partProgress.length > 0) {
-                    // Filter uncompleted parts that have some progress
+                // Allow deep-linking to a specific part from the detail page query (?partId=...)
+                let initialPartIndex = 0;
+
+                const findPartIndex = (targetPartId: string) => {
+                    let idx = 0;
+                    let found = -1;
+                    if (courseData.lessons) {
+                        for (const lesson of courseData.lessons) {
+                            if (lesson.parts) {
+                                for (const part of lesson.parts) {
+                                    if (part.id === targetPartId) {
+                                        found = idx;
+                                        break;
+                                    }
+                                    idx++;
+                                }
+                            }
+                            if (found !== -1) break;
+                        }
+                    }
+                    return found;
+                };
+
+                if (partIdFromQuery) {
+                    const directIndex = findPartIndex(partIdFromQuery);
+                    if (directIndex !== -1) {
+                        initialPartIndex = directIndex;
+                    }
+                } else if (progressData && progressData.partProgress && progressData.partProgress.length > 0) {
+                    // Fallback to last in-progress part
                     const inProgress = progressData.partProgress
                         .filter(p => !p.isCompleted && p.watchedDuration > 0)
                         .sort((a, b) => new Date(b.lastWatchedAt).getTime() - new Date(a.lastWatchedAt).getTime());
 
                     if (inProgress.length > 0) {
-                        const targetId = inProgress[0].lessonPartId;
-                        // Find index in allParts (re-calculated locally if needed, but we don't have allParts here yet as it depends on course state)
-                        // Better to do this in a separate effect or after setCourse?
-                        // But we need allParts derived from courseData right now.
-
-                        // Re-derive flattened parts temporarily
-                        let idx = 0;
-                        let found = -1;
-                        if (courseData.lessons) {
-                            for (const l of courseData.lessons) {
-                                if (l.parts) {
-                                    for (const p of l.parts) {
-                                        if (p.id === targetId) {
-                                            found = idx;
-                                            break;
-                                        }
-                                        idx++;
-                                    }
-                                }
-                                if (found !== -1) break;
-                            }
+                        const resumeIndex = findPartIndex(inProgress[0].lessonPartId);
+                        if (resumeIndex !== -1) {
+                            initialPartIndex = resumeIndex;
                         }
-                        if (found !== -1) lastWatchedIndex = found;
                     }
                 }
 
-                setCurrentPartIndex(lastWatchedIndex);
+                setCurrentPartIndex(initialPartIndex);
             } catch (err: any) {
                 setError(err.message || t('learn.loadError'));
                 if (err.message.includes('Enrollment not found') || err.message.includes('Not Found')) {
@@ -127,7 +140,7 @@ const LearningPage: React.FC = () => {
         };
 
         fetchData();
-    }, [id, isAuthenticated, navigate]);
+    }, [id, isAuthenticated, navigate, partIdFromQuery]);
 
     // Auto-save progress every 10 seconds
     useEffect(() => {
@@ -230,18 +243,40 @@ const LearningPage: React.FC = () => {
     console.log('DEBUG: currentPart', currentPart); // Debug log
 
     return (
-        <div className="min-h-screen bg-white flex">
+        <div className="min-h-screen bg-white flex flex-col lg:flex-row">
+            {/* Mobile Backdrop */}
+            <div
+                className={`fixed inset-x-0 bottom-0 top-16 sm:top-20 z-30 bg-black/40 transition-opacity lg:hidden ${isCurriculumOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                onClick={() => setIsCurriculumOpen(false)}
+            />
+
             {/* Sidebar */}
-            <aside className="w-96 bg-gray-50 border-r border-gray-200 flex flex-col overflow-hidden">
+            <aside
+                className={`
+                    fixed left-0 top-16 bottom-0 sm:top-20 z-40 w-[88vw] max-w-sm bg-gray-50 border-r border-gray-200 flex flex-col overflow-hidden
+                    transform transition-transform duration-200
+                    ${isCurriculumOpen ? 'translate-x-0' : '-translate-x-full'}
+                    lg:static lg:top-auto lg:bottom-auto lg:translate-x-0 lg:w-96
+                `}
+            >
                 {/* Course Header */}
                 <div className="p-6 bg-white border-b border-gray-200">
-                    <button
-                        onClick={() => navigate(`/courses/${id}`)}
-                        className="mb-4 text-gray-600 hover:text-gray-900 flex items-center gap-2 text-sm"
-                    >
-                        <span className="material-symbols-outlined text-lg">arrow_back</span>
-                        {t('learn.backToCourse')}
-                    </button>
+                    <div className="mb-4 flex items-center justify-between gap-2">
+                        <button
+                            onClick={() => navigate(`/courses/${id}`)}
+                            className="text-gray-600 hover:text-gray-900 flex items-center gap-2 text-sm"
+                        >
+                            <span className="material-symbols-outlined text-lg">arrow_back</span>
+                            {t('learn.backToCourse')}
+                        </button>
+                        <button
+                            onClick={() => setIsCurriculumOpen(false)}
+                            className="lg:hidden h-10 w-10 rounded-lg border border-gray-200 text-gray-700"
+                            aria-label="Close curriculum"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">close</span>
+                        </button>
+                    </div>
                     <h1 className="text-xl font-bold text-gray-900 mb-2">{course.title}</h1>
                     <p className="text-sm text-gray-600">{course.lecturer?.fullName}</p>
                 </div>
@@ -352,7 +387,10 @@ const LearningPage: React.FC = () => {
                                                     return (
                                                         <button
                                                             key={part.id}
-                                                            onClick={() => setCurrentPartIndex(globalIdx)}
+                                                            onClick={() => {
+                                                                setCurrentPartIndex(globalIdx);
+                                                                setIsCurriculumOpen(false);
+                                                            }}
                                                             className={`w-full px-3 py-2 flex items-center gap-2 hover:bg-gray-50 transition-colors border-t border-gray-100 ${isCurrent ? 'bg-blue-50 border-l-4 border-l-primary' : ''
                                                                 }`}
                                                         >
@@ -395,7 +433,22 @@ const LearningPage: React.FC = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col bg-white overflow-hidden">
+            <main className="flex-1 flex flex-col bg-white overflow-hidden min-h-0">
+                <div className="lg:hidden border-b border-gray-200 bg-white px-3 py-2 flex items-center justify-between gap-2">
+                    <button
+                        onClick={() => setIsCurriculumOpen(true)}
+                        className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-200 px-3 text-sm font-medium text-gray-700"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">menu_book</span>
+                        {t('learn.curriculum')}
+                    </button>
+
+                    <div className="min-w-0 text-right">
+                        <p className="text-xs text-gray-500 truncate">{currentPart.lessonTitle}</p>
+                        <p className="text-sm font-semibold text-gray-900 truncate">{currentPart.title}</p>
+                    </div>
+                </div>
+
                 {/* Video/PDF Player */}
                 <div className="flex-1 bg-black flex items-center justify-center">
                     {currentPart.type === 'Video' ? (

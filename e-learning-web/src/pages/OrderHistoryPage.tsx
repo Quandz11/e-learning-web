@@ -80,65 +80,116 @@ const OrderHistoryPage: React.FC = () => {
               <p className="mt-4 text-gray-500 dark:text-gray-400">{t('payments.orders.empty')}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-900/60 text-gray-500 dark:text-gray-400 uppercase text-xs">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">{t('payments.orders.table.order')}</th>
-                    <th className="px-6 py-4 font-semibold">{t('payments.orders.table.createdAt')}</th>
-                    <th className="px-6 py-4 font-semibold">{t('payments.orders.table.status')}</th>
-                    <th className="px-6 py-4 font-semibold">{t('payments.orders.table.totalAmount')}</th>
-                    <th className="px-6 py-4 font-semibold">{t('payments.orders.table.courses')}</th>
-                    <th className="px-6 py-4 text-right font-semibold">{t('payments.orders.table.detail')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {orders.map((order) => {
-                    const status = order.status.toUpperCase();
-                    return (
-                      <tr key={order.orderId} className="hover:bg-gray-50 dark:hover:bg-gray-900/40">
-                        <td className="px-6 py-4">
-                          <p className="font-semibold text-gray-900 dark:text-white">#{order.payOSOrderCode ?? '-'}</p>
+            <>
+              <div className="lg:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                {orders.map((order) => {
+                  const status = order.status.toUpperCase();
+
+                  return (
+                    <div key={order.orderId} className="p-4 sm:p-5 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-gray-900 dark:text-white truncate">#{order.payOSOrderCode ?? '-'}</p>
                           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 break-all">{order.orderId}</p>
-                        </td>
-                        <td className="px-6 py-4 text-gray-700 dark:text-gray-200">
-                          {new Date(order.createdAt).toLocaleString(locale)}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[status] || statusStyles.PENDING}`}>
-                            {formatStatus(status)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-primary">
+                          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(order.createdAt).toLocaleString(locale)}
+                          </p>
+                        </div>
+
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[status] || statusStyles.PENDING}`}>
+                          {formatStatus(status)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 text-gray-700 dark:text-gray-200 text-sm">
+                          {order.items.slice(0, 1).map((item) => (
+                            <p key={item.courseId} className="truncate">{item.title}</p>
+                          ))}
+                          {order.items.length > 1 && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {t('payments.orders.moreCourses', { count: order.items.length - 1 })}
+                            </p>
+                          )}
+                        </div>
+
+                        <p className="font-semibold text-primary shrink-0">
                           {formatCurrency(order.totalAmount)}
-                        </td>
-                        <td className="px-6 py-4 text-gray-700 dark:text-gray-200">
-                          <div className="max-w-[300px] space-y-1">
-                            {order.items.slice(0, 2).map((item) => (
-                              <p key={item.courseId} className="truncate">{item.title}</p>
-                            ))}
-                            {order.items.length > 2 && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {t('payments.orders.moreCourses', { count: order.items.length - 2 })}
-                              </p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <Link
-                            to={`/payment/result?orderId=${order.orderId}`}
-                            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:border-primary hover:text-primary transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">open_in_new</span>
-                            {t('payments.orders.view')}
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </p>
+                      </div>
+
+                      <Link
+                        to={`/payment/result?orderId=${order.orderId}`}
+                        className="inline-flex h-10 items-center justify-center gap-1 rounded-lg border border-gray-300 dark:border-gray-700 px-4 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:border-primary hover:text-primary transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+                        {t('payments.orders.view')}
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-900/60 text-gray-500 dark:text-gray-400 uppercase text-xs">
+                    <tr>
+                      <th className="px-6 py-4 font-semibold">{t('payments.orders.table.order')}</th>
+                      <th className="px-6 py-4 font-semibold">{t('payments.orders.table.createdAt')}</th>
+                      <th className="px-6 py-4 font-semibold">{t('payments.orders.table.status')}</th>
+                      <th className="px-6 py-4 font-semibold">{t('payments.orders.table.totalAmount')}</th>
+                      <th className="px-6 py-4 font-semibold">{t('payments.orders.table.courses')}</th>
+                      <th className="px-6 py-4 text-right font-semibold">{t('payments.orders.table.detail')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {orders.map((order) => {
+                      const status = order.status.toUpperCase();
+                      return (
+                        <tr key={order.orderId} className="hover:bg-gray-50 dark:hover:bg-gray-900/40">
+                          <td className="px-6 py-4">
+                            <p className="font-semibold text-gray-900 dark:text-white">#{order.payOSOrderCode ?? '-'}</p>
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 break-all">{order.orderId}</p>
+                          </td>
+                          <td className="px-6 py-4 text-gray-700 dark:text-gray-200">
+                            {new Date(order.createdAt).toLocaleString(locale)}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[status] || statusStyles.PENDING}`}>
+                              {formatStatus(status)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 font-semibold text-primary">
+                            {formatCurrency(order.totalAmount)}
+                          </td>
+                          <td className="px-6 py-4 text-gray-700 dark:text-gray-200">
+                            <div className="max-w-[300px] space-y-1">
+                              {order.items.slice(0, 2).map((item) => (
+                                <p key={item.courseId} className="truncate">{item.title}</p>
+                              ))}
+                              {order.items.length > 2 && (
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {t('payments.orders.moreCourses', { count: order.items.length - 2 })}
+                                </p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <Link
+                              to={`/payment/result?orderId=${order.orderId}`}
+                              className="inline-flex items-center gap-1 rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:border-primary hover:text-primary transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+                              {t('payments.orders.view')}
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>

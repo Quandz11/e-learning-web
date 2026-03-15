@@ -20,7 +20,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <AdminHeader
           onToggleMobileNav={() => setIsMobileNavOpen((prev) => !prev)}
         />
-        <main className="flex-1 overflow-y-auto p-4 scroll-smooth md:p-8">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 scroll-smooth">
           {children}
         </main>
       </div>

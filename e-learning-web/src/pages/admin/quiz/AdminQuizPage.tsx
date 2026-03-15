@@ -41,7 +41,7 @@ const AdminQuizPage: React.FC = () => {
 
     return (
         <AdminLayout>
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                         {t('admin.quiz.title', { defaultValue: 'Quizzes' })}
@@ -52,7 +52,7 @@ const AdminQuizPage: React.FC = () => {
                 </div>
                 <Link
                     to="/admin/quizzes/new"
-                    className="flex items-center gap-2 rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-dashboard-primary-dark"
+                    className="inline-flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-dashboard-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-dashboard-primary-dark"
                 >
                     <span className="material-symbols-outlined text-[20px]">add</span>
                     {t('admin.quiz.create', { defaultValue: 'Create Quiz' })}
@@ -60,8 +60,55 @@ const AdminQuizPage: React.FC = () => {
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-dashboard-surface-dark">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
+                <div className="md:hidden divide-y divide-slate-200 dark:divide-slate-700">
+                    {loading ? (
+                        <div className="p-6 text-center text-sm text-slate-500">{t('common.loading', { defaultValue: 'Loading...' })}</div>
+                    ) : quizzes.length === 0 ? (
+                        <div className="p-6 text-center text-sm text-slate-500">{t('admin.quiz.table.noQuizzes', { defaultValue: 'No quizzes found.' })}</div>
+                    ) : (
+                        quizzes.map((quiz) => (
+                            <div key={quiz.id} className="space-y-3 p-4">
+                                <div className="flex items-start justify-between gap-3">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">{quiz.title}</p>
+                                    <span className={`inline-flex shrink-0 rounded-full px-2 py-1 text-xs font-semibold ${quiz.isActive
+                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                                        }`}>
+                                        {quiz.isActive ? t('admin.quiz.status.active', { defaultValue: 'Active' }) : t('admin.quiz.status.inactive', { defaultValue: 'Inactive' })}
+                                    </span>
+                                </div>
+
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    {new Date(quiz.createdAt).toLocaleDateString()}
+                                </p>
+
+                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                    <Link
+                                        to={`/admin/quizzes/${quiz.id}/submissions`}
+                                        className="h-10 rounded-lg border border-slate-200 px-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center justify-center"
+                                    >
+                                        {t('admin.quiz.table.viewSubmissions', { defaultValue: 'View Submissions' })}
+                                    </Link>
+                                    <Link
+                                        to={`/admin/quizzes/${quiz.id}`}
+                                        className="h-10 rounded-lg border border-slate-200 px-3 text-sm text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 flex items-center justify-center"
+                                    >
+                                        {t('common.edit', { defaultValue: 'Edit' })}
+                                    </Link>
+                                    <button
+                                        onClick={() => handleDelete(quiz.id)}
+                                        className="h-10 rounded-lg border border-red-200 px-3 text-sm text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20"
+                                    >
+                                        {t('common.delete', { defaultValue: 'Delete' })}
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                <div className="hidden md:block overflow-x-auto">
+                    <table className="min-w-[760px] w-full text-left text-sm">
                         <thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
                             <tr>
                                 <th className="px-6 py-4 font-semibold">{t('admin.quiz.table.title', { defaultValue: 'Title' })}</th>

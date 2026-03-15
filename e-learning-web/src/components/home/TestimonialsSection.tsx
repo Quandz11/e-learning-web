@@ -55,15 +55,15 @@ const TestimonialsSection: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 max-w-7xl mx-auto">
                     {testimonials.map((testimonial) => (
                         <div
                             key={testimonial.id}
-                            className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700"
+                            className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700"
                         >
                             {testimonial.type === TestimonialType.Video && testimonial.videoUrl ? (
                                 /* Video Testimonial */
-                                <div className="mb-6">
+                                <div className="mb-4 sm:mb-6">
                                     <video
                                         controls
                                         className="w-full rounded-lg"
@@ -77,45 +77,45 @@ const TestimonialsSection: React.FC = () => {
                                 /* Text Testimonial */
                                 <>
                                     {/* Quote Icon */}
-                                    <div className="flex justify-center mb-6">
-                                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-primary text-2xl">
+                                    <div className="flex justify-center mb-4 sm:mb-6">
+                                        <div className="w-9 h-9 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-primary text-lg sm:text-2xl">
                                                 format_quote
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Content */}
-                                    <p className="text-slate-600 dark:text-slate-300 text-center mb-6 italic leading-relaxed">
+                                    <p className="text-slate-600 dark:text-slate-300 text-center mb-4 sm:mb-6 text-xs sm:text-sm lg:text-base italic leading-relaxed line-clamp-6 sm:line-clamp-none">
                                         "{testimonial.content}"
                                     </p>
 
                                     {/* Divider */}
-                                    <div className="w-16 h-1 bg-gradient-to-r from-primary to-primary/50 mx-auto mb-6"></div>
+                                    <div className="w-10 sm:w-16 h-1 bg-gradient-to-r from-primary to-primary/50 mx-auto mb-4 sm:mb-6"></div>
                                 </>
                             )}
 
                             {/* Author */}
-                            <div className="flex items-center justify-center gap-4">
+                            <div className="flex items-center justify-center gap-2 sm:gap-4">
                                 {testimonial.avatarUrl && testimonial.type === TestimonialType.Text ? (
                                     <img
                                         src={testimonial.avatarUrl}
                                         alt={testimonial.name}
-                                        className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
+                                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-primary/20"
                                     />
                                 ) : testimonial.type === TestimonialType.Text ? (
-                                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-primary text-xl">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-primary text-base sm:text-xl">
                                             person
                                         </span>
                                     </div>
                                 ) : null}
                                 <div>
-                                    <h4 className="font-bold text-slate-900 dark:text-white">
+                                    <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                                         {testimonial.name}
                                     </h4>
                                     {testimonial.position && (
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                                             {testimonial.position}
                                         </p>
                                     )}
@@ -129,10 +129,10 @@ const TestimonialsSection: React.FC = () => {
                 <div className="text-center mt-12">
                     <Link
                         to="/testimonials"
-                        className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-full font-semibold hover:bg-primary/90 transition-colors shadow-lg hover:shadow-xl"
+                        className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 bg-primary text-white rounded-full text-sm sm:text-base font-semibold hover:bg-primary/90 transition-colors shadow-lg hover:shadow-xl"
                     >
                         {t('home.testimonials.viewAll', { defaultValue: 'Xem tất cả' })}
-                        <span className="material-symbols-outlined text-xl">
+                        <span className="material-symbols-outlined text-lg sm:text-xl">
                             arrow_forward
                         </span>
                     </Link>

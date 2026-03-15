@@ -54,17 +54,17 @@ const CourseList: React.FC<CourseListProps> = ({
 
     const totalPages = showPagination ? Math.ceil(allCourses.length / pageSize) : 1;
     const gridClass = cols === 4
-        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-        : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+        ? 'grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4'
+        : 'grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 lg:gap-6';
 
     if (loading) {
         const skeletonCount = showPagination ? pageSize : (limit ?? 3);
         return (
             <div className={gridClass}>
                 {Array.from({ length: Math.min(skeletonCount, 12) }).map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
+                    <div key={i} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm animate-pulse dark:border-gray-700 dark:bg-gray-800">
                         <div className="aspect-square bg-gray-200 dark:bg-gray-700" />
-                        <div className="p-5 space-y-3">
+                        <div className="space-y-3 p-4 sm:p-5">
                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
                             <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
                             <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
@@ -98,7 +98,7 @@ const CourseList: React.FC<CourseListProps> = ({
                 <Link
                     key={course.id}
                     to={`/courses/${course.id}`}
-                    className="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800"
                 >
                     <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
                         {course.thumbnailUrl ? (
@@ -111,28 +111,28 @@ const CourseList: React.FC<CourseListProps> = ({
                             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500" />
                         )}
                         {course.isFree && (
-                            <div className="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm z-10">
+                            <div className="absolute left-2.5 top-2.5 z-10 rounded bg-green-500 px-2 py-1 text-[11px] font-bold text-white shadow-sm sm:left-3 sm:top-3 sm:text-xs">
                                 {t('home.courses.free', { defaultValue: 'FREE' })}
                             </div>
                         )}
                         {/* Logic for "Popular" tag could be added here if needed, consistent with original HomePage */}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                     </div>
-                    <div className="p-5 flex flex-col flex-grow">
-                        <div className="flex items-center gap-2 mb-3">
+                    <div className="flex flex-grow flex-col p-3 sm:p-5">
+                        <div className="mb-2 flex items-center gap-1.5 sm:mb-3 sm:gap-2">
                             <span className="material-symbols-outlined text-yellow-400 text-sm">star</span>
-                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                            <span className="truncate text-[11px] sm:text-xs font-bold text-gray-700 dark:text-gray-300">
                                 4.8 (128 {t('home.courses.reviews', { defaultValue: 'reviews' })})
                             </span>
                         </div>
-                        <h3 className="text-xl font-bold text-[#0c1c1d] dark:text-white mb-2 leading-tight line-clamp-2">
+                        <h3 className="mb-1.5 line-clamp-2 text-sm font-semibold leading-snug text-[#0c1c1d] dark:text-white sm:mb-2 sm:text-lg md:text-xl">
                             {course.title}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
+                        <p className="mb-4 hidden line-clamp-2 text-sm text-gray-500 dark:text-gray-400 sm:mb-4 sm:block">
                             {stripHtml(course.description || '')}
                         </p>
-                        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                        <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-2.5 dark:border-gray-700 sm:gap-3 sm:pt-4">
+                            <div className="hidden min-w-0 items-center gap-2 sm:flex">
                                 {course.lecturer?.avatarUrl ? (
                                     <img
                                         src={course.lecturer.avatarUrl}
@@ -142,11 +142,11 @@ const CourseList: React.FC<CourseListProps> = ({
                                 ) : (
                                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-blue-600" />
                                 )}
-                                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate max-w-[120px]">
+                                <span className="truncate text-xs font-medium text-gray-600 dark:text-gray-300 sm:max-w-[120px]">
                                     {course.lecturer?.fullName || 'NhinAnChuaLanh Instructor'}
                                 </span>
                             </div>
-                            <span className="text-primary font-bold text-lg">
+                            <span className="ml-auto text-xs font-bold text-primary sm:text-base md:text-lg">
                                 {course.isFree ? t('home.courses.free', { defaultValue: 'FREE' }) : `${course.price.toLocaleString('vi-VN')} VND`}
                             </span>
                         </div>
@@ -157,7 +157,7 @@ const CourseList: React.FC<CourseListProps> = ({
 
         {/* Pagination */}
         {showPagination && totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-2">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:mt-10">
                 <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}

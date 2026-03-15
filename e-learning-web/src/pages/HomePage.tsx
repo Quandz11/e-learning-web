@@ -126,21 +126,21 @@ const HomePage: React.FC = () => {
 
       {/* Why Choose Us Section */}
       {whyChooseUsItems.length > 0 && (
-        <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0c1c1d] dark:text-white mb-4">
+        <section className="max-w-7xl mx-auto px-4 py-14 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+          <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-12">
+            <h2 className="mb-3 text-2xl font-bold text-[#0c1c1d] dark:text-white sm:mb-4 sm:text-3xl md:text-4xl">
               {t('home.whyChooseUs.title')}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400 sm:text-base">
               {t('home.whyChooseUs.subtitle')}
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div className="grid grid-cols-2 gap-3 text-center sm:gap-4 md:grid-cols-3 md:gap-8">
             {whyChooseUsItems.map(item => (
-              <div key={item.id} className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <span className="material-symbols-outlined text-4xl text-primary mb-4 block">{item.icon}</span>
-                <h3 className="text-xl font-bold mb-2 dark:text-white">{item.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{item.description}</p>
+              <div key={item.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-5 md:p-6">
+                <span className="material-symbols-outlined mb-3 block text-2xl text-primary sm:text-3xl md:mb-4 md:text-4xl">{item.icon}</span>
+                <h3 className="mb-1 text-sm font-bold dark:text-white sm:text-base md:mb-2 md:text-xl">{item.title}</h3>
+                <p className="line-clamp-4 text-xs text-gray-600 dark:text-gray-400 sm:text-sm md:line-clamp-none">{item.description}</p>
               </div>
             ))}
           </div>

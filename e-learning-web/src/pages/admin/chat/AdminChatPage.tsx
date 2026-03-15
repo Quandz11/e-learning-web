@@ -19,6 +19,7 @@ export default function AdminChatPage() {
     // Offline/Disconnected state: key = guestId
     const [disconnectedGuests, setDisconnectedGuests] = useState<Set<string>>(new Set());
     const [activeTab, setActiveTab] = useState<'guest' | 'authenticated'>('guest');
+    const [isConversationListOpen, setIsConversationListOpen] = useState(false);
 
     // Use ref to avoid stale closure in SignalR callbacks
     const selectedConversationRef = useRef<AdminConversation | null>(null);
@@ -261,6 +262,7 @@ export default function AdminChatPage() {
 
     const handleSelectConversation = (conversation: AdminConversation) => {
         setSelectedConversation(conversation);
+        setIsConversationListOpen(false);
         loadMessages(conversation);
     };
 
@@ -306,17 +308,47 @@ export default function AdminChatPage() {
 
     return (
         <AdminLayout>
-            <div className="h-full flex flex-col bg-gray-50 -m-4 md:-m-8">
+            <div className="h-full min-h-0 flex flex-col bg-gray-50 -m-3 sm:-m-4 lg:-m-8">
                 {/* Header */}
-                <div className="bg-white border-b border-gray-200 px-6 py-4">
-                    <h1 className="text-2xl font-bold text-gray-900">{t('admin.chat.title')}</h1>
-                    <p className="text-sm text-gray-600 mt-1">{t('admin.chat.subtitle')}</p>
+                <div className="bg-white border-b border-gray-200 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+                    <div className="flex items-center justify-between gap-2">
+                        <div>
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{t('admin.chat.title')}</h1>
+                            <p className="mt-1 text-xs sm:text-sm text-gray-600">{t('admin.chat.subtitle')}</p>
+                        </div>
+
+                        <button
+                            onClick={() => setIsConversationListOpen(true)}
+                            className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-200 px-3 text-sm text-gray-700 lg:hidden"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">chat</span>
+                            {activeTab === 'guest' ? t('admin.chat.guestConversations') : t('admin.chat.memberConversations')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 flex overflow-hidden">
+                <div className="relative flex-1 min-h-0 flex overflow-hidden">
+                    <div
+                        className={`absolute inset-0 z-20 bg-black/40 transition-opacity lg:hidden ${isConversationListOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                        onClick={() => setIsConversationListOpen(false)}
+                    />
+
                     {/* Conversation List */}
-                    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+                    <div
+                        className={`absolute lg:static inset-y-0 left-0 z-30 w-[86vw] max-w-sm lg:w-80 bg-white border-r border-gray-200 transform transition-transform duration-200 ${isConversationListOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col`}
+                    >
+                        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 lg:hidden">
+                            <h2 className="text-sm font-semibold text-gray-900">{t('admin.chat.title')}</h2>
+                            <button
+                                onClick={() => setIsConversationListOpen(false)}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700"
+                                aria-label="Close conversations"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">close</span>
+                            </button>
+                        </div>
+
                         {/* Tabs */}
                         <div className="flex border-b border-gray-200">
                             <button
@@ -363,7 +395,7 @@ export default function AdminChatPage() {
                                             className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${selectedConversation?.id === conv.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                                                 }`}
                                         >
-                                            <div className="flex items-start justify-between">
+                                            <div className="flex items-start justify-between gap-2">
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-medium text-gray-900 truncate">
@@ -388,13 +420,11 @@ export default function AdminChatPage() {
                                                             {conv.unreadCount}
                                                         </span>
                                                     )}
-                                                    {/* Typing Indicator in List */}
                                                     {(typingUsers[conv.guestId!] || typingUsers[conv.userId!]) && (
                                                         <span className="text-xs text-green-600 font-medium animate-pulse">
                                                             Typing...
                                                         </span>
                                                     )}
-                                                    {/* Offline Indicator */}
                                                     {conv.type === 'guest' && disconnectedGuests.has(conv.guestId!) && (
                                                         <span className="text-xs text-gray-400">Offline</span>
                                                     )}
@@ -407,15 +437,24 @@ export default function AdminChatPage() {
                     </div>
 
                     {/* Chat Panel */}
-                    <div className="flex-1 flex flex-col bg-white">
+                    <div className="flex-1 min-w-0 flex flex-col bg-white">
                         {selectedConversation ? (
                             <>
                                 {/* Chat Header */}
-                                <div className="px-6 py-4 border-b border-gray-200">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900">{selectedConversation.userName}</h3>
-                                            <p className="text-sm text-gray-500">
+                                <div className="px-3 py-3 sm:px-4 sm:py-4 lg:px-6 border-b border-gray-200">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => setIsConversationListOpen(true)}
+                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-600 lg:hidden"
+                                                    aria-label="Back to conversations"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                                                </button>
+                                                <h3 className="truncate font-semibold text-gray-900">{selectedConversation.userName}</h3>
+                                            </div>
+                                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
                                                 {selectedConversation.type === 'guest' ? t('admin.chat.guest') : t('admin.chat.member')}
                                                 {(typingUsers[selectedConversation.guestId!] || typingUsers[selectedConversation.userId!]) && (
                                                     <span className="ml-2 text-xs text-green-600 font-medium animate-pulse">
@@ -438,7 +477,7 @@ export default function AdminChatPage() {
                                                         loadConversations();
                                                     }
                                                 }}
-                                                className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="h-9 shrink-0 px-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                             >
                                                 {t('admin.chat.close')}
                                             </button>
@@ -447,11 +486,8 @@ export default function AdminChatPage() {
                                 </div>
 
                                 {/* Messages */}
-                                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                                <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
                                     {messages.map(msg => {
-                                        // Determine if message is from "Me" (the Admin)
-                                        // For Guest Chat: !isFromGuest (Admin sent it)
-                                        // For Auth Chat: senderId === user.id
                                         const isMe = selectedConversation.type === 'guest'
                                             ? !msg.isFromGuest
                                             : msg.senderId === user?.id;
@@ -461,12 +497,12 @@ export default function AdminChatPage() {
                                                 key={msg.id}
                                                 className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                                             >
-                                                <div className={`max-w-md rounded-2xl px-4 py-2 ${!isMe
+                                                <div className={`max-w-[85%] sm:max-w-md rounded-2xl px-4 py-2 ${!isMe
                                                     ? 'bg-white text-gray-900 border border-gray-200 rounded-bl-sm'
                                                     : 'bg-primary text-white rounded-br-sm'
                                                     }`}>
                                                     {!isMe && <p className="text-xs text-gray-500 mb-1">{msg.senderName}</p>}
-                                                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                                                    <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                                                     <p className={`text-xs mt-1 ${msg.isFromGuest ? 'text-gray-400' : 'text-white/70'}`}>
                                                         {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
@@ -479,8 +515,8 @@ export default function AdminChatPage() {
                                 </div>
 
                                 {/* Input */}
-                                <div className="p-4 border-t border-gray-200">
-                                    <div className="flex gap-2">
+                                <div className="p-3 sm:p-4 border-t border-gray-200">
+                                    <div className="flex flex-col sm:flex-row gap-2">
                                         <input
                                             type="text"
                                             value={inputMessage}
@@ -496,13 +532,13 @@ export default function AdminChatPage() {
                                                 }
                                             }}
                                             placeholder="Type your message..."
-                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="h-11 w-full flex-1 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             disabled={sending}
                                         />
                                         <button
                                             onClick={handleSendMessage}
                                             disabled={!inputMessage.trim() || sending}
-                                            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                            className="h-11 w-full sm:w-auto px-5 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                                         >
                                             {sending ? t('admin.chat.sending') : t('admin.chat.send')}
                                         </button>
@@ -510,13 +546,19 @@ export default function AdminChatPage() {
                                 </div>
                             </>
                         ) : (
-                            <div className="flex-1 flex items-center justify-center text-gray-500">
+                            <div className="flex-1 flex items-center justify-center text-gray-500 p-6">
                                 <div className="text-center">
                                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
                                     <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.chat.selectTitle')}</h3>
                                     <p className="mt-1 text-sm text-gray-500">{t('admin.chat.selectDesc')}</p>
+                                    <button
+                                        onClick={() => setIsConversationListOpen(true)}
+                                        className="mt-4 inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 px-4 text-sm text-gray-700 lg:hidden"
+                                    >
+                                        {activeTab === 'guest' ? t('admin.chat.guestConversations') : t('admin.chat.memberConversations')}
+                                    </button>
                                 </div>
                             </div>
                         )}

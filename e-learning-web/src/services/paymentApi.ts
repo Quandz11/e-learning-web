@@ -5,6 +5,14 @@ export interface CheckoutRequest {
   referralCode?: string;
 }
 
+export interface ReferralPreviewResponse {
+  referralCode: string;
+  cabinId: string;
+  cabinName: string;
+  ownerUserId: string;
+  ownerName: string;
+}
+
 export interface CheckoutItemDto {
   courseId: string;
   title: string;
@@ -65,6 +73,10 @@ export interface OrderStatusResponse {
 }
 
 export const paymentApi = {
+  async previewReferralCode(code: string): Promise<ReferralPreviewResponse> {
+    return apiClient(`/payments/referrals/preview?code=${encodeURIComponent(code)}`);
+  },
+
   async createCheckout(payload: CheckoutRequest): Promise<CheckoutResponse> {
     return apiClient('/payments/checkout', {
       method: 'POST',

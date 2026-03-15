@@ -36,6 +36,29 @@ public class CheckoutService : ICheckoutService
         _logger = logger;
     }
 
+    public async Task<ReferralPreviewResponse?> PreviewReferralAsync(string referralCode, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(referralCode))
+        {
+            return null;
+        }
+
+        var cabin = await FindActiveCabinByReferralCodeAsync(referralCode, includeOwner: true, cancellationToken);
+        if (cabin == null)
+        {
+            return null;
+        }
+
+        return new ReferralPreviewResponse
+        {
+            ReferralCode = cabin.ReferralCode ?? NormalizeReferralCode(referralCode),
+            CabinId = cabin.Id.ToString(),
+            CabinName = cabin.Name,
+            OwnerUserId = cabin.OwnerUserId.ToString(),
+            OwnerName = FirstNonEmpty(cabin.OwnerUser?.FullName, cabin.OwnerUser?.Email, cabin.Name) ?? cabin.Name
+        };
+    }
+
     public async Task<CheckoutResponse> CreateCheckoutAsync(Guid userId, CheckoutRequest request, CancellationToken cancellationToken = default)
     {
         if (request.CourseIds == null || request.CourseIds.Count == 0)
@@ -73,9 +96,7 @@ public class CheckoutService : ICheckoutService
         Cabin? cabin = null;
         if (!string.IsNullOrWhiteSpace(request.ReferralCode))
         {
-            var normalizedReferralCode = request.ReferralCode.Trim().ToUpperInvariant();
-            cabin = await _context.Cabins
-                .FirstOrDefaultAsync(c => c.IsActive && c.ReferralCode != null && c.ReferralCode.ToUpper() == normalizedReferralCode, cancellationToken);
+            cabin = await FindActiveCabinByReferralCodeAsync(request.ReferralCode, includeOwner: false, cancellationToken);
 
             if (cabin == null)
             {
@@ -551,26 +572,40 @@ public class CheckoutService : ICheckoutService
             return;
         }
 
-        var exists = await _context.CommissionLedgers
-            .AsNoTracking()
-            .AnyAsync(x => x.OrderId == order.Id && x.CabinId == order.CabinId.Value, cancellationToken);
-
-        if (exists)
-        {
-            return;
-        }
-
-        var cabin = order.Cabin ?? await _context.Cabins
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == order.CabinId.Value, cancellationToken);
-
-        if (cabin == null)
-        {
-            return;
-        }
-
         var paidItems = order.OrderItems.Where(oi => oi.Price > 0).ToList();
         if (paidItems.Count == 0)
+        {
+            return;
+        }
+
+        var commissionCabinIds = await ResolveCommissionCabinChainAsync(order.CabinId.Value, cancellationToken);
+        if (commissionCabinIds.Count == 0)
+        {
+            return;
+        }
+
+        var existingLedgerCabinIds = await _context.CommissionLedgers
+            .AsNoTracking()
+            .Where(x => x.OrderId == order.Id && commissionCabinIds.Contains(x.CabinId))
+            .Select(x => x.CabinId)
+            .ToListAsync(cancellationToken);
+
+        var existingLedgerCabinIdSet = existingLedgerCabinIds.ToHashSet();
+        var targetCabinIds = commissionCabinIds
+            .Where(cabinId => !existingLedgerCabinIdSet.Contains(cabinId))
+            .ToList();
+
+        if (targetCabinIds.Count == 0)
+        {
+            return;
+        }
+
+        var cabins = await _context.Cabins
+            .AsNoTracking()
+            .Where(c => targetCabinIds.Contains(c.Id))
+            .ToDictionaryAsync(c => c.Id, cancellationToken);
+
+        if (cabins.Count == 0)
         {
             return;
         }
@@ -578,40 +613,136 @@ public class CheckoutService : ICheckoutService
         var courseIds = paidItems.Select(x => x.CourseId).Distinct().ToList();
         var rules = await _context.CommissionRules
             .AsNoTracking()
-            .Where(r => r.CabinId == order.CabinId && (r.CourseId == null || courseIds.Contains(r.CourseId.Value)))
+            .Where(r =>
+                r.CabinId.HasValue
+                && targetCabinIds.Contains(r.CabinId.Value)
+                && (r.CourseId == null || courseIds.Contains(r.CourseId.Value)))
             .ToListAsync(cancellationToken);
 
-        var cabinLevelRule = rules.FirstOrDefault(r => r.CourseId == null);
-        decimal commissionAmount = 0;
+        var rulesByCabinId = rules
+            .Where(r => r.CabinId.HasValue)
+            .GroupBy(r => r.CabinId!.Value)
+            .ToDictionary(group => group.Key, group => group.ToList());
 
-        foreach (var item in paidItems)
+        var ledgersToCreate = new List<CommissionLedger>();
+        var now = DateTime.UtcNow;
+
+        foreach (var cabinId in commissionCabinIds)
         {
-            var courseRule = rules.FirstOrDefault(r => r.CourseId == item.CourseId);
-            var rate = courseRule?.Rate ?? cabinLevelRule?.Rate ?? cabin.CommissionRate;
-            if (rate <= 0)
+            if (!targetCabinIds.Contains(cabinId) || !cabins.TryGetValue(cabinId, out var cabin))
             {
                 continue;
             }
 
-            commissionAmount += item.Price * (rate / 100m);
+            rulesByCabinId.TryGetValue(cabinId, out var cabinRules);
+            cabinRules ??= new List<CommissionRule>();
+
+            var cabinLevelRule = cabinRules.FirstOrDefault(r => r.CourseId == null);
+            var courseRuleLookup = cabinRules
+                .Where(r => r.CourseId.HasValue)
+                .GroupBy(r => r.CourseId!.Value)
+                .ToDictionary(group => group.Key, group => group.First().Rate);
+
+            decimal commissionAmount = 0;
+            foreach (var item in paidItems)
+            {
+                var rate = courseRuleLookup.TryGetValue(item.CourseId, out var courseRate)
+                    ? courseRate
+                    : (cabinLevelRule?.Rate ?? cabin.CommissionRate);
+
+                if (rate <= 0)
+                {
+                    continue;
+                }
+
+                commissionAmount += item.Price * (rate / 100m);
+            }
+
+            var roundedAmount = decimal.Round(commissionAmount, 2, MidpointRounding.AwayFromZero);
+            if (roundedAmount <= 0)
+            {
+                continue;
+            }
+
+            ledgersToCreate.Add(new CommissionLedger
+            {
+                Id = Guid.NewGuid(),
+                CabinId = cabinId,
+                OrderId = order.Id,
+                Amount = roundedAmount,
+                Status = "PENDING",
+                CreatedAt = now
+            });
         }
 
-        if (commissionAmount <= 0)
+        if (ledgersToCreate.Count == 0)
         {
             return;
         }
 
-        _context.CommissionLedgers.Add(new CommissionLedger
-        {
-            Id = Guid.NewGuid(),
-            CabinId = order.CabinId.Value,
-            OrderId = order.Id,
-            Amount = decimal.Round(commissionAmount, 2, MidpointRounding.AwayFromZero),
-            Status = "PENDING",
-            CreatedAt = DateTime.UtcNow
-        });
-
+        _context.CommissionLedgers.AddRange(ledgersToCreate);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<Cabin?> FindActiveCabinByReferralCodeAsync(string referralCode, bool includeOwner, CancellationToken cancellationToken)
+    {
+        var normalizedReferralCode = NormalizeReferralCode(referralCode);
+
+        IQueryable<Cabin> query = _context.Cabins.AsNoTracking();
+        if (includeOwner)
+        {
+            query = query.Include(c => c.OwnerUser);
+        }
+
+        return await query.FirstOrDefaultAsync(
+            c => c.IsActive && c.ReferralCode != null && c.ReferralCode.ToUpper() == normalizedReferralCode,
+            cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<Guid>> ResolveCommissionCabinChainAsync(Guid referralCabinId, CancellationToken cancellationToken)
+    {
+        const int maxDepth = 10;
+
+        var orderedCabinIds = new List<Guid> { referralCabinId };
+        var visitedCabinIds = new HashSet<Guid> { referralCabinId };
+        var currentChildCabinIds = new List<Guid> { referralCabinId };
+
+        for (var depth = 0; depth < maxDepth && currentChildCabinIds.Count > 0; depth++)
+        {
+            var parentLinks = await _context.CabinMembers
+                .AsNoTracking()
+                .Where(x => currentChildCabinIds.Contains(x.ChildCabinId))
+                .OrderBy(x => x.Level)
+                .ThenBy(x => x.CreatedAt)
+                .ToListAsync(cancellationToken);
+
+            if (parentLinks.Count == 0)
+            {
+                break;
+            }
+
+            var nextChildCabinIds = new List<Guid>();
+
+            foreach (var parentLink in parentLinks)
+            {
+                if (!visitedCabinIds.Add(parentLink.ParentCabinId))
+                {
+                    continue;
+                }
+
+                orderedCabinIds.Add(parentLink.ParentCabinId);
+                nextChildCabinIds.Add(parentLink.ParentCabinId);
+            }
+
+            currentChildCabinIds = nextChildCabinIds;
+        }
+
+        return orderedCabinIds;
+    }
+
+    private static string NormalizeReferralCode(string referralCode)
+    {
+        return referralCode.Trim().ToUpperInvariant();
     }
 
     private async Task<PaymentMethod> EnsureVietQrPaymentMethodAsync(CancellationToken cancellationToken)

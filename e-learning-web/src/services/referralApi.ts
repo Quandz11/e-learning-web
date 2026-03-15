@@ -36,6 +36,48 @@ export interface UpdateReferralRequest {
   isActive: boolean;
 }
 
+export interface AdminCommissionSummaryDto {
+  totalPending: number;
+  totalPaid: number;
+  pendingLedgers: number;
+  paidLedgers: number;
+  pendingCabins: number;
+  payoutCount: number;
+}
+
+export interface AdminCommissionCabinItemDto {
+  cabinId: string;
+  cabinName: string;
+  referralCode: string;
+  ownerName?: string;
+  ownerEmail: string;
+  pendingAmount: number;
+  pendingLedgerCount: number;
+  lastCommissionAt: string;
+}
+
+export interface AdminCommissionCabinPagedResultDto {
+  items: AdminCommissionCabinItemDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface PayCabinCommissionRequestDto {
+  bankName?: string;
+  bankAccount?: string;
+}
+
+export interface PayCabinCommissionResponseDto {
+  payoutId: string;
+  cabinId: string;
+  paidAmount: number;
+  paidLedgerCount: number;
+  paidAt: string;
+  bankName?: string;
+  bankAccount?: string;
+}
+
 export const referralApi = {
   async getPaged(params: { search?: string; isActive?: boolean; page?: number; pageSize?: number }): Promise<ReferralPagedResultDto> {
     const searchParams = new URLSearchParams();
@@ -75,6 +117,37 @@ export const referralApi = {
   async remove(id: string): Promise<void> {
     return apiClient(`/admin/referrals/${id}`, {
       method: 'DELETE',
+    });
+  },
+
+  async getCommissionSummary(): Promise<AdminCommissionSummaryDto> {
+    return apiClient('/admin/commissions/summary');
+  },
+
+  async getPendingCommissionCabins(params: {
+    search?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<AdminCommissionCabinPagedResultDto> {
+    const searchParams = new URLSearchParams();
+
+    if (params.search) {
+      searchParams.set('search', params.search);
+    }
+
+    searchParams.set('page', String(params.page ?? 1));
+    searchParams.set('pageSize', String(params.pageSize ?? 20));
+
+    return apiClient(`/admin/commissions/cabins?${searchParams.toString()}`);
+  },
+
+  async payPendingCommission(
+    cabinId: string,
+    payload: PayCabinCommissionRequestDto = {}
+  ): Promise<PayCabinCommissionResponseDto> {
+    return apiClient(`/admin/commissions/cabins/${cabinId}/pay`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
     });
   },
 };

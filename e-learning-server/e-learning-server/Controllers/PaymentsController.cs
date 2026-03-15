@@ -19,6 +19,32 @@ public class PaymentsController : ControllerBase
         _logger = logger;
     }
 
+    [HttpGet("referrals/preview")]
+    [AllowAnonymous]
+    public async Task<IActionResult> PreviewReferral([FromQuery] string? code, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return BadRequest(new { message = "Referral code is required." });
+        }
+
+        try
+        {
+            var result = await _checkoutService.PreviewReferralAsync(code, cancellationToken);
+            if (result == null)
+            {
+                return NotFound(new { message = "Invalid referral code." });
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error previewing referral code {ReferralCode}", code);
+            return StatusCode(500, new { message = "Failed to preview referral code" });
+        }
+    }
+
     [HttpPost("checkout")]
     [Authorize]
     public async Task<IActionResult> CreateCheckout([FromBody] CheckoutRequest request, CancellationToken cancellationToken)

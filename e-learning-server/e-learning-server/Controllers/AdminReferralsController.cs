@@ -68,7 +68,10 @@ public class AdminReferralsController : ControllerBase
                 OwnerName = c.OwnerUser.FullName,
                 OwnerEmail = c.OwnerUser.Email,
                 CommissionRate = c.CommissionRate,
-                WalletBalance = c.WalletBalance,
+                WalletBalance = _context.CommissionLedgers
+                    .Where(ledger => ledger.CabinId == c.Id && ledger.Status != "PAID")
+                    .Select(ledger => (decimal?)ledger.Amount)
+                    .Sum() ?? 0m,
                 IsActive = c.IsActive,
                 CreatedAt = c.CreatedAt
             })
@@ -96,7 +99,13 @@ public class AdminReferralsController : ControllerBase
             return NotFound(new { message = "Referral not found" });
         }
 
-        return Ok(MapToDto(cabin));
+        var walletBalance = await _context.CommissionLedgers
+            .AsNoTracking()
+            .Where(ledger => ledger.CabinId == cabin.Id && ledger.Status != "PAID")
+            .Select(ledger => (decimal?)ledger.Amount)
+            .SumAsync(cancellationToken) ?? 0m;
+
+        return Ok(MapToDto(cabin, walletBalance));
     }
 
     [HttpPost]
@@ -212,7 +221,7 @@ public class AdminReferralsController : ControllerBase
         return NoContent();
     }
 
-    private static ReferralItemDto MapToDto(Cabin cabin)
+    private static ReferralItemDto MapToDto(Cabin cabin, decimal? walletBalanceOverride = null)
     {
         return new ReferralItemDto
         {
@@ -223,7 +232,7 @@ public class AdminReferralsController : ControllerBase
             OwnerName = cabin.OwnerUser.FullName,
             OwnerEmail = cabin.OwnerUser.Email,
             CommissionRate = cabin.CommissionRate,
-            WalletBalance = cabin.WalletBalance,
+            WalletBalance = walletBalanceOverride ?? cabin.WalletBalance,
             IsActive = cabin.IsActive,
             CreatedAt = cabin.CreatedAt
         };

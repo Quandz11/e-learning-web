@@ -1,7 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../../components/admin/AdminLayout';
-import { referralApi, type ReferralItemDto } from '../../../services/referralApi';
+import {
+  referralApi,
+  type AdminCommissionCabinItemDto,
+  type AdminCommissionSummaryDto,
+  type ReferralItemDto,
+} from '../../../services/referralApi';
 import { userApi, type UserDto } from '../../../services/userApi';
 import { toast } from 'react-hot-toast';
 
@@ -27,23 +32,50 @@ const AdminReferralsPage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [referralSearch, setReferralSearch] = useState('');
+  const [referralStatusFilter, setReferralStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [referrals, setReferrals] = useState<ReferralItemDto[]>([]);
   const [owners, setOwners] = useState<UserDto[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<ReferralItemDto | null>(null);
   const [form, setForm] = useState<ReferralFormState>(initialFormState);
 
+  const [commissionLoading, setCommissionLoading] = useState(true);
+  const [commissionSearch, setCommissionSearch] = useState('');
+  const [payingCabinId, setPayingCabinId] = useState<string | null>(null);
+  const [commissionSummary, setCommissionSummary] = useState<AdminCommissionSummaryDto | null>(null);
+  const [pendingCabins, setPendingCabins] = useState<AdminCommissionCabinItemDto[]>([]);
+
   const totalActive = useMemo(() => referrals.filter((item) => item.isActive).length, [referrals]);
+  const summary = useMemo<AdminCommissionSummaryDto>(
+    () =>
+      commissionSummary ?? {
+        totalPending: 0,
+        totalPaid: 0,
+        pendingLedgers: 0,
+        paidLedgers: 0,
+        pendingCabins: 0,
+        payoutCount: 0,
+      },
+    [commissionSummary]
+  );
+
   const formatCurrency = (value: number) => `${value.toLocaleString(locale)} ${t('payments.common.currency')}`;
+  const formatDateTime = (value: string) =>
+    new Date(value).toLocaleString(locale, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
   const fetchReferrals = async () => {
     try {
       setLoading(true);
       const data = await referralApi.getPaged({
-        search: search.trim() || undefined,
-        isActive: statusFilter === 'all' ? undefined : statusFilter === 'active',
+        search: referralSearch.trim() || undefined,
+        isActive: referralStatusFilter === 'all' ? undefined : referralStatusFilter === 'active',
         page: 1,
         pageSize: 100,
       });
@@ -64,14 +96,40 @@ const AdminReferralsPage: React.FC = () => {
     }
   };
 
+  const fetchCommissionData = async () => {
+    try {
+      setCommissionLoading(true);
+      const [summaryData, cabinsResult] = await Promise.all([
+        referralApi.getCommissionSummary(),
+        referralApi.getPendingCommissionCabins({
+          search: commissionSearch.trim() || undefined,
+          page: 1,
+          pageSize: 100,
+        }),
+      ]);
+
+      setCommissionSummary(summaryData);
+      setPendingCabins(cabinsResult.items);
+    } catch (error: any) {
+      toast.error(error.message || t('adminReferrals.commissions.toasts.loadFailed'));
+    } finally {
+      setCommissionLoading(false);
+    }
+  };
+
   useEffect(() => {
     void fetchReferrals();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, statusFilter]);
+  }, [referralSearch, referralStatusFilter]);
 
   useEffect(() => {
     void fetchOwners();
   }, []);
+
+  useEffect(() => {
+    void fetchCommissionData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [commissionSearch]);
 
   const openCreate = () => {
     setEditing(null);
@@ -159,6 +217,29 @@ const AdminReferralsPage: React.FC = () => {
     }
   };
 
+  const handlePayCommission = async (item: AdminCommissionCabinItemDto) => {
+    if (!window.confirm(t('adminReferrals.commissions.confirmPay', { cabin: item.cabinName }))) {
+      return;
+    }
+
+    try {
+      setPayingCabinId(item.cabinId);
+      const response = await referralApi.payPendingCommission(item.cabinId, {});
+      toast.success(
+        t('adminReferrals.commissions.toasts.paySuccess', {
+          count: response.paidLedgerCount,
+          amount: formatCurrency(response.paidAmount),
+        })
+      );
+
+      await Promise.all([fetchReferrals(), fetchCommissionData()]);
+    } catch (error: any) {
+      toast.error(error.message || t('adminReferrals.commissions.toasts.payFailed'));
+    } finally {
+      setPayingCabinId(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -183,16 +264,16 @@ const AdminReferralsPage: React.FC = () => {
         <div className="sm:col-span-2 lg:col-span-2">
           <input
             type="text"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            value={referralSearch}
+            onChange={(event) => setReferralSearch(event.target.value)}
             placeholder={t('adminReferrals.searchPlaceholder')}
             className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-dashboard-primary focus:outline-none"
           />
         </div>
 
         <select
-          value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value as 'all' | 'active' | 'inactive')}
+          value={referralStatusFilter}
+          onChange={(event) => setReferralStatusFilter(event.target.value as 'all' | 'active' | 'inactive')}
           className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-dashboard-primary focus:outline-none"
         >
           <option value="all">{t('adminReferrals.filters.all')}</option>
@@ -203,6 +284,162 @@ const AdminReferralsPage: React.FC = () => {
 
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-dashboard-surface-dark overflow-hidden">
         <div className="md:hidden divide-y divide-slate-200 dark:divide-slate-700">
+
+      <section id="commissions" className="mt-10">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('adminReferrals.commissions.title')}</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('adminReferrals.commissions.subtitle')}</p>
+          </div>
+        </div>
+
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-dashboard-surface-dark">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {t('adminReferrals.commissions.summary.pendingAmount')}
+            </p>
+            <p className="mt-2 text-lg font-bold text-slate-900 dark:text-white">{formatCurrency(summary.totalPending)}</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-dashboard-surface-dark">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {t('adminReferrals.commissions.summary.paidAmount')}
+            </p>
+            <p className="mt-2 text-lg font-bold text-slate-900 dark:text-white">{formatCurrency(summary.totalPaid)}</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-dashboard-surface-dark">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {t('adminReferrals.commissions.summary.pendingCabins')}
+            </p>
+            <p className="mt-2 text-lg font-bold text-slate-900 dark:text-white">{summary.pendingCabins}</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-dashboard-surface-dark">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {t('adminReferrals.commissions.summary.payoutCount')}
+            </p>
+            <p className="mt-2 text-lg font-bold text-slate-900 dark:text-white">{summary.payoutCount}</p>
+          </div>
+        </div>
+
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <input
+            type="text"
+            value={commissionSearch}
+            onChange={(event) => setCommissionSearch(event.target.value)}
+            placeholder={t('adminReferrals.commissions.searchPlaceholder')}
+            className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-dashboard-primary focus:outline-none"
+          />
+          <div className="hidden sm:block" />
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-dashboard-surface-dark overflow-hidden">
+          <div className="md:hidden divide-y divide-slate-200 dark:divide-slate-700">
+            {commissionLoading ? (
+              <div className="px-4 py-8 text-sm text-slate-500 dark:text-slate-400">
+                {t('adminReferrals.commissions.table.loading')}
+              </div>
+            ) : pendingCabins.length === 0 ? (
+              <div className="px-4 py-8 text-sm text-slate-500 dark:text-slate-400">
+                {t('adminReferrals.commissions.table.empty')}
+              </div>
+            ) : (
+              pendingCabins.map((item) => (
+                <div key={item.cabinId} className="space-y-3 p-4">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.cabinName}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{item.ownerName || t('adminReferrals.table.noName')}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 break-all">{item.ownerEmail}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600 dark:text-slate-300">{item.pendingLedgerCount} {t('adminReferrals.commissions.table.ledgers')}</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(item.pendingAmount)}</span>
+                  </div>
+
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {t('adminReferrals.commissions.table.lastCommissionAt')}: {formatDateTime(item.lastCommissionAt)}
+                  </p>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => void handlePayCommission(item)}
+                      disabled={payingCabinId === item.cabinId}
+                      className="h-10 rounded-md bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {payingCabinId === item.cabinId
+                        ? t('adminReferrals.commissions.actions.processing')
+                        : t('adminReferrals.commissions.actions.payNow')}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-[980px] w-full text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
+                <tr>
+                  <th className="px-6 py-4 font-semibold">{t('adminReferrals.commissions.table.cabin')}</th>
+                  <th className="px-6 py-4 font-semibold">{t('adminReferrals.commissions.table.owner')}</th>
+                  <th className="px-6 py-4 font-semibold">{t('adminReferrals.commissions.table.referralCode')}</th>
+                  <th className="px-6 py-4 font-semibold">{t('adminReferrals.commissions.table.pendingAmount')}</th>
+                  <th className="px-6 py-4 font-semibold">{t('adminReferrals.commissions.table.ledgers')}</th>
+                  <th className="px-6 py-4 font-semibold">{t('adminReferrals.commissions.table.lastCommissionAt')}</th>
+                  <th className="px-6 py-4 text-right font-semibold">{t('adminReferrals.commissions.table.actions')}</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                {commissionLoading ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                      {t('adminReferrals.commissions.table.loading')}
+                    </td>
+                  </tr>
+                ) : pendingCabins.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                      {t('adminReferrals.commissions.table.empty')}
+                    </td>
+                  </tr>
+                ) : (
+                  pendingCabins.map((item) => (
+                    <tr key={item.cabinId} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                      <td className="px-6 py-4 text-slate-800 dark:text-slate-100">
+                        <p className="font-medium">{item.cabinName}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-slate-800 dark:text-slate-100">{item.ownerName || t('adminReferrals.table.noName')}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{item.ownerEmail}</p>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-slate-700 dark:text-slate-200">{item.referralCode || '-'}</td>
+                      <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">{formatCurrency(item.pendingAmount)}</td>
+                      <td className="px-6 py-4 text-slate-700 dark:text-slate-200">{item.pendingLedgerCount}</td>
+                      <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{formatDateTime(item.lastCommissionAt)}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => void handlePayCommission(item)}
+                          disabled={payingCabinId === item.cabinId}
+                          className="inline-flex h-9 items-center rounded-md bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {payingCabinId === item.cabinId
+                            ? t('adminReferrals.commissions.actions.processing')
+                            : t('adminReferrals.commissions.actions.payNow')}
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
           {loading ? (
             <div className="px-4 py-8 text-sm text-slate-500 dark:text-slate-400">{t('adminReferrals.table.loading')}</div>
           ) : referrals.length === 0 ? (

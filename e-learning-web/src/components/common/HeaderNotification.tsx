@@ -5,7 +5,12 @@ import { formatDistanceToNow } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 
-export default function HeaderNotification() {
+interface HeaderNotificationProps {
+    viewAllHref?: string;
+    showViewAllLink?: boolean;
+}
+
+export default function HeaderNotification({ viewAllHref = '/admin/notifications', showViewAllLink = true }: HeaderNotificationProps) {
     const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification();
     const { t, i18n } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
@@ -105,15 +110,17 @@ export default function HeaderNotification() {
                         )}
                     </div>
 
-                    <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center">
-                        <Link
-                            to="/admin/notifications"
-                            onClick={() => setIsOpen(false)}
-                            className="text-sm text-dashboard-primary hover:text-dashboard-primary-dark font-medium hover:underline"
-                        >
-                            {t('notifications.viewAll')}
-                        </Link>
-                    </div>
+                    {showViewAllLink && (
+                        <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-center">
+                            <Link
+                                to={viewAllHref}
+                                onClick={() => setIsOpen(false)}
+                                className="text-sm text-dashboard-primary hover:text-dashboard-primary-dark font-medium hover:underline"
+                            >
+                                {t('notifications.viewAll')}
+                            </Link>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

@@ -67,9 +67,9 @@
         "subtitle": "Tham gia cộng đồng học tập suốt đời và làm chủ các kỹ năng mới theo tốc độ của riêng bạn. Tương lai của bạn bắt đầu từ đây."
     },
     "fasting": {
-        "title": "Chào mừng đến với Phương pháp Nhịn ăn",
-        "subtitle": "Nhịn ăn gián đoạn để giảm cân",
-        "description": "Trải nghiệm chương trình nhịn ăn toàn diện nhất.",
+        "title": "Chào mừng đến với Nhinanchualanh.vn",
+        "subtitle": "Đánh thức bác sĩ bên trong-Lắng nghe để chữa lành",
+        "description": "Chào mừng bạn đến với chương trình nhịn ăn toàn diện nhất tại nhinanchualanh.vn",
         "takeQuiz": "Bắt đầu với bài kiểm tra"
     },
     "admin": {
@@ -212,6 +212,7 @@
             "notifications": "Thông báo",
             "articles": "Bài viết",
             "referrals": "Mã giới thiệu",
+            "consultRegistrations": "Đăng ký tư vấn",
             "whyChooseUs": "Tại sao chọn chúng tôi"
         },
         "articles": {
@@ -266,7 +267,138 @@
             "totalStudents": "Tổng học viên",
             "totalRevenue": "Tổng doanh thu",
             "agentRevenue": "Doanh thu đại lý",
-            "activeCourses": "Khóa học đang hoạt động"
+            "activeCourses": "Khóa học đang hoạt động",
+            "care": {
+                "title": "Bảng điều khiển Chăm sóc",
+                "subtitle": "Quản lý hỗ trợ khách hàng và sự hài lòng",
+                "brand": "Hỗ trợ Chăm sóc",
+                "menu": {
+                    "overview": "Tổng quan",
+                    "supportTickets": "Phiếu hỗ trợ",
+                    "customers": "Khách hàng",
+                    "registrations": "Đăng ký tư vấn"
+                },
+                "stats": {
+                    "totalCustomers": "Tổng khách hàng",
+                    "activeTickets": "Phiếu đang hoạt động",
+                    "averageSatisfaction": "Độ hài lòng trung bình",
+                    "unresolvedTickets": "Phiếu chưa giải quyết",
+                    "currentStatus": "Trạng thái hiện tại",
+                    "pending": "Đang chờ"
+                },
+                "supportTickets": "Phiếu hỗ trợ",
+                "customers": "Khách hàng",
+                "noTickets": "Không tìm thấy phiếu hỗ trợ nào",
+                "noCustomers": "Không tìm thấy khách hàng nào",
+                "searchPlaceholder": "Tìm kiếm khách hàng...",
+                "enrolledCourses": "Khóa học đã đăng ký",
+                "table": {
+                    "ticketId": "Mã phiếu",
+                    "title": "Tiêu đề",
+                    "customer": "Khách hàng",
+                    "status": "Trạng thái",
+                    "priority": "Ưu tiên",
+                    "createdAt": "Ngày tạo"
+                }
+            },
+            "agent": {
+                "title": "Bảng điều khiển Đại lý",
+                "subtitle": "Theo dõi doanh số, giới thiệu và hoa hồng của bạn",
+                "overviewSubtitle": "Theo dõi hiệu suất doanh số, giới thiệu và thanh toán hoa hồng tại một nơi.",
+                "brand": "Cổng Đại lý",
+                "menu": {
+                    "overview": "Tổng quan",
+                    "sales": "Doanh số",
+                    "referrals": "Giới thiệu",
+                    "commission": "Hoa hồng",
+                    "leaderboard": "Bảng xếp hạng"
+                },
+                "stats": {
+                    "totalSalesThisMonth": "Doanh số tháng này",
+                    "commissionPending": "Hoa hồng đang chờ",
+                    "activeReferrals": "Giới thiệu đang hoạt động",
+                    "leaderboardRank": "Xếp hạng của bạn",
+                    "currentStatus": "Trạng thái hiện tại",
+                    "currentPosition": "Vị trí hiện tại"
+                },
+                "salesChart": "Biểu đồ doanh số",
+                "referrals": "Giới thiệu",
+                "commission": "Hoa hồng",
+                "leaderboard": "Bảng xếp hạng",
+                "noData": "Không có dữ liệu",
+                "noReferrals": "Không tìm thấy giới thiệu nào",
+                "noLeaderboardData": "Không có dữ liệu bảng xếp hạng",
+                "allStatuses": "Tất cả trạng thái",
+                "pending": "Đang chờ",
+                "approved": "Đã duyệt",
+                "rejected": "Bị từ chối",
+                "max": "Doanh số tối đa hàng ngày",
+                "average": "Doanh số trung bình hàng ngày",
+                "total": "Tổng doanh số hàng tháng",
+                "totalCommission": "Tổng hoa hồng",
+                "paidCommission": "Hoa hồng đã trả",
+                "pendingCommission": "Hoa hồng đang chờ",
+                "monthlyAverage": "Trung bình hàng tháng",
+                "payoutStatus": "Trạng thái thanh toán",
+                "paid": "Đã trả",
+                "payoutHistory": "Lịch sử thanh toán",
+                "table": {
+                    "student": "Học viên",
+                    "course": "Khóa học",
+                    "status": "Trạng thái",
+                    "commission": "Hoa hồng",
+                    "date": "Ngày",
+                    "period": "Kỳ",
+                    "amount": "Số tiền",
+                    "payoutDate": "Ngày thanh toán",
+                    "rank": "Xếp hạng",
+                    "agent": "Đại lý",
+                    "sales": "Doanh số",
+                    "students": "Học viên"
+                }
+            },
+            "lecturer": {
+                "title": "Bảng điều khiển Giảng viên",
+                "subtitle": "Quản lý khóa học và theo dõi tiến trình học sinh",
+                "brand": "Cổng Giảng viên",
+                "menu": {
+                    "overview": "Tổng quan",
+                    "courses": "Khóa học",
+                    "students": "Học sinh",
+                    "analytics": "Phân tích"
+                },
+                "stats": {
+                    "totalCourses": "Khóa học dạy",
+                    "activeStudents": "Học sinh đang hoạt động",
+                    "completionRate": "Tỷ lệ hoàn thành",
+                    "revenue": "Doanh thu",
+                    "currentLoad": "Khối lượng hiện tại",
+                    "currentStatus": "Trạng thái hiện tại"
+                },
+                "courses": "Khóa học của tôi",
+                "studentProgress": "Tiến trình học sinh",
+                "analytics": "Phân tích",
+                "noCourses": "Không tìm thấy khóa học nào",
+                "noStudents": "Không tìm thấy học sinh nào",
+                "totalEnrollments": "Tổng đăng ký",
+                "completionRate": "Tỷ lệ hoàn thành",
+                "avgQuizScore": "Số điểm trắc nghiệm trung bình",
+                "totalRevenue": "Tổng doanh thu",
+                "topPerformance": "Hiệu suất hàng đầu",
+                "topCourse": "Khóa học hàng đầu",
+                "topStudent": "Học sinh hàng đầu",
+                "dropoffAnalysis": "Phân tích bỏ cuộc",
+                "lesson": "Bài học",
+                "studentsDropped": "Học sinh bỏ cuộc",
+                "dropoffRate": "Tỷ lệ bỏ cuộc",
+                "noDropoff": "Không có dữ liệu bỏ cuộc",
+                "table": {
+                    "course": "Khóa học",
+                    "students": "Học sinh",
+                    "completion": "Hoàn thành",
+                    "revenue": "Doanh thu"
+                }
+            }
         },
         "chat": {
             "title": "Quản lý Chat",
@@ -854,12 +986,14 @@
         "createSuccess": "Tạo thành công",
         "error": "Đã xảy ra lỗi",
         "home": "Trang chủ",
+        "reload": "Tải lại trang",
         "unnamed": "Người dùng chưa đặt tên",
         "backToList": "Quay lại danh sách",
         "title": "Tiêu đề",
         "status": "Trạng thái",
         "created": "Ngày tạo",
         "actions": "Hành động",
+        "logout": "Đăng xuất",
         "categories": {
             "title": "Phân loại Bài học",
             "subtitle": "Quản lý phân loại bài học",
@@ -1151,6 +1285,30 @@
                 "history": "Tóm tắt tiểu sử bệnh tật"
             }
         },
+        "consultForm": {
+            "title": "Đăng Ký Tư Vấn Khóa Học",
+            "fields": {
+                "fullName": "Họ và tên của bạn",
+                "email": "Địa chỉ Email",
+                "phone": "Số điện thoại (Zalo)",
+                "goal": "Mục tiêu của bạn là gì?"
+            },
+            "goals": {
+                "detox": "Thanh lọc cơ thể",
+                "weightLoss": "Giảm cân lành mạnh",
+                "chronicSupport": "Hỗ trợ bệnh nền",
+                "personalPlan": "Lộ trình cá nhân hóa"
+            },
+            "actions": {
+                "submit": "Gửi yêu cầu ngay",
+                "submitting": "Đang gửi..."
+            },
+            "messages": {
+                "required": "Vui lòng điền đầy đủ thông tin.",
+                "success": "Đăng ký thành công. Đội ngũ sẽ liên hệ bạn sớm.",
+                "failed": "Không thể gửi đăng ký. Vui lòng thử lại."
+            }
+        },
         "testimonials": {
             "title": "Phản hồi học viên",
             "subtitle": "Những phản hồi chân thực từ học viên của chúng tôi"
@@ -1386,7 +1544,13 @@
             "referral": {
                 "title": "Mã giới thiệu",
                 "placeholder": "Nhập mã referral",
-                "hint": "Nếu mã hợp lệ, hoa hồng sẽ được ghi nhận sau khi thanh toán thành công."
+                "hint": "Nếu mã hợp lệ, hoa hồng sẽ được ghi nhận sau khi thanh toán thành công.",
+                "checking": "Đang kiểm tra mã giới thiệu...",
+                "invalid": "Mã giới thiệu không hợp lệ.",
+                "lookupFailed": "Không thể xác thực mã giới thiệu lúc này.",
+                "matched": "Đã nhận diện mã giới thiệu",
+                "cabin": "Cabin",
+                "owner": "Agent"
             },
             "summary": {
                 "title": "Tổng quan thanh toán",
@@ -1491,9 +1655,60 @@
             }
         }
     },
+    "leadRegistrations": {
+        "title": "Form đăng ký tư vấn",
+        "subtitle": "Quản lý thông tin khách đăng ký từ trang chủ.",
+        "searchPlaceholder": "Tìm theo tên, email, số điện thoại, mục tiêu",
+        "confirmDelete": "Bạn có chắc muốn xóa đăng ký này?",
+        "filters": {
+            "all": "Tất cả trạng thái"
+        },
+        "status": {
+            "NEW": "Mới",
+            "CONTACTED": "Đã liên hệ",
+            "CONSULTING": "Đang tư vấn",
+            "CONVERTED": "Đã chuyển đổi",
+            "LOST": "Không tiềm năng"
+        },
+        "table": {
+            "customer": "Khách hàng",
+            "phone": "Điện thoại",
+            "goal": "Mục tiêu",
+            "status": "Trạng thái",
+            "assignedCare": "Care phụ trách",
+            "createdAt": "Đăng ký lúc",
+            "actions": "Thao tác",
+            "loading": "Đang tải dữ liệu...",
+            "empty": "Chưa có đăng ký nào."
+        },
+        "fields": {
+            "fullName": "Họ và tên",
+            "email": "Email",
+            "phone": "Số điện thoại",
+            "goal": "Mục tiêu tư vấn",
+            "status": "Trạng thái",
+            "assignedCare": "Care phụ trách",
+            "unassigned": "Chưa phân công"
+        },
+        "actions": {
+            "create": "Tạo mới",
+            "edit": "Cập nhật đăng ký",
+            "save": "Lưu",
+            "saving": "Đang lưu..."
+        },
+        "toasts": {
+            "loadFailed": "Không thể tải danh sách đăng ký.",
+            "required": "Vui lòng nhập đầy đủ thông tin.",
+            "updateSuccess": "Cập nhật đăng ký thành công.",
+            "createSuccess": "Tạo đăng ký thành công.",
+            "saveFailed": "Không thể lưu đăng ký.",
+            "deleteSuccess": "Đã xóa đăng ký.",
+            "deleteFailed": "Không thể xóa đăng ký."
+        }
+    },
     "adminReferrals": {
-        "title": "Mã giới thiệu",
-        "subtitle": "Quản lý mã giới thiệu cho checkout. Đang có {{total}} cabin, {{active}} cabin đang hoạt động.",
+        "title": "Quản lý đại lý",
+        "subtitle": "Quản lý cabin, mã giới thiệu và cấu hình hoa hồng. Đang có {{total}} cabin, {{active}} cabin đang hoạt động.",
         "actions": {
             "create": "Tạo referral",
             "update": "Cập nhật",
@@ -1548,6 +1763,71 @@
             "saveFailed": "Không thể lưu referral.",
             "deactivateSuccess": "Đã vô hiệu hóa referral.",
             "deactivateFailed": "Không thể vô hiệu hóa referral."
+        },
+        "commissions": {
+            "title": "Chi trả hoa hồng đại lý",
+            "subtitle": "Theo dõi commission đang chờ và thực hiện chi trả cho từng cabin.",
+            "searchPlaceholder": "Tìm theo cabin, mã referral, owner",
+            "summary": {
+                "pendingAmount": "Đang chờ chi",
+                "paidAmount": "Đã chi trả",
+                "pendingCabins": "Cabin chờ chi",
+                "payoutCount": "Lượt chi trả"
+            },
+            "table": {
+                "cabin": "Cabin",
+                "owner": "Owner",
+                "referralCode": "Referral",
+                "pendingAmount": "Tiền chờ chi",
+                "ledgers": "Bút toán",
+                "lastCommissionAt": "Phát sinh gần nhất",
+                "actions": "Thao tác",
+                "loading": "Đang tải dữ liệu hoa hồng...",
+                "empty": "Không có cabin nào đang chờ chi hoa hồng."
+            },
+            "actions": {
+                "payNow": "Trả hoa hồng",
+                "processing": "Đang xử lý..."
+            },
+            "confirmPay": "Xác nhận trả hoa hồng cho cabin {{cabin}}?",
+            "toasts": {
+                "loadFailed": "Không thể tải dữ liệu hoa hồng.",
+                "paySuccess": "Đã chi trả {{amount}} cho {{count}} bút toán hoa hồng.",
+                "payFailed": "Không thể thực hiện chi trả hoa hồng."
+            }
+        }
+    },
+    "adminAgents": {
+        "title": "Đại lý",
+        "subtitle": "Danh sách tài khoản đại lý và hiệu suất cabin trên hệ thống.",
+        "searchPlaceholder": "Tìm theo tên, email hoặc số điện thoại đại lý",
+        "filters": {
+            "allStatuses": "Tất cả trạng thái"
+        },
+        "stats": {
+            "totalAgents": "Tổng đại lý",
+            "activeAgents": "Đại lý hoạt động",
+            "activeCabins": "Cabin hoạt động",
+            "pendingPayout": "Hoa hồng chờ chi"
+        },
+        "actions": {
+            "manageReferrals": "Quản lý referral",
+            "managePayouts": "Chi trả hoa hồng",
+            "viewUser": "Xem tài khoản"
+        },
+        "table": {
+            "agent": "Đại lý",
+            "status": "Trạng thái",
+            "totalCabins": "Tổng cabin",
+            "activeCabins": "Cabin hoạt động",
+            "pendingWallet": "Ví chờ chi",
+            "actions": "Thao tác",
+            "loading": "Đang tải danh sách đại lý...",
+            "empty": "Chưa có đại lý nào.",
+            "cabinsSummary": "{{active}}/{{total}} cabin hoạt động"
+        },
+        "toasts": {
+            "loadFailed": "Không thể tải dữ liệu đại lý."
         }
     }
 }

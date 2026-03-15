@@ -1,0 +1,674 @@
+/* Agent Dashboard Layout */
+.agent-dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background: #f1f2f4;
+}
+
+.agent-sidebar {
+  width: 280px;
+  background: #ffffff;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  overflow-y: auto;
+}
+
+.agent-sidebar-header {
+  padding: 24px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.agent-sidebar-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.agent-sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.agent-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 4px 8px;
+  background: transparent;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.agent-nav-item:hover {
+  background-color: #f1f5f9;
+  color: #15803d;
+}
+
+.agent-nav-item.active {
+  background-color: #15803d;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.agent-nav-icon {
+  font-size: 18px;
+}
+
+.agent-nav-label {
+  flex: 1;
+  text-align: left;
+}
+
+.agent-sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.agent-logout-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.agent-logout-btn:hover {
+  border-color: #15803d;
+  color: #15803d;
+}
+
+/* Main Dashboard Area */
+.agent-dashboard-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.agent-dashboard-header {
+  margin-bottom: 24px;
+}
+
+.agent-dashboard-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.agent-dashboard-header h1 {
+  font-size: 32px;
+  margin: 0 0 8px 0;
+  color: #0f172a;
+}
+
+.agent-dashboard-header p {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.agent-dashboard-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.agent-action-btn {
+  height: 42px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.agent-action-btn.secondary {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.agent-action-btn.secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.agent-action-btn.primary {
+  background: #15803d;
+  color: #ffffff;
+}
+
+.agent-action-btn.primary:hover {
+  background: #166534;
+}
+
+.agent-dashboard-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.agent-tab-btn {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.agent-tab-btn:hover {
+  background: #f1f5f9;
+  color: #15803d;
+}
+
+.agent-tab-btn.active {
+  background: #15803d;
+  color: #ffffff;
+}
+
+/* Stats Cards Grid */
+.agent-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.agent-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.agent-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.agent-stat-icon {
+  font-size: 36px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.agent-stat-content {
+  flex: 1;
+}
+
+.agent-stat-content h3 {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.agent-stat-value {
+  margin: 8px 0 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.agent-stat-trend {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #4CAF50;
+}
+
+/* Panels Grid */
+.agent-dashboard-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.agent-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.agent-panel.fullscreen {
+  grid-column: 1 / -1;
+}
+
+.agent-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.agent-panel-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.agent-month-select,
+.agent-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.agent-month-select:focus,
+.agent-filter-select:focus {
+  outline: none;
+  border-color: #15803d;
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+}
+
+.agent-panel-loading {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.agent-panel-error {
+  padding: 24px;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 8px;
+}
+
+.agent-no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+/* Sales Chart */
+.agent-sales-chart {
+  padding: 20px 0;
+}
+
+.agent-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 250px;
+  margin-bottom: 20px;
+  gap: 8px;
+}
+
+.agent-chart-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 30px;
+}
+
+.agent-chart-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.agent-chart-bar:hover {
+  opacity: 0.8;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.3);
+}
+
+.agent-chart-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.agent-chart-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.agent-chart-stat {
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.agent-chart-stat-label {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.agent-chart-stat-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Tables */
+.agent-referrals-table,
+.agent-leaderboard-table,
+.agent-history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.agent-referrals-table thead,
+.agent-leaderboard-table thead,
+.agent-history-table thead {
+  background-color: #f9f9f9;
+}
+
+.agent-referrals-table th,
+.agent-leaderboard-table th,
+.agent-history-table th {
+  padding: 12px;
+  text-align: left;
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #eee;
+}
+
+.agent-referrals-table td,
+.agent-leaderboard-table td,
+.agent-history-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.agent-referrals-table tbody tr:hover,
+.agent-leaderboard-table tbody tr:hover,
+.agent-history-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.agent-status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.agent-payout-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.agent-payout-status.paid {
+  background-color: #4CAF50;
+}
+
+.agent-payout-status.pending {
+  background-color: #FF9800;
+}
+
+.agent-payout-status.processing {
+  background-color: #2196F3;
+}
+
+.agent-commission-amount {
+  font-weight: 600;
+  color: #15803d;
+}
+
+.agent-referral-student {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agent-referral-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.agent-referral-email {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Commission Cards */
+.agent-commission-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.agent-commission-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.agent-commission-label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.agent-commission-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+}
+
+.agent-commission-paid {
+  color: #4CAF50;
+}
+
+.agent-commission-pending {
+  color: #FF9800;
+}
+
+/* Progress Bar */
+.agent-commission-progress {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.agent-commission-progress h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.agent-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.agent-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e 0%, #15803d 100%);
+  transition: width 0.3s ease;
+}
+
+.agent-progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Leaderboard */
+.agent-rank-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-medal {
+  font-size: 18px;
+}
+
+.agent-rank-number {
+  font-weight: 600;
+  color: #15803d;
+}
+
+.agent-agent-name {
+  font-weight: 600;
+}
+
+/* Commission History */
+.agent-commission-history {
+  margin-top: 24px;
+}
+
+.agent-commission-history h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .agent-dashboard-panels {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-commission-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .agent-dashboard-container {
+    flex-direction: column;
+  }
+
+  .agent-sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+  }
+
+  .agent-sidebar-header {
+    padding: 12px 16px;
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .agent-sidebar-nav {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .agent-dashboard-main {
+    padding: 16px;
+  }
+
+  .agent-dashboard-header-main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .agent-dashboard-actions {
+    width: 100%;
+  }
+
+  .agent-action-btn {
+    flex: 1;
+  }
+
+  .agent-dashboard-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .agent-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-chart-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-commission-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Loading and Error States */
+.agent-dashboard-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: #999;
+}
+
+.agent-dashboard-error {
+  padding: 24px;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 8px;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

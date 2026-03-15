@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const TopAgents: React.FC = () => {
@@ -79,7 +80,7 @@ const TopAgents: React.FC = () => {
                     </div>
                 </div>
                 <div className="mt-6 border-t border-slate-100 pt-4 dark:border-slate-700/50">
-                    <a className="block text-center text-sm font-medium text-slate-500 transition-colors hover:text-dashboard-primary" href="#">{t('admin.topAgents.viewAll')}</a>
+                    <Link className="block text-center text-sm font-medium text-slate-500 transition-colors hover:text-dashboard-primary" to="/admin/agents">{t('admin.topAgents.viewAll')}</Link>
                 </div>
             </div>
         </div>

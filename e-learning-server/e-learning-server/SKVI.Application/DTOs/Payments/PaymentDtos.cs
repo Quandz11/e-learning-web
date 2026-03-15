@@ -8,6 +8,15 @@ public class CheckoutRequest
     public string? ReferralCode { get; set; }
 }
 
+public class ReferralPreviewResponse
+{
+    public string ReferralCode { get; set; } = string.Empty;
+    public string CabinId { get; set; } = string.Empty;
+    public string CabinName { get; set; } = string.Empty;
+    public string OwnerUserId { get; set; } = string.Empty;
+    public string OwnerName { get; set; } = string.Empty;
+}
+
 public class CheckoutItemDto
 {
     public string CourseId { get; set; } = string.Empty;

@@ -728,7 +728,13 @@ namespace e_learning_server.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Goal")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")

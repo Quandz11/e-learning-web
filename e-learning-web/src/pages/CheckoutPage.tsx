@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { useTranslation } from 'react-i18next';
 import { courseApi } from '../services/courseApi';
-import { paymentApi, type PaymentInstructionDto } from '../services/paymentApi';
+import { paymentApi, type PaymentInstructionDto, type ReferralPreviewResponse } from '../services/paymentApi';
 import { paymentCart, type PaymentCartItem } from '../services/paymentCart';
 
 interface PendingPaymentSession {
@@ -17,6 +17,8 @@ interface PendingPaymentSession {
   createdAt: string;
   expiresAt?: string;
 }
+
+type ReferralPreviewState = 'idle' | 'loading' | 'valid' | 'invalid' | 'error';
 
 const parseCourseIds = (raw: string | null): string[] => {
   if (!raw) {
@@ -41,9 +43,13 @@ const CheckoutPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<PaymentCartItem[]>([]);
   const [referralCode, setReferralCode] = useState('');
+  const [referralPreview, setReferralPreview] = useState<ReferralPreviewResponse | null>(null);
+  const [referralPreviewState, setReferralPreviewState] = useState<ReferralPreviewState>('idle');
+  const [referralMessage, setReferralMessage] = useState<string | null>(null);
   const [pendingPayment, setPendingPayment] = useState<PendingPaymentSession | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const pendingPaymentRef = useRef<HTMLDivElement | null>(null);
+  const referralLookupRef = useRef(0);
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const singleMode = searchParams.get('single') === '1';
@@ -170,6 +176,56 @@ const CheckoutPage: React.FC = () => {
     void loadCheckoutItems();
   }, [queryCourseIds, singleMode]);
 
+  useEffect(() => {
+    const normalizedCode = referralCode.trim();
+    referralLookupRef.current += 1;
+    const lookupId = referralLookupRef.current;
+
+    if (!normalizedCode) {
+      setReferralPreview(null);
+      setReferralPreviewState('idle');
+      setReferralMessage(null);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const lookupReferral = async () => {
+        try {
+          setReferralPreviewState('loading');
+          setReferralMessage(null);
+
+          const preview = await paymentApi.previewReferralCode(normalizedCode);
+          if (lookupId !== referralLookupRef.current) {
+            return;
+          }
+
+          setReferralPreview(preview);
+          setReferralPreviewState('valid');
+        } catch (err: any) {
+          if (lookupId !== referralLookupRef.current) {
+            return;
+          }
+
+          setReferralPreview(null);
+          if (err?.status === 404 || err?.status === 400) {
+            setReferralPreviewState('invalid');
+            setReferralMessage(t('payments.checkout.referral.invalid'));
+            return;
+          }
+
+          setReferralPreviewState('error');
+          setReferralMessage(t('payments.checkout.referral.lookupFailed'));
+        }
+      };
+
+      void lookupReferral();
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [referralCode, t]);
+
   const totalAmount = useMemo(() => {
     return items.reduce((sum, item) => sum + (item.isFree ? 0 : item.price), 0);
   }, [items]);
@@ -188,13 +244,24 @@ const CheckoutPage: React.FC = () => {
       return;
     }
 
+    const normalizedReferralCode = referralCode.trim();
+    if (normalizedReferralCode && referralPreviewState === 'invalid') {
+      setError(t('payments.checkout.referral.invalid'));
+      return;
+    }
+
+    if (normalizedReferralCode && referralPreviewState === 'loading') {
+      setError(t('payments.checkout.referral.checking'));
+      return;
+    }
+
     try {
       setSubmitting(true);
       setError(null);
 
       const result = await paymentApi.createCheckout({
         courseIds: items.map((item) => item.courseId),
-        referralCode: referralCode.trim() || undefined,
+        referralCode: normalizedReferralCode || undefined,
       });
 
       if (!result.requiresPayment) {
@@ -563,6 +630,30 @@ const CheckoutPage: React.FC = () => {
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 {t('payments.checkout.referral.hint')}
               </p>
+
+              {referralPreviewState === 'loading' && (
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  {t('payments.checkout.referral.checking')}
+                </p>
+              )}
+
+              {referralPreviewState === 'valid' && referralPreview && (
+                <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-200">
+                  <p className="font-semibold">{t('payments.checkout.referral.matched')}</p>
+                  <p className="mt-1">
+                    {t('payments.checkout.referral.cabin')}: <span className="font-semibold">{referralPreview.cabinName}</span>
+                  </p>
+                  <p>
+                    {t('payments.checkout.referral.owner')}: <span className="font-semibold">{referralPreview.ownerName}</span>
+                  </p>
+                </div>
+              )}
+
+              {(referralPreviewState === 'invalid' || referralPreviewState === 'error') && referralMessage && (
+                <p className="mt-2 text-xs text-red-600 dark:text-red-300">
+                  {referralMessage}
+                </p>
+              )}
             </div>
 
             <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 shadow-sm p-5">
@@ -581,7 +672,7 @@ const CheckoutPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCheckout}
-                disabled={loading || submitting || items.length === 0 || !!pendingPayment}
+                disabled={loading || submitting || items.length === 0 || !!pendingPayment || referralPreviewState === 'loading'}
                 className="mt-5 w-full rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white shadow-md shadow-primary/20 transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting

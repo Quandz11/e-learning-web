@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import CourseList from '../components/courses/CourseList';
 import QuizModal from '../components/quiz/QuizModal';
 import TestimonialsSection from '../components/home/TestimonialsSection';
+import CourseConsultationForm from '../components/home/CourseConsultationForm';
 import { homeSectionApi, type HomeVideoSectionDto } from '../services/homeSectionApi';
 import { whyChooseUsApi, type WhyChooseUsItemDto } from '../services/whyChooseUsApi';
 
@@ -105,6 +106,7 @@ const HomePage: React.FC = () => {
         </section>
       )}
 
+
       {/* Featured Courses Section */}
       <section className="bg-gray-50 dark:bg-gray-800 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -145,7 +147,10 @@ const HomePage: React.FC = () => {
             ))}
           </div>
         </section>
+        
       )}
+      <CourseConsultationForm />
+
 
       <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
     </>

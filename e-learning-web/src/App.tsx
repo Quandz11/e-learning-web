@@ -61,6 +61,12 @@ import CheckoutPage from './pages/CheckoutPage';
 import PaymentResultPage from './pages/PaymentResultPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import AdminReferralsPage from './pages/admin/referrals/AdminReferralsPage';
+import AdminAgentsPage from './pages/admin/agents/AdminAgentsPage';
+import AdminLeadRegistrationsPage from './pages/admin/leads/AdminLeadRegistrationsPage';
+import CareDashboardPage from './pages/care/CareDashboardPage';
+import AgentDashboardPage from './pages/agent/AgentDashboardPage';
+import LecturerDashboardPage from './pages/lecturer/LecturerDashboardPage';
+import RouteErrorFallback from './components/common/RouteErrorFallback';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -68,7 +74,11 @@ const RootRedirect = () => {
   const role = user?.role?.toUpperCase();
 
   if (isAuthenticated) {
-    return <Navigate to={role === 'ADMIN' ? '/admin/dashboard' : '/home'} replace />;
+    if (role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
+    if (role === 'CARE') return <Navigate to="/care/dashboard" replace />;
+    if (role === 'CABIN_OWNER') return <Navigate to="/agent/dashboard" replace />;
+    if (role === 'LECTURER') return <Navigate to="/lecturer/dashboard" replace />;
+    return <Navigate to="/home" replace />;
   }
   return <HomePage />;
 };
@@ -83,6 +93,7 @@ function App() {
       createBrowserRouter([
         {
           element: <RootLayout />,
+          errorElement: <RouteErrorFallback />,
           children: [
             {
               element: <AuthLayout />,
@@ -471,6 +482,22 @@ function App() {
               ),
             },
             {
+              path: 'admin/agents',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminAgentsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/lead-registrations',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminLeadRegistrationsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
               path: 'admin/why-choose-us',
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
@@ -491,6 +518,33 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminWhyChooseUsEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            // Care Dashboard Routes
+            {
+              path: 'care/dashboard',
+              element: (
+                <ProtectedRoute requiredRole="CARE">
+                  <CareDashboardPage />
+                </ProtectedRoute>
+              ),
+            },
+            // Agent Dashboard Routes
+            {
+              path: 'agent/dashboard',
+              element: (
+                <ProtectedRoute requiredRole="CABIN_OWNER">
+                  <AgentDashboardPage />
+                </ProtectedRoute>
+              ),
+            },
+            // Lecturer Dashboard Routes
+            {
+              path: 'lecturer/dashboard',
+              element: (
+                <ProtectedRoute requiredRole="LECTURER">
+                  <LecturerDashboardPage />
                 </ProtectedRoute>
               ),
             },

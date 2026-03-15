@@ -67,6 +67,8 @@ import CareDashboardPage from './pages/care/CareDashboardPage';
 import AgentDashboardPage from './pages/agent/AgentDashboardPage';
 import LecturerDashboardPage from './pages/lecturer/LecturerDashboardPage';
 import RouteErrorFallback from './components/common/RouteErrorFallback';
+import PricingPage from './pages/PricingPage';
+import AmbassadorPage from './pages/AmbassadorPage';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -146,6 +148,14 @@ function App() {
                 {
                   path: 'courses/:id',
                   element: <StudentCourseDetailPage />,
+                },
+                {
+                  path: 'pricing',
+                  element: <PricingPage />,
+                },
+                {
+                  path: 'ambassador',
+                  element: <AmbassadorPage />,
                 },
                 {
                   path: 'my-courses',

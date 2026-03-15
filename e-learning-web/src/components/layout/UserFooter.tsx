@@ -1,131 +1,188 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { FaFacebookF, FaTiktok, FaYoutube } from 'react-icons/fa6';
 import logoImg from '../../assets/logo.jpg';
 
 const UserFooter: React.FC = () => {
     const { t } = useTranslation();
     const currentYear = new Date().getFullYear();
 
+    const discoverLinks = [
+        { to: '/', icon: 'eco', label: t('home.footer.discover.about') },
+        { to: '/#fasting', icon: 'self_improvement', label: t('home.footer.discover.method') },
+        { to: '/courses', icon: 'school', label: t('home.footer.discover.courses') },
+        { to: '/pricing', icon: 'payments', label: t('home.footer.discover.pricing') },
+        { to: '/testimonials', icon: 'favorite', label: t('home.footer.discover.stories') },
+        { to: '/articles', icon: 'library_books', label: t('home.footer.discover.blog') }
+    ];
+
+    const supportLinks = [
+        { to: '/forum', icon: 'help', label: t('home.footer.support.faq') },
+        { to: '/ambassador', icon: 'volunteer_activism', label: t('home.footer.support.ambassador') },
+        { to: '/', icon: 'policy', label: t('home.footer.support.privacy') },
+        { to: '/', icon: 'gavel', label: t('home.footer.support.terms') },
+        { to: '/', icon: 'warning', label: t('home.footer.support.disclaimer') },
+        { to: '/', icon: 'handshake', label: t('home.footer.support.collaboration') }
+    ];
+
     return (
-        <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
-                    {/* Company Info */}
-                    <div className="col-span-1 sm:col-span-2 lg:col-span-2">
-                        <Link to="/" className="flex items-center gap-3 mb-4">
-                            <img src={logoImg} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full border border-primary bg-white shadow-sm" />
-                            <h3 className="text-[#0c1c1d] dark:text-white text-lg sm:text-xl font-bold tracking-tight">
-                                NhinAnChuaLanh<span className="text-primary">.vn</span>
-                            </h3>
+        <footer className="mt-auto border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+            <div className="mx-auto max-w-none px-3 py-8 sm:px-4 sm:py-10 lg:px-6 xl:px-8">
+                <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="p-6 sm:p-7 xl:border-r xl:border-gray-200 dark:xl:border-gray-800">
+                        <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
+                            <span className="material-symbols-outlined text-[22px] text-primary">spa</span>
+                            <h4 className="text-sm font-extrabold uppercase tracking-wide text-[#0c1c1d] dark:text-white">
+                                {t('home.footer.journey.title')}
+                            </h4>
+                        </div>
+
+                        <Link to="/" className="mb-4 flex items-center gap-3">
+                            <img src={logoImg} alt={t('home.footer.logoAlt')} className="h-10 w-10 border border-primary bg-white object-cover shadow-sm" />
+                            <p className="text-2xl font-bold tracking-tight text-[#0c1c1d] dark:text-white">
+                                {t('home.footer.journey.brand')}
+                            </p>
                         </Link>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 max-w-md leading-relaxed">
-                            {t('footer.description', {
-                                defaultValue: 'Nền tảng học tập trực tuyến hàng đầu, cung cấp các khóa học chất lượng cao và kiến thức chuyên sâu.'
-                            })}
+
+                        <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                            {t('home.footer.journey.description')}
                         </p>
-                        {/* Social Links */}
-                        <div className="flex items-center gap-3">
+                        <p className="mt-5 font-medium text-[#0c1c1d] dark:text-white">{t('home.footer.journey.tagline')}</p>
+                    </div>
+
+                    <div className="p-6 sm:p-7 xl:border-r xl:border-gray-200 dark:xl:border-gray-800">
+                        <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
+                            <span className="material-symbols-outlined text-[22px] text-primary">menu_book</span>
+                            <h4 className="text-sm font-extrabold uppercase tracking-wide text-[#0c1c1d] dark:text-white">
+                                {t('home.footer.discover.title')}
+                            </h4>
+                        </div>
+
+                        <ul className="space-y-2.5">
+                            {discoverLinks.map((item) => (
+                                <li key={item.label}>
+                                    <Link
+                                        to={item.to}
+                                        className="group flex items-center gap-2 text-[17px] text-gray-700 transition-colors hover:text-primary dark:text-gray-300"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px] text-primary/80 transition-transform group-hover:scale-110">
+                                            {item.icon}
+                                        </span>
+                                        <span>{item.label}</span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="p-6 sm:p-7 xl:border-r xl:border-gray-200 dark:xl:border-gray-800">
+                        <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
+                            <span className="material-symbols-outlined text-[22px] text-primary">support_agent</span>
+                            <h4 className="text-sm font-extrabold uppercase tracking-wide text-[#0c1c1d] dark:text-white">
+                                {t('home.footer.support.title')}
+                            </h4>
+                        </div>
+
+                        <ul className="space-y-2.5">
+                            {supportLinks.map((item) => (
+                                <li key={item.label}>
+                                    <Link
+                                        to={item.to}
+                                        className="group flex items-center gap-2 text-[17px] text-gray-700 transition-colors hover:text-primary dark:text-gray-300"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px] text-primary/80 transition-transform group-hover:scale-110">
+                                            {item.icon}
+                                        </span>
+                                        <span>{item.label}</span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="p-6 sm:p-7">
+                        <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
+                            <span className="material-symbols-outlined text-[22px] text-primary">podcasts</span>
+                            <h4 className="text-sm font-extrabold uppercase tracking-wide text-[#0c1c1d] dark:text-white">
+                                {t('home.footer.connect.title')}
+                            </h4>
+                        </div>
+
+                        <div className="space-y-2 text-[17px] text-gray-700 dark:text-gray-300">
+                            <p>
+                                <span className="font-semibold text-[#0c1c1d] dark:text-white">{t('home.footer.connect.hotlineLabel')}:</span>{' '}
+                                {t('home.footer.connect.hotlineValue')}
+                            </p>
+                            <p>
+                                <span className="font-semibold text-[#0c1c1d] dark:text-white">{t('home.footer.connect.emailLabel')}:</span>{' '}
+                                {t('home.footer.connect.emailValue')}
+                            </p>
+                        </div>
+
+                        <div className="mt-4 flex items-center gap-3">
                             <a
                                 href="https://www.facebook.com/nhinanchualanhvn"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-colors"
-                                aria-label="Facebook"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-[#0c1c1d] transition-colors hover:border-primary hover:bg-primary hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                aria-label={t('home.footer.connect.social.facebook')}
                             >
-                                <span className="material-symbols-outlined text-xl">facebook</span>
+                                <FaFacebookF className="h-[18px] w-[18px]" />
                             </a>
                             <a
                                 href="https://www.youtube.com/@nhinanchualanhvn"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-colors"
-                                aria-label="YouTube"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-[#0c1c1d] transition-colors hover:border-primary hover:bg-primary hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                aria-label={t('home.footer.connect.social.youtube')}
                             >
-                                <span className="material-symbols-outlined text-xl">youtube_video</span>
+                                <FaYoutube className="h-[18px] w-[18px]" />
+                            </a>
+                            <a
+                                href="https://www.tiktok.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-[#0c1c1d] transition-colors hover:border-primary hover:bg-primary hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                aria-label={t('home.footer.connect.social.tiktok')}
+                            >
+                                <FaTiktok className="h-[18px] w-[18px]" />
+                            </a>
+                            <a
+                                href="/forum"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-[#0c1c1d] transition-colors hover:border-primary hover:bg-primary hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                aria-label={t('home.footer.connect.social.community')}
+                            >
+                                <span className="material-symbols-outlined text-[20px]">groups</span>
                             </a>
                         </div>
-                    </div>
 
-                    {/* Quick Links */}
-                    <div>
-                        <h4 className="text-[#0c1c1d] dark:text-white font-bold mb-4">
-                            {t('footer.quickLinks', { defaultValue: 'Liên kết' })}
-                        </h4>
-                        <ul className="space-y-2">
-                            <li>
-                                <Link
-                                    to="/courses"
-                                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors text-sm"
-                                >
-                                    {t('footer.courses', { defaultValue: 'Khóa học' })}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/articles"
-                                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors text-sm"
-                                >
-                                    {t('footer.articles', { defaultValue: 'Bài viết' })}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors text-sm"
-                                >
-                                    {t('footer.about', { defaultValue: 'Về chúng tôi' })}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors text-sm"
-                                >
-                                    {t('footer.contact', { defaultValue: 'Liên hệ' })}
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* Support */}
-                    <div>
-                        <h4 className="text-[#0c1c1d] dark:text-white font-bold mb-4">
-                            {t('footer.support', { defaultValue: 'Hỗ trợ' })}
-                        </h4>
-                        <ul className="space-y-2">
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors text-sm"
-                                >
-                                    {t('footer.faq', { defaultValue: 'Câu hỏi thường gặp' })}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors text-sm"
-                                >
-                                    {t('footer.privacy', { defaultValue: 'Chính sách bảo mật' })}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/"
-                                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors text-sm"
-                                >
-                                    {t('footer.terms', { defaultValue: 'Điều khoản sử dụng' })}
-                                </Link>
-                            </li>
-                        </ul>
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                            <button
+                                type="button"
+                                className="rounded-full border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+                            >
+                                {t('home.footer.connect.chatAction')}
+                            </button>
+                            <button
+                                type="button"
+                                className="rounded-full border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+                            >
+                                {t('home.footer.connect.newsAction')}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Copyright */}
-                <div className="mt-8 pt-6 sm:pt-8 border-t border-gray-200 dark:border-gray-800">
-                    <p className="text-center text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                        © {currentYear} NhinAnChuaLanh.vn {t('footer.copyright', { defaultValue: 'Tất cả quyền được bảo lưu.' })}
+                <div className="mt-6 border-t border-gray-200 pt-5 dark:border-gray-800">
+                    <p className="text-center text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                        {t('home.footer.copyrightLine', { year: currentYear })}
+                    </p>
+                </div>
+
+                <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/70">
+                    <p className="text-center text-xs leading-relaxed text-gray-700 dark:text-gray-300">
+                        {t('home.footer.medicalNotice')}
                     </p>
                 </div>
             </div>

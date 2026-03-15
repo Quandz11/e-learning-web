@@ -20,6 +20,12 @@ public class LeadRegistrationsController : ControllerBase
         "LOST"
     };
 
+    private static readonly HashSet<string> AllowedSources = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "WEBSITE_FORM",
+        "AMBASSADOR_FORM"
+    };
+
     private readonly ApplicationDbContext _context;
     private readonly ILogger<LeadRegistrationsController> _logger;
 
@@ -41,6 +47,14 @@ public class LeadRegistrationsController : ControllerBase
             var email = RequireValue(request.Email, "Email is required.");
             var phone = RequireValue(request.Phone, "Phone is required.");
             var goal = RequireValue(request.Goal, "Consultation goal is required.");
+            var source = string.IsNullOrWhiteSpace(request.Source)
+                ? "WEBSITE_FORM"
+                : request.Source.Trim().ToUpperInvariant();
+
+            if (!AllowedSources.Contains(source))
+            {
+                return BadRequest(new { message = "Source is invalid." });
+            }
 
             if (!email.Contains('@'))
             {
@@ -55,7 +69,7 @@ public class LeadRegistrationsController : ControllerBase
                 Email = email,
                 Phone = phone,
                 Goal = goal,
-                Source = "WEBSITE_FORM",
+                Source = source,
                 Status = "NEW",
                 CreatedAt = now,
                 UpdatedAt = now

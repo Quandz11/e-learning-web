@@ -44,6 +44,7 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | LeadStatus>('ALL');
+  const [sourceFilter, setSourceFilter] = useState('ALL');
   const [leads, setLeads] = useState<LeadRegistrationDto[]>([]);
   const [careUsers, setCareUsers] = useState<UserDto[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -71,11 +72,35 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
       minute: '2-digit',
     });
 
+  const sourceOptions = useMemo(() => {
+    const sources = new Set<string>(['WEBSITE_FORM', 'AMBASSADOR_FORM']);
+
+    leads.forEach((lead) => {
+      const normalizedSource = (lead.source || '').trim().toUpperCase();
+      if (normalizedSource) {
+        sources.add(normalizedSource);
+      }
+    });
+
+    return Array.from(sources);
+  }, [leads]);
+
+  const sourceLabel = (value: string) =>
+    t(`leadRegistrations.source.${value}`, {
+      defaultValue: value,
+    });
+
   const filteredLeads = useMemo(() => {
     const keyword = search.trim().toUpperCase();
 
     return leads.filter((lead) => {
       if (statusFilter !== 'ALL' && lead.status !== statusFilter) {
+        return false;
+      }
+
+      const normalizedSource = (lead.source || '').trim().toUpperCase();
+
+      if (sourceFilter !== 'ALL' && normalizedSource !== sourceFilter) {
         return false;
       }
 
@@ -87,10 +112,11 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
         lead.fullName.toUpperCase().includes(keyword) ||
         lead.email.toUpperCase().includes(keyword) ||
         lead.phone.toUpperCase().includes(keyword) ||
-        lead.goal.toUpperCase().includes(keyword)
+        lead.goal.toUpperCase().includes(keyword) ||
+        normalizedSource.includes(keyword)
       );
     });
-  }, [leads, search, statusFilter]);
+  }, [leads, search, sourceFilter, statusFilter]);
 
   const statusClass = (status: LeadStatus) => {
     if (status === 'NEW') {
@@ -288,8 +314,8 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
         </button>
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="sm:col-span-2">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="sm:col-span-2 lg:col-span-2">
           <input
             type="text"
             value={search}
@@ -313,6 +339,19 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
             </option>
           ))}
         </select>
+
+        <select
+          value={sourceFilter}
+          onChange={(event) => setSourceFilter(event.target.value)}
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-dashboard-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+        >
+          <option value="ALL">{t('leadRegistrations.filters.allSources', { defaultValue: 'Tất cả nguồn' })}</option>
+          {sourceOptions.map((source) => (
+            <option key={source} value={source}>
+              {sourceLabel(source)}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-dashboard-surface-dark overflow-hidden">
@@ -323,6 +362,7 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
                 <th className="px-6 py-4 font-semibold">{t('leadRegistrations.table.customer', { defaultValue: 'Khách hàng' })}</th>
                 <th className="px-6 py-4 font-semibold">{t('leadRegistrations.table.phone', { defaultValue: 'Điện thoại' })}</th>
                 <th className="px-6 py-4 font-semibold">{t('leadRegistrations.table.goal', { defaultValue: 'Mục tiêu' })}</th>
+                <th className="px-6 py-4 font-semibold">{t('leadRegistrations.table.source', { defaultValue: 'Nguồn' })}</th>
                 <th className="px-6 py-4 font-semibold">{t('leadRegistrations.table.status', { defaultValue: 'Trạng thái' })}</th>
                 <th className="px-6 py-4 font-semibold">{t('leadRegistrations.table.assignedCare', { defaultValue: 'Care phụ trách' })}</th>
                 <th className="px-6 py-4 font-semibold">{t('leadRegistrations.table.createdAt', { defaultValue: 'Đăng ký lúc' })}</th>
@@ -332,13 +372,13 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
             <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan={8} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
                     {t('leadRegistrations.table.loading', { defaultValue: 'Đang tải dữ liệu...' })}
                   </td>
                 </tr>
               ) : filteredLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan={8} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
                     {t('leadRegistrations.table.empty', { defaultValue: 'Chưa có đăng ký nào.' })}
                   </td>
                 </tr>
@@ -351,6 +391,7 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
                     </td>
                     <td className="px-6 py-4 text-slate-700 dark:text-slate-200">{lead.phone}</td>
                     <td className="px-6 py-4 text-slate-700 dark:text-slate-200">{lead.goal}</td>
+                    <td className="px-6 py-4 text-slate-700 dark:text-slate-200">{sourceLabel((lead.source || '').trim().toUpperCase() || 'WEBSITE_FORM')}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(lead.status)}`}>
                         {statusLabel(lead.status)}
@@ -402,6 +443,9 @@ const LeadRegistrationsPanel: React.FC<LeadRegistrationsPanelProps> = ({ title, 
 
                 <p className="text-sm text-slate-700 dark:text-slate-200">{lead.phone}</p>
                 <p className="text-sm text-slate-700 dark:text-slate-200">{lead.goal}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {t('leadRegistrations.table.source', { defaultValue: 'Nguồn' })}: {sourceLabel((lead.source || '').trim().toUpperCase() || 'WEBSITE_FORM')}
+                </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{formatDateTime(lead.createdAt)}</p>
 
                 <div className="flex items-center justify-between gap-2">

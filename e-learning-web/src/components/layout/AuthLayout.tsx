@@ -17,7 +17,7 @@ const AuthLayout = () => {
                 </div>
                 <div className="relative z-10 text-white max-w-md">
                     <div className="flex items-center gap-2 mb-8">
-                        <img src={logoImg} alt="Logo" className="w-20 h-20 object-cover rounded-full border-2 border-white bg-white shadow-sm" />
+                        <img src={logoImg} alt="Logo" className="w-20 h-20 object-cover border-2 border-white bg-white shadow-sm" />
                         <span className="text-3xl font-bold tracking-tight">Nhinanchualanh.vn</span>
                     </div>
                     <h1 className="text-4xl font-bold leading-tight mb-6">Đánh thức bác sĩ tự thân trong cơ thể bạn.</h1>
@@ -37,7 +37,7 @@ const AuthLayout = () => {
                     {/* Mobile Branding */}
                     <div className="mb-2 flex justify-center sm:mb-4 lg:hidden">
                         <div className="flex items-center gap-2 text-primary dark:text-white">
-                            <img src={logoImg} alt="Logo" className="h-12 w-12 rounded-full border-2 border-primary bg-white object-cover shadow-sm sm:h-14 sm:w-14" />
+                            <img src={logoImg} alt="Logo" className="h-12 w-12 border-2 border-primary bg-white object-cover shadow-sm sm:h-14 sm:w-14" />
                             <span className="max-w-[70vw] truncate text-2xl font-bold tracking-tight sm:text-3xl">NhinAnChuaLanh</span>
                         </div>
                     </div>

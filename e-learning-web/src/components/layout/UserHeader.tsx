@@ -8,6 +8,7 @@ import { authApi } from '../../services/authApi';
 import { clearAuth } from '../../services/authStorage';
 import HeaderNotification from '../common/HeaderNotification';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import UserMenu from '../common/UserMenu';
 import logoImg from '../../assets/logo.jpg';
 import { paymentCart, PAYMENT_CART_CHANGED_EVENT } from '../../services/paymentCart';
 
@@ -56,7 +57,7 @@ const UserHeader: React.FC = () => {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="flex items-center gap-2 sm:gap-3"
                     >
-                        <div className="size-10 sm:size-12 flex items-center justify-center overflow-hidden rounded-full border-2 border-primary">
+                        <div className="size-10 sm:size-12 flex items-center justify-center overflow-hidden border-2 border-primary">
                             <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <h2 className="hidden sm:block text-[#0c1c1d] dark:text-white text-base lg:text-lg font-bold tracking-tight">
@@ -86,26 +87,22 @@ const UserHeader: React.FC = () => {
                         </Link>
                         <Link
                             className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
+                            to="/pricing"
+                        >
+                            {t('home.header.nav.pricing', { defaultValue: 'Bảng giá' })}
+                        </Link>
+                        <Link
+                            className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
+                            to="/ambassador"
+                        >
+                            {t('home.header.nav.ambassador', { defaultValue: 'Đại sứ sức khỏe' })}
+                        </Link>
+                        <Link
+                            className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
                             to="/forum"
                         >
                             {t('home.header.nav.forum', { defaultValue: 'Diễn đàn' })}
                         </Link>
-                        {isAuthenticated && user && (
-                            <Link
-                                className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                                to="/my-courses"
-                            >
-                                {t('home.header.nav.myCourses')}
-                            </Link>
-                        )}
-                        {isAuthenticated && user && (
-                            <Link
-                                className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                                to="/my-orders"
-                            >
-                                {t('home.header.nav.myOrders')}
-                            </Link>
-                        )}
                         <a
                             className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
                             href="/#testimonials"
@@ -136,22 +133,11 @@ const UserHeader: React.FC = () => {
                                     <HeaderNotification />
                                 </div>
 
-                                <Link
-                                    to="/profile"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden"
-                                    title={t('home.header.profileTitle', { defaultValue: 'Profile' })}
-                                >
-                                    {user.avatarUrl ? (
-                                        <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
-                                    ) : (
-                                        <span className="text-sm font-semibold text-primary">{user.fullName?.charAt(0)?.toUpperCase() || 'U'}</span>
-                                    )}
-                                </Link>
-
                                 <span className="hidden xl:inline text-sm text-gray-600 dark:text-gray-300 font-display">
                                     {t('home.header.welcome')}, <span className="font-medium text-gray-900 dark:text-white normal-case">{user.fullName}</span>
                                 </span>
+
+                                <UserMenu user={user} />
 
                                 <button
                                     onClick={handleLogout}
@@ -224,30 +210,26 @@ const UserHeader: React.FC = () => {
                             {t('home.header.nav.articles', { defaultValue: 'Bài viết' })}
                         </Link>
                         <Link
+                            to="/pricing"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
+                        >
+                            {t('home.header.nav.pricing', { defaultValue: 'Bảng giá' })}
+                        </Link>
+                        <Link
+                            to="/ambassador"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
+                        >
+                            {t('home.header.nav.ambassador', { defaultValue: 'Đại sứ sức khỏe' })}
+                        </Link>
+                        <Link
                             to="/forum"
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
                         >
                             {t('home.header.nav.forum', { defaultValue: 'Diễn đàn' })}
                         </Link>
-                        {isAuthenticated && user && (
-                            <>
-                                <Link
-                                    to="/my-courses"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
-                                >
-                                    {t('home.header.nav.myCourses')}
-                                </Link>
-                                <Link
-                                    to="/my-orders"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
-                                >
-                                    {t('home.header.nav.myOrders')}
-                                </Link>
-                            </>
-                        )}
                         <a
                             href="/#testimonials"
                             onClick={() => setIsMobileMenuOpen(false)}

@@ -1229,11 +1229,18 @@
                 "benefits": "Lợi ích",
                 "testimonials": "Đánh giá",
                 "myCourses": "Khóa học của tôi",
-                "myOrders": "Đơn hàng của tôi"
+                "myOrders": "Đơn hàng của tôi",
+                "pricing": "Bảng giá",
+                "ambassador": "Đại sứ sức khỏe"
             },
             "cartTitle": "Giỏ hàng",
             "logout": "Đăng xuất",
-            "welcome": "Chào mừng"
+            "welcome": "Chào mừng",
+            "profileTitle": "Hồ sơ",
+            "userMenu": {
+                "profile": "Hồ sơ",
+                "settings": "Cài đặt"
+            }
         },
         "hero": {
             "badge": "Khai giảng học kỳ mới",
@@ -1249,6 +1256,10 @@
             },
             "interactive": "Học tập tương tác",
             "liveSession": "Buổi học trực tiếp & hội thảo"
+        },
+        "heroCta": {
+            "pricing": "Xem bảng giá 2026",
+            "ambassador": "Đăng ký Đại sứ sức khỏe"
         },
         "fasting": {
             "title": "Chào mừng bạn đến với Phương pháp nhịn ăn",
@@ -1371,33 +1382,234 @@
             "cta": "Bắt đầu"
         },
         "footer": {
-            "description": "Trao quyền cho người học trên toàn thế giới với giáo dục chất lượng cao, dễ tiếp cận từ các chuyên gia ngành.",
-            "platform": {
-                "title": "Nền tảng",
-                "browseCourses": "Duyệt khóa học",
-                "successStories": "Câu chuyện thành công",
-                "pricing": "Bảng giá",
-                "forBusiness": "Dành cho doanh nghiệp"
+            "logoAlt": "Logo Nhịn Ăn Chữa Lành",
+            "journey": {
+                "title": "Hành trình tự chữa lành",
+                "brand": "nhinanchualanh.vn",
+                "description": "Hành trình trở về với bản thể tự nhiên thông qua phương pháp nhịn ăn khoa học. Chúng tôi đồng hành cùng bạn trên con đường thanh lọc thân tâm và đánh thức khả năng tự chữa lành của cơ thể.",
+                "tagline": "Lắng nghe cơ thể - Tìm lại chính mình."
             },
-            "portals": {
-                "title": "Cổng thông tin",
-                "studentLogin": "Đăng nhập học viên",
-                "instructorDashboard": "Bảng điều khiển giảng viên",
-                "agentPortal": "Cổng đại lý",
-                "adminAccess": "Truy cập quản trị"
+            "discover": {
+                "title": "Khám phá",
+                "about": "Về chúng tôi",
+                "method": "Phương pháp Nhịn ăn",
+                "courses": "Khóa học & Workshop",
+                "pricing": "Bảng giá 2026",
+                "stories": "Câu chuyện chữa lành",
+                "blog": "Blog kiến thức"
+            },
+            "support": {
+                "title": "Hỗ trợ",
+                "faq": "Câu hỏi thường gặp (FAQ)",
+                "ambassador": "Chương trình Đại sứ sức khỏe",
+                "privacy": "Chính sách bảo mật",
+                "terms": "Điều khoản sử dụng",
+                "disclaimer": "Miễn trừ trách nhiệm",
+                "collaboration": "Liên hệ cộng tác"
             },
             "connect": {
                 "title": "Kết nối",
-                "aboutUs": "Về chúng tôi",
-                "careers": "Nghề nghiệp",
-                "contactSupport": "Liên hệ hỗ trợ",
-                "privacyPolicy": "Chính sách bảo mật"
+                "hotlineLabel": "Hotline",
+                "hotlineValue": "[Số điện thoại]",
+                "emailLabel": "Email",
+                "emailValue": "contact@nhinanchualanh.vn",
+                "chatAction": "Đăng ký nhắn tin",
+                "newsAction": "Đăng ký nhận tin",
+                "social": {
+                    "facebook": "Facebook",
+                    "youtube": "YouTube",
+                    "tiktok": "TikTok",
+                    "community": "Cộng đồng"
+                }
             },
-            "copyright": "© 2026 SKVI Learning Inc. Bản quyền thuộc về.",
-            "terms": "Điều khoản",
-            "privacy": "Bảo mật",
-            "cookies": "Cookies"
+            "copyrightLine": "© {{year}} Nhịn Ăn Chữa Lành. Tất cả các quyền được bảo hộ. Thiết kế bởi [Tên đơn vị thiết kế].",
+            "medicalNotice": "*Lưu ý: Các thông tin trên website mang tính chất chia sẻ kiến thức và kinh nghiệm cá nhân. Chúng tôi không đưa ra lời khuyên y tế thay thế cho bác sĩ chuyên khoa. Vui lòng tham vấn ý kiến chuyên gia trước khi bắt đầu bất kỳ liệu trình nhịn ăn chuyên sâu nào.*"
         }
+    },
+    "pricingPage": {
+        "hero": {
+            "title": "Bảng Giá Nhịn Ăn Chữa Lành 2026",
+            "subtitle": "Hệ sinh thái chăm sóc sức khỏe chủ động theo chuẩn khoa học"
+        },
+        "packages": {
+            "course99k": {
+                "name": "Quy Trình Nhịn Ăn Chuẩn Khoa Học",
+                "price": "99.000đ",
+                "desc": "Nắm vững kiến thức xương sống để nhịn ăn an toàn và hiệu quả.",
+                "features": [
+                    "Quy trình nhịn ăn chuẩn y khoa",
+                    "Tặng 07 ngày tập cùng HLV"
+                ],
+                "cta": "Trải nghiệm ngay"
+            },
+            "challenge": {
+                "name": "Thử Thách 7 Ngày (Challenge)",
+                "price": "299.000đ",
+                "desc": "Chiến dịch đồng hành cộng đồng có HLV dẫn dắt trực tiếp mỗi tháng.",
+                "features": [
+                    "Zoom thực chiến mỗi tối",
+                    "Nhóm hỗ trợ Zalo sát sao",
+                    "Năng lượng cộng đồng tích cực"
+                ],
+                "cta": "Đăng ký tham gia"
+            },
+            "trainingMeditation": {
+                "name": "Tập Luyện & Thiền Chữa Lành",
+                "price": "399.000đ",
+                "desc": "Duy trì kỷ luật rèn luyện Thân - Tâm hàng ngày cùng chuyên gia.",
+                "features": [
+                    "Zoom trực tiếp sáng & tối",
+                    "Kho bài tập thiền chuyên sâu",
+                    "Tặng gói Quy trình 99K"
+                ],
+                "cta": "Đăng ký tháng"
+            },
+            "basicFull": {
+                "badge": "BÁN CHẠY NHẤT",
+                "name": "Nhịn Ăn Cơ Bản (Full)",
+                "price": "2.500.000đ",
+                "desc": "Trọn bộ kiến thức từ cơ bản đến nâng cao để làm chủ lối sống.",
+                "features": [
+                    "10 bài học nhịn ăn chuyên sâu",
+                    "Tặng gói Tập & Thiền chữa lành",
+                    "Miễn phí mọi kỳ Thử Thách",
+                    "Hoàn tiền 100% nếu không kết quả"
+                ],
+                "cta": "Sở hữu ngay"
+            },
+            "obesityReset": {
+                "name": "Xóa Sổ Béo Phì",
+                "price": "5.500.000đ",
+                "desc": "Lộ trình đặc biệt tiêu diệt mỡ nội tạng và mỡ thừa lâu năm.",
+                "features": [
+                    "Công thức ăn xanh & tập luyện",
+                    "Tặng gói Tập & Thiền chữa lành",
+                    "Miễn phí mọi kỳ Thử Thách",
+                    "Cam kết giảm cân, giảm eo"
+                ],
+                "cta": "Chốt lộ trình"
+            },
+            "fullTransformation": {
+                "name": "Chuyển Hóa Toàn Diện",
+                "price": "Tư vấn",
+                "desc": "Phác đồ trị liệu 1:1 dành riêng cho người có bệnh lý nền.",
+                "features": [
+                    "Kèm cặp 1:1 cùng chuyên gia",
+                    "Phác đồ dựa trên chỉ số máu",
+                    "Miễn phí Tập & Thiền vĩnh viễn",
+                    "Tư vấn sức khỏe 24/7"
+                ],
+                "cta": "Đăng ký tư vấn 1:1"
+            }
+        },
+        "ambassador": {
+            "title": "TRỞ THÀNH ĐẠI SỨ SỨC KHỎE",
+            "subtitle": "Lan tỏa giá trị chữa lành - Nhận hoa hồng từ 15% đến 50% khi giới thiệu học viên mới.",
+            "cta": "Tìm hiểu cơ chế & Đăng ký Đại sứ tại đây"
+        },
+        "policies": {
+            "title": "Chính Sách & Quy Định",
+            "items": [
+                "Đặc quyền miễn phí: Học viên đăng ký các gói từ số 4 trở đi (giá trị trên 2.000.000đ) được miễn phí gói Tập luyện & Thiền chữa lành và tất cả các kỳ Thử thách 7 ngày hàng tháng.",
+                "Cam kết hoàn tiền: Hoàn phí 100% cho các gói chuyên sâu nếu học viên tham gia đầy đủ (trên 80%) nhưng không đạt kết quả cải thiện chỉ số cơ thể.",
+                "Chính sách nâng cấp: Khấu trừ phí cũ khi nâng cấp lên gói cao hơn trong vòng 15 ngày kể từ ngày đăng ký."
+            ]
+        },
+        "faq": {
+            "title": "Câu Hỏi Thường Gặp",
+            "items": [
+                {
+                    "q": "Tôi mua gói Nhịn ăn cơ bản Full có được tập luyện không?",
+                    "a": "Có. Từ gói số 4 trở đi, bạn được tặng kèm miễn phí gói Tập luyện & Thiền chữa lành hàng ngày và vé tham dự Thử thách 7 ngày hàng tháng mà không phải trả thêm chi phí."
+                },
+                {
+                    "q": "Làm sao để nhận hoa hồng cao khi giới thiệu học viên?",
+                    "a": "Khi bạn trở thành Đại sứ sức khỏe, các gói phễu như khóa 99K có mức hoa hồng rất cao. Các gói cao cấp hơn sẽ có mức từ 15% đến 25% tùy vào cấp độ đại sứ của bạn."
+                },
+                {
+                    "q": "Gói Tập luyện & Thiền chữa lành có Zoom trực tiếp không?",
+                    "a": "Có. Đây là chương trình Zoom trực tiếp mỗi ngày cùng HLV để đảm bảo bạn duy trì kỷ luật tập luyện và tĩnh tâm đúng cách."
+                }
+            ]
+        }
+    },
+    "ambassadorPage": {
+        "hero": {
+            "title": "Đại Sứ Sức Khỏe",
+            "subtitle": "Biến hành trình chữa lành của bạn thành giá trị lan tỏa cho cộng đồng và nhận những phần thưởng xứng đáng."
+        },
+        "commissions": {
+            "direct": {
+                "title": "Hoa hồng Trực tiếp (F1)",
+                "value": "15% - 20%",
+                "note": "Khi khách hàng mua qua link hoặc mã của bạn"
+            },
+            "indirect": {
+                "title": "Hoa hồng Gián tiếp (F2)",
+                "value": "5%",
+                "note": "Khi đối tác cấp dưới của bạn có đơn hàng"
+            },
+            "voucher": {
+                "title": "Quà tặng khách hàng",
+                "value": "5% - 10%",
+                "note": "Voucher giảm giá dành riêng cho khách của bạn"
+            }
+        },
+        "voucher": {
+            "title": "Cơ chế Voucher Gieo Hạt",
+            "description": "Chúng tôi không muốn bạn đi bán hàng, chúng tôi muốn bạn đi tặng quà. Mỗi Đại sứ sẽ được cấp 1 mã code định danh riêng.",
+            "steps": [
+                "Bạn tặng mã: Khách hàng nhập mã sẽ được giảm ngay 5% đến 10% học phí như một món quà làm quen.",
+                "Hệ thống ghi nhận: Ngay khi mã được dùng, hệ thống tự động gắn khách hàng đó vào tài khoản của bạn.",
+                "Nhận hoa hồng: Hoa hồng được cộng dồn và đối soát thanh toán vào ngày 15 hàng tháng."
+            ]
+        },
+        "rewards": {
+            "title": "Vinh Danh Tinh Hoa (Hàng Quý)",
+            "subtitle": "Mỗi quý hệ thống sẽ chọn Top 10 Đại sứ xuất sắc nhất để vinh danh và trao thưởng.",
+            "items": [
+                "Vinh danh danh hiệu Đại sứ Tinh hoa trên toàn hệ thống.",
+                "Nhận bộ quà tặng chăm sóc sức khỏe đặc biệt.",
+                "Vé tham dự miễn phí các kỳ thanh lọc chuyên sâu cùng chuyên gia."
+            ]
+        },
+        "form": {
+            "title": "Đăng Ký Làm Đại Sứ",
+            "fields": {
+                "fullName": "Họ và tên *",
+                "email": "Email *",
+                "phone": "Số điện thoại (Zalo) *",
+                "course": "Khóa học bạn đã hoặc đang tham gia *",
+                "voucherCode": "Mã Voucher bạn mong muốn"
+            },
+            "placeholders": {
+                "fullName": "Nhập tên của bạn",
+                "email": "Để đội ngũ gửi thông tin xác nhận",
+                "phone": "Để đội ngũ hỗ trợ liên lạc",
+                "course": "-- Chọn khóa học --",
+                "voucherCode": "Ví dụ: QUYNH99, SUCKHOE2026..."
+            },
+            "courses": [
+                "Quy trình nhịn ăn chuẩn (99K)",
+                "Tập luyện & Thiền chữa lành",
+                "Nhịn ăn cơ bản Full",
+                "Xóa sổ béo phì",
+                "Gói chuyên sâu hoặc khác"
+            ],
+            "actions": {
+                "submit": "GỬI ĐĂNG KÝ NGAY",
+                "submitting": "ĐANG GỬI..."
+            },
+            "messages": {
+                "required": "Vui lòng điền đầy đủ thông tin bắt buộc.",
+                "success": "Đăng ký thành công. Đội ngũ sẽ liên hệ bạn trong vòng 24h.",
+                "failed": "Không thể gửi đăng ký. Vui lòng thử lại."
+            },
+            "goalValue": "Đăng ký Đại sứ | Khóa học: {{course}} | Mã voucher mong muốn: {{voucher}}",
+            "noVoucher": "Không yêu cầu",
+            "note": "Chúng tôi sẽ phê duyệt và gửi thông tin mã định danh cho bạn qua Zalo trong vòng 24h."
+        },
+        "backToPricing": "← Quay lại Bảng giá"
     },
     "chat": {
         "button": {
@@ -1661,7 +1873,12 @@
         "searchPlaceholder": "Tìm theo tên, email, số điện thoại, mục tiêu",
         "confirmDelete": "Bạn có chắc muốn xóa đăng ký này?",
         "filters": {
-            "all": "Tất cả trạng thái"
+            "all": "Tất cả trạng thái",
+            "allSources": "Tất cả nguồn"
+        },
+        "source": {
+            "WEBSITE_FORM": "Form website",
+            "AMBASSADOR_FORM": "Form đại sứ"
         },
         "status": {
             "NEW": "Mới",
@@ -1674,6 +1891,7 @@
             "customer": "Khách hàng",
             "phone": "Điện thoại",
             "goal": "Mục tiêu",
+            "source": "Nguồn",
             "status": "Trạng thái",
             "assignedCare": "Care phụ trách",
             "createdAt": "Đăng ký lúc",

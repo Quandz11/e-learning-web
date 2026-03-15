@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import CourseList from '../components/courses/CourseList';
 import QuizModal from '../components/quiz/QuizModal';
 import TestimonialsSection from '../components/home/TestimonialsSection';
@@ -41,12 +42,12 @@ const HomePage: React.FC = () => {
           <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl animate-fadeDown">
             {t('fasting.title')}
           </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-xl text-white/90 animate-fadeIn delay-100">
+          <p className="mx-auto mb-8 max-w-7xl text-3xl text-white/90 animate-fadeIn delay-100">
             {t('fasting.subtitle')}
           </p>
-          <p className="mx-auto mb-10 max-w-3xl text-lg text-white/80 animate-fadeIn delay-200">
+          {/* <p className="mx-auto mb-10 max-w-3xl text-lg text-white/80 animate-fadeIn delay-200">
             {t('fasting.description')}
-          </p>
+          </p> */}
 
           <div className="flex justify-center animate-fadeIn delay-300">
             <button
@@ -55,6 +56,21 @@ const HomePage: React.FC = () => {
             >
               {t('fasting.takeQuiz')}
             </button>
+          </div>
+
+          <div className="mt-4 flex flex-wrap justify-center gap-3 animate-fadeIn delay-300">
+            <Link
+              to="/pricing"
+              className="rounded-full border-2 border-white/80 px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-white/10"
+            >
+              {t('home.heroCta.pricing', { defaultValue: 'Xem bảng giá 2026' })}
+            </Link>
+            <Link
+              to="/ambassador"
+              className="rounded-full bg-[#ffb703] px-5 py-2 text-sm font-bold text-black transition-colors hover:bg-[#f4ae19]"
+            >
+              {t('home.heroCta.ambassador', { defaultValue: 'Đăng ký Đại sứ sức khỏe' })}
+            </Link>
           </div>
         </div>
       </section>

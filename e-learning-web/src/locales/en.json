@@ -1224,11 +1224,18 @@
                 "benefits": "Benefits",
                 "testimonials": "Testimonials",
                 "myCourses": "My Courses",
-                "myOrders": "My Orders"
+                "myOrders": "My Orders",
+                "pricing": "Pricing",
+                "ambassador": "Health Ambassador"
             },
             "cartTitle": "Cart",
             "logout": "Logout",
-            "welcome": "Welcome"
+            "welcome": "Welcome",
+            "profileTitle": "Profile",
+            "userMenu": {
+                "profile": "Profile",
+                "settings": "Settings"
+            }
         },
         "hero": {
             "badge": "New Semester Open",
@@ -1244,6 +1251,10 @@
             },
             "interactive": "Interactive Learning",
             "liveSession": "Live sessions & workshops"
+        },
+        "heroCta": {
+            "pricing": "View 2026 pricing",
+            "ambassador": "Apply as Health Ambassador"
         },
         "fasting": {
             "title": "Welcome to the Nhinanchualanh.vn",
@@ -1366,33 +1377,234 @@
             "cta": "Get Started"
         },
         "footer": {
-            "description": "Empowering learners worldwide with accessible, high-quality education from industry experts.",
-            "platform": {
-                "title": "Platform",
-                "browseCourses": "Browse Courses",
-                "successStories": "Success Stories",
-                "pricing": "Pricing",
-                "forBusiness": "For Business"
+            "logoAlt": "Nhin An Chua Lanh logo",
+            "journey": {
+                "title": "Healing Journey",
+                "brand": "nhinanchualanh.vn",
+                "description": "A return-to-self journey through science-based fasting. We walk with you to cleanse body and mind, and awaken the natural healing capacity within.",
+                "tagline": "Listen to your body - Find yourself again."
             },
-            "portals": {
-                "title": "Portals",
-                "studentLogin": "Student Login",
-                "instructorDashboard": "Instructor Dashboard",
-                "agentPortal": "Agent Portal",
-                "adminAccess": "Admin Access"
+            "discover": {
+                "title": "Discover",
+                "about": "About us",
+                "method": "Fasting Method",
+                "courses": "Courses & Workshops",
+                "pricing": "Pricing 2026",
+                "stories": "Healing stories",
+                "blog": "Knowledge blog"
+            },
+            "support": {
+                "title": "Support",
+                "faq": "Frequently Asked Questions (FAQ)",
+                "ambassador": "Health Ambassador Program",
+                "privacy": "Privacy Policy",
+                "terms": "Terms of Use",
+                "disclaimer": "Disclaimer",
+                "collaboration": "Partnership Contact"
             },
             "connect": {
                 "title": "Connect",
-                "aboutUs": "About Us",
-                "careers": "Careers",
-                "contactSupport": "Contact Support",
-                "privacyPolicy": "Privacy Policy"
+                "hotlineLabel": "Hotline",
+                "hotlineValue": "[Phone number]",
+                "emailLabel": "Email",
+                "emailValue": "contact@nhinanchualanh.vn",
+                "chatAction": "Subscribe messages",
+                "newsAction": "Subscribe updates",
+                "social": {
+                    "facebook": "Facebook",
+                    "youtube": "YouTube",
+                    "tiktok": "TikTok",
+                    "community": "Community"
+                }
             },
-            "copyright": "© 2024 SKVI Learning Inc. All rights reserved.",
-            "terms": "Terms",
-            "privacy": "Privacy",
-            "cookies": "Cookies"
+            "copyrightLine": "© {{year}} Nhin An Chua Lanh. All rights reserved. Designed by [Design agency name].",
+            "medicalNotice": "*Note: Information on this website is for knowledge sharing and personal experience only. It does not replace professional medical advice. Please consult qualified professionals before starting any intensive fasting protocol.*"
         }
+    },
+    "pricingPage": {
+        "hero": {
+            "title": "Nhin An Chua Lanh Pricing 2026",
+            "subtitle": "A proactive health ecosystem based on practical science"
+        },
+        "packages": {
+            "course99k": {
+                "name": "Scientific Fasting Foundation",
+                "price": "99,000 VND",
+                "desc": "Master the core principles to practice fasting safely and effectively.",
+                "features": [
+                    "Scientifically structured fasting roadmap",
+                    "Free 7-day guided training challenge"
+                ],
+                "cta": "Start now"
+            },
+            "challenge": {
+                "name": "7-Day Community Challenge",
+                "price": "299,000 VND",
+                "desc": "A monthly guided challenge with live coaching and peer accountability.",
+                "features": [
+                    "Live practical Zoom every evening",
+                    "Close support group",
+                    "Strong community momentum"
+                ],
+                "cta": "Join challenge"
+            },
+            "trainingMeditation": {
+                "name": "Training & Healing Meditation",
+                "price": "399,000 VND",
+                "desc": "Build daily discipline for body and mind with expert guidance.",
+                "features": [
+                    "Live Zoom sessions morning and evening",
+                    "Deep meditation library",
+                    "Includes Foundation package"
+                ],
+                "cta": "Subscribe monthly"
+            },
+            "basicFull": {
+                "badge": "BEST SELLER",
+                "name": "Core Fasting Full Program",
+                "price": "2,500,000 VND",
+                "desc": "Complete track from beginner to advanced for a sustainable lifestyle shift.",
+                "features": [
+                    "10 advanced fasting modules",
+                    "Includes Training & Meditation",
+                    "Free access to every monthly challenge",
+                    "100% refund if no measurable outcomes"
+                ],
+                "cta": "Get this package"
+            },
+            "obesityReset": {
+                "name": "Obesity Reset",
+                "price": "5,500,000 VND",
+                "desc": "A focused protocol to reduce visceral fat and long-term excess weight.",
+                "features": [
+                    "Green meal and movement framework",
+                    "Includes Training & Meditation",
+                    "Free access to every monthly challenge",
+                    "Outcome commitment on weight and waist reduction"
+                ],
+                "cta": "Start this pathway"
+            },
+            "fullTransformation": {
+                "name": "Comprehensive Transformation",
+                "price": "Consultation",
+                "desc": "1:1 therapeutic protocol for members with chronic or complex conditions.",
+                "features": [
+                    "1:1 coaching with specialists",
+                    "Protocol based on health indicators",
+                    "Lifetime Training & Meditation access",
+                    "24/7 health consultation support"
+                ],
+                "cta": "Book 1:1 consultation"
+            }
+        },
+        "ambassador": {
+            "title": "BECOME A HEALTH AMBASSADOR",
+            "subtitle": "Share healing value with your community and earn commission from 15% to 50% for successful referrals.",
+            "cta": "See mechanism and apply here"
+        },
+        "policies": {
+            "title": "Policy & Terms",
+            "items": [
+                "Free privilege: Members enrolling in packages from level 4 and above (over 2,000,000 VND) receive free Training & Healing Meditation and all monthly 7-day challenges.",
+                "Refund commitment: 100% refund for intensive programs if learners complete participation (above 80%) but do not achieve measurable body-index improvement.",
+                "Upgrade policy: Previous fee is deducted when upgrading to a higher package within 15 days from registration date."
+            ]
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "items": [
+                {
+                    "q": "If I buy the Core Fasting Full package, do I get training access?",
+                    "a": "Yes. From package level 4 onward, you get free daily access to Training & Healing Meditation and monthly 7-day challenges at no extra cost."
+                },
+                {
+                    "q": "How can I earn high referral commission as an ambassador?",
+                    "a": "Once you become a Health Ambassador, entry offers like the 99K course can provide very high commission. Premium programs range around 15% to 25% depending on your ambassador tier."
+                },
+                {
+                    "q": "Does Training & Healing Meditation include live Zoom sessions?",
+                    "a": "Yes. The program includes live daily Zoom sessions with coaches to maintain both physical discipline and mindful recovery."
+                }
+            ]
+        }
+    },
+    "ambassadorPage": {
+        "hero": {
+            "title": "Health Ambassador",
+            "subtitle": "Turn your healing journey into shared community value and receive meaningful rewards."
+        },
+        "commissions": {
+            "direct": {
+                "title": "Direct Commission (F1)",
+                "value": "15% - 20%",
+                "note": "When customers purchase through your link or code"
+            },
+            "indirect": {
+                "title": "Indirect Commission (F2)",
+                "value": "5%",
+                "note": "When your downstream partner closes an order"
+            },
+            "voucher": {
+                "title": "Customer Gift",
+                "value": "5% - 10%",
+                "note": "Exclusive discount vouchers for your referrals"
+            }
+        },
+        "voucher": {
+            "title": "Seed Voucher Mechanism",
+            "description": "We do not want you to sell aggressively. We want you to share gifts. Every ambassador gets a unique identification code.",
+            "steps": [
+                "Share your code: The customer gets an instant 5% to 10% tuition discount as a welcome gift.",
+                "System tracking: Once the code is used, that customer is linked to your account automatically.",
+                "Commission payout: Earnings are accumulated and reconciled on the 15th of each month."
+            ]
+        },
+        "rewards": {
+            "title": "Quarterly Recognition",
+            "subtitle": "Each quarter, the platform honors the Top 10 outstanding ambassadors.",
+            "items": [
+                "Official recognition across the full system.",
+                "Special health-care gift set.",
+                "Free ticket to intensive cleanse retreats with experts."
+            ]
+        },
+        "form": {
+            "title": "Apply to Become an Ambassador",
+            "fields": {
+                "fullName": "Full name *",
+                "email": "Email *",
+                "phone": "Phone (Zalo/WhatsApp) *",
+                "course": "Course you have joined *",
+                "voucherCode": "Preferred voucher code"
+            },
+            "placeholders": {
+                "fullName": "Enter your full name",
+                "email": "Used for confirmation details",
+                "phone": "Used for support contact",
+                "course": "-- Select your course --",
+                "voucherCode": "Example: HEAL2026, HEALTHJOY..."
+            },
+            "courses": [
+                "Scientific Fasting Foundation (99K)",
+                "Training & Healing Meditation",
+                "Core Fasting Full Program",
+                "Obesity Reset",
+                "Intensive package or other"
+            ],
+            "actions": {
+                "submit": "SUBMIT APPLICATION",
+                "submitting": "SUBMITTING..."
+            },
+            "messages": {
+                "required": "Please complete all required information.",
+                "success": "Application submitted successfully. Our team will contact you within 24 hours.",
+                "failed": "Unable to submit application. Please try again."
+            },
+            "goalValue": "Ambassador application | Course: {{course}} | Desired voucher code: {{voucher}}",
+            "noVoucher": "No preference",
+            "note": "We will review and send your ambassador code information via chat channel within 24 hours."
+        },
+        "backToPricing": "← Back to pricing"
     },
     "chat": {
         "button": {
@@ -1656,7 +1868,12 @@
         "searchPlaceholder": "Search by name, email, phone, or goal",
         "confirmDelete": "Are you sure you want to delete this registration?",
         "filters": {
-            "all": "All statuses"
+            "all": "All statuses",
+            "allSources": "All sources"
+        },
+        "source": {
+            "WEBSITE_FORM": "Website form",
+            "AMBASSADOR_FORM": "Ambassador form"
         },
         "status": {
             "NEW": "New",
@@ -1669,6 +1886,7 @@
             "customer": "Customer",
             "phone": "Phone",
             "goal": "Goal",
+            "source": "Source",
             "status": "Status",
             "assignedCare": "Assigned care",
             "createdAt": "Registered at",

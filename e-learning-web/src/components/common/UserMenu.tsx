@@ -45,31 +45,30 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
     };
 
     return (
-        <div className="relative">
-            {/* Trigger Button */}
+        <div
+            className="relative"
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
+        >
             <button
                 ref={triggerRef}
-                onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 overflow-hidden hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                onClick={() => setIsOpen((prev) => !prev)}
+                className="inline-flex h-10 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-gray-900 transition-colors hover:bg-primary/10 hover:text-primary dark:text-white dark:hover:bg-slate-800"
                 title={t('home.header.profileTitle', { defaultValue: 'Profile' })}
                 aria-label="User menu"
                 aria-expanded={isOpen}
             >
-                {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
-                ) : (
-                    <span className="text-sm font-semibold text-primary">{user.fullName?.charAt(0)?.toUpperCase() || 'U'}</span>
-                )}
+                <span className="max-w-[10rem] truncate">{user.fullName}</span>
+                <span className={`material-symbols-outlined text-[18px] transition-transform ${isOpen ? 'rotate-180' : ''}`}>expand_more</span>
             </button>
 
             {/* Dropdown Menu */}
             {isOpen && (
                 <div
                     ref={menuRef}
-                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+                    className="absolute right-0 top-full z-50 w-56 pt-2"
                 >
-                    {/* Menu items */}
-                    <div className="py-2">
+                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white py-2 shadow-lg dark:border-gray-700 dark:bg-slate-800">
                         <Link
                             to="/my-courses"
                             onClick={() => handleMenuItemClick()}

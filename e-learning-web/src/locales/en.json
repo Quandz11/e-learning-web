@@ -1218,15 +1218,24 @@
         "header": {
             "nav": {
                 "home": "Home",
+                "training": "Training",
+                "community": "Community",
+                "about": "About Us",
+                "contact": "Contact",
                 "courses": "Courses",
                 "articles": "Articles",
+                "knowledge": "Knowledge Updates",
+                "challenge": "7-Day Challenge",
+                "specialCoaching": "Special Coaching",
                 "forum": "Forum",
                 "benefits": "Benefits",
                 "testimonials": "Testimonials",
                 "myCourses": "My Courses",
                 "myOrders": "My Orders",
                 "pricing": "Pricing",
-                "ambassador": "Health Ambassador"
+                "ambassador": "Health Ambassador",
+                "missionVision": "Mission & Vision",
+                "policy": "Policies"
             },
             "cartTitle": "Cart",
             "logout": "Logout",

@@ -12,6 +12,12 @@ import UserMenu from '../common/UserMenu';
 import logoImg from '../../assets/logo.jpg';
 import { paymentCart, PAYMENT_CART_CHANGED_EVENT } from '../../services/paymentCart';
 
+interface NavLinkItem {
+    label: string;
+    to?: string;
+    href?: string;
+}
+
 const UserHeader: React.FC = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -19,6 +25,9 @@ const UserHeader: React.FC = () => {
     const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
     const [cartCount, setCartCount] = useState(0);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const contactHref = isAuthenticated
+        ? '/home#course-consultation-form'
+        : '/#course-consultation-form';
 
     useEffect(() => {
         const syncCartCount = () => {
@@ -47,6 +56,91 @@ const UserHeader: React.FC = () => {
         }
     };
 
+    const trainingItems: NavLinkItem[] = [
+        { label: t('home.header.nav.courses'), to: '/courses' },
+        { label: t('home.header.nav.knowledge', { defaultValue: 'Cập nhật kiến thức' }), to: '/articles' },
+        { label: t('home.header.nav.challenge', { defaultValue: 'Thử thách 7 ngày' }), to: '/articles' },
+        { label: t('home.header.nav.specialCoaching', { defaultValue: 'Huấn luyện đặc biệt' }), to: '/pricing' },
+    ];
+
+    const communityItems: NavLinkItem[] = [
+        { label: t('home.header.nav.forum', { defaultValue: 'Diễn đàn' }), to: '/forum' },
+        { label: t('home.header.nav.ambassador', { defaultValue: 'Đại sứ sức khỏe' }), to: '/ambassador' },
+        { label: t('home.header.nav.testimonials'), to: '/testimonials' },
+    ];
+
+    const aboutItems: NavLinkItem[] = [
+        { label: t('home.header.nav.missionVision', { defaultValue: 'Sứ mệnh & tầm nhìn' }), to: '/' },
+        { label: t('home.header.nav.pricing', { defaultValue: 'Bảng giá' }), to: '/pricing' },
+        { label: t('home.header.nav.policy', { defaultValue: 'Chính sách' }), to: '/pricing#pricing-policies' },
+    ];
+
+    const renderDesktopMenuItem = (item: NavLinkItem, className: string, key: string) => {
+        if (item.to) {
+            return (
+                <Link key={key} to={item.to} className={className}>
+                    {item.label}
+                </Link>
+            );
+        }
+
+        return (
+            <a key={key} href={item.href} className={className}>
+                {item.label}
+            </a>
+        );
+    };
+
+    const renderMobileMenuItem = (item: NavLinkItem, className: string, key: string) => {
+        if (item.to) {
+            return (
+                <Link
+                    key={key}
+                    to={item.to}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={className}
+                >
+                    {item.label}
+                </Link>
+            );
+        }
+
+        return (
+            <a
+                key={key}
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={className}
+            >
+                {item.label}
+            </a>
+        );
+    };
+
+    const renderDesktopDropdown = (label: string, items: NavLinkItem[]) => (
+        <div className="group relative">
+            <button
+                type="button"
+                className="inline-flex items-center gap-1 text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
+            >
+                {label}
+                <span className="material-symbols-outlined text-[18px] transition-transform group-hover:rotate-180">expand_more</span>
+            </button>
+
+            <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                <div className="min-w-[15rem] rounded-xl border border-gray-200 bg-white p-2 shadow-xl dark:border-gray-700 dark:bg-slate-900">
+                    {items.map((item, index) =>
+                        renderDesktopMenuItem(
+                            item,
+                            'block rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-primary/10 hover:text-primary',
+                            `${label}-${index}`,
+                        )
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <header className="sticky top-0 z-50 w-full bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
             <div className="w-full px-3 sm:px-4 lg:px-5">
@@ -57,7 +151,7 @@ const UserHeader: React.FC = () => {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="flex items-center gap-2 sm:gap-3"
                     >
-                        <div className="size-10 sm:size-12 flex items-center justify-center overflow-hidden border-2 border-primary">
+                        <div className="size-10 sm:size-12 flex items-center justify-center overflow-hidden">
                             <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <h2 className="hidden sm:block text-[#0c1c1d] dark:text-white text-base lg:text-lg font-bold tracking-tight">
@@ -73,41 +167,23 @@ const UserHeader: React.FC = () => {
                         >
                             {t('home.header.nav.home')}
                         </Link>
-                        <Link
-                            className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                            to="/courses"
-                        >
-                            {t('home.header.nav.courses')}
-                        </Link>
-                        <Link
-                            className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                            to="/articles"
-                        >
-                            {t('home.header.nav.articles', { defaultValue: 'Bài viết' })}
-                        </Link>
-                        <Link
-                            className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                            to="/pricing"
-                        >
-                            {t('home.header.nav.pricing', { defaultValue: 'Bảng giá' })}
-                        </Link>
-                        <Link
-                            className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                            to="/ambassador"
-                        >
-                            {t('home.header.nav.ambassador', { defaultValue: 'Đại sứ sức khỏe' })}
-                        </Link>
-                        <Link
-                            className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                            to="/forum"
-                        >
-                            {t('home.header.nav.forum', { defaultValue: 'Diễn đàn' })}
-                        </Link>
+                        {renderDesktopDropdown(
+                            t('home.header.nav.training', { defaultValue: 'Đào tạo' }),
+                            trainingItems,
+                        )}
+                        {renderDesktopDropdown(
+                            t('home.header.nav.community', { defaultValue: 'Cộng đồng' }),
+                            communityItems,
+                        )}
+                        {renderDesktopDropdown(
+                            t('home.header.nav.about', { defaultValue: 'Về chúng tôi' }),
+                            aboutItems,
+                        )}
                         <a
                             className="text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                            href="/#testimonials"
+                            href={contactHref}
                         >
-                            {t('home.header.nav.testimonials')}
+                            {t('home.header.nav.contact', { defaultValue: 'Liên hệ' })}
                         </a>
                     </nav>
 
@@ -132,10 +208,6 @@ const UserHeader: React.FC = () => {
                                 <div className="hidden sm:block">
                                     <HeaderNotification />
                                 </div>
-
-                                <span className="hidden xl:inline text-sm text-gray-600 dark:text-gray-300 font-display">
-                                    {t('home.header.welcome')}, <span className="font-medium text-gray-900 dark:text-white normal-case">{user.fullName}</span>
-                                </span>
 
                                 <UserMenu user={user} />
 
@@ -185,7 +257,7 @@ const UserHeader: React.FC = () => {
 
                 {/* Mobile Menu */}
                 <div
-                    className={`lg:hidden overflow-hidden transition-all duration-300 ${isMobileMenuOpen ? 'max-h-[32rem] opacity-100 pb-3' : 'max-h-0 opacity-0'}`}
+                    className={`lg:hidden overflow-hidden transition-all duration-300 ${isMobileMenuOpen ? 'max-h-[42rem] opacity-100 pb-3' : 'max-h-0 opacity-0'}`}
                 >
                     <nav className="border-t border-gray-200 dark:border-gray-800 pt-3 space-y-1">
                         <Link
@@ -195,56 +267,53 @@ const UserHeader: React.FC = () => {
                         >
                             {t('home.header.nav.home')}
                         </Link>
-                        <Link
-                            to="/courses"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
-                        >
-                            {t('home.header.nav.courses')}
-                        </Link>
-                        <Link
-                            to="/articles"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
-                        >
-                            {t('home.header.nav.articles', { defaultValue: 'Bài viết' })}
-                        </Link>
-                        <Link
-                            to="/pricing"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
-                        >
-                            {t('home.header.nav.pricing', { defaultValue: 'Bảng giá' })}
-                        </Link>
-                        <Link
-                            to="/ambassador"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
-                        >
-                            {t('home.header.nav.ambassador', { defaultValue: 'Đại sứ sức khỏe' })}
-                        </Link>
-                        <Link
-                            to="/forum"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
-                        >
-                            {t('home.header.nav.forum', { defaultValue: 'Diễn đàn' })}
-                        </Link>
+
+                        <p className="px-3 pt-2 text-[11px] font-bold uppercase tracking-wide text-primary">
+                            {t('home.header.nav.training', { defaultValue: 'Đào tạo' })}
+                        </p>
+                        {trainingItems.map((item, index) =>
+                            renderMobileMenuItem(
+                                item,
+                                'block rounded-lg px-6 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10',
+                                `training-${index}`,
+                            )
+                        )}
+
+                        <p className="px-3 pt-2 text-[11px] font-bold uppercase tracking-wide text-primary">
+                            {t('home.header.nav.community', { defaultValue: 'Cộng đồng' })}
+                        </p>
+                        {communityItems.map((item, index) =>
+                            renderMobileMenuItem(
+                                item,
+                                'block rounded-lg px-6 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10',
+                                `community-${index}`,
+                            )
+                        )}
+
+                        <p className="px-3 pt-2 text-[11px] font-bold uppercase tracking-wide text-primary">
+                            {t('home.header.nav.about', { defaultValue: 'Về chúng tôi' })}
+                        </p>
+                        {aboutItems.map((item, index) =>
+                            renderMobileMenuItem(
+                                item,
+                                'block rounded-lg px-6 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10',
+                                `about-${index}`,
+                            )
+                        )}
+
                         <a
-                            href="/#testimonials"
+                            href={contactHref}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10"
                         >
-                            {t('home.header.nav.testimonials')}
+                            {t('home.header.nav.contact', { defaultValue: 'Liên hệ' })}
                         </a>
                     </nav>
 
                     <div className="mt-3 border-t border-gray-200 dark:border-gray-800 pt-3">
                         {isAuthenticated && user ? (
                             <div className="space-y-2">
-                                <p className="px-3 text-sm text-gray-600 dark:text-gray-300">
-                                    {t('home.header.welcome')}, <span className="font-medium text-gray-900 dark:text-white">{user.fullName}</span>
-                                </p>
+                                <p className="px-3 text-sm font-medium text-gray-900 dark:text-white">{user.fullName}</p>
                                 <button
                                     onClick={handleLogout}
                                     className="w-full h-11 rounded-lg bg-primary text-white font-semibold"

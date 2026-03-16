@@ -1223,15 +1223,24 @@
         "header": {
             "nav": {
                 "home": "Trang chủ",
+                "training": "Đào tạo",
+                "community": "Cộng đồng",
+                "about": "Về chúng tôi",
+                "contact": "Liên hệ",
                 "courses": "Khóa học",
                 "articles": "Bài viết",
+                "knowledge": "Cập nhật kiến thức",
+                "challenge": "Thử thách 7 ngày",
+                "specialCoaching": "Huấn luyện đặc biệt",
                 "forum": "Diễn đàn",
                 "benefits": "Lợi ích",
                 "testimonials": "Đánh giá",
                 "myCourses": "Khóa học của tôi",
                 "myOrders": "Đơn hàng của tôi",
                 "pricing": "Bảng giá",
-                "ambassador": "Đại sứ sức khỏe"
+                "ambassador": "Đại sứ sức khỏe",
+                "missionVision": "Sứ mệnh & tầm nhìn",
+                "policy": "Chính sách"
             },
             "cartTitle": "Giỏ hàng",
             "logout": "Đăng xuất",
@@ -1422,7 +1431,7 @@
                     "community": "Cộng đồng"
                 }
             },
-            "copyrightLine": "© {{year}} Nhịn Ăn Chữa Lành. Tất cả các quyền được bảo hộ. Thiết kế bởi [Tên đơn vị thiết kế].",
+            "copyrightLine": "© {{year}} Nhịn Ăn Chữa Lành. Tất cả các quyền được bảo hộ. Thiết kế bởi Nhinanchualanh.vn.",
             "medicalNotice": "*Lưu ý: Các thông tin trên website mang tính chất chia sẻ kiến thức và kinh nghiệm cá nhân. Chúng tôi không đưa ra lời khuyên y tế thay thế cho bác sĩ chuyên khoa. Vui lòng tham vấn ý kiến chuyên gia trước khi bắt đầu bất kỳ liệu trình nhịn ăn chuyên sâu nào.*"
         }
     },

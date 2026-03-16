@@ -205,7 +205,7 @@ const PricingPage: React.FC = () => {
           </Link>
         </section>
 
-        <section className="mt-10 sm:mt-12">
+        <section id="pricing-policies" className="mt-10 sm:mt-12">
           <h2 className="inline-block border-b-[3px] border-[#ffb703] pb-1 text-2xl font-bold text-[#2d6a4f]">{t('pricingPage.policies.title')}</h2>
           <div className="mt-4 rounded-2xl bg-white p-6 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
             <ul className="space-y-3 text-sm text-gray-700 sm:text-base">

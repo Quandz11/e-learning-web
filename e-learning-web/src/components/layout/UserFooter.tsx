@@ -39,7 +39,7 @@ const UserFooter: React.FC = () => {
                         </div>
 
                         <Link to="/" className="mb-4 flex items-center gap-3">
-                            <img src={logoImg} alt={t('home.footer.logoAlt')} className="h-10 w-10 border border-primary bg-white object-cover shadow-sm" />
+                            <img src={logoImg} alt={t('home.footer.logoAlt')} className="h-10 w-10 bg-white object-cover shadow-sm" />
                             <p className="text-2xl font-bold tracking-tight text-[#0c1c1d] dark:text-white">
                                 {t('home.footer.journey.brand')}
                             </p>
@@ -101,7 +101,7 @@ const UserFooter: React.FC = () => {
                         </ul>
                     </div>
 
-                    <div className="p-6 sm:p-7">
+                    <div id="footer-contact" className="p-6 sm:p-7">
                         <div className="mb-4 flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
                             <span className="material-symbols-outlined text-[22px] text-primary">podcasts</span>
                             <h4 className="text-sm font-extrabold uppercase tracking-wide text-[#0c1c1d] dark:text-white">
@@ -140,7 +140,7 @@ const UserFooter: React.FC = () => {
                                 <FaYoutube className="h-[18px] w-[18px]" />
                             </a>
                             <a
-                                href="https://www.tiktok.com"
+                                href="https://www.tiktok.com/@nhinanchualanhvn"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-[#0c1c1d] transition-colors hover:border-primary hover:bg-primary hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-white"

@@ -76,7 +76,7 @@ const CourseConsultationForm: React.FC = () => {
   };
 
   return (
-    <section className="bg-[#dce5e3] py-12 sm:py-14">
+    <section id="course-consultation-form" className="bg-[#dce5e3] py-12 sm:py-14">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <h2 className="mb-6 text-center text-3xl font-extrabold text-[#11332e] sm:text-4xl">
           {t('home.consultForm.title', { defaultValue: 'Đăng Ký Tư Vấn Khóa Học' })}

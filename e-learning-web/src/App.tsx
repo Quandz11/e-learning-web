@@ -39,6 +39,7 @@ import ArticlesPage from './pages/ArticlesPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import AdminArticlesPage from './pages/admin/article/AdminArticlesPage';
 import AdminCategoriesPage from './pages/admin/article/AdminCategoriesPage';
+import ArticleEditorPage from './pages/admin/article/ArticleEditorPage';
 import UserLayout from './components/layout/UserLayout';
 import AdminQuizPage from './pages/admin/quiz/AdminQuizPage';
 import AdminQuizEditorPage from './pages/admin/quiz/AdminQuizEditorPage';
@@ -269,6 +270,22 @@ function App() {
               ),
             },
             {
+              path: 'admin/articles/new',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <ArticleEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/articles/:id/edit',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <ArticleEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
               path: 'admin/courses',
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
@@ -355,14 +372,6 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminNotificationPage />
-                </ProtectedRoute>
-              ),
-            },
-            {
-              path: 'admin/articles',
-              element: (
-                <ProtectedRoute requiredRole="ADMIN">
-                  <AdminArticlesPage />
                 </ProtectedRoute>
               ),
             },

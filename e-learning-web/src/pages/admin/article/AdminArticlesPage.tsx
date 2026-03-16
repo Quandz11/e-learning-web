@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { articleApi, type ArticleListItem, type ArticleCategory } from '../../../services/articleApi';
-import ArticleFormModal from './components/ArticleFormModal';
+import { useNavigate } from 'react-router-dom';
+import { articleApi, type ArticleListItem } from '../../../services/articleApi';
 import AdminLayout from '../../../components/admin/AdminLayout';
+import { toast } from 'react-hot-toast';
 
 const AdminArticlesPage: React.FC = () => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [articles, setArticles] = useState<ArticleListItem[]>([]);
-    const [categories, setCategories] = useState<ArticleCategory[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingArticle, setEditingArticle] = useState<string | null>(null);
 
     React.useEffect(() => {
         fetchData();
@@ -20,12 +19,8 @@ const AdminArticlesPage: React.FC = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [articlesData, categoriesData] = await Promise.all([
-                articleApi.getAllAdmin(),
-                articleApi.getCategories()
-            ]);
+            const articlesData = await articleApi.getAllAdmin();
             setArticles(articlesData);
-            setCategories(categoriesData);
         } catch (err) {
             console.error('Failed to load data', err);
         } finally {
@@ -40,27 +35,20 @@ const AdminArticlesPage: React.FC = () => {
 
         try {
             await articleApi.delete(id);
+            toast.success('Đã xóa bài viết');
             await fetchData();
         } catch (err) {
             console.error('Failed to delete article', err);
-            alert(t('admin.articles.deleteFailed', { defaultValue: 'Xóa bài viết thất bại' }));
+            toast.error(t('admin.articles.deleteFailed', { defaultValue: 'Xóa bài viết thất bại' }));
         }
     };
 
     const handleEdit = (id: string) => {
-        setEditingArticle(id);
-        setIsModalOpen(true);
+        navigate(`/admin/articles/${id}/edit`);
     };
 
     const handleCreate = () => {
-        setEditingArticle(null);
-        setIsModalOpen(true);
-    };
-
-    const handleModalClose = () => {
-        setIsModalOpen(false);
-        setEditingArticle(null);
-        fetchData();
+        navigate('/admin/articles/new');
     };
 
     const filteredArticles = articles.filter(article =>
@@ -226,14 +214,6 @@ const AdminArticlesPage: React.FC = () => {
                 )}
             </div>
 
-            {/* Modal */}
-            {isModalOpen && (
-                <ArticleFormModal
-                    articleId={editingArticle}
-                    categories={categories}
-                    onClose={handleModalClose}
-                />
-            )}
         </AdminLayout>
     );
 };

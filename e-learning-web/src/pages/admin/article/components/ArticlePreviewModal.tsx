@@ -85,20 +85,35 @@ const ArticlePreviewModal: React.FC<ArticlePreviewModalProps> = ({ article, onCl
                             </div>
                         </div>
 
-                        {/* Content */}
-                        <div
-                            className="prose prose-slate dark:prose-invert max-w-none
-                                prose-headings:text-slate-900 dark:prose-headings:text-white
-                                prose-p:text-slate-700 dark:prose-p:text-slate-300
-                                prose-a:text-dashboard-primary hover:prose-a:text-dashboard-primary-dark
-                                prose-strong:text-slate-900 dark:prose-strong:text-white
-                                prose-code:text-dashboard-primary prose-code:bg-slate-100 dark:prose-code:bg-slate-800
-                                prose-pre:bg-slate-900 dark:prose-pre:bg-slate-950
-                                prose-img:rounded-xl prose-img:shadow-lg"
-                            dangerouslySetInnerHTML={{ __html: article.content }}
-                        />
-
-                        {/* SEO Preview */}
+                        {/* Content Preview Sandboxed */}
+                        <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden min-h-[500px] relative bg-white">
+                            <iframe
+                                title="Article Preview"
+                                className="w-full h-[500px] border-none"
+                                srcDoc={`
+                                    <!DOCTYPE html>
+                                    <html>
+                                    <head>
+                                        <meta charset="utf-8">
+                                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                                        <script src="https://cdn.tailwindcss.com"></script>
+                                        <style>
+                                            body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 1.5rem; line-height: 1.6; }
+                                            /* Basic reset for raw html */
+                                            img { max-width: 100%; height: auto; border-radius: 0.5rem; }
+                                            a { color: #3b82f6; text-decoration: none; }
+                                            a:hover { text-decoration: underline; }
+                                        </style>
+                                    </head>
+                                    <body>
+                                        <div class="prose max-w-none">
+                                            ${article.content}
+                                        </div>
+                                    </body>
+                                    </html>
+                                `}
+                            />
+                        </div>                        {/* SEO Preview */}
                         {(article.metaDescription || article.metaKeywords) && (
                             <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
                                 <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">

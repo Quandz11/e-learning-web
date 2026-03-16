@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { articleApi, type Article } from '../services/articleApi';
+import { articleApi, type Article, type ArticleListItem } from '../services/articleApi';
 
 const ArticleDetailPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const { t } = useTranslation();
     const [article, setArticle] = useState<Article | null>(null);
+    const [relatedArticles, setRelatedArticles] = useState<ArticleListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -16,11 +17,37 @@ const ArticleDetailPage: React.FC = () => {
         }
     }, [slug]);
 
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'resize-iframe' && event.data?.id === slug) {
+                const iframes = document.querySelectorAll('iframe[title="Article Content"]');
+                iframes.forEach(iframe => {
+                    (iframe as HTMLIFrameElement).style.height = `${event.data.height}px`;
+                });
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [slug]);
+
     const fetchArticle = async (articleSlug: string) => {
         try {
             setLoading(true);
             const data = await articleApi.getBySlug(articleSlug);
             setArticle(data);
+
+            // Fetch related articles (latest 3 excluding this one)
+            try {
+                // Determine if we should fetch by category or just all
+                const allArticles = await articleApi.getAll();
+                const filtered = allArticles
+                    .filter(a => a.id !== data.id)
+                    .slice(0, 3);
+                setRelatedArticles(filtered);
+            } catch (e) {
+                console.error('Failed to fetch related articles', e);
+            }
+
         } catch (err: any) {
             setError(err.message || 'Failed to load article');
         } finally {
@@ -128,18 +155,53 @@ const ArticleDetailPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Content */}
-                <div
-                    className="prose prose-lg dark:prose-invert max-w-none
-            prose-headings:text-gray-900 dark:prose-headings:text-white
-            prose-p:text-gray-700 dark:prose-p:text-gray-300
-            prose-a:text-primary hover:prose-a:text-primary/80
-            prose-strong:text-gray-900 dark:prose-strong:text-white
-            prose-code:text-primary prose-code:bg-gray-100 dark:prose-code:bg-gray-800
-            prose-pre:bg-gray-900 prose-pre:text-gray-100
-            prose-img:rounded-xl prose-img:shadow-lg"
-                    dangerouslySetInnerHTML={{ __html: article.content }}
-                />
+                {/* Content Sandboxed using iframe */}
+                <div className="w-full relative min-h-[600px] border-none">
+                    <iframe
+                        title="Article Content"
+                        className="w-full h-full min-h-[600px] border-none"
+                        srcDoc={`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <meta charset="utf-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1">
+                                <script src="https://cdn.tailwindcss.com"></script>
+                                <style>
+                                    body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 0; line-height: 1.8; color: #374151; }
+                                    @media (prefers-color-scheme: dark) {
+                                        body { color: #d1d5db; background: transparent; }
+                                    }
+                                    /* Basic reset for raw html */
+                                    img { max-width: 100%; height: auto; border-radius: 0.75rem; margin: 2rem 0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+                                    a { color: #0284c7; text-decoration: none; }
+                                    a:hover { color: #0369a1; text-decoration: underline; }
+                                    h1, h2, h3, h4 { color: #111827; }
+                                    @media (prefers-color-scheme: dark) {
+                                        h1, h2, h3, h4 { color: #f9fafb; }
+                                        a { color: #38bdf8; }
+                                        a:hover { color: #7dd3fc; }
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="prose prose-lg dark:prose-invert max-w-none">
+                                    ${article.content}
+                                </div>
+                                <script>
+                                    // Auto-resize iframe height based on content
+                                    const resizeIframe = () => {
+                                        const height = document.documentElement.scrollHeight || document.body.scrollHeight;
+                                        window.parent.postMessage({ type: 'resize-iframe', id: '${article.slug}', height: height }, '*');
+                                    };
+                                    window.addEventListener('load', resizeIframe);
+                                    new ResizeObserver(resizeIframe).observe(document.body);
+                                </script>
+                            </body>
+                            </html>
+                        `}
+                    />
+                </div>
 
                 {/* Footer */}
                 <footer className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
@@ -170,6 +232,51 @@ const ArticleDetailPage: React.FC = () => {
                         </div>
                     </div>
                 </footer>
+
+                {/* Related Articles Section */}
+                {relatedArticles.length > 0 && (
+                    <div className="mt-16 border-t border-gray-200 dark:border-gray-700 pt-12">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+                            {t('articles.related', { defaultValue: 'Bài viết liên quan' })}
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {relatedArticles.map((relArticle) => (
+                                <Link
+                                    key={relArticle.id}
+                                    to={`/articles/${relArticle.slug}`}
+                                    className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-700"
+                                >
+                                    {relArticle.featuredImageUrl && (
+                                        <div className="aspect-[16/10] overflow-hidden bg-gray-200 dark:bg-gray-700 shrink-0">
+                                            <img
+                                                src={relArticle.featuredImageUrl}
+                                                alt={relArticle.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="p-5 flex flex-col flex-1">
+                                        {relArticle.categoryName && (
+                                            <span className="inline-block self-start px-2.5 py-1 text-[11px] font-semibold text-primary bg-primary/10 rounded-full mb-3">
+                                                {relArticle.categoryName}
+                                            </span>
+                                        )}
+                                        <h3 className="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary transition-colors text-base">
+                                            {relArticle.title}
+                                        </h3>
+                                        <div className="mt-auto pt-4 flex items-center justify-between text-[13px] text-gray-500 dark:text-gray-400">
+                                            <span>{formatDate(relArticle.publishedAt || relArticle.createdAt)}</span>
+                                            <div className="flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>{relArticle.viewCount}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </article>
         </div>
     );

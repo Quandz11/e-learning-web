@@ -98,8 +98,22 @@ public class ArticlesController : ControllerBase
             return Unauthorized();
         }
 
-        var article = await _articleService.CreateArticleAsync(dto, Guid.Parse(userId));
-        return CreatedAtAction(nameof(GetArticleById), new { id = article.Id }, article);
+        try
+        {
+            var article = await _articleService.CreateArticleAsync(dto, Guid.Parse(userId));
+            return CreatedAtAction(nameof(GetArticleById), new { id = article.Id }, article);
+        }
+        catch (Exception ex)
+        {
+            // Duplicate slug or other DB constraint violation
+            if (ex.InnerException?.Message.Contains("UNIQUE") == true ||
+                ex.InnerException?.Message.Contains("duplicate") == true ||
+                ex.InnerException?.Message.Contains("Duplicate") == true)
+            {
+                return Conflict(new { message = "Slug bài viết đã tồn tại. Vui lòng đổi slug." });
+            }
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]

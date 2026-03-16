@@ -14,6 +14,7 @@ export interface TestimonialDto {
     content: string;
     avatarUrl?: string;
     videoUrl?: string;
+    resultImageUrl?: string;
     type: TestimonialType;
     order: number;
     isActive: boolean;
@@ -26,6 +27,7 @@ export interface CreateTestimonialRequest {
     content: string;
     avatarUrl?: string;
     videoUrl?: string;
+    resultImageUrl?: string;
     type: TestimonialType;
     order: number;
     isActive: boolean;
@@ -37,6 +39,7 @@ export interface UpdateTestimonialRequest {
     content: string;
     avatarUrl?: string;
     videoUrl?: string;
+    resultImageUrl?: string;
     type: TestimonialType;
     order: number;
     isActive: boolean;

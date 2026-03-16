@@ -55,6 +55,16 @@
   textarea {
     touch-action: manipulation;
   }
+
+  /* Global heading colors */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-primary dark:text-primary-light;
+  }
 }
 
 .material-symbols-outlined {
@@ -181,3 +191,24 @@
 
 /* Quill editor min-height */
 .quill-wrapper .ql-editor { min-height: 160px; }
+
+/* Global heading colors - override Tailwind utilities */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #044a2a !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #22c55e !important;
+  }
+}

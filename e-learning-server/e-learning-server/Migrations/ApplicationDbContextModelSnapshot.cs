@@ -22,6 +22,67 @@ namespace e_learning_server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("SKVI.Domain.Entities.AiChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AiChatMessages");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.AiSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ApiKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SystemPrompt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsEnabled");
+
+                    b.ToTable("AiSettings");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Article", b =>
                 {
                     b.Property<Guid>("Id")
@@ -490,6 +551,43 @@ namespace e_learning_server.Migrations
                     b.HasIndex("VideoId");
 
                     b.ToTable("CourseLessons");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.DailyStudyTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AiAdvice")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("TaskDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserFeedback")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId");
+
+                    b.ToTable("DailyStudyTasks");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Document", b =>
@@ -1376,6 +1474,9 @@ namespace e_learning_server.Migrations
                     b.Property<string>("Position")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ResultImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
@@ -1452,6 +1553,37 @@ namespace e_learning_server.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.UserStudyPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurrentKnowledgeLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Goal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserStudyPlans");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Video", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1505,6 +1637,17 @@ namespace e_learning_server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WhyChooseUsItems");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.AiChatMessage", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Article", b =>
@@ -1644,6 +1787,17 @@ namespace e_learning_server.Migrations
                     b.Navigation("Course");
 
                     b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.DailyStudyTask", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.UserStudyPlan", "Plan")
+                        .WithMany("DailyTasks")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Enrollment", b =>
@@ -1961,6 +2115,17 @@ namespace e_learning_server.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.UserStudyPlan", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.ArticleCategory", b =>
                 {
                     b.Navigation("Articles");
@@ -2078,6 +2243,11 @@ namespace e_learning_server.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("RefreshTokens");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.UserStudyPlan", b =>
+                {
+                    b.Navigation("DailyTasks");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Video", b =>

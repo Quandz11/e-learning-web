@@ -51,6 +51,7 @@ import AdminLessonCategoriesPage from './pages/admin/categories/AdminCategoriesP
 import AdminLessonCategoryEditorPage from './pages/admin/categories/AdminCategoryEditorPage';
 import AdminWhyChooseUsPage from './pages/admin/why-choose-us/AdminWhyChooseUsPage';
 import AdminWhyChooseUsEditorPage from './pages/admin/why-choose-us/AdminWhyChooseUsEditorPage';
+import AdminAiSettingsPage from './pages/admin/ai/AdminAiSettingsPage';
 import ForumPage from './pages/ForumPage';
 import ForumCategoryPage from './pages/ForumCategoryPage';
 import ForumThreadPage from './pages/ForumThreadPage';
@@ -542,6 +543,14 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminWhyChooseUsEditorPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/ai-settings',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminAiSettingsPage />
                 </ProtectedRoute>
               ),
             },

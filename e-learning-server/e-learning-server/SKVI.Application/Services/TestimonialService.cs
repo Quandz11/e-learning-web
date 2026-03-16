@@ -51,6 +51,9 @@ public class TestimonialService : ITestimonialService
             Position = request.Position,
             Content = request.Content,
             AvatarUrl = request.AvatarUrl,
+            VideoUrl = request.VideoUrl,
+            ResultImageUrl = request.ResultImageUrl,
+            Type = request.Type,
             Order = request.Order,
             IsActive = request.IsActive,
             CreatedAt = DateTime.UtcNow
@@ -71,6 +74,9 @@ public class TestimonialService : ITestimonialService
         testimonial.Position = request.Position;
         testimonial.Content = request.Content;
         testimonial.AvatarUrl = request.AvatarUrl;
+        testimonial.VideoUrl = request.VideoUrl;
+        testimonial.ResultImageUrl = request.ResultImageUrl;
+        testimonial.Type = request.Type;
         testimonial.Order = request.Order;
         testimonial.IsActive = request.IsActive;
 
@@ -97,6 +103,9 @@ public class TestimonialService : ITestimonialService
             Position = testimonial.Position,
             Content = testimonial.Content,
             AvatarUrl = testimonial.AvatarUrl,
+            VideoUrl = testimonial.VideoUrl,
+            ResultImageUrl = testimonial.ResultImageUrl,
+            Type = testimonial.Type,
             Order = testimonial.Order,
             IsActive = testimonial.IsActive,
             CreatedAt = testimonial.CreatedAt

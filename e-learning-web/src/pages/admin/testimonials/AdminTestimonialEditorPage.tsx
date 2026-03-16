@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { testimonialApi, type CreateTestimonialRequest, TestimonialType } from '../../../services/testimonialApi';
+import { uploadService } from '../../../services/uploadService';
+import ImageUploadButton from '../../../components/common/ImageUploadButton';
 import { toast } from 'react-hot-toast';
 
 const AdminTestimonialEditorPage: React.FC = () => {
@@ -20,6 +22,7 @@ const AdminTestimonialEditorPage: React.FC = () => {
         content: '',
         avatarUrl: '',
         videoUrl: '',
+        resultImageUrl: '',
         type: TestimonialType.Text,
         order: 0,
         isActive: true,
@@ -41,6 +44,7 @@ const AdminTestimonialEditorPage: React.FC = () => {
                 content: data.content,
                 avatarUrl: data.avatarUrl || '',
                 videoUrl: data.videoUrl || '',
+                resultImageUrl: data.resultImageUrl || '',
                 type: data.type,
                 order: data.order,
                 isActive: data.isActive,
@@ -178,6 +182,26 @@ const AdminTestimonialEditorPage: React.FC = () => {
                                     <option value={TestimonialType.Text}>{t('admin.testimonials.form.typeText', { defaultValue: 'Text' })}</option>
                                     <option value={TestimonialType.Video}>{t('admin.testimonials.form.typeVideo', { defaultValue: 'Video' })}</option>
                                 </select>
+                            </div>
+
+                            {/* Result Image URL - Before/After */}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    {t('admin.testimonials.form.resultImage', { defaultValue: 'Result Image (Before/After)' })}
+                                </label>
+                                <ImageUploadButton
+                                    onUpload={async (file) => {
+                                        const result = await uploadService.uploadTestimonialResultImage(file);
+                                        return result.url;
+                                    }}
+                                    currentImageUrl={formData.resultImageUrl}
+                                    onImageChange={(url) => setFormData({ ...formData, resultImageUrl: url })}
+                                    label=""
+                                    folder="testimonial-results"
+                                />
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                    {t('admin.testimonials.form.resultImageHint', { defaultValue: 'Upload before/after result images' })}
+                                </p>
                             </div>
 
                             {/* Video URL - Only show for video type */}

@@ -15,8 +15,8 @@ const TestimonialsSection: React.FC = () => {
     const fetchTestimonials = async () => {
         try {
             const data = await testimonialApi.getActive();
-            // Limit to 3 testimonials for homepage
-            setTestimonials(data.slice(0, 3));
+            // Limit to 6 testimonials for homepage
+            setTestimonials(data.slice(0, 6));
         } catch (error) {
             console.error('Failed to load testimonials:', error);
         } finally {
@@ -47,7 +47,7 @@ const TestimonialsSection: React.FC = () => {
         <section className="py-16 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+                    <h2 className="text-3xl md:text-4xl font-bold text-primary dark:text-primary-light mb-4">
                         {t('home.testimonials.title')}
                     </h2>
                     <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
@@ -55,12 +55,23 @@ const TestimonialsSection: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-5 max-w-7xl mx-auto">
                     {testimonials.map((testimonial) => (
                         <div
                             key={testimonial.id}
                             className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700"
                         >
+                            {/* Result Image (Before/After) */}
+                            {testimonial.resultImageUrl && (
+                                <div className="mb-4 sm:mb-6 -mx-4 sm:-mx-6 lg:-mx-8 overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-700">
+                                    <img
+                                        src={testimonial.resultImageUrl}
+                                        alt={`${testimonial.name} result`}
+                                        className="w-full aspect-video object-contain shadow-md hover:shadow-lg transition-shadow"
+                                    />
+                                </div>
+                            )}
+
                             {testimonial.type === TestimonialType.Video && testimonial.videoUrl ? (
                                 /* Video Testimonial */
                                 <div className="mb-4 sm:mb-6">
@@ -76,14 +87,6 @@ const TestimonialsSection: React.FC = () => {
                             ) : (
                                 /* Text Testimonial */
                                 <>
-                                    {/* Quote Icon */}
-                                    <div className="flex justify-center mb-4 sm:mb-6">
-                                        <div className="w-9 h-9 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-primary text-lg sm:text-2xl">
-                                                format_quote
-                                            </span>
-                                        </div>
-                                    </div>
 
                                     {/* Content */}
                                     <p className="text-slate-600 dark:text-slate-300 text-center mb-4 sm:mb-6 text-xs sm:text-sm lg:text-base italic leading-relaxed line-clamp-6 sm:line-clamp-none">

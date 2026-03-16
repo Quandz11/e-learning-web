@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { articleApi, type Article, type ArticleListItem } from '../services/articleApi';
+import { toast } from 'react-hot-toast';
 
 const ArticleDetailPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
@@ -205,30 +206,47 @@ const ArticleDetailPage: React.FC = () => {
 
                 {/* Footer */}
                 <footer className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
-                        <Link
-                            to="/articles"
-                            className="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                        >
-                            <span className="material-symbols-outlined">arrow_back</span>
-                            <span>{t('articles.backToList', { defaultValue: 'Quay lại danh sách' })}</span>
-                        </Link>
+                    <div className="flex items-center justify-between gap-4">
+                        {/* Left: Back */}
+                        <div className="flex-1 flex justify-start">
+                            <Link
+                                to="/articles"
+                                className="flex items-center gap-2 px-4 py-3 md:px-6 md:py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap"
+                            >
+                                <span className="material-symbols-outlined">arrow_back</span>
+                                <span className="hidden sm:inline">{t('articles.backToList', { defaultValue: 'Quay lại danh sách' })}</span>
+                            </Link>
+                        </div>
 
-                        {/* Share buttons (optional) */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">
-                                {t('articles.share', { defaultValue: 'Chia sẻ:' })}
-                            </span>
+                        {/* Center: Share */}
+                        <div className="flex-1 flex justify-center items-center">
                             <button
                                 onClick={() => {
                                     navigator.clipboard.writeText(window.location.href);
-                                    alert(t('articles.linkCopied', { defaultValue: 'Đã sao chép link!' }));
+                                    toast.success(t('articles.linkCopied', { defaultValue: 'Đã sao chép link!' }));
                                 }}
-                                className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                className="flex items-center gap-2 px-4 py-3 md:px-6 md:py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap"
                                 title={t('articles.copyLink', { defaultValue: 'Sao chép link' })}
                             >
-                                <span className="material-symbols-outlined text-lg">link</span>
+                                <span className="material-symbols-outlined text-lg">share</span>
+                                <span className="font-medium text-sm hidden sm:inline">{t('articles.share', { defaultValue: 'Chia sẻ' })}</span>
                             </button>
+                        </div>
+
+                        {/* Right: Next */}
+                        <div className="flex-1 flex justify-end">
+                            {relatedArticles.length > 0 ? (
+                                <Link
+                                    to={`/articles/${relatedArticles[0].slug}`}
+                                    className="flex items-center gap-2 px-4 py-3 md:px-6 md:py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors whitespace-nowrap"
+                                    title={relatedArticles[0].title}
+                                >
+                                    <span className="hidden sm:inline">{t('articles.nextArticle', { defaultValue: 'Bài viết tiếp theo' })}</span>
+                                    <span className="material-symbols-outlined">arrow_forward</span>
+                                </Link>
+                            ) : (
+                                <div className="w-full"></div>
+                            )}
                         </div>
                     </div>
                 </footer>

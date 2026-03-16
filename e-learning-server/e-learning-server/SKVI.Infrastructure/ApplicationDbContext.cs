@@ -82,6 +82,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<ForumThread> ForumThreads { get; set; }
     public DbSet<ForumPost> ForumPosts { get; set; }
 
+    // AI Feature
+    public DbSet<AiSettings> AiSettings { get; set; }
+    public DbSet<UserStudyPlan> UserStudyPlans { get; set; }
+    public DbSet<DailyStudyTask> DailyStudyTasks { get; set; }
+    public DbSet<AiChatMessage> AiChatMessages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -394,6 +400,37 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(fp => fp.AuthorId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // AI Feature configurations
+        modelBuilder.Entity<AiSettings>()
+            .HasIndex(s => s.IsEnabled);
+
+        modelBuilder.Entity<UserStudyPlan>()
+            .HasIndex(p => p.UserId);
+
+        modelBuilder.Entity<UserStudyPlan>()
+            .HasOne(p => p.User)
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DailyStudyTask>()
+            .HasIndex(t => t.PlanId);
+
+        modelBuilder.Entity<DailyStudyTask>()
+            .HasOne(t => t.Plan)
+            .WithMany(p => p.DailyTasks)
+            .HasForeignKey(t => t.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<AiChatMessage>()
+            .HasIndex(m => m.UserId);
+
+        modelBuilder.Entity<AiChatMessage>()
+            .HasOne(m => m.User)
+            .WithMany()
+            .HasForeignKey(m => m.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
             
         // Relationships are automatically configured by EF Core conventions based on navigation properties,
         // but explicit configuration can be added here if needed.

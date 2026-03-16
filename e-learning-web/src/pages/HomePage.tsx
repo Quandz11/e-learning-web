@@ -38,9 +38,9 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="relative mx-auto max-w-7xl text-center">
-          <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl animate-fadeDown">
+          <p className="mb-4 text-4xl font-extrabold tracking-tight text-white/90 sm:text-5xl md:text-6xl animate-fadeDown">
             {t('fasting.title')}
-          </h1>
+          </p>
           <p className="mx-auto mb-8 max-w-7xl text-3xl text-white/90 animate-fadeIn delay-100">
             {t('fasting.subtitle')}
           </p>

@@ -56,6 +56,11 @@ builder.Services.AddScoped<IHomeVideoSectionService, HomeVideoSectionService>();
 builder.Services.AddScoped<IWhyChooseUsService, WhyChooseUsService>();
 builder.Services.AddScoped<ForumService>();
 
+// AI Services
+builder.Services.AddScoped<IAiSettingsService, AiSettingsService>();
+builder.Services.AddScoped<IGeminiService, GeminiService>();
+builder.Services.AddScoped<IStudyPlanService, StudyPlanService>();
+
 // Guest Conversation Service (Singleton for in-memory storage)
 builder.Services.AddSingleton<IGuestConversationService, GuestConversationService>();
 

@@ -10,6 +10,7 @@ public class Testimonial
     public string Content { get; set; } = string.Empty;
     public string? AvatarUrl { get; set; }
     public string? VideoUrl { get; set; }
+    public string? ResultImageUrl { get; set; }
     public TestimonialType Type { get; set; } = TestimonialType.Text;
     public int Order { get; set; }
     public bool IsActive { get; set; } = true;

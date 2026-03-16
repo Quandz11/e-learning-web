@@ -10,10 +10,12 @@ namespace e_learning_server.Controllers;
 public class TestimonialsController : ControllerBase
 {
     private readonly ITestimonialService _testimonialService;
+    private readonly IBunnyStreamService _bunnyStreamService;
 
-    public TestimonialsController(ITestimonialService testimonialService)
+    public TestimonialsController(ITestimonialService testimonialService, IBunnyStreamService bunnyStreamService)
     {
         _testimonialService = testimonialService;
+        _bunnyStreamService = bunnyStreamService;
     }
 
     [HttpGet("active")]
@@ -70,5 +72,36 @@ public class TestimonialsController : ControllerBase
         var success = await _testimonialService.DeleteAsync(id);
         if (!success) return NotFound();
         return NoContent();
+    }
+
+    [HttpPost("upload-result")]
+    [Authorize(Roles = "ADMIN")]
+    [RequestSizeLimit(20_000_000)]
+    public async Task<IActionResult> UploadResultImage([FromForm] IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file == null)
+        {
+            return BadRequest(new { message = "File is required" });
+        }
+
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = "Only image files are allowed" });
+        }
+
+        try
+        {
+            await using var stream = file.OpenReadStream();
+            var url = await _bunnyStreamService.UploadImageAsync(stream, file.FileName, "testimonial-results", cancellationToken);
+            return Ok(new { url });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

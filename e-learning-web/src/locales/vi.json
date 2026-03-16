@@ -1230,7 +1230,7 @@
                 "courses": "Khóa học",
                 "articles": "Bài viết",
                 "knowledge": "Cập nhật kiến thức",
-                "challenge": "Thử thách 7 ngày",
+                "challenge": "Thử thách 10 ngày",
                 "specialCoaching": "Huấn luyện đặc biệt",
                 "forum": "Diễn đàn",
                 "benefits": "Lợi ích",
@@ -1619,6 +1619,101 @@
             "note": "Chúng tôi sẽ phê duyệt và gửi thông tin mã định danh cho bạn qua Zalo trong vòng 24h."
         },
         "backToPricing": "← Quay lại Bảng giá"
+    },
+    "challenge10Page": {
+        "hero": {
+            "badge": "PROTOCOLO RE-CODE 10",
+            "title": "Tái Thiết Lập Hệ Thống Sinh Học",
+            "subtitle": "Quy trình 10 ngày tối ưu hóa tế bào dành riêng cho người đã thực hành 16/8",
+            "cta": "KHÁM PHÁ LỘ TRÌNH"
+        },
+        "decode": {
+            "title": "Giải mã Cơ thể - Lập trình Tương lai"
+        },
+        "features": [
+            {
+                "title": "Cơ chế Autophagy",
+                "description": "Kích hoạt khả năng tự thực của tế bào, loại bỏ protein lỗi và tái tạo cấu trúc mô mới trong 5 ngày nhịn sâu."
+            },
+            {
+                "title": "Metabolic Flexibility",
+                "description": "Huấn luyện cơ thể chuyển đổi linh hoạt giữa đốt đường và đốt mỡ, giúp duy trì năng lượng bền bỉ suốt cả ngày."
+            },
+            {
+                "title": "Protocol bảo mật",
+                "description": "Sản phẩm mã hóa độc quyền kết hợp cùng sự đồng hành sát sao từ các Đại sứ Sức khỏe."
+            }
+        ],
+        "protocol": {
+            "title": "Giao thức RE-CODE 10",
+            "headers": {
+                "stage": "Giai đoạn",
+                "duration": "Thời lượng",
+                "activity": "Hoạt động cốt lõi",
+                "target": "Trạng thái mục tiêu"
+            }
+        },
+        "timeline": [
+            {
+                "stage": "PRE-FAST",
+                "duration": "Ngày 1 - 2",
+                "activity": "Cắt giảm tinh bột xấu, ăn thuần thực vật, làm sạch đường ruột.",
+                "target": "Sẵn sàng chuyển hóa"
+            },
+            {
+                "stage": "DEEP FAST",
+                "duration": "Ngày 3 - 7",
+                "activity": "Nhịn ăn hoàn toàn. Chỉ sử dụng nước và tổ hợp MF-1, BF-X, DCT.",
+                "target": "Tái tạo tế bào sâu"
+            },
+            {
+                "stage": "RE-FEEDING",
+                "duration": "Ngày 8 - 10",
+                "activity": "Ăn ra theo quy trình lỏng-đến-đặc. Kích hoạt lại enzyme tiêu hóa.",
+                "target": "Hồi sinh hệ thống"
+            }
+        ],
+        "kitTitle": "Biological Reset Kit (RE-CODE 10)",
+        "kitDescription": "Hệ thống công cụ hỗ trợ được thiết kế để duy trì sự an toàn và hiệu suất tối đa trong suốt 10 ngày.",
+        "codeLabel": "Code",
+        "kit": [
+            {
+                "title": "Mineral Flux 1.0",
+                "code": "MF-1",
+                "description": "Phức hợp điện giải nồng độ cao chống mệt mỏi."
+            },
+            {
+                "title": "Brain Fuel X",
+                "code": "BF-X",
+                "description": "Dầu tinh khiết cấp năng lượng cho neuron."
+            },
+            {
+                "title": "Deep Cleanse Tea",
+                "code": "DCT",
+                "description": "Tổ hợp thảo mộc hỗ trợ gan thải độc."
+            },
+            {
+                "title": "Ketone Tracker",
+                "code": "KT-10",
+                "description": "Chỉ báo sinh hóa xác thực mức độ đốt mỡ."
+            },
+            {
+                "title": "The Protocol",
+                "code": "P.10",
+                "description": "Cẩm nang vận hành chi tiết từng giờ."
+            }
+        ],
+        "warning": {
+            "title": "Tiêu chuẩn gia nhập:",
+            "body": "Để đảm bảo an toàn, thử thách này BẮT BUỘC dành cho người đã thực hành nhịn ăn gián đoạn (IF) từ 4 tuần trở lên. Nếu bạn chưa có kinh nghiệm, vui lòng chọn lộ trình Prepare 16/8 trước."
+        },
+        "cta": {
+            "title": "Sẵn sàng để \"Lập trình\" lại cơ thể?",
+            "subtitle": "Chọn phương thức bắt đầu phù hợp với bạn",
+            "surveyButton": "LÀM BÀI KHẢO SÁT SỨC KHỎE",
+            "joinButton": "THAM GIA THỬ THÁCH NGAY",
+            "oldStudentLink": "Bạn là học viên cũ? Đăng ký mua lẻ Bộ Kit tại đây"
+        }
     },
     "chat": {
         "button": {

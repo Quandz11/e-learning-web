@@ -1225,7 +1225,7 @@
                 "courses": "Courses",
                 "articles": "Articles",
                 "knowledge": "Knowledge Updates",
-                "challenge": "7-Day Challenge",
+                "challenge": "10-Day Challenge",
                 "specialCoaching": "Special Coaching",
                 "forum": "Forum",
                 "benefits": "Benefits",
@@ -1614,6 +1614,101 @@
             "note": "We will review and send your ambassador code information via chat channel within 24 hours."
         },
         "backToPricing": "← Back to pricing"
+    },
+    "challenge10Page": {
+        "hero": {
+            "badge": "PROTOCOLO RE-CODE 10",
+            "title": "Reset Your Biological System",
+            "subtitle": "A 10-day cellular optimization protocol for participants already practicing 16/8 fasting.",
+            "cta": "EXPLORE THE PROTOCOL"
+        },
+        "decode": {
+            "title": "Decode the Body - Program the Future"
+        },
+        "features": [
+            {
+                "title": "Autophagy Mechanism",
+                "description": "Activate cellular self-cleaning to remove faulty proteins and regenerate tissue structures during deep fasting days."
+            },
+            {
+                "title": "Metabolic Flexibility",
+                "description": "Train the body to switch efficiently between glucose-burning and fat-burning for sustained daily energy."
+            },
+            {
+                "title": "Secure Protocol",
+                "description": "An exclusive coded toolkit with close guidance from Health Ambassadors throughout the challenge."
+            }
+        ],
+        "protocol": {
+            "title": "RE-CODE 10 Protocol",
+            "headers": {
+                "stage": "Stage",
+                "duration": "Duration",
+                "activity": "Core Activity",
+                "target": "Target State"
+            }
+        },
+        "timeline": [
+            {
+                "stage": "PRE-FAST",
+                "duration": "Day 1 - 2",
+                "activity": "Reduce harmful carbs, switch to plant-based meals, and clean the digestive system.",
+                "target": "Metabolic readiness"
+            },
+            {
+                "stage": "DEEP FAST",
+                "duration": "Day 3 - 7",
+                "activity": "Complete fasting phase. Use only water and the MF-1, BF-X, DCT support set.",
+                "target": "Deep cellular reset"
+            },
+            {
+                "stage": "RE-FEEDING",
+                "duration": "Day 8 - 10",
+                "activity": "Refeed from liquid to solid in sequence to reactivate digestive enzymes.",
+                "target": "System recovery"
+            }
+        ],
+        "kitTitle": "Biological Reset Kit (RE-CODE 10)",
+        "kitDescription": "A support toolkit designed to maximize safety and performance throughout the full 10-day protocol.",
+        "codeLabel": "Code",
+        "kit": [
+            {
+                "title": "Mineral Flux 1.0",
+                "code": "MF-1",
+                "description": "High-density electrolyte formula for fatigue resistance."
+            },
+            {
+                "title": "Brain Fuel X",
+                "code": "BF-X",
+                "description": "Pure fuel source for neuronal energy support."
+            },
+            {
+                "title": "Deep Cleanse Tea",
+                "code": "DCT",
+                "description": "Herbal blend to support liver detox pathways."
+            },
+            {
+                "title": "Ketone Tracker",
+                "code": "KT-10",
+                "description": "Biochemical indicator to verify fat-burning intensity."
+            },
+            {
+                "title": "The Protocol",
+                "code": "P.10",
+                "description": "Step-by-step operating handbook by hour."
+            }
+        ],
+        "warning": {
+            "title": "Entry requirement:",
+            "body": "For safety, this challenge is mandatory for participants with at least 4 weeks of intermittent fasting experience. If you are new, please complete the Prepare 16/8 pathway first."
+        },
+        "cta": {
+            "title": "Ready to reprogram your body?",
+            "subtitle": "Choose the best way for you to start",
+            "surveyButton": "TAKE THE HEALTH ASSESSMENT",
+            "joinButton": "JOIN THE CHALLENGE NOW",
+            "oldStudentLink": "Returning learner? Register to purchase the kit separately here"
+        }
     },
     "chat": {
         "button": {

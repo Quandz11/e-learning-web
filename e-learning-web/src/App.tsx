@@ -69,6 +69,7 @@ import LecturerDashboardPage from './pages/lecturer/LecturerDashboardPage';
 import RouteErrorFallback from './components/common/RouteErrorFallback';
 import PricingPage from './pages/PricingPage';
 import AmbassadorPage from './pages/AmbassadorPage';
+import Challenge10DayPage from './pages/Challenge10DayPage';
 
 // Helper component to handle root path redirection
 const RootRedirect = () => {
@@ -156,6 +157,10 @@ function App() {
                 {
                   path: 'ambassador',
                   element: <AmbassadorPage />,
+                },
+                {
+                  path: 'challenge-10-days',
+                  element: <Challenge10DayPage />,
                 },
                 {
                   path: 'my-courses',

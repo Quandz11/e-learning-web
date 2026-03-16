@@ -59,7 +59,7 @@ const UserHeader: React.FC = () => {
     const trainingItems: NavLinkItem[] = [
         { label: t('home.header.nav.courses'), to: '/courses' },
         { label: t('home.header.nav.knowledge', { defaultValue: 'Cập nhật kiến thức' }), to: '/articles' },
-        { label: t('home.header.nav.challenge', { defaultValue: 'Thử thách 7 ngày' }), to: '/articles' },
+        { label: t('home.header.nav.challenge', { defaultValue: 'Thử thách 10 ngày' }), to: '/challenge-10-days' },
         { label: t('home.header.nav.specialCoaching', { defaultValue: 'Huấn luyện đặc biệt' }), to: '/pricing' },
     ];
 

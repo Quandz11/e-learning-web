@@ -1325,6 +1325,23 @@
                 "failed": "Unable to submit registration. Please try again."
             }
         },
+        "recodeKit": {
+            "title": "RECODE-10 KIT",
+            "subtitle": "Discover exclusive products and kits to maximize your fasting journey.",
+            "limitedEdition": "LIMITED EDITION",
+            "eynt": "EVERYTHING YOU NEED",
+            "heading": "Fasting solution without barriers",
+            "desc": "No more worries about complex preparation. We provide a complete package from supportive nutrients, measurement devices to an execution manual. Your job is to listen to your body, P.10 handles the rest.",
+            "f1Title": "🧬 MF-1 & BF-X",
+            "f1Desc": "Micronutrient solvent blocks headaches & fatigue.",
+            "f2Title": "🩸 KT-10 Monitor",
+            "f2Desc": "Master biological data, know exactly when fat burns.",
+            "f3Title": "📖 P.10 Protocol",
+            "f3Desc": "\"Hand-holding\" manual for every fasting hour.",
+            "f4Title": "🌱 DCT Deep Cleanse",
+            "f4Desc": "Deep cleanse lymphatic system and internal organs.",
+            "cta": "BUY P.10 FULL KIT"
+        },
         "testimonials": {
             "title": "Student Feedback",
             "subtitle": "Hear from our students about their learning journey"

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import CourseList from '../components/courses/CourseList';
 import QuizModal from '../components/quiz/QuizModal';
 import TestimonialsSection from '../components/home/TestimonialsSection';
+import RecodeKitSection from '../components/home/RecodeKitSection';
 import CourseConsultationForm from '../components/home/CourseConsultationForm';
 import { homeSectionApi, type HomeVideoSectionDto } from '../services/homeSectionApi';
 import { whyChooseUsApi, type WhyChooseUsItemDto } from '../services/whyChooseUsApi';
@@ -122,6 +123,9 @@ const HomePage: React.FC = () => {
           <CourseList pageSize={12} showPagination cols={4} showFilter={false} />
         </div>
       </section>
+
+      {/* Recode - 10 Kit Section */}
+      <RecodeKitSection />
 
       {/* Testimonials Section */}
       <TestimonialsSection />

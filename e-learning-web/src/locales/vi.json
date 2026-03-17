@@ -1330,6 +1330,23 @@
                 "failed": "Không thể gửi đăng ký. Vui lòng thử lại."
             }
         },
+        "recodeKit": {
+            "title": "RECODE-10 KIT",
+            "subtitle": "Khám phá các sản phẩm và bộ kit độc quyền hỗ trợ tối đa cho hành trình nhịn ăn của bạn.",
+            "limitedEdition": "PHIÊN BẢN GIỚI HẠN",
+            "eynt": "EVERYTHING YOU NEED",
+            "heading": "Giải pháp nhịn ăn không rào cản",
+            "desc": "Không còn nỗi lo chuẩn bị phức tạp. Chúng tôi mang đến giải pháp trọn gói từ vi chất hỗ trợ, thiết bị đo lường đến cẩm nang thực thi. Việc của bạn là lắng nghe cơ thể, phần còn lại đã có P.10 lo.",
+            "f1Title": "🧬 MF-1 & BF-X",
+            "f1Desc": "Dung môi vi chất chặn đứng cơn đau đầu & uể oải.",
+            "f2Title": "🩸 KT-10 Monitor",
+            "f2Desc": "Làm chủ dữ liệu sinh học, biết chính xác khi nào đốt mỡ.",
+            "f3Title": "📖 P.10 Protocol",
+            "f3Desc": "Cẩm nang \"cầm tay chỉ việc\" cho từng giờ nhịn ăn.",
+            "f4Title": "🌱 DCT Deep Cleanse",
+            "f4Desc": "Thanh lọc sâu hệ bạch huyết và làm sạch nội tạng.",
+            "cta": "MUA TRỌN BỘ KIT P.10"
+        },
         "testimonials": {
             "title": "Phản hồi học viên",
             "subtitle": "Những phản hồi chân thực từ học viên của chúng tôi"

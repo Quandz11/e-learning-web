@@ -66,7 +66,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
                 accessTokenFactory: () => token
             })
             .withAutomaticReconnect()
-            .configureLogging(LogLevel.Information)
+            .configureLogging(LogLevel.None)
             .build();
 
         setConnection(newConnection);
@@ -82,7 +82,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         if (connection) {
             connection.start()
                 .then(() => {
-                    console.log('Notification Hub Connected');
                     setIsConnected(true);
 
                     connection.on('ReceiveNotification', (notification: NotificationDto) => {

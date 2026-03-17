@@ -124,7 +124,6 @@ class ChatSignalRService {
                     // Simplified strategy: Always stop and reconnect if connect is called explicitly with a token
                     // This ensures we don't get stuck in Anonymous mode when User logs in
                     if (token) {
-                        console.log('[ChatSignalR] Token provided, forcing reconnection to update auth context.');
                         if (this.connection) {
                             await this.connection.stop();
                         }
@@ -156,18 +155,16 @@ class ChatSignalRService {
                     transport: signalR.HttpTransportType.WebSockets,
                 })
                 .withAutomaticReconnect()
-                .configureLogging(signalR.LogLevel.Information);
+                .configureLogging(signalR.LogLevel.None);
 
             this.connection = connectionBuilder.build();
 
             // Register event handlers once per connection
             this.connection.on('ReceiveMessage', (message: ChatMessage) => {
-                console.log('[ChatSignalR] Event Received: ReceiveMessage', message);
                 this.callbacks.onReceiveMessage.forEach(cb => cb(message));
             });
 
             this.connection.on('ReceiveGuestMessage', (guestId: string, message: ChatMessage) => {
-                console.log('[ChatSignalR] Event Received: ReceiveGuestMessage', guestId, message);
                 this.callbacks.onGuestMessage.forEach(cb => cb(guestId, message));
             });
 
@@ -229,13 +226,11 @@ class ChatSignalRService {
             });
 
             this.connection.on('ReceiveNotification', (notification: NotificationMessage) => {
-                console.log('[ChatSignalR] Event Received: ReceiveNotification', notification);
                 this.callbacks.onReceiveNotification.forEach(cb => cb(notification));
             });
 
             try {
                 await this.connection.start();
-                console.log('SignalR Connected');
             } catch (err) {
                 console.error('SignalR Connection Error:', err);
                 // Reset connection so next attempt rebuilds cleanly
@@ -278,11 +273,8 @@ class ChatSignalRService {
     }
 
     async sendGuestReply(guestId: string, content: string) {
-        console.log('[ChatSignalR] Sending guest reply...', guestId);
         const conn = await this.ensureConnected();
-        console.log('[ChatSignalR] Connection secured, invoking SendGuestReply...');
         await conn.invoke('SendGuestReply', guestId, content);
-        console.log('[ChatSignalR] SendGuestReply invoked successfully.');
     }
 
     async startTypingGuest(guestId: string) {

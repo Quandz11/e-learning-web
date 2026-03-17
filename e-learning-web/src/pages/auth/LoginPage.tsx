@@ -97,7 +97,7 @@ const LoginPage = () => {
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');
             } else {
-                navigate('/home'); // or appropriate page for other roles
+                navigate('/'); // or appropriate page for other roles
             }
         } catch (err) {
             const message = extractErrorMessage(err);
@@ -141,7 +141,7 @@ const LoginPage = () => {
             if (user.role === 'ADMIN') {
                 navigate('/admin/dashboard');
             } else {
-                navigate('/home');
+                navigate('/');
             }
         } catch (err: any) {
             const message = extractErrorMessage(err);

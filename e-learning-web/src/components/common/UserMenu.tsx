@@ -7,6 +7,7 @@ interface UserMenuProps {
         avatarUrl?: string;
         fullName: string;
         email: string;
+        role?: string;
     };
 }
 
@@ -69,6 +70,22 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
                     className="absolute right-0 top-full z-50 w-56 pt-2"
                 >
                     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white py-2 shadow-lg dark:border-gray-700 dark:bg-slate-800">
+                        {user.role && ['ADMIN', 'CARE', 'CABIN_OWNER', 'LECTURER'].includes(user.role.toUpperCase()) && (
+                            <Link
+                                to={
+                                    user.role.toUpperCase() === 'ADMIN' ? '/admin/dashboard' :
+                                    user.role.toUpperCase() === 'CARE' ? '/care/dashboard' :
+                                    user.role.toUpperCase() === 'CABIN_OWNER' ? '/agent/dashboard' :
+                                    '/lecturer/dashboard'
+                                }
+                                onClick={() => handleMenuItemClick()}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors border-b border-gray-100 dark:border-gray-700"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                                {t('home.header.userMenu.adminPanel', { defaultValue: 'Quản trị hệ thống' })}
+                            </Link>
+                        )}
+
                         <Link
                             to="/my-courses"
                             onClick={() => handleMenuItemClick()}

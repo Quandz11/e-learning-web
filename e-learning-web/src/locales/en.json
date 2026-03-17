@@ -198,6 +198,7 @@
         },
         "sidebar": {
             "dashboard": "Dashboard",
+            "backToHome": "Back to Home Page",
             "users": "Users",
             "students": "Students",
             "instructors": "Instructors",
@@ -1003,7 +1004,7 @@
         "status": "Status",
         "created": "Created At",
         "actions": "Actions",
-        "logout": "Logout", 
+        "logout": "Logout",
         "categories": {
             "title": "Lesson Categories",
             "subtitle": "Manage lesson categories",
@@ -1414,9 +1415,9 @@
             "connect": {
                 "title": "Connect",
                 "hotlineLabel": "Hotline",
-                "hotlineValue": "[Phone number]",
+                "hotlineValue": "0977698753",
                 "emailLabel": "Email",
-                "emailValue": "contact@nhinanchualanh.vn",
+                "emailValue": "suckhoeviet.skvi@gmail.com",
                 "chatAction": "Subscribe messages",
                 "newsAction": "Subscribe updates",
                 "social": {

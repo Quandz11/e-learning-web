@@ -20,10 +20,10 @@ const UserFooter: React.FC = () => {
     const supportLinks = [
         { to: '/forum', icon: 'help', label: t('home.footer.support.faq') },
         { to: '/ambassador', icon: 'volunteer_activism', label: t('home.footer.support.ambassador') },
-        { to: '/', icon: 'policy', label: t('home.footer.support.privacy') },
-        { to: '/', icon: 'gavel', label: t('home.footer.support.terms') },
-        { to: '/', icon: 'warning', label: t('home.footer.support.disclaimer') },
-        { to: '/', icon: 'handshake', label: t('home.footer.support.collaboration') }
+        { to: '/privacy-policy', icon: 'policy', label: t('home.footer.support.privacy') },
+        { to: '/privacy-policy', icon: 'gavel', label: t('home.footer.support.terms') },
+        { to: '/privacy-policy', icon: 'warning', label: t('home.footer.support.disclaimer') },
+        { to: '/contact', icon: 'handshake', label: t('home.footer.support.collaboration') }
     ];
 
     return (

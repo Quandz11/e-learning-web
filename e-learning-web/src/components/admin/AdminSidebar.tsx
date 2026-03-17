@@ -72,6 +72,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
           {/* Navigation Links */}
           <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-6">
             <Link
+              to="/"
+              onClick={handleNav}
+              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300`}
+            >
+              <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">home</span>
+              <span className="text-sm font-medium">{t('admin.sidebar.backToHome')}</span>
+            </Link>
+            <Link
               to="/admin/dashboard"
               onClick={handleNav}
               className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname === '/admin/dashboard'

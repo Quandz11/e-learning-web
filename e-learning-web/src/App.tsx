@@ -1,8 +1,8 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 import AdminLayout from './components/admin/AdminLayout';
-import { useDispatch, useSelector } from 'react-redux';
-import type { AppDispatch, RootState } from './store/store';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from './store/store';
 import AuthLayout from './components/layout/AuthLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -72,21 +72,11 @@ import RouteErrorFallback from './components/common/RouteErrorFallback';
 import PricingPage from './pages/PricingPage';
 import AmbassadorPage from './pages/AmbassadorPage';
 import Challenge10DayPage from './pages/Challenge10DayPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import ContactUsPage from './pages/ContactUsPage';
+import MissionVisionPage from './pages/MissionVisionPage';
 
-// Helper component to handle root path redirection
-const RootRedirect = () => {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const role = user?.role?.toUpperCase();
-
-  if (isAuthenticated) {
-    if (role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
-    if (role === 'CARE') return <Navigate to="/care/dashboard" replace />;
-    if (role === 'CABIN_OWNER') return <Navigate to="/agent/dashboard" replace />;
-    if (role === 'LECTURER') return <Navigate to="/lecturer/dashboard" replace />;
-    return <Navigate to="/home" replace />;
-  }
-  return <HomePage />;
-};
+// Removed RootRedirect to allow all users to access the HomePage at '/'
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -126,15 +116,11 @@ function App() {
               children: [
                 {
                   path: '/',
-                  element: <RootRedirect />,
+                  element: <HomePage />,
                 },
                 {
                   path: 'home',
-                  element: (
-                    <ProtectedRoute>
-                      <HomePage />
-                    </ProtectedRoute>
-                  ),
+                  element: <Navigate to="/" replace />,
                 },
                 {
                   path: 'profile',
@@ -163,6 +149,18 @@ function App() {
                 {
                   path: 'challenge-10-days',
                   element: <Challenge10DayPage />,
+                },
+                {
+                  path: 'privacy-policy',
+                  element: <PrivacyPolicyPage />
+                },
+                {
+                  path: 'contact',
+                  element: <ContactUsPage />
+                },
+                {
+                  path: 'mission-vision',
+                  element: <MissionVisionPage />
                 },
                 {
                   path: 'my-courses',

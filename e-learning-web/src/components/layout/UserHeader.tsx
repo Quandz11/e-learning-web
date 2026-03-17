@@ -25,9 +25,7 @@ const UserHeader: React.FC = () => {
     const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
     const [cartCount, setCartCount] = useState(0);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const contactHref = isAuthenticated
-        ? '/home#course-consultation-form'
-        : '/#course-consultation-form';
+    const contactHref = '/contact';
 
     useEffect(() => {
         const syncCartCount = () => {
@@ -70,9 +68,9 @@ const UserHeader: React.FC = () => {
     ];
 
     const aboutItems: NavLinkItem[] = [
-        { label: t('home.header.nav.missionVision', { defaultValue: 'Sứ mệnh & tầm nhìn' }), to: '/' },
+        { label: t('home.header.nav.missionVision', { defaultValue: 'Sứ mệnh & tầm nhìn' }), to: '/mission-vision' },
         { label: t('home.header.nav.pricing', { defaultValue: 'Bảng giá' }), to: '/pricing' },
-        { label: t('home.header.nav.policy', { defaultValue: 'Chính sách' }), to: '/pricing#pricing-policies' },
+        { label: t('home.header.nav.policy', { defaultValue: 'Chính sách' }), to: '/privacy-policy' },
     ];
 
     const renderDesktopMenuItem = (item: NavLinkItem, className: string, key: string) => {

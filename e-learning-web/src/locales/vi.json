@@ -198,6 +198,7 @@
         },
         "sidebar": {
             "dashboard": "Bảng điều khiển",
+            "backToHome": "Về trang chủ",
             "users": "Người dùng",
             "students": "Học viên",
             "instructors": "Giảng viên",
@@ -1419,9 +1420,9 @@
             "connect": {
                 "title": "Kết nối",
                 "hotlineLabel": "Hotline",
-                "hotlineValue": "[Số điện thoại]",
+                "hotlineValue": "0977698753",
                 "emailLabel": "Email",
-                "emailValue": "contact@nhinanchualanh.vn",
+                "emailValue": "suckhoeviet.skvi@gmail.com",
                 "chatAction": "Đăng ký nhắn tin",
                 "newsAction": "Đăng ký nhận tin",
                 "social": {

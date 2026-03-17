@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { leadApi } from '../../services/leadApi';
 import { useToast } from '../../contexts/ToastContext';
+import contactBackground from '../../assets/contact-background.jpg';
 
 interface ConsultationFormState {
   fullName: string;
@@ -65,9 +66,9 @@ const CourseConsultationForm: React.FC = () => {
     } catch (error: any) {
       showToast(
         error?.message ||
-          t('home.consultForm.messages.failed', {
-            defaultValue: 'Không thể gửi đăng ký. Vui lòng thử lại.',
-          }),
+        t('home.consultForm.messages.failed', {
+          defaultValue: 'Không thể gửi đăng ký. Vui lòng thử lại.',
+        }),
         'error'
       );
     } finally {
@@ -76,13 +77,20 @@ const CourseConsultationForm: React.FC = () => {
   };
 
   return (
-    <section id="course-consultation-form" className="bg-[#dce5e3] py-12 sm:py-14">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <h2 className="mb-6 text-center text-3xl font-extrabold text-[#11332e] sm:text-4xl">
-          {t('home.consultForm.title', { defaultValue: 'Đăng Ký Tư Vấn Khóa Học' })}
-        </h2>
+    <section
+      id="course-consultation-form"
+      className="relative py-16 sm:py-20 lg:py-24 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${contactBackground})` }}
+    >
+      {/* Dark overlay for better text and form readability */}
+      <div className="absolute inset-0 bg-black/40"></div>
 
-        <div className="mx-auto max-w-3xl rounded-[20px] bg-white px-5 py-6 shadow-[0_20px_45px_rgba(17,51,46,0.09)] sm:px-8 sm:py-8">
+      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <p className="mb-8 text-center text-3xl font-extrabold text-white sm:text-4xl shadow-black/50 drop-shadow-md">
+          {t('home.consultForm.title', { defaultValue: 'Đăng Ký Tư Vấn Khóa Học' })}
+        </p>
+
+        <div className="mx-auto max-w-3xl rounded-[24px] bg-white/95 backdrop-blur-sm px-6 py-8 shadow-2xl sm:px-10 sm:py-10 border border-white/20">
           <form onSubmit={handleSubmit} className="space-y-3">
             <input
               type="text"

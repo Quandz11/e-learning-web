@@ -153,9 +153,9 @@ const Challenge10DayPage: React.FC = () => {
         <span className="mb-5 inline-block rounded-full bg-[#ccff33] px-5 py-1 text-sm font-bold text-[#132a13]">
           {t('challenge10Page.hero.badge', { defaultValue: 'PROTOCOLO RE-CODE 10' })}
         </span>
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+        <p className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
           {t('challenge10Page.hero.title', { defaultValue: 'Tái Thiết Lập Hệ Thống Sinh Học' })}
-        </h1>
+        </p>
         <p className="mx-auto mt-3 max-w-3xl text-base text-white/90 sm:text-lg">
           {t('challenge10Page.hero.subtitle', {
             defaultValue: 'Quy trình 10 ngày tối ưu hóa tế bào dành riêng cho người đã thực hành 16/8',
@@ -235,9 +235,9 @@ const Challenge10DayPage: React.FC = () => {
         </section>
 
         <section className="mt-16 overflow-hidden rounded-[28px] bg-[#132a13] px-6 py-10 text-white sm:px-8 sm:py-14">
-          <h2 className="text-3xl font-bold text-[#ccff33]">
+          <p className="text-3xl font-bold text-[#ccff33]">
             {t('challenge10Page.kitTitle', { defaultValue: 'Biological Reset Kit (RE-CODE 10)' })}
-          </h2>
+          </p>
           <p className="mt-3 max-w-3xl text-sm text-white/80 sm:text-base">
             {t('challenge10Page.kitDescription', {
               defaultValue:
@@ -249,14 +249,13 @@ const Challenge10DayPage: React.FC = () => {
             {kitItems.map((item) => (
               <article
                 key={item.title}
-                className={`rounded-2xl border p-4 ${
-                  item.highlighted
-                    ? 'border-[#ccff33] bg-[#ccff33] text-[#132a13]'
-                    : 'border-white/15 bg-white/5 text-white'
-                }`}
+                className={`rounded-2xl border p-4 ${item.highlighted
+                  ? 'border-[#ccff33] bg-[#ccff33] text-[#132a13]'
+                  : 'border-white/15 bg-white/5 text-white'
+                  }`}
               >
                 <span className="material-symbols-outlined text-3xl">{item.icon}</span>
-                <h3 className="mt-2 text-base font-bold">{item.title}</h3>
+                <p className="mt-2 text-base font-bold">{item.title}</p>
                 <p className={`mt-1 text-xs ${item.highlighted ? 'text-[#132a13]/80' : 'text-white/70'}`}>
                   {t('challenge10Page.codeLabel', { defaultValue: 'Code' })}: {item.code}
                 </p>

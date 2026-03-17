@@ -90,70 +90,46 @@ const TestimonialsPage: React.FC = () => {
                 </div>
 
                 {/* Testimonials Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
                     {filteredTestimonials.map((testimonial) => (
                         <div
                             key={testimonial.id}
-                            className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700"
+                            className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-slate-100 dark:border-slate-700 flex flex-col group/card"
                         >
-                            {testimonial.type === TestimonialType.Video && testimonial.videoUrl ? (
-                                /* Video Testimonial */
-                                <div className="mb-6">
+                            {/* Result Image / Video */}
+                            {testimonial.resultImageUrl ? (
+                                <div className="relative w-full aspect-video bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                                    <img
+                                        src={testimonial.resultImageUrl}
+                                        alt={`${testimonial.name} result`}
+                                        className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
+                                    />
+                                </div>
+                            ) : testimonial.type === TestimonialType.Video && testimonial.videoUrl ? (
+                                <div className="w-full aspect-video bg-slate-100 dark:bg-slate-700">
                                     <video
                                         controls
-                                        className="w-full rounded-lg"
+                                        className="w-full h-full object-cover"
                                         poster={testimonial.avatarUrl}
                                     >
                                         <source src={testimonial.videoUrl} type="video/mp4" />
-                                        Your browser does not support the video tag.
                                     </video>
                                 </div>
                             ) : (
-                                /* Text Testimonial */
-                                <>
-                                    {/* Quote Icon */}
-                                    <div className="flex justify-center mb-6">
-                                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-primary text-2xl">
-                                                format_quote
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Content */}
-                                    <p className="text-slate-600 dark:text-slate-300 text-center mb-6 italic leading-relaxed">
+                                <div className="p-6 bg-slate-50 dark:bg-slate-750 flex flex-col items-center justify-center aspect-video border-b border-slate-100 dark:border-slate-700">
+                                    <span className="material-symbols-outlined text-4xl text-primary/20 mb-3">format_quote</span>
+                                    <p className="text-slate-600 dark:text-slate-300 text-sm italic leading-relaxed line-clamp-4 text-center">
                                         "{testimonial.content}"
                                     </p>
-
-                                    {/* Divider */}
-                                    <div className="w-16 h-1 bg-gradient-to-r from-primary to-primary/50 mx-auto mb-6"></div>
-                                </>
+                                </div>
                             )}
 
-                            {/* Author */}
-                            <div className="flex items-center justify-center gap-4">
-                                {testimonial.avatarUrl && testimonial.type === TestimonialType.Text ? (
-                                    <img
-                                        src={testimonial.avatarUrl}
-                                        alt={testimonial.name}
-                                        className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
-                                    />
-                                ) : testimonial.type === TestimonialType.Text ? (
-                                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-primary text-xl">
-                                            person
-                                        </span>
-                                    </div>
-                                ) : null}
-                                <div>
-                                    <h4 className="font-bold text-slate-900 dark:text-white">
-                                        {testimonial.name}
+                            {/* Author Info Area */}
+                            <div className="p-4 bg-white dark:bg-slate-800 flex-grow flex items-center justify-center">
+                                <div className="text-center w-full">
+                                    <h4 className="text-[15px] font-bold text-slate-800 dark:text-white truncate" title={testimonial.name}>
+                                        KH {testimonial.name}{testimonial.position ? ` - ${testimonial.position}` : ''}
                                     </h4>
-                                    {testimonial.position && (
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                                            {testimonial.position}
-                                        </p>
-                                    )}
                                 </div>
                             </div>
                         </div>

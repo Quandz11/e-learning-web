@@ -34,6 +34,13 @@ export interface ArticleListItem {
     createdAt: string;
 }
 
+export interface PagedResult<T> {
+    items: T[];
+    total: number;
+    page: number;
+    pageSize: number;
+}
+
 export interface CreateArticleDto {
     title: string;
     slug: string;
@@ -81,6 +88,13 @@ export const articleApi = {
         return apiClient('/articles');
     },
 
+    async getPaged(params: { page?: number; pageSize?: number }): Promise<PagedResult<ArticleListItem>> {
+        const searchParams = new URLSearchParams();
+        searchParams.set('page', String(params.page ?? 1));
+        searchParams.set('pageSize', String(params.pageSize ?? 10));
+        return apiClient(`/articles?${searchParams.toString()}`);
+    },
+
     async getBySlug(slug: string): Promise<Article> {
         return apiClient(`/articles/${slug}`);
     },
@@ -89,8 +103,23 @@ export const articleApi = {
         return apiClient(`/articles/category/${categoryId}`);
     },
 
+    async getByPagingCategory(categoryId: string, params: { page?: number; pageSize?: number }): Promise<PagedResult<ArticleListItem>> {
+        const searchParams = new URLSearchParams();
+        searchParams.set('page', String(params.page ?? 1));
+        searchParams.set('pageSize', String(params.pageSize ?? 10));
+        return apiClient(`/articles/category/${categoryId}?${searchParams.toString()}`);
+    },
+
     async search(query: string): Promise<ArticleListItem[]> {
         return apiClient(`/articles/search?q=${encodeURIComponent(query)}`);
+    },
+
+    async searchPaged(query: string, params: { page?: number; pageSize?: number }): Promise<PagedResult<ArticleListItem>> {
+        const searchParams = new URLSearchParams();
+        searchParams.set('q', query);
+        searchParams.set('page', String(params.page ?? 1));
+        searchParams.set('pageSize', String(params.pageSize ?? 10));
+        return apiClient(`/articles/search?${searchParams.toString()}`);
     },
 
     async getCategories(): Promise<ArticleCategory[]> {

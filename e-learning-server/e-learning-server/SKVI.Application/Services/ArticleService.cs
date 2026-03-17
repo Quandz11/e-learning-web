@@ -3,6 +3,7 @@ using SKVI.Application.DTOs.Articles;
 using SKVI.Application.Interfaces;
 using SKVI.Domain.Entities;
 using SKVI.Infrastructure;
+using SKVI.Shared;
 
 namespace SKVI.Application.Services;
 
@@ -44,6 +45,49 @@ public class ArticleService : IArticleService
                 CreatedAt = a.CreatedAt
             })
             .ToListAsync();
+    }
+
+    public async Task<PagedResult<ArticleListDto>> GetAllArticlesPaginatedAsync(int page, int pageSize, bool includeUnpublished = false)
+    {
+        var query = _context.Articles
+            .Include(a => a.Category)
+            .Include(a => a.Author)
+            .AsQueryable();
+
+        if (!includeUnpublished)
+        {
+            query = query.Where(a => a.IsPublished);
+        }
+
+        var total = await query.CountAsync();
+        
+        var items = await query
+            .OrderByDescending(a => a.PublishedAt ?? a.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(a => new ArticleListDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Slug = a.Slug,
+                Excerpt = a.Excerpt,
+                FeaturedImageUrl = a.FeaturedImageUrl,
+                CategoryName = a.Category != null ? a.Category.Name : null,
+                AuthorName = a.Author.FullName ?? a.Author.Email,
+                IsPublished = a.IsPublished,
+                PublishedAt = a.PublishedAt,
+                ViewCount = a.ViewCount,
+                CreatedAt = a.CreatedAt
+            })
+            .ToListAsync();
+
+        return new PagedResult<ArticleListDto>
+        {
+            Items = items,
+            Total = total,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     public async Task<ArticleDto?> GetArticleByIdAsync(Guid id)
@@ -128,6 +172,45 @@ public class ArticleService : IArticleService
             .ToListAsync();
     }
 
+    public async Task<PagedResult<ArticleListDto>> GetArticlesCategoryPaginatedAsync(Guid categoryId, int page, int pageSize)
+    {
+        var query = _context.Articles
+            .Include(a => a.Category)
+            .Include(a => a.Author)
+            .Where(a => a.CategoryId == categoryId && a.IsPublished)
+            .AsQueryable();
+
+        var total = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(a => a.PublishedAt ?? a.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(a => new ArticleListDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Slug = a.Slug,
+                Excerpt = a.Excerpt,
+                FeaturedImageUrl = a.FeaturedImageUrl,
+                CategoryName = a.Category != null ? a.Category.Name : null,
+                AuthorName = a.Author.FullName ?? a.Author.Email,
+                IsPublished = a.IsPublished,
+                PublishedAt = a.PublishedAt,
+                ViewCount = a.ViewCount,
+                CreatedAt = a.CreatedAt
+            })
+            .ToListAsync();
+
+        return new PagedResult<ArticleListDto>
+        {
+            Items = items,
+            Total = total,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
     public async Task<List<ArticleListDto>> SearchArticlesAsync(string query)
     {
         return await _context.Articles
@@ -153,6 +236,48 @@ public class ArticleService : IArticleService
                 CreatedAt = a.CreatedAt
             })
             .ToListAsync();
+    }
+
+    public async Task<PagedResult<ArticleListDto>> SearchArticlesPaginatedAsync(string query, int page, int pageSize)
+    {
+        var searchQuery = _context.Articles
+            .Include(a => a.Category)
+            .Include(a => a.Author)
+            .Where(a => a.IsPublished && 
+                   (a.Title.Contains(query) || 
+                    a.Content.Contains(query) || 
+                    (a.Excerpt != null && a.Excerpt.Contains(query))))
+            .AsQueryable();
+
+        var total = await searchQuery.CountAsync();
+
+        var items = await searchQuery
+            .OrderByDescending(a => a.PublishedAt ?? a.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(a => new ArticleListDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Slug = a.Slug,
+                Excerpt = a.Excerpt,
+                FeaturedImageUrl = a.FeaturedImageUrl,
+                CategoryName = a.Category != null ? a.Category.Name : null,
+                AuthorName = a.Author.FullName ?? a.Author.Email,
+                IsPublished = a.IsPublished,
+                PublishedAt = a.PublishedAt,
+                ViewCount = a.ViewCount,
+                CreatedAt = a.CreatedAt
+            })
+            .ToListAsync();
+
+        return new PagedResult<ArticleListDto>
+        {
+            Items = items,
+            Total = total,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     public async Task<ArticleDto> CreateArticleAsync(CreateArticleDto dto, Guid authorId)

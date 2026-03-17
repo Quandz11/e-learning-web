@@ -1434,7 +1434,7 @@
                 "hotlineLabel": "Hotline",
                 "hotlineValue": "0977698753",
                 "emailLabel": "Email",
-                "emailValue": "suckhoeviet.skvi@gmail.com",
+                "emailValue": "nhinanchualanh.vn@gmail.com",
                 "chatAction": "Subscribe messages",
                 "newsAction": "Subscribe updates",
                 "social": {
@@ -1450,107 +1450,107 @@
     },
     "pricingPage": {
         "hero": {
-            "title": "Nhin An Chua Lanh Pricing 2026",
-            "subtitle": "A proactive health ecosystem based on practical science"
+            "title": "NHIN AN CHUA LANH 2026",
+            "subtitle": "A bright pathway for a perfectly transformed body"
         },
-        "packages": {
-            "course99k": {
-                "name": "Scientific Fasting Foundation",
-                "price": "99,000 VND",
-                "desc": "Master the core principles to practice fasting safely and effectively.",
-                "features": [
-                    "Scientifically structured fasting roadmap",
-                    "Free 7-day guided training challenge"
-                ],
-                "cta": "Start now"
-            },
-            "challenge": {
-                "name": "7-Day Community Challenge",
-                "price": "299,000 VND",
-                "desc": "A monthly guided challenge with live coaching and peer accountability.",
-                "features": [
-                    "Live practical Zoom every evening",
-                    "Close support group",
-                    "Strong community momentum"
-                ],
-                "cta": "Join challenge"
-            },
-            "trainingMeditation": {
-                "name": "Training & Healing Meditation",
-                "price": "399,000 VND",
-                "desc": "Build daily discipline for body and mind with expert guidance.",
-                "features": [
-                    "Live Zoom sessions morning and evening",
-                    "Deep meditation library",
-                    "Includes Foundation package"
-                ],
-                "cta": "Subscribe monthly"
-            },
-            "basicFull": {
-                "badge": "BEST SELLER",
-                "name": "Core Fasting Full Program",
-                "price": "2,500,000 VND",
-                "desc": "Complete track from beginner to advanced for a sustainable lifestyle shift.",
-                "features": [
-                    "10 advanced fasting modules",
-                    "Includes Training & Meditation",
-                    "Free access to every monthly challenge",
-                    "100% refund if no measurable outcomes"
-                ],
-                "cta": "Get this package"
-            },
-            "obesityReset": {
-                "name": "Obesity Reset",
-                "price": "5,500,000 VND",
-                "desc": "A focused protocol to reduce visceral fat and long-term excess weight.",
-                "features": [
-                    "Green meal and movement framework",
-                    "Includes Training & Meditation",
-                    "Free access to every monthly challenge",
-                    "Outcome commitment on weight and waist reduction"
-                ],
-                "cta": "Start this pathway"
-            },
-            "fullTransformation": {
-                "name": "Comprehensive Transformation",
-                "price": "Consultation",
-                "desc": "1:1 therapeutic protocol for members with chronic or complex conditions.",
-                "features": [
-                    "1:1 coaching with specialists",
-                    "Protocol based on health indicators",
-                    "Lifetime Training & Meditation access",
-                    "24/7 health consultation support"
-                ],
-                "cta": "Book 1:1 consultation"
-            }
+        "table": {
+            "featureCol": "PACKAGE INFO",
+            "col1": "Experience",
+            "col2": "Basic (Full)",
+            "col3": "10-Day Coaching",
+            "col4": "Obesity Reset",
+            "col5": "Complete Transform",
+            "rowPrice": "INVESTMENT",
+            "price1": "99,000 VND",
+            "price2": "999,000 VND",
+            "price3": "2,990,000 VND",
+            "price4": "Consultation",
+            "price5": "1:1 Consult",
+            "rowRenewal": "MAINTENANCE",
+            "renewal2": "399k VND/m",
+            "renewal3": "Retail Kit",
+            "renewal4": "By roadmap",
+            "renewal5": "12-mth protocol",
+            "rowRoadmap": "ROADMAP",
+            "roadmap1": "7 days video",
+            "roadmap2": "Basic personal",
+            "roadmap3": "Close group",
+            "roadmap4": "Deep personal",
+            "roadmap5": "Medical protocol",
+            "rowZoom": "LIVE ZOOM",
+            "zoom1": "2 sessions",
+            "zoom2": "8 sessions",
+            "zoom3": "Live every night",
+            "zoom4": "Deep coaching",
+            "zoom5": "Special priority",
+            "rowDuration": "DURATION",
+            "duration1": "7 days",
+            "duration2": "30 days",
+            "duration3": "03 months",
+            "duration4": "06 months",
+            "duration5": "12 months",
+            "rowKit": "RECODE 10 KIT",
+            "kit2": "Retail offer",
+            "kit3": "1 Free Kit",
+            "kit4": "Included Kit",
+            "kit5": "Per protocol",
+            "rowGift": "SPECIAL GIFT",
+            "gift1": "Basic Ebook",
+            "gift2": "Green menu",
+            "gift3": "Practical docs",
+            "gift4": "Free 10-day Course",
+            "gift5": "Free 10-day Course",
+            "rowCommit": "COMMITMENT",
+            "commit1": "Standard knowledge",
+            "commit2": "Lifestyle mastery",
+            "commit3": "Deep cleanse",
+            "commit4": "Refund if no loss",
+            "commit5": "Disease improvement",
+            "rowAction": "ACTION",
+            "cta1": "Try now",
+            "cta2": "Join now",
+            "cta3": "Join now",
+            "cta4": "Consult",
+            "cta5": "Contact"
+        },
+        "affiliate": {
+            "title": "AMBASSADOR COMMISSION (AFFILIATE)",
+            "colProduct": "Product Group",
+            "colF1": "Direct (F1)",
+            "colF2": "Indirect (F2)",
+            "row1Name": "Digital Package (99k - 1,490k)",
+            "row1Sub": "Self-study & Community Zoom",
+            "row1F1": "25%",
+            "row1F2": "5%",
+            "row2Name": "Coaching Package (2,990k)",
+            "row2Sub": "Includes Recode Kit",
+            "row2F1": "12%",
+            "row2F2": "3%",
+            "row3Name": "Coaching & Group Combo",
+            "row3Sub": "Obesity Reset & Transformation",
+            "row3F1": "12%",
+            "row3F2": "3%",
+            "note": "Commission is calculated on actual revenue after discounts. Paid on the 10th-15th of each month."
         },
         "ambassador": {
             "title": "BECOME A HEALTH AMBASSADOR",
-            "subtitle": "Share healing value with your community and earn commission from 15% to 50% for successful referrals.",
-            "cta": "See mechanism and apply here"
-        },
-        "policies": {
-            "title": "Policy & Terms",
-            "items": [
-                "Free privilege: Members enrolling in packages from level 4 and above (over 2,000,000 VND) receive free Training & Healing Meditation and all monthly 7-day challenges.",
-                "Refund commitment: 100% refund for intensive programs if learners complete participation (above 80%) but do not achieve measurable body-index improvement.",
-                "Upgrade policy: Previous fee is deducted when upgrading to a higher package within 15 days from registration date."
-            ]
+            "subtitle": "Spread healing values - Earn 15% to 50% commission for new referrals.",
+            "cta": "Learn mechanism & Register as Ambassador here"
         },
         "faq": {
-            "title": "Frequently Asked Questions",
+            "title": "FAQ & POLICIES",
             "items": [
                 {
-                    "q": "If I buy the Core Fasting Full package, do I get training access?",
-                    "a": "Yes. From package level 4 onward, you get free daily access to Training & Healing Meditation and monthly 7-day challenges at no extra cost."
+                    "q": "Course upgrade policy?",
+                    "a": "100% of the old fee paid is deducted when upgrading to a higher package within the first 5 days."
                 },
                 {
-                    "q": "How can I earn high referral commission as an ambassador?",
-                    "a": "Once you become a Health Ambassador, entry offers like the 99K course can provide very high commission. Premium programs range around 15% to 25% depending on your ambassador tier."
+                    "q": "Group registration offers?",
+                    "a": "Combo of 2: 10% off. Combo of 3: 15% off the total order value."
                 },
                 {
-                    "q": "Does Training & Healing Meditation include live Zoom sessions?",
-                    "a": "Yes. The program includes live daily Zoom sessions with coaches to maintain both physical discipline and mindful recovery."
+                    "q": "Is there a guarantee for Coaching packages?",
+                    "a": "100% refund guaranteed if you follow the protocol correctly but visceral fat indicators do not improve."
                 }
             ]
         }

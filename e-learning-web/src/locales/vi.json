@@ -1439,7 +1439,7 @@
                 "hotlineLabel": "Hotline",
                 "hotlineValue": "0977698753",
                 "emailLabel": "Email",
-                "emailValue": "suckhoeviet.skvi@gmail.com",
+                "emailValue": "nhinanchualanh.vn@gmail.com",
                 "chatAction": "Đăng ký nhắn tin",
                 "newsAction": "Đăng ký nhận tin",
                 "social": {
@@ -1455,111 +1455,112 @@
     },
     "pricingPage": {
         "hero": {
-            "title": "Bảng Giá Nhịn Ăn Chữa Lành 2026",
-            "subtitle": "Hệ sinh thái chăm sóc sức khỏe chủ động theo chuẩn khoa học"
+            "title": "NHỊN ĂN CHỮA LÀNH 2026",
+            "subtitle": "Lộ trình tươi sáng cho một cơ thể chuyển hóa hoàn hảo"
         },
-        "packages": {
-            "course99k": {
-                "name": "Quy Trình Nhịn Ăn Chuẩn Khoa Học",
-                "price": "99.000đ",
-                "desc": "Nắm vững kiến thức xương sống để nhịn ăn an toàn và hiệu quả.",
-                "features": [
-                    "Quy trình nhịn ăn chuẩn y khoa",
-                    "Tặng 07 ngày tập cùng HLV"
-                ],
-                "cta": "Trải nghiệm ngay"
-            },
-            "challenge": {
-                "name": "Thử Thách 7 Ngày (Challenge)",
-                "price": "299.000đ",
-                "desc": "Chiến dịch đồng hành cộng đồng có HLV dẫn dắt trực tiếp mỗi tháng.",
-                "features": [
-                    "Zoom thực chiến mỗi tối",
-                    "Nhóm hỗ trợ Zalo sát sao",
-                    "Năng lượng cộng đồng tích cực"
-                ],
-                "cta": "Đăng ký tham gia"
-            },
-            "trainingMeditation": {
-                "name": "Tập Luyện & Thiền Chữa Lành",
-                "price": "399.000đ",
-                "desc": "Duy trì kỷ luật rèn luyện Thân - Tâm hàng ngày cùng chuyên gia.",
-                "features": [
-                    "Zoom trực tiếp sáng & tối",
-                    "Kho bài tập thiền chuyên sâu",
-                    "Tặng gói Quy trình 99K"
-                ],
-                "cta": "Đăng ký tháng"
-            },
-            "basicFull": {
-                "badge": "BÁN CHẠY NHẤT",
-                "name": "Nhịn Ăn Cơ Bản (Full)",
-                "price": "2.500.000đ",
-                "desc": "Trọn bộ kiến thức từ cơ bản đến nâng cao để làm chủ lối sống.",
-                "features": [
-                    "10 bài học nhịn ăn chuyên sâu",
-                    "Tặng gói Tập & Thiền chữa lành",
-                    "Miễn phí mọi kỳ Thử Thách",
-                    "Hoàn tiền 100% nếu không kết quả"
-                ],
-                "cta": "Sở hữu ngay"
-            },
-            "obesityReset": {
-                "name": "Xóa Sổ Béo Phì",
-                "price": "5.500.000đ",
-                "desc": "Lộ trình đặc biệt tiêu diệt mỡ nội tạng và mỡ thừa lâu năm.",
-                "features": [
-                    "Công thức ăn xanh & tập luyện",
-                    "Tặng gói Tập & Thiền chữa lành",
-                    "Miễn phí mọi kỳ Thử Thách",
-                    "Cam kết giảm cân, giảm eo"
-                ],
-                "cta": "Chốt lộ trình"
-            },
-            "fullTransformation": {
-                "name": "Chuyển Hóa Toàn Diện",
-                "price": "Tư vấn",
-                "desc": "Phác đồ trị liệu 1:1 dành riêng cho người có bệnh lý nền.",
-                "features": [
-                    "Kèm cặp 1:1 cùng chuyên gia",
-                    "Phác đồ dựa trên chỉ số máu",
-                    "Miễn phí Tập & Thiền vĩnh viễn",
-                    "Tư vấn sức khỏe 24/7"
-                ],
-                "cta": "Đăng ký tư vấn 1:1"
-            }
+        "table": {
+            "featureCol": "THÔNG TIN GÓI",
+            "col1": "Trải Nghiệm",
+            "col2": "Cơ Bản (Full)",
+            "col3": "Huấn Luyện 10 Ngày",
+            "col4": "Xóa Sổ Béo Phì",
+            "col5": "Chuyển Hóa Toàn Diện",
+            "rowPrice": "CHI PHÍ ĐẦU TƯ",
+            "price1": "99.000đ",
+            "price2": "999.000đ",
+            "price3": "2.990.000đ",
+            "price4": "Tùy trạng béo",
+            "price5": "Tư vấn 1:1",
+            "rowRenewal": "DUY TRÌ (GIA HẠN)",
+            "renewal2": "399.000đ/tháng",
+            "renewal3": "Mua lẻ Kit",
+            "renewal4": "Theo lộ trình",
+            "renewal5": "Phác đồ 12 th",
+            "rowRoadmap": "LỘ TRÌNH TẬP LUYỆN",
+            "roadmap1": "7 ngày qua video",
+            "roadmap2": "Cá nhân hóa cơ bản",
+            "roadmap3": "Nhóm kèm cặp sát",
+            "roadmap4": "Cá nhân hóa sâu",
+            "roadmap5": "Phác đồ y khoa",
+            "rowZoom": "ZOOM LIVE",
+            "zoom1": "2 buổi/ khóa",
+            "zoom2": "8 buổi chính",
+            "zoom3": "Live mỗi tối",
+            "zoom4": "Coaching chuyên sâu",
+            "zoom5": "Ưu tiên đặc biệt",
+            "rowDuration": "THỜI GIAN 1 KHÓA",
+            "duration1": "7 ngày",
+            "duration2": "30 ngày",
+            "duration3": "03 tháng",
+            "duration4": "06 tháng",
+            "duration5": "12 tháng",
+            "rowKit": "RECODE 10 KIT",
+            "kit2": "Ưu đãi mua lẻ",
+            "kit3": "Tặng 01 Bộ Kit",
+            "kit4": "Tặng kèm Kit",
+            "kit5": "Cấp theo phác đồ",
+            "rowGift": "QUÀ TẶNG ĐẶC BIỆT",
+            "gift1": "Ebook cơ bản",
+            "gift2": "Thực đơn xanh",
+            "gift3": "Tài liệu thực chiến",
+            "gift4": "Tặng Free Khóa 10 ngày",
+            "gift5": "Tặng Free Khóa 10 ngày",
+            "rowCommit": "CAM KẾT",
+            "commit1": "Kiến thức chuẩn",
+            "commit2": "Làm chủ lối sống",
+            "commit3": "Thanh lọc sâu",
+            "commit4": "Hoàn phí nếu ko giảm",
+            "commit5": "Cải thiện bệnh nền",
+            "rowAction": "HÀNH ĐỘNG",
+            "cta1": "Thử ngay",
+            "cta2": "Tham gia",
+            "cta3": "Tham gia",
+            "cta4": "Tư vấn",
+            "cta5": "Liên hệ"
+        },
+        "affiliate": {
+            "title": "CHIẾT KHẤU ĐẠI SỨ (AFFILIATE)",
+            "colProduct": "Nhóm Sản Phẩm",
+            "colF1": "Trực tiếp (F1)",
+            "colF2": "Gián tiếp (F2)",
+            "row1Name": "Gói Số (99k - 1.490k)",
+            "row1Sub": "Tự học & Zoom cộng đồng",
+            "row1F1": "25%",
+            "row1F2": "5%",
+            "row2Name": "Gói Huấn Luyện (2.990k)",
+            "row2Sub": "Có kèm Bộ Recode Kit",
+            "row2F1": "12%",
+            "row2F2": "3%",
+            "row3Name": "Coaching & Combo Nhóm",
+            "row3Sub": "Xóa béo & Chuyển hóa",
+            "row3F1": "12%",
+            "row3F2": "3%",
+            "note": "Hoa hồng được tính trên giá thực thu sau giảm giá/khấu trừ gói. Trả thưởng ngày 10-15 hàng tháng."
         },
         "ambassador": {
             "title": "TRỞ THÀNH ĐẠI SỨ SỨC KHỎE",
             "subtitle": "Lan tỏa giá trị chữa lành - Nhận hoa hồng từ 15% đến 50% khi giới thiệu học viên mới.",
             "cta": "Tìm hiểu cơ chế & Đăng ký Đại sứ tại đây"
         },
-        "policies": {
-            "title": "Chính Sách & Quy Định",
-            "items": [
-                "Đặc quyền miễn phí: Học viên đăng ký các gói từ số 4 trở đi (giá trị trên 2.000.000đ) được miễn phí gói Tập luyện & Thiền chữa lành và tất cả các kỳ Thử thách 7 ngày hàng tháng.",
-                "Cam kết hoàn tiền: Hoàn phí 100% cho các gói chuyên sâu nếu học viên tham gia đầy đủ (trên 80%) nhưng không đạt kết quả cải thiện chỉ số cơ thể.",
-                "Chính sách nâng cấp: Khấu trừ phí cũ khi nâng cấp lên gói cao hơn trong vòng 15 ngày kể từ ngày đăng ký."
-            ]
-        },
         "faq": {
-            "title": "Câu Hỏi Thường Gặp",
+            "title": "HỎI ĐÁP & CHÍNH SÁCH",
             "items": [
                 {
-                    "q": "Tôi mua gói Nhịn ăn cơ bản Full có được tập luyện không?",
-                    "a": "Có. Từ gói số 4 trở đi, bạn được tặng kèm miễn phí gói Tập luyện & Thiền chữa lành hàng ngày và vé tham dự Thử thách 7 ngày hàng tháng mà không phải trả thêm chi phí."
+                    "q": "Chính sách nâng cấp khóa học?",
+                    "a": "Khấu trừ 100% phí cũ (đóng thực tế) khi nâng cấp lên gói cao hơn trong vòng 5 ngày đầu tiên kể từ khi đăng ký."
                 },
                 {
-                    "q": "Làm sao để nhận hoa hồng cao khi giới thiệu học viên?",
-                    "a": "Khi bạn trở thành Đại sứ sức khỏe, các gói phễu như khóa 99K có mức hoa hồng rất cao. Các gói cao cấp hơn sẽ có mức từ 15% đến 25% tùy vào cấp độ đại sứ của bạn."
+                    "q": "Ưu đãi khi đăng ký theo nhóm?",
+                    "a": "Combo 2 người: Giảm ngay 10%. Combo 3 người: Giảm ngay 15% tổng giá trị đơn hàng."
                 },
                 {
-                    "q": "Gói Tập luyện & Thiền chữa lành có Zoom trực tiếp không?",
-                    "a": "Có. Đây là chương trình Zoom trực tiếp mỗi ngày cùng HLV để đảm bảo bạn duy trì kỷ luật tập luyện và tĩnh tâm đúng cách."
+                    "q": "Gói Coaching có cam kết gì không?",
+                    "a": "Cam kết hoàn phí 100% nếu thực hiện đúng phác đồ nhưng chỉ số mỡ nội tạng không cải thiện."
                 }
             ]
         }
     },
+
     "ambassadorPage": {
         "hero": {
             "title": "Đại Sứ Sức Khỏe",

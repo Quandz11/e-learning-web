@@ -104,7 +104,7 @@ const AmbassadorPage: React.FC = () => {
     <div className="bg-[#f8f9fa]">
       <section className="bg-gradient-to-br from-[#1b4332] to-[#2d6a4f] px-4 py-14 text-white sm:px-6 sm:py-16">
         <div className="mx-auto max-w-5xl text-center">
-          <h1 className="text-3xl font-extrabold text-[#ffb703] sm:text-4xl lg:text-5xl">{t('ambassadorPage.hero.title')}</h1>
+          <p className="text-3xl font-extrabold text-[#ffb703] sm:text-4xl lg:text-5xl">{t('ambassadorPage.hero.title')}</p>
           <p className="mx-auto mt-3 max-w-3xl text-sm text-white/90 sm:text-base">{t('ambassadorPage.hero.subtitle')}</p>
         </div>
       </section>

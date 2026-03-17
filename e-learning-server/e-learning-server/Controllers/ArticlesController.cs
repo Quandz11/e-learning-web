@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SKVI.Application.DTOs.Articles;
 using SKVI.Application.Interfaces;
+using SKVI.Shared;
 using System.Security.Claims;
 
 namespace e_learning_server.Controllers;
@@ -19,10 +20,10 @@ public class ArticlesController : ControllerBase
 
     // Public endpoints
     [HttpGet]
-    public async Task<ActionResult<List<ArticleListDto>>> GetAllArticles()
+    public async Task<ActionResult<PagedResult<ArticleListDto>>> GetAllArticles([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var articles = await _articleService.GetAllArticlesAsync(includeUnpublished: false);
-        return Ok(articles);
+        var result = await _articleService.GetAllArticlesPaginatedAsync(page, pageSize, includeUnpublished: false);
+        return Ok(result);
     }
 
     [HttpGet("{slug}")]
@@ -41,22 +42,22 @@ public class ArticlesController : ControllerBase
     }
 
     [HttpGet("category/{categoryId}")]
-    public async Task<ActionResult<List<ArticleListDto>>> GetArticlesByCategory(Guid categoryId)
+    public async Task<ActionResult<PagedResult<ArticleListDto>>> GetArticlesByCategory(Guid categoryId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var articles = await _articleService.GetArticlesByCategoryAsync(categoryId);
-        return Ok(articles);
+        var result = await _articleService.GetArticlesCategoryPaginatedAsync(categoryId, page, pageSize);
+        return Ok(result);
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<List<ArticleListDto>>> SearchArticles([FromQuery] string q)
+    public async Task<ActionResult<PagedResult<ArticleListDto>>> SearchArticles([FromQuery] string q, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         if (string.IsNullOrWhiteSpace(q))
         {
             return BadRequest("Search query is required");
         }
 
-        var articles = await _articleService.SearchArticlesAsync(q);
-        return Ok(articles);
+        var result = await _articleService.SearchArticlesPaginatedAsync(q, page, pageSize);
+        return Ok(result);
     }
 
     [HttpGet("categories")]

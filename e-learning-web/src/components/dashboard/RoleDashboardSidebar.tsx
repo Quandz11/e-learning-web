@@ -6,7 +6,7 @@ import type { AppDispatch, RootState } from '../../store/store';
 import { logout } from '../../store/authSlice';
 import { authApi } from '../../services/authApi';
 import { clearAuth } from '../../services/authStorage';
-import logoImg from '../../assets/logo.jpg';
+import logoImg from '../../assets/logo-rm-bg.png';
 
 export interface RoleSidebarItem {
   id: string;
@@ -77,8 +77,8 @@ const RoleDashboardSidebar: React.FC<RoleDashboardSidebarProps> = ({
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center border-b border-slate-100 px-6 dark:border-slate-800/50">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full overflow-hidden bg-white border border-slate-200 shadow-sm">
-                <img src={logoImg} alt="Logo" className="h-full w-full object-cover" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full overflow-hidden">
+                <img src={logoImg} alt="Logo" className="h-full w-full object-contain" />
               </div>
               <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate">
                 {brand}

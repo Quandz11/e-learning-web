@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { articleApi, type Article, type ArticleListItem } from '../services/articleApi';
@@ -11,12 +11,23 @@ const ArticleDetailPage: React.FC = () => {
     const [relatedArticles, setRelatedArticles] = useState<ArticleListItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [relatedPage, setRelatedPage] = useState(1);
+    const [relatedPageSize, setRelatedPageSize] = useState(3);
+    const [relatedTotal, setRelatedTotal] = useState(0);
+
+    const relatedTotalPages = useMemo(() => Math.max(1, Math.ceil(relatedTotal / relatedPageSize)), [relatedTotal, relatedPageSize]);
 
     useEffect(() => {
         if (slug) {
             fetchArticle(slug);
         }
     }, [slug]);
+
+    useEffect(() => {
+        if (article?.categoryId) {
+            fetchRelatedArticles(article.categoryId, relatedPage);
+        }
+    }, [article?.categoryId, relatedPage]);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -36,23 +47,35 @@ const ArticleDetailPage: React.FC = () => {
             setLoading(true);
             const data = await articleApi.getBySlug(articleSlug);
             setArticle(data);
-
-            // Fetch related articles (latest 3 excluding this one)
-            try {
-                // Determine if we should fetch by category or just all
-                const allArticles = await articleApi.getAll();
-                const filtered = allArticles
-                    .filter(a => a.id !== data.id)
-                    .slice(0, 3);
-                setRelatedArticles(filtered);
-            } catch (e) {
-                console.error('Failed to fetch related articles', e);
-            }
-
+            setRelatedPage(1);
         } catch (err: any) {
             setError(err.message || 'Failed to load article');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchRelatedArticles = async (categoryId: string, page: number) => {
+        try {
+            if (!categoryId) {
+                setRelatedArticles([]);
+                setRelatedTotal(0);
+                return;
+            }
+
+            const result = await articleApi.getByPagingCategory(categoryId, {
+                page,
+                pageSize: relatedPageSize
+            });
+
+            // Filter out the current article
+            const filtered = result.items.filter(a => a.id !== article?.id);
+            setRelatedArticles(filtered);
+            setRelatedTotal(result.total - (result.items.some(a => a.id === article?.id) ? 1 : 0));
+        } catch (e) {
+            console.error('Failed to fetch related articles', e);
+            setRelatedArticles([]);
+            setRelatedTotal(0);
         }
     };
 
@@ -257,7 +280,7 @@ const ArticleDetailPage: React.FC = () => {
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
                             {t('articles.related', { defaultValue: 'Bài viết liên quan' })}
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             {relatedArticles.map((relArticle) => (
                                 <Link
                                     key={relArticle.id}
@@ -293,6 +316,57 @@ const ArticleDetailPage: React.FC = () => {
                                 </Link>
                             ))}
                         </div>
+
+                        {/* Pagination for Related Articles */}
+                        {relatedTotalPages > 1 && (
+                            <div className="flex flex-wrap items-center justify-center gap-2">
+                                <button
+                                    onClick={() => setRelatedPage(Math.max(1, relatedPage - 1))}
+                                    disabled={relatedPage === 1}
+                                    className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                    {'<'}
+                                </button>
+
+                                <div className="flex gap-1">
+                                    {Array.from({ length: relatedTotalPages }, (_, i) => i + 1).map((pageNum) => {
+                                        const isVisible =
+                                            pageNum === 1 ||
+                                            pageNum === relatedTotalPages ||
+                                            (pageNum >= relatedPage - 1 && pageNum <= relatedPage + 1);
+
+                                        if (!isVisible) {
+                                            if (pageNum === 2 || pageNum === relatedTotalPages - 1) {
+                                                return <span key={pageNum} className="px-2 py-1">...</span>;
+                                            }
+                                            return null;
+                                        }
+
+                                        return (
+                                            <button
+                                                key={pageNum}
+                                                onClick={() => setRelatedPage(pageNum)}
+                                                className={`rounded-lg px-3 py-2 text-sm transition-colors ${
+                                                    relatedPage === pageNum
+                                                        ? 'bg-primary text-white'
+                                                        : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                                }`}
+                                            >
+                                                {pageNum}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <button
+                                    onClick={() => setRelatedPage(Math.min(relatedTotalPages, relatedPage + 1))}
+                                    disabled={relatedPage === relatedTotalPages}
+                                    className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                    {'>'}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </article>

@@ -9,7 +9,7 @@ import { clearAuth } from '../../services/authStorage';
 import HeaderNotification from '../common/HeaderNotification';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import UserMenu from '../common/UserMenu';
-import logoImg from '../../assets/logo.jpg';
+import logoImg from '../../assets/logo-rm-bg.png';
 import { paymentCart, PAYMENT_CART_CHANGED_EVENT } from '../../services/paymentCart';
 
 interface NavLinkItem {
@@ -150,7 +150,7 @@ const UserHeader: React.FC = () => {
                         className="flex items-center gap-2 sm:gap-3"
                     >
                         <div className="size-10 sm:size-12 flex items-center justify-center overflow-hidden">
-                            <img src={logoImg} alt="Logo" className="w-full h-full object-cover" />
+                            <img src={logoImg} alt="Logo" className="w-full h-full object-contain" />
                         </div>
                         <h2 className="hidden sm:block text-[#0c1c1d] dark:text-white text-base lg:text-lg font-bold tracking-tight">
                             NhinAnChuaLanh<span className="text-primary">.vn</span>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaFacebookF, FaTiktok, FaYoutube } from 'react-icons/fa6';
-import logoImg from '../../assets/logo.jpg';
+import logoImg from '../../assets/logo-rm-bg.png';
 
 const UserFooter: React.FC = () => {
     const { t } = useTranslation();
@@ -39,7 +39,7 @@ const UserFooter: React.FC = () => {
                         </div>
 
                         <Link to="/" className="mb-4 flex items-center gap-3">
-                            <img src={logoImg} alt={t('home.footer.logoAlt')} className="h-10 w-10 bg-white object-cover shadow-sm" />
+                            <img src={logoImg} alt={t('home.footer.logoAlt')} className="h-10 w-10 object-contain" />
                             <p className="text-2xl font-bold tracking-tight text-[#0c1c1d] dark:text-white">
                                 {t('home.footer.journey.brand')}
                             </p>

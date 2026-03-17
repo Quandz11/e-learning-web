@@ -2,250 +2,251 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-type CtaVariant = 'primary' | 'outline' | 'accent';
-
-interface PricingFeature {
-  text: string;
-  highlight?: boolean;
-}
-
-interface PricingPackage {
-  id: string;
-  name: string;
-  price: string;
-  desc: string;
-  features: PricingFeature[];
-  cta: string;
-  ctaTo: string;
-  ctaVariant: CtaVariant;
-  featured?: boolean;
-  badge?: string;
-}
-
 const PricingPage: React.FC = () => {
-  const { t } = useTranslation();
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+    const { t } = useTranslation();
+    const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
-  const packages: PricingPackage[] = [
-    {
-      id: 'course99k',
-      name: t('pricingPage.packages.course99k.name'),
-      price: t('pricingPage.packages.course99k.price'),
-      desc: t('pricingPage.packages.course99k.desc'),
-      features: [
-        { text: t('pricingPage.packages.course99k.features.0') },
-        { text: t('pricingPage.packages.course99k.features.1'), highlight: true },
-      ],
-      cta: t('pricingPage.packages.course99k.cta'),
-      ctaTo: '/courses',
-      ctaVariant: 'outline',
-    },
-    {
-      id: 'challenge',
-      name: t('pricingPage.packages.challenge.name'),
-      price: t('pricingPage.packages.challenge.price'),
-      desc: t('pricingPage.packages.challenge.desc'),
-      features: [
-        { text: t('pricingPage.packages.challenge.features.0') },
-        { text: t('pricingPage.packages.challenge.features.1') },
-        { text: t('pricingPage.packages.challenge.features.2') },
-      ],
-      cta: t('pricingPage.packages.challenge.cta'),
-      ctaTo: '/courses',
-      ctaVariant: 'primary',
-    },
-    {
-      id: 'trainingMeditation',
-      name: t('pricingPage.packages.trainingMeditation.name'),
-      price: t('pricingPage.packages.trainingMeditation.price'),
-      desc: t('pricingPage.packages.trainingMeditation.desc'),
-      features: [
-        { text: t('pricingPage.packages.trainingMeditation.features.0') },
-        { text: t('pricingPage.packages.trainingMeditation.features.1') },
-        { text: t('pricingPage.packages.trainingMeditation.features.2'), highlight: true },
-      ],
-      cta: t('pricingPage.packages.trainingMeditation.cta'),
-      ctaTo: '/courses',
-      ctaVariant: 'outline',
-    },
-    {
-      id: 'basicFull',
-      name: t('pricingPage.packages.basicFull.name'),
-      price: t('pricingPage.packages.basicFull.price'),
-      desc: t('pricingPage.packages.basicFull.desc'),
-      features: [
-        { text: t('pricingPage.packages.basicFull.features.0') },
-        { text: t('pricingPage.packages.basicFull.features.1'), highlight: true },
-        { text: t('pricingPage.packages.basicFull.features.2'), highlight: true },
-        { text: t('pricingPage.packages.basicFull.features.3') },
-      ],
-      cta: t('pricingPage.packages.basicFull.cta'),
-      ctaTo: '/courses',
-      ctaVariant: 'primary',
-      featured: true,
-      badge: t('pricingPage.packages.basicFull.badge'),
-    },
-    {
-      id: 'obesityReset',
-      name: t('pricingPage.packages.obesityReset.name'),
-      price: t('pricingPage.packages.obesityReset.price'),
-      desc: t('pricingPage.packages.obesityReset.desc'),
-      features: [
-        { text: t('pricingPage.packages.obesityReset.features.0') },
-        { text: t('pricingPage.packages.obesityReset.features.1'), highlight: true },
-        { text: t('pricingPage.packages.obesityReset.features.2'), highlight: true },
-        { text: t('pricingPage.packages.obesityReset.features.3') },
-      ],
-      cta: t('pricingPage.packages.obesityReset.cta'),
-      ctaTo: '/courses',
-      ctaVariant: 'primary',
-    },
-    {
-      id: 'fullTransformation',
-      name: t('pricingPage.packages.fullTransformation.name'),
-      price: t('pricingPage.packages.fullTransformation.price'),
-      desc: t('pricingPage.packages.fullTransformation.desc'),
-      features: [
-        { text: t('pricingPage.packages.fullTransformation.features.0') },
-        { text: t('pricingPage.packages.fullTransformation.features.1') },
-        { text: t('pricingPage.packages.fullTransformation.features.2'), highlight: true },
-        { text: t('pricingPage.packages.fullTransformation.features.3') },
-      ],
-      cta: t('pricingPage.packages.fullTransformation.cta'),
-      ctaTo: '/ambassador#register',
-      ctaVariant: 'accent',
-    },
-  ];
+    const faqItems: { q: string; a: string }[] = t('pricingPage.faq.items', { returnObjects: true }) as { q: string; a: string }[];
 
-  const policyItems = [
-    t('pricingPage.policies.items.0'),
-    t('pricingPage.policies.items.1'),
-    t('pricingPage.policies.items.2'),
-  ];
+    return (
+        <div className="min-h-screen bg-white dark:bg-slate-900 py-10 px-4 sm:px-6 lg:px-8 font-sans text-[#002d26] dark:text-slate-100">
+            <div className="max-w-6xl mx-auto">
 
-  const faqItems = [
-    {
-      q: t('pricingPage.faq.items.0.q'),
-      a: t('pricingPage.faq.items.0.a'),
-    },
-    {
-      q: t('pricingPage.faq.items.1.q'),
-      a: t('pricingPage.faq.items.1.a'),
-    },
-    {
-      q: t('pricingPage.faq.items.2.q'),
-      a: t('pricingPage.faq.items.2.a'),
-    },
-  ];
+                {/* Header */}
+                <div className="text-center py-10 px-5 bg-gradient-to-br from-[#004d40] to-[#00796b] text-white rounded-2xl mb-8 shadow-[0_10px_20px_rgba(0,77,64,0.2)]">
+                    <p className="text-3xl sm:text-4xl font-black uppercase tracking-widest text-[#ffc107]">
+                        {t('pricingPage.hero.title')}
+                    </p>
+                    <p className="mt-3 italic opacity-90 text-base sm:text-lg">
+                        {t('pricingPage.hero.subtitle')}
+                    </p>
+                </div>
 
-  const getCtaClass = (variant: CtaVariant): string => {
-    if (variant === 'outline') {
-      return 'border-2 border-primary bg-transparent text-primary hover:bg-primary/10';
-    }
+                {/* Comparison Table */}
+                <div className="overflow-x-auto mb-8 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-[#e0e0e0]">
+                    <table className="w-full border-collapse bg-white dark:bg-slate-800 text-center text-[15px] sm:text-base">
+                        <thead>
+                            <tr>
+                                <th className="bg-[#004d40] text-[#ffc107] font-black uppercase text-left px-4 py-7 text-sm border border-[#eee] w-[18%]">
+                                    {t('pricingPage.table.featureCol')}
+                                </th>
+                                <th className="bg-[#004d40] text-[#ffc107] font-black uppercase py-7 border border-[#eee] text-sm">
+                                    {t('pricingPage.table.col1')}
+                                </th>
+                                <th className="bg-[#004d40] text-[#ffc107] font-black uppercase py-7 border-[3px] border-[#ffc107] text-sm relative">
+                                    {t('pricingPage.table.col2')}
+                                    <span className="absolute top-0 right-0 bg-[#ffc107] text-[#004d40] text-[0.7rem] font-black px-3 py-1 rounded-bl-2xl">
+                                        BESTSELLER
+                                    </span>
+                                </th>
+                                <th className="bg-[#004d40] text-[#ffc107] font-black uppercase py-7 border border-[#eee] text-sm">
+                                    {t('pricingPage.table.col3')}
+                                </th>
+                                <th className="bg-[#004d40] text-[#ffc107] font-black uppercase py-7 border border-[#eee] text-sm">
+                                    {t('pricingPage.table.col4')}
+                                </th>
+                                <th className="bg-[#004d40] text-[#ffc107] font-black uppercase py-7 border border-[#eee] text-sm">
+                                    {t('pricingPage.table.col5')}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {/* Price row */}
+                            <tr className="bg-[#fffdf2] dark:bg-slate-700 text-[#e64a19] font-black text-xl sm:text-2xl">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-2 border border-[#eee]">{t('pricingPage.table.rowPrice')}</td>
+                                <td className="py-2 border border-[#eee]">{t('pricingPage.table.price1')}</td>
+                                <td className="py-2 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">{t('pricingPage.table.price2')}</td>
+                                <td className="py-2 border border-[#eee]">{t('pricingPage.table.price3')}</td>
+                                <td className="py-2 border border-[#eee]">{t('pricingPage.table.price4')}</td>
+                                <td className="py-2 border border-[#eee]">{t('pricingPage.table.price5')}</td>
+                            </tr>
+                            {/* Renewal row */}
+                            <tr className="dark:bg-slate-800">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-1 border border-[#eee]">{t('pricingPage.table.rowRenewal')}</td>
+                                <td className="py-1 border border-[#eee]">--</td>
+                                <td className="py-1 border-[3px] border-[#ffc107] text-[#00796b] font-black bg-[#fffef7] dark:bg-slate-700">{t('pricingPage.table.renewal2')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.renewal3')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.renewal4')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.renewal5')}</td>
+                            </tr>
+                            {/* Roadmap row */}
+                            <tr className="dark:bg-slate-800">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-1 border border-[#eee]">{t('pricingPage.table.rowRoadmap')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.roadmap1')}</td>
+                                <td className="py-1 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">{t('pricingPage.table.roadmap2')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.roadmap3')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.roadmap4')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.roadmap5')}</td>
+                            </tr>
+                            {/* Zoom live row */}
+                            <tr className="dark:bg-slate-800">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-1 border border-[#eee]">{t('pricingPage.table.rowZoom')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.zoom1')}</td>
+                                <td className="py-1 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">{t('pricingPage.table.zoom2')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.zoom3')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.zoom4')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.zoom5')}</td>
+                            </tr>
+                            {/* Duration row */}
+                            <tr className="dark:bg-slate-800">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-1 border border-[#eee]">{t('pricingPage.table.rowDuration')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.duration1')}</td>
+                                <td className="py-1 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">{t('pricingPage.table.duration2')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.duration3')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.duration4')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.duration5')}</td>
+                            </tr>
+                            {/* Recode kit row */}
+                            <tr className="dark:bg-slate-800">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-1 border border-[#eee]">{t('pricingPage.table.rowKit')}</td>
+                                <td className="py-1 border border-[#eee]">--</td>
+                                <td className="py-1 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">{t('pricingPage.table.kit2')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.kit3')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.kit4')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.kit5')}</td>
+                            </tr>
+                            {/* Gift row */}
+                            <tr className="dark:bg-slate-800">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-1 border border-[#eee]">{t('pricingPage.table.rowGift')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.gift1')}</td>
+                                <td className="py-1 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">{t('pricingPage.table.gift2')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.gift3')}</td>
+                                <td className="py-1 border border-[#eee] text-[#e64a19] font-bold">{t('pricingPage.table.gift4')}</td>
+                                <td className="py-1 border border-[#eee] text-[#e64a19] font-bold">{t('pricingPage.table.gift5')}</td>
+                            </tr>
+                            {/* Commitment row */}
+                            <tr className="dark:bg-slate-800">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-1 border border-[#eee]">{t('pricingPage.table.rowCommit')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.commit1')}</td>
+                                <td className="py-1 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">{t('pricingPage.table.commit2')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.commit3')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.commit4')}</td>
+                                <td className="py-1 border border-[#eee]">{t('pricingPage.table.commit5')}</td>
+                            </tr>
+                            {/* CTA row */}
+                            <tr className="dark:bg-slate-800">
+                                <td className="text-left bg-[#e0f2f1] dark:bg-slate-600 text-[#004d40] dark:text-[#ffc107] font-bold text-sm px-4 py-2 border border-[#eee]">{t('pricingPage.table.rowAction')}</td>
+                                <td className="py-2 border border-[#eee]">
+                                    <Link to="/courses" className="inline-block px-4 py-2 border-2 border-[#004d40] text-[#004d40] dark:border-[#ffc107] dark:text-[#ffc107] rounded-full font-bold text-sm hover:bg-[#004d40] hover:text-white transition-all">
+                                        {t('pricingPage.table.cta1')}
+                                    </Link>
+                                </td>
+                                <td className="py-2 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">
+                                    <Link to="/courses" className="inline-block px-4 py-2 bg-[#e64a19] text-white rounded-full font-bold text-sm hover:bg-[#bf360c] transition-all shadow-md">
+                                        {t('pricingPage.table.cta2')}
+                                    </Link>
+                                </td>
+                                <td className="py-2 border border-[#eee]">
+                                    <Link to="/courses" className="inline-block px-4 py-2 bg-[#e64a19] text-white rounded-full font-bold text-sm hover:bg-[#bf360c] transition-all shadow-md">
+                                        {t('pricingPage.table.cta3')}
+                                    </Link>
+                                </td>
+                                <td className="py-2 border border-[#eee]">
+                                    <Link to="/ambassador#register" className="inline-block px-4 py-2 bg-[#e64a19] text-white rounded-full font-bold text-sm hover:bg-[#bf360c] transition-all shadow-md">
+                                        {t('pricingPage.table.cta4')}
+                                    </Link>
+                                </td>
+                                <td className="py-2 border border-[#eee]">
+                                    <Link to="/ambassador#register" className="inline-block px-4 py-2 bg-[#e64a19] text-white rounded-full font-bold text-sm hover:bg-[#bf360c] transition-all shadow-md">
+                                        {t('pricingPage.table.cta5')}
+                                    </Link>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-    if (variant === 'accent') {
-      return 'bg-[#ffb703] text-black hover:bg-[#f4ae19]';
-    }
+                {/* Info Grid: Affiliate + FAQ */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
 
-    return 'bg-primary text-white hover:bg-primary/90';
-  };
+                    {/* Affiliate Card */}
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border-2 border-[#e0e0e0] dark:border-slate-700 shadow-sm">
+                        <h4 className="text-[#004d40] dark:text-[#ffc107] text-xl font-bold mb-5 border-b-[3px] border-[#ffc107] inline-block pb-1">
+                            💎 {t('pricingPage.affiliate.title')}
+                        </h4>
+                        <table className="w-full text-sm border-collapse mt-2">
+                            <thead>
+                                <tr>
+                                    <th className="bg-[#f1f8f6] dark:bg-slate-700 text-[#004d40] dark:text-[#ffc107] p-3 border border-[#ddd] dark:border-slate-600 text-left">{t('pricingPage.affiliate.colProduct')}</th>
+                                    <th className="bg-[#f1f8f6] dark:bg-slate-700 text-[#004d40] dark:text-[#ffc107] p-3 border border-[#ddd] dark:border-slate-600">{t('pricingPage.affiliate.colF1')}</th>
+                                    <th className="bg-[#f1f8f6] dark:bg-slate-700 text-[#004d40] dark:text-[#ffc107] p-3 border border-[#ddd] dark:border-slate-600">{t('pricingPage.affiliate.colF2')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600">
+                                        <strong>{t('pricingPage.affiliate.row1Name')}</strong><br />
+                                        <small className="text-gray-500">{t('pricingPage.affiliate.row1Sub')}</small>
+                                    </td>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600 text-center text-[#e64a19] font-bold text-lg">{t('pricingPage.affiliate.row1F1')}</td>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600 text-center text-[#00796b] font-bold">{t('pricingPage.affiliate.row1F2')}</td>
+                                </tr>
+                                <tr>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600">
+                                        <strong>{t('pricingPage.affiliate.row2Name')}</strong><br />
+                                        <small className="text-gray-500">{t('pricingPage.affiliate.row2Sub')}</small>
+                                    </td>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600 text-center text-[#e64a19] font-bold text-lg">{t('pricingPage.affiliate.row2F1')}</td>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600 text-center text-[#00796b] font-bold">{t('pricingPage.affiliate.row2F2')}</td>
+                                </tr>
+                                <tr>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600">
+                                        <strong>{t('pricingPage.affiliate.row3Name')}</strong><br />
+                                        <small className="text-gray-500">{t('pricingPage.affiliate.row3Sub')}</small>
+                                    </td>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600 text-center text-[#e64a19] font-bold text-lg">{t('pricingPage.affiliate.row3F1')}</td>
+                                    <td className="p-3 border border-[#ddd] dark:border-slate-600 text-center text-[#00796b] font-bold">{t('pricingPage.affiliate.row3F2')}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p className="text-xs text-gray-500 mt-4">* {t('pricingPage.affiliate.note')}</p>
+                    </div>
 
-  return (
-    <div className="bg-[#f8f9fa] py-12 sm:py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <section className="mb-10 text-center sm:mb-12">
-          <h1 className="text-3xl font-extrabold text-[#1b4332] sm:text-4xl lg:text-5xl">{t('pricingPage.hero.title')}</h1>
-          <p className="mx-auto mt-3 max-w-3xl text-sm text-[#2d6a4f]/85 sm:text-base">{t('pricingPage.hero.subtitle')}</p>
-        </section>
+                    {/* FAQ Card */}
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border-2 border-[#e0e0e0] dark:border-slate-700 shadow-sm">
+                        <h4 className="text-[#004d40] dark:text-[#ffc107] text-xl font-bold mb-5 border-b-[3px] border-[#ffc107] inline-block pb-1">
+                            ❓ {t('pricingPage.faq.title')}
+                        </h4>
+                        <div className="space-y-2">
+                            {faqItems.map((faq, index) => {
+                                const isOpen = openFaqIndex === index;
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`rounded-xl border transition-all ${isOpen ? 'border-[#004d40] dark:border-[#ffc107]' : 'border-[#eee] dark:border-slate-600'} bg-[#f9f9f9] dark:bg-slate-700`}
+                                    >
+                                        <button
+                                            type="button"
+                                            onClick={() => setOpenFaqIndex(prev => prev === index ? null : index)}
+                                            className="w-full flex justify-between items-center px-5 py-4 text-left"
+                                        >
+                                            <span className="text-sm font-bold text-[#004d40] dark:text-[#ffc107] pr-3">{faq.q}</span>
+                                            <span className="text-lg font-bold text-[#004d40] dark:text-[#ffc107] flex-shrink-0">{isOpen ? '−' : '▼'}</span>
+                                        </button>
+                                        {isOpen && (
+                                            <div className="px-5 pb-4 pt-2 border-t border-[#eee] dark:border-slate-600 text-sm text-gray-600 dark:text-slate-300 leading-relaxed">
+                                                {faq.a}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
 
-        <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {packages.map((pkg) => (
-            <article
-              key={pkg.id}
-              className={`relative flex h-full flex-col rounded-2xl border bg-white p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
-                pkg.featured
-                  ? 'scale-[1.01] border-[2.5px] border-[#40916c] shadow-[0_12px_30px_rgba(27,67,50,0.12)]'
-                  : 'border-gray-100 shadow-[0_10px_24px_rgba(0,0,0,0.06)]'
-              }`}
-            >
-              {pkg.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#ffb703] px-3 py-1 text-xs font-extrabold text-black">
-                  {pkg.badge}
-                </span>
-              )}
+                {/* Ambassador CTA
+                <div className="mt-8 rounded-2xl bg-gradient-to-r from-[#004d40] to-[#00796b] px-6 py-8 text-center text-white shadow-xl">
+                    <h2 className="text-xl sm:text-2xl font-extrabold">{t('pricingPage.ambassador.title')}</h2>
+                    <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-white/90">{t('pricingPage.ambassador.subtitle')}</p>
+                    <Link to="/ambassador" className="mt-4 inline-flex items-center justify-center text-sm font-bold text-[#ffc107] underline underline-offset-4 hover:text-yellow-300 transition-colors">
+                        {t('pricingPage.ambassador.cta')}
+                    </Link>
+                </div> */}
 
-              <h2 className="min-h-[3.2rem] text-lg font-bold text-[#2d6a4f]">{pkg.name}</h2>
-              <p className="mt-2 text-3xl font-extrabold text-[#1f2937]">{pkg.price}</p>
-              <p className="mt-2 min-h-[3.2rem] text-sm text-gray-600">{pkg.desc}</p>
-
-              <ul className="mt-5 flex-1 space-y-2 text-left text-sm text-gray-700">
-                {pkg.features.map((feature) => (
-                  <li key={feature.text} className="relative pl-6">
-                    <span className="absolute left-0 top-0 font-bold text-[#40916c]">✓</span>
-                    <span className={feature.highlight ? 'font-semibold text-[#d90429]' : ''}>{feature.text}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                to={pkg.ctaTo}
-                className={`mt-6 block rounded-lg px-4 py-3 text-sm font-bold transition-colors ${getCtaClass(pkg.ctaVariant)}`}
-              >
-                {pkg.cta}
-              </Link>
-            </article>
-          ))}
-        </section>
-
-        <section className="mt-10 rounded-2xl bg-gradient-to-r from-[#2d6a4f] to-[#40916c] px-6 py-7 text-center text-white sm:mt-12 sm:px-8 sm:py-9">
-          <h2 className="text-xl font-extrabold sm:text-2xl">{t('pricingPage.ambassador.title')}</h2>
-          <p className="mx-auto mt-2 max-w-2xl text-sm text-white/90 sm:text-base">{t('pricingPage.ambassador.subtitle')}</p>
-          <Link to="/ambassador" className="mt-4 inline-flex items-center justify-center text-sm font-bold text-[#ffb703] underline underline-offset-4">
-            {t('pricingPage.ambassador.cta')}
-          </Link>
-        </section>
-
-        <section id="pricing-policies" className="mt-10 sm:mt-12">
-          <h2 className="inline-block border-b-[3px] border-[#ffb703] pb-1 text-2xl font-bold text-[#2d6a4f]">{t('pricingPage.policies.title')}</h2>
-          <div className="mt-4 rounded-2xl bg-white p-6 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-            <ul className="space-y-3 text-sm text-gray-700 sm:text-base">
-              {policyItems.map((item) => (
-                <li key={item} className="leading-relaxed">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="mt-10 sm:mt-12">
-          <h2 className="inline-block border-b-[3px] border-[#ffb703] pb-1 text-2xl font-bold text-[#2d6a4f]">{t('pricingPage.faq.title')}</h2>
-          <div className="mt-4 max-w-4xl space-y-3">
-            {faqItems.map((faq, index) => {
-              const isOpen = openFaqIndex === index;
-
-              return (
-                <article
-                  key={faq.q}
-                  className={`overflow-hidden rounded-xl border bg-white transition-all ${isOpen ? 'border-[#40916c]' : 'border-gray-100'}`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaqIndex((prev) => (prev === index ? null : index))}
-                    className="flex w-full items-center justify-between px-5 py-4 text-left"
-                  >
-                    <span className="pr-3 text-sm font-bold text-[#1b4332] sm:text-base">{faq.q}</span>
-                    <span className="text-lg font-bold text-[#2d6a4f]">{isOpen ? '−' : '+'}</span>
-                  </button>
-                  {isOpen && <div className="border-t border-gray-100 px-5 pb-4 pt-3 text-sm leading-relaxed text-gray-700">{faq.a}</div>}
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      </div>
-    </div>
-  );
+            </div>
+        </div>
+    );
 };
 
 export default PricingPage;

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     FaFacebookF,
     FaFacebookMessenger,
@@ -17,7 +18,6 @@ import type { RootState } from '../../store/store';
 import { useToast } from '../../contexts/ToastContext';
 import { userReferralApi, type UserReferralOverviewDto } from '../../services/userReferralApi';
 import {
-    buildReferralMessage,
     getDeviceKind,
     getPublicShareBaseUrl,
     getShareUrl,
@@ -28,6 +28,7 @@ import {
 } from '../../utils/referralShare';
 
 const ReferralInviteFloat: React.FC = () => {
+    const { t } = useTranslation();
     const location = useLocation();
     const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
     const { showToast } = useToast();
@@ -45,8 +46,11 @@ const ReferralInviteFloat: React.FC = () => {
 
     const shareMessage = useMemo(() => {
         if (!overview) return '';
-        return buildReferralMessage(overview.referral.discountCode, overview.referral.discountPercent);
-    }, [overview]);
+        return t('referralInvite.shareMessage', {
+            discountCode: overview.referral.discountCode,
+            discountPercent: overview.referral.discountPercent,
+        });
+    }, [overview, t]);
 
     const shouldHideOnPath = useMemo(() => {
         const hiddenExactPaths = ['/login', '/register', '/forgot-password', '/otp-verify'];
@@ -74,7 +78,7 @@ const ReferralInviteFloat: React.FC = () => {
             const data = await userReferralApi.getMyReferral();
             setOverview(data);
         } catch (error: any) {
-            showToast(error?.message || 'Không thể tải mã mời. Vui lòng thử lại.', 'error');
+            showToast(error?.message || t('referralInvite.toast.loadFailed'), 'error');
         } finally {
             setIsLoading(false);
         }
@@ -82,7 +86,7 @@ const ReferralInviteFloat: React.FC = () => {
 
     const handleOpen = async () => {
         if (!isAuthenticated) {
-            showToast('Vui lòng đăng nhập để lấy link mời bạn bè.', 'info');
+            showToast(t('referralInvite.toast.loginRequired'), 'info');
             return;
         }
 
@@ -100,12 +104,12 @@ const ReferralInviteFloat: React.FC = () => {
         const payload = {
             url: referralLink,
             text: shareMessage,
-            title: 'Mời bạn học cùng SKVI'
+            title: t('referralInvite.shareTitle')
         };
 
         if (platform === 'copy') {
             await navigator.clipboard.writeText(referralLink);
-            showToast('Đã sao chép link mời.', 'success');
+            showToast(t('referralInvite.toast.linkCopied'), 'success');
             return;
         }
 
@@ -124,13 +128,13 @@ const ReferralInviteFloat: React.FC = () => {
             window.open(getShareUrl(platform, payload), '_blank', 'noopener,noreferrer');
 
             if (platform === 'zalo') {
-                showToast('Đã sao chép nội dung. Bạn dán vào Zalo để gửi lời mời nhé.', 'info');
+                showToast(t('referralInvite.toast.manualPasteZalo'), 'info');
             } else if (platform === 'messenger') {
-                showToast('Đã sao chép nội dung. Bạn dán vào Messenger để gửi lời mời nhé.', 'info');
+                showToast(t('referralInvite.toast.manualPasteMessenger'), 'info');
             } else if (platform === 'facebook') {
-                showToast('Đã sao chép nội dung. Bạn chọn người nhận trên Facebook rồi dán để gửi nhé.', 'info');
+                showToast(t('referralInvite.toast.manualPasteFacebook'), 'info');
             } else {
-                showToast('Đã sao chép nội dung. Bạn dán vào Instagram DM hoặc story nhé.', 'info');
+                showToast(t('referralInvite.toast.manualPasteInstagram'), 'info');
             }
             return;
         }
@@ -144,7 +148,7 @@ const ReferralInviteFloat: React.FC = () => {
         const popup = window.open(shareUrl, '_blank', 'noopener,noreferrer');
         if (!popup) {
             await navigator.clipboard.writeText(shareContent);
-            showToast('Trình duyệt đang chặn popup. Nội dung đã được sao chép để bạn dán thủ công.', 'warning');
+            showToast(t('referralInvite.toast.popupBlocked'), 'warning');
         }
     };
 
@@ -152,29 +156,29 @@ const ReferralInviteFloat: React.FC = () => {
         <>
             <button
                 onClick={handleOpen}
-                className="group fixed bottom-24 right-6 z-[60] flex items-center gap-2 rounded-full bg-sky-600 px-4 py-3 text-white shadow-xl transition-all duration-300 hover:scale-105 hover:bg-sky-500"
-                aria-label="Mời bạn bè"
+                className="group fixed bottom-24 right-4 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-sky-600 p-0 text-white shadow-xl transition-all duration-300 hover:scale-105 hover:bg-sky-500 sm:right-6 sm:h-auto sm:w-auto sm:justify-start sm:gap-2 sm:px-4 sm:py-3"
+                aria-label={t('referralInvite.buttonAriaLabel')}
             >
                 <span className="absolute -top-1 -right-1 inline-flex h-3 w-3 animate-ping rounded-full bg-amber-300" />
                 <span className="absolute -top-1 -right-1 inline-flex h-3 w-3 rounded-full bg-amber-300" />
                 <span className="material-symbols-outlined text-[22px]">share</span>
-                <span className="text-sm font-semibold">Mời bạn</span>
+                <span className="hidden text-sm font-semibold sm:inline">{t('referralInvite.buttonLabel')}</span>
             </button>
 
             {isOpen && (
-                <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4">
-                    <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
-                        <div className="mb-6 flex items-center justify-between">
+                <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/60 p-2 sm:items-center sm:p-4">
+                    <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl dark:bg-gray-900 sm:p-6">
+                        <div className="mb-4 flex items-center justify-between sm:mb-6">
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Mời bạn bè cùng học</h3>
-                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    Chia sẻ link mời của bạn qua Zalo, Facebook, Instagram và nhiều nền tảng khác.
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">{t('referralInvite.modalTitle')}</h3>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+                                    {t('referralInvite.modalDescription')}
                                 </p>
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
-                                aria-label="Đóng"
+                                aria-label={t('referralInvite.closeAriaLabel')}
                             >
                                 <FaXmark className="text-xl" />
                             </button>
@@ -182,41 +186,41 @@ const ReferralInviteFloat: React.FC = () => {
 
                         {isLoading ? (
                             <div className="rounded-xl border border-slate-200 p-6 text-center text-sm text-slate-500 dark:border-slate-700">
-                                Đang tạo mã mời cho bạn...
+                                {t('referralInvite.loading')}
                             </div>
                         ) : overview ? (
                             <>
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 dark:border-sky-800/60 dark:bg-sky-900/20">
-                                        <p className="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300">Mã mời</p>
+                                        <p className="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300">{t('referralInvite.referralCodeLabel')}</p>
                                         <p className="mt-1 text-lg font-bold text-sky-900 dark:text-sky-100">{overview.referral.referralCode}</p>
                                     </div>
                                     <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800/60 dark:bg-emerald-900/20">
-                                        <p className="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Mã giảm giá của bạn</p>
+                                        <p className="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{t('referralInvite.discountCodeLabel')}</p>
                                         <p className="mt-1 text-lg font-bold text-emerald-900 dark:text-emerald-100">
                                             {overview.referral.discountCode} ({overview.referral.discountPercent}%)
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 grid grid-cols-3 gap-3">
+                                <div className="mt-4 grid grid-cols-1 gap-3 min-[420px]:grid-cols-3">
                                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center dark:border-slate-700 dark:bg-slate-800">
-                                        <p className="text-xs text-slate-500">Tổng lời mời</p>
+                                        <p className="text-xs text-slate-500">{t('referralInvite.stats.totalInvites')}</p>
                                         <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{overview.stats.totalInvites}</p>
                                     </div>
                                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center dark:border-slate-700 dark:bg-slate-800">
-                                        <p className="text-xs text-slate-500">Thành công</p>
+                                        <p className="text-xs text-slate-500">{t('referralInvite.stats.successfulInvites')}</p>
                                         <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{overview.stats.successfulInvites}</p>
                                     </div>
                                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center dark:border-slate-700 dark:bg-slate-800">
-                                        <p className="text-xs text-slate-500">Đang chờ</p>
+                                        <p className="text-xs text-slate-500">{t('referralInvite.stats.pendingInvites')}</p>
                                         <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{overview.stats.pendingInvites}</p>
                                     </div>
                                 </div>
 
                                 <div className="mt-4 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
-                                    <p className="mb-2 text-xs text-slate-500">Link mời của bạn</p>
-                                    <div className="flex gap-2">
+                                    <p className="mb-2 text-xs text-slate-500">{t('referralInvite.linkLabel')}</p>
+                                    <div className="flex flex-col gap-2 sm:flex-row">
                                         <input
                                             readOnly
                                             value={referralLink}
@@ -224,8 +228,8 @@ const ReferralInviteFloat: React.FC = () => {
                                         />
                                         <button
                                             onClick={() => handleShare('copy')}
-                                            className="rounded-lg bg-slate-900 px-3 text-white transition hover:bg-slate-700 dark:bg-slate-200 dark:text-slate-900"
-                                            aria-label="Sao chép"
+                                            className="h-10 rounded-lg bg-slate-900 px-3 text-white transition hover:bg-slate-700 dark:bg-slate-200 dark:text-slate-900"
+                                            aria-label={t('referralInvite.copyAriaLabel')}
                                         >
                                             <FaRegCopy />
                                         </button>
@@ -244,20 +248,20 @@ const ReferralInviteFloat: React.FC = () => {
                                 </div>
 
                                 <div className="mt-5 rounded-xl border border-dashed border-slate-300 p-3 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
-                                    <p className="font-semibold">Mẹo chia sẻ</p>
-                                    <p className="mt-1">Khi bạn bè đăng ký qua link này, hệ thống ghi nhận lời mời của bạn để mở khóa ưu đãi giảm giá.</p>
-                                    <p className="mt-1">Mobile: Zalo/Facebook/Messenger mở bảng chia sẻ với tin nhắn sẵn. Desktop: hệ thống copy trước rồi mở chat để bạn dán gửi.</p>
+                                    <p className="font-semibold">{t('referralInvite.shareTipsTitle')}</p>
+                                    <p className="mt-1">{t('referralInvite.shareTip1')}</p>
+                                    <p className="mt-1">{t('referralInvite.shareTip2')}</p>
                                 </div>
                             </>
                         ) : (
                             <div className="rounded-xl border border-slate-200 p-6 text-center text-sm text-slate-500 dark:border-slate-700">
-                                Chưa thể tải dữ liệu referral. Bạn bấm thử lại nhé.
+                                {t('referralInvite.loadError')}
                                 <div className="mt-3">
                                     <button
                                         onClick={loadReferral}
                                         className="rounded-lg bg-primary px-4 py-2 text-white transition hover:bg-primary-dark"
                                     >
-                                        Tải lại
+                                        {t('referralInvite.reload')}
                                     </button>
                                 </div>
                             </div>
@@ -285,7 +289,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ icon, label, color, onClick }
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-base">
                 {icon}
             </span>
-            <span>{label}</span>
+            <span className="truncate">{label}</span>
             <FaLink className="ml-auto text-[11px] opacity-0 transition group-hover:opacity-100" />
         </button>
     );

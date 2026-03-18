@@ -35,8 +35,12 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ documentUrl, className = '' }) =>
     };
 
     const fullUrl = getFullUrl(documentUrl);
-    // Add URL parameters to hide toolbar (works in Chrome PDF viewer)
-    const pdfUrl = `${fullUrl}#toolbar=0&navpanes=0&scrollbar=0`;
+    const apiBase = (import.meta.env.VITE_API_URL || 'https://localhost:7145/api').replace(/\/+$/, '');
+    const viewerSourceBase = fullUrl.startsWith('blob:')
+        ? fullUrl
+        : `${apiBase}/documents/proxy?url=${encodeURIComponent(fullUrl)}`;
+    // Add URL parameters to hide toolbar (works in Chrome PDF viewer).
+    const pdfUrl = `${viewerSourceBase}#toolbar=0&navpanes=0&scrollbar=0`;
 
     return (
         <div
@@ -57,7 +61,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ documentUrl, className = '' }) =>
                     <span className="material-symbols-outlined text-6xl text-red-500 mb-4">error</span>
                     <p className="text-slate-600 mb-4 font-medium dark:text-slate-300">Failed to load PDF document</p>
                     <a
-                        href={fullUrl}
+                        href={viewerSourceBase}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-6 py-2.5 bg-dashboard-primary text-white rounded-lg hover:bg-dashboard-primary-dark inline-flex items-center gap-2 font-medium transition-colors"

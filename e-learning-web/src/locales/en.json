@@ -72,6 +72,40 @@
         "description": "Experience the most comprehensive fasting program.",
         "takeQuiz": "Take the quiz to start"
     },
+    "referralInvite": {
+        "buttonAriaLabel": "Invite friends",
+        "buttonLabel": "Invite",
+        "modalTitle": "Invite friends to learn",
+        "modalDescription": "Share your invite link via Zalo, Facebook, Instagram, and more platforms.",
+        "closeAriaLabel": "Close",
+        "loading": "Generating your invite code...",
+        "referralCodeLabel": "Invite code",
+        "discountCodeLabel": "Your discount code",
+        "linkLabel": "Your invite link",
+        "copyAriaLabel": "Copy",
+        "reload": "Reload",
+        "loadError": "Unable to load referral data. Please try again.",
+        "shareTitle": "Invite friends to SKVI",
+        "shareMessage": "I’m inviting you to join SKVI! Use this link to register. I have a discount code {{discountCode}} ({{discountPercent}}% off) when you join successfully.",
+        "shareTipsTitle": "Sharing tips",
+        "shareTip1": "When your friends register through this link, the system records your referral and unlocks discount benefits.",
+        "shareTip2": "Mobile: Zalo/Facebook/Messenger opens native share with prefilled text. Desktop: the app copies content first, then opens chat for paste.",
+        "stats": {
+            "totalInvites": "Total invites",
+            "successfulInvites": "Successful",
+            "pendingInvites": "Pending"
+        },
+        "toast": {
+            "loadFailed": "Unable to load invite code. Please try again.",
+            "loginRequired": "Please sign in to get your invite link.",
+            "linkCopied": "Invite link copied.",
+            "manualPasteZalo": "Content copied. Paste it in Zalo to send your invite.",
+            "manualPasteMessenger": "Content copied. Paste it in Messenger to send your invite.",
+            "manualPasteFacebook": "Content copied. Choose recipient in Facebook then paste to send.",
+            "manualPasteInstagram": "Content copied. Paste it in Instagram DM or story.",
+            "popupBlocked": "Popup is blocked by browser. Content has been copied so you can paste manually."
+        }
+    },
     "admin": {
         "lessons": {
             "title": "Lesson Management",

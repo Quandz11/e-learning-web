@@ -49,4 +49,30 @@ public class DocumentsController : ControllerBase
 
         return Ok(document);
     }
+
+    [AllowAnonymous]
+    [HttpGet("proxy")]
+    public async Task<IActionResult> ProxyPdf([FromQuery] string url, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return BadRequest(new { message = "Document URL is required." });
+        }
+
+        try
+        {
+            var document = await _documentService.GetPdfStreamByUrlAsync(url, cancellationToken);
+            if (document == null)
+            {
+                return NotFound(new { message = "Document not found." });
+            }
+
+            Response.Headers.CacheControl = "private, max-age=300";
+            return File(document.Content, document.ContentType, enableRangeProcessing: true);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(502, new { message = $"Failed to stream PDF: {ex.Message}" });
+        }
+    }
 }

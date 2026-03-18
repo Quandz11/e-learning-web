@@ -72,6 +72,40 @@
         "description": "Chào mừng bạn đến với chương trình nhịn ăn toàn diện nhất tại nhinanchualanh.vn",
         "takeQuiz": "Bắt đầu với bài kiểm tra"
     },
+    "referralInvite": {
+        "buttonAriaLabel": "Mời bạn bè",
+        "buttonLabel": "Mời bạn",
+        "modalTitle": "Mời bạn bè cùng học",
+        "modalDescription": "Chia sẻ link mời của bạn qua Zalo, Facebook, Instagram và nhiều nền tảng khác.",
+        "closeAriaLabel": "Đóng",
+        "loading": "Đang tạo mã mời cho bạn...",
+        "referralCodeLabel": "Mã mời",
+        "discountCodeLabel": "Mã giảm giá của bạn",
+        "linkLabel": "Link mời của bạn",
+        "copyAriaLabel": "Sao chép",
+        "reload": "Tải lại",
+        "loadError": "Chưa thể tải dữ liệu referral. Bạn bấm thử lại nhé.",
+        "shareTitle": "Mời bạn học cùng SKVI",
+        "shareMessage": "Mình mời bạn tham gia học trên SKVI! Dùng link này để đăng ký. Mình có mã giảm giá {{discountCode}} ({{discountPercent}}% off) khi bạn tham gia thành công.",
+        "shareTipsTitle": "Mẹo chia sẻ",
+        "shareTip1": "Khi bạn bè đăng ký qua link này, hệ thống ghi nhận lời mời của bạn để mở khóa ưu đãi giảm giá.",
+        "shareTip2": "Mobile: Zalo/Facebook/Messenger mở bảng chia sẻ với tin nhắn sẵn. Desktop: hệ thống copy trước rồi mở chat để bạn dán gửi.",
+        "stats": {
+            "totalInvites": "Tổng lời mời",
+            "successfulInvites": "Thành công",
+            "pendingInvites": "Đang chờ"
+        },
+        "toast": {
+            "loadFailed": "Không thể tải mã mời. Vui lòng thử lại.",
+            "loginRequired": "Vui lòng đăng nhập để lấy link mời bạn bè.",
+            "linkCopied": "Đã sao chép link mời.",
+            "manualPasteZalo": "Đã sao chép nội dung. Bạn dán vào Zalo để gửi lời mời nhé.",
+            "manualPasteMessenger": "Đã sao chép nội dung. Bạn dán vào Messenger để gửi lời mời nhé.",
+            "manualPasteFacebook": "Đã sao chép nội dung. Bạn chọn người nhận trên Facebook rồi dán để gửi nhé.",
+            "manualPasteInstagram": "Đã sao chép nội dung. Bạn dán vào Instagram DM hoặc story nhé.",
+            "popupBlocked": "Trình duyệt đang chặn popup. Nội dung đã được sao chép để bạn dán thủ công."
+        }
+    },
     "admin": {
         "lessons": {
             "title": "Quản lý Bài học",

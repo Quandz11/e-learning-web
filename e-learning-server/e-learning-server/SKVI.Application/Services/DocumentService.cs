@@ -11,12 +11,17 @@ public class DocumentService : IDocumentService
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IBunnyStreamService _bunnyStreamService;
+    private readonly IHttpClientFactory _httpClientFactory;
     private const long MaxFileSizeBytes = 50 * 1024 * 1024; // 50MB
 
-    public DocumentService(ApplicationDbContext dbContext, IBunnyStreamService bunnyStreamService)
+    public DocumentService(
+        ApplicationDbContext dbContext,
+        IBunnyStreamService bunnyStreamService,
+        IHttpClientFactory httpClientFactory)
     {
         _dbContext = dbContext;
         _bunnyStreamService = bunnyStreamService;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<DocumentUploadResponse> UploadPdfAsync(IFormFile file, CancellationToken cancellationToken = default)
@@ -85,6 +90,53 @@ public class DocumentService : IDocumentService
             FileUrl = document.BunnyStoragePath, // Already full CDN URL
             FileSizeBytes = document.FileSizeBytes,
             UploadedAt = document.UploadedAt
+        };
+    }
+
+    public async Task<DocumentStreamResponse?> GetPdfStreamByUrlAsync(string fileUrl, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(fileUrl))
+        {
+            return null;
+        }
+
+        var normalizedUrl = fileUrl.Trim();
+
+        if (!Uri.TryCreate(normalizedUrl, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            return null;
+        }
+
+        // Only allow proxying URLs that exist in our document table.
+        var document = await _dbContext.Documents
+            .AsNoTracking()
+            .FirstOrDefaultAsync(d => d.BunnyStoragePath == normalizedUrl, cancellationToken);
+
+        if (document == null)
+        {
+            return null;
+        }
+
+        var httpClient = _httpClientFactory.CreateClient();
+        using var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException("Failed to fetch PDF from storage.");
+        }
+
+        var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        var upstreamContentType = response.Content.Headers.ContentType?.MediaType;
+        var contentType = string.Equals(upstreamContentType, "application/pdf", StringComparison.OrdinalIgnoreCase)
+            ? "application/pdf"
+            : "application/pdf";
+
+        return new DocumentStreamResponse
+        {
+            Content = bytes,
+            ContentType = contentType,
+            FileName = document.FileName
         };
     }
 

@@ -7,4 +7,5 @@ public interface IDocumentService
 {
     Task<DocumentUploadResponse> UploadPdfAsync(IFormFile file, CancellationToken cancellationToken = default);
     Task<DocumentResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<DocumentStreamResponse?> GetPdfStreamByUrlAsync(string fileUrl, CancellationToken cancellationToken = default);
 }

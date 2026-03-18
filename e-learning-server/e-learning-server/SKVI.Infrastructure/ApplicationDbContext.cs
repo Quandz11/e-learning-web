@@ -12,6 +12,8 @@ public class ApplicationDbContext : DbContext
     // Auth & User
     public DbSet<User> Users { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<UserReferral> UserReferrals { get; set; }
+    public DbSet<ReferralTransaction> ReferralTransactions { get; set; }
 
     // Lead & Care
     public DbSet<Lead> Leads { get; set; }
@@ -100,6 +102,55 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<User>()
             .Property(u => u.Role)
             .IsRequired();
+
+        modelBuilder.Entity<User>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(u => u.ReferredByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<UserReferral>()
+            .HasIndex(r => r.ReferralCode)
+            .IsUnique();
+
+        modelBuilder.Entity<UserReferral>()
+            .HasIndex(r => r.DiscountCode)
+            .IsUnique();
+
+        modelBuilder.Entity<UserReferral>()
+            .Property(r => r.DiscountPercent)
+            .HasColumnType("decimal(5,2)");
+
+        modelBuilder.Entity<UserReferral>()
+            .HasOne(r => r.User)
+            .WithMany(u => u.ReferralProfiles)
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ReferralTransaction>()
+            .HasIndex(t => t.ReferralCode);
+
+        modelBuilder.Entity<ReferralTransaction>()
+            .HasIndex(t => t.ReferredUserId)
+            .IsUnique();
+
+        modelBuilder.Entity<ReferralTransaction>()
+            .HasOne(t => t.ReferrerUser)
+            .WithMany(u => u.SentReferrals)
+            .HasForeignKey(t => t.ReferrerUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ReferralTransaction>()
+            .HasOne(t => t.ReferredUser)
+            .WithMany(u => u.ReceivedReferrals)
+            .HasForeignKey(t => t.ReferredUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ReferralTransaction>()
+            .HasOne(t => t.UserReferral)
+            .WithMany(r => r.ReferralTransactions)
+            .HasForeignKey(t => t.UserReferralId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Leads
         modelBuilder.Entity<Lead>()

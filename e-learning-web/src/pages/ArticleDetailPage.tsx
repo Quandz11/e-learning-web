@@ -12,7 +12,7 @@ const ArticleDetailPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [relatedPage, setRelatedPage] = useState(1);
-    const [relatedPageSize, setRelatedPageSize] = useState(3);
+    const relatedPageSize = 3;
     const [relatedTotal, setRelatedTotal] = useState(0);
 
     const relatedTotalPages = useMemo(() => Math.max(1, Math.ceil(relatedTotal / relatedPageSize)), [relatedTotal, relatedPageSize]);

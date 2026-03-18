@@ -157,6 +157,19 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
               <span className="text-sm font-medium">{t('admin.sidebar.referrals')}</span>
             </Link>
             <Link
+              to="/admin/user-referrals"
+              onClick={handleNav}
+              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/user-referrals')
+                ? 'bg-dashboard-primary text-white shadow-dashboard-subtle'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
+                }`}
+            >
+              <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">sell</span>
+              <span className="text-sm font-medium">
+                {t('admin.sidebar.userReferralDiscounts', { defaultValue: 'Mã giảm giá user' })}
+              </span>
+            </Link>
+            <Link
               to="/admin/lead-registrations"
               onClick={handleNav}
               className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${location.pathname.startsWith('/admin/lead-registrations')

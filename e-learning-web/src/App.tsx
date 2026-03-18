@@ -63,6 +63,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import PaymentResultPage from './pages/PaymentResultPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import AdminReferralsPage from './pages/admin/referrals/AdminReferralsPage';
+import AdminUserReferralsPage from './pages/admin/referrals/AdminUserReferralsPage.tsx';
 import AdminAgentsPage from './pages/admin/agents/AdminAgentsPage';
 import AdminLeadRegistrationsPage from './pages/admin/leads/AdminLeadRegistrationsPage';
 import CareDashboardPage from './pages/care/CareDashboardPage';
@@ -501,6 +502,14 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminReferralsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/user-referrals',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminUserReferralsPage />
                 </ProtectedRoute>
               ),
             },

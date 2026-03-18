@@ -17,11 +17,11 @@ const AuthLayout = () => {
                 </div>
                 <div className="relative z-10 text-white max-w-md">
                     <div className="flex items-center gap-2 mb-8">
-                        <img src={logoImg} alt="Logo" className="w-20 h-20 object-contain border-2 border-white shadow-sm" />
+                        <img src={logoImg} alt="Logo" className="w-20 h-20 object-contain border-2 border-white shadow-sm bg-white"  />
                         <span className="text-3xl font-bold tracking-tight">Nhinanchualanh.vn</span>
                     </div>
-                    <h1 className="text-4xl font-bold leading-tight mb-6">Đánh thức bác sĩ tự thân trong cơ thể bạn.</h1>
-                               <h1 className="text-4xl font-bold leading-tight mb-6">Giải mã thông điệp cơ thể.</h1>
+                    <p className="text-4xl font-bold leading-tight mb-6">Đánh thức bác sĩ tự thân trong cơ thể bạn.</p>
+                    <p className="text-4xl font-bold leading-tight mb-6">Giải mã thông điệp cơ thể.</p>
                     <p className="text-4xl font-bold leading-tight mb-6">Lắng nghe để chữa lành.</p>
                     <div className="flex gap-2 mt-8">
                         <div className="h-1.5 w-8 bg-white rounded-full"></div>

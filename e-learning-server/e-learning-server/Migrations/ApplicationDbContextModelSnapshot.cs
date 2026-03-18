@@ -1407,6 +1407,49 @@ namespace e_learning_server.Migrations
                     b.ToTable("QuizSubmissions");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.ReferralTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReferralCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("ReferredUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ReferrerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserReferralId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReferralCode");
+
+                    b.HasIndex("ReferredUserId")
+                        .IsUnique();
+
+                    b.HasIndex("ReferrerUserId");
+
+                    b.HasIndex("UserReferralId");
+
+                    b.ToTable("ReferralTransactions");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1532,6 +1575,9 @@ namespace e_learning_server.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("ReferredByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -1548,9 +1594,53 @@ namespace e_learning_server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ReferredByUserId");
+
                     b.HasIndex("Role");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.UserReferral", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DiscountCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ReferralCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DiscountCode")
+                        .IsUnique();
+
+                    b.HasIndex("ReferralCode")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserReferrals");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.UserStudyPlan", b =>
@@ -2104,10 +2194,56 @@ namespace e_learning_server.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.ReferralTransaction", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "ReferredUser")
+                        .WithMany("ReceivedReferrals")
+                        .HasForeignKey("ReferredUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.User", "ReferrerUser")
+                        .WithMany("SentReferrals")
+                        .HasForeignKey("ReferrerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.UserReferral", "UserReferral")
+                        .WithMany("ReferralTransactions")
+                        .HasForeignKey("UserReferralId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReferredUser");
+
+                    b.Navigation("ReferrerUser");
+
+                    b.Navigation("UserReferral");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.User", "User")
                         .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.User", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("ReferredByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.UserReferral", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "User")
+                        .WithMany("ReferralProfiles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2242,7 +2378,18 @@ namespace e_learning_server.Migrations
 
                     b.Navigation("Orders");
 
+                    b.Navigation("ReceivedReferrals");
+
+                    b.Navigation("ReferralProfiles");
+
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("SentReferrals");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.UserReferral", b =>
+                {
+                    b.Navigation("ReferralTransactions");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.UserStudyPlan", b =>

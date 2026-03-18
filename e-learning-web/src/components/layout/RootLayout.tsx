@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import ChatButton from '../chat/ChatButton';
+import ReferralInviteFloat from '../referral/ReferralInviteFloat';
 
 export default function RootLayout() {
     const location = useLocation();
@@ -12,6 +13,7 @@ export default function RootLayout() {
     return (
         <>
             <Outlet />
+            <ReferralInviteFloat />
             <ChatButton />
         </>
     );

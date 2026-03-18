@@ -1,7 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import UserHeader from './UserHeader';
 import UserFooter from './UserFooter';
-import ChatButton from '../chat/ChatButton';
 import AiChatWidget from '../ai/AiChatWidget';
 
 export default function UserLayout() {
@@ -12,7 +11,6 @@ export default function UserLayout() {
                 <Outlet />
             </main>
             <UserFooter />
-            <ChatButton />
             <AiChatWidget />
         </div>
     );

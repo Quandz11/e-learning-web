@@ -14,6 +14,7 @@ public class AuthService : IAuthService
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
     private readonly JwtSettings _jwtSettings;
+    private readonly IUserReferralService _userReferralService;
 
     private readonly IEmailService _emailService;
 
@@ -22,12 +23,14 @@ public class AuthService : IAuthService
         IPasswordHasher passwordHasher, 
         ITokenService tokenService,
         IOptions<JwtSettings> jwtSettings,
+        IUserReferralService userReferralService,
         IEmailService emailService)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
         _jwtSettings = jwtSettings.Value;
+        _userReferralService = userReferralService;
         _emailService = emailService;
     }
 
@@ -115,6 +118,11 @@ public class AuthService : IAuthService
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
+
+        if (!string.IsNullOrWhiteSpace(request.ReferralCode))
+        {
+            await _userReferralService.ApplyReferralCodeForNewUserAsync(user.Id, request.ReferralCode);
+        }
         
         // Send OTP Email
         string subject = "Verify your account - SKVI E-Learning";
@@ -156,6 +164,8 @@ public class AuthService : IAuthService
         user.OtpExpiration = null;
         
         await _context.SaveChangesAsync();
+
+        await _userReferralService.CompleteReferralForUserAsync(user.Id);
 
         return await GenerateTokensForUser(user, "Unknown", "Unknown"); // Pass real IP/UA if forwarded
     }

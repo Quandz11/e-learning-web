@@ -1,7 +1,7 @@
 namespace SKVI.Application.DTOs.Auth;
 
 public record LoginRequest(string Email, string Password);
-public record RegisterRequest(string Email, string Password, string FullName, string? Phone);
+public record RegisterRequest(string Email, string Password, string FullName, string? Phone, string? ReferralCode = null);
 public record VerifyOtpRequest(string Email, string Otp);
 public record ResendOtpRequest(string Email);
 

@@ -170,7 +170,7 @@ const AiChatWidget: React.FC = () => {
     if (!isAuthenticated || !isEnabled) return null;
 
     return (
-        <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-40 right-6 z-50 flex flex-col items-end">
             {/* Chat Box */}
             {isOpen && (
                 <div className="mb-4 w-[350px] sm:w-[400px] h-[500px] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 flex flex-col overflow-hidden animate-slideUp">

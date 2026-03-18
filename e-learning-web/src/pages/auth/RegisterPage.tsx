@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '../../services/authApi';
 
 const RegisterPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const referralCodeFromUrl = searchParams.get('ref')?.trim().toUpperCase() || '';
     const [role, setRole] = useState<'student' | 'agent'>('student');
 
     // Form state
@@ -86,6 +88,7 @@ const RegisterPage = () => {
                 password: formData.password,
                 fullName: formData.fullName.trim(),
                 phone: formData.phone.trim() || undefined,
+                referralCode: referralCodeFromUrl || undefined,
             });
 
             // Success - navigate to OTP verification page with email
@@ -122,6 +125,16 @@ const RegisterPage = () => {
                     >
                         <span className="material-symbols-outlined text-xl">close</span>
                     </button>
+                </div>
+            )}
+
+            {referralCodeFromUrl && (
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-xl">celebration</span>
+                    <div className="flex-1">
+                        <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">Bạn đang đăng ký từ link mời</p>
+                        <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1">Mã giới thiệu: {referralCodeFromUrl}</p>
+                    </div>
                 </div>
             )}
 

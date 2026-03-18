@@ -155,7 +155,6 @@ const HomePage: React.FC = () => {
       )}
       <CourseConsultationForm />
 
-
       <QuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
     </>
   );

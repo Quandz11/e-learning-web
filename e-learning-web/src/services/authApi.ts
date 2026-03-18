@@ -59,6 +59,7 @@ class AuthApi {
     password: string;
     fullName: string;
     phone?: string;
+    referralCode?: string;
   }): Promise<{ message: string }> {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',

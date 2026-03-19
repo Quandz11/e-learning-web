@@ -15,7 +15,7 @@ namespace SKVI.Domain.Entities
 
         [Required]
         [StringLength(100)]
-        public string ModelName { get; set; } = "gemini-1.5-pro";
+        public string ModelName { get; set; } = "gemini-2.5-flash";
 
         public string SystemPrompt { get; set; } = "Bạn là một gia sư AI thân thiện, giúp đỡ người dùng lên lịch học tập, tạo động lực và đưa ra các lời khuyên chuyên nghiệp.";
 

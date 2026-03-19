@@ -28,18 +28,28 @@ namespace SKVI.Application.Services
                 settings = new AiSettings
                 {
                     ApiKey = "",
-                    ModelName = "gemini-1.5-pro",
+                    ModelName = GeminiModelCatalog.DefaultModel,
                     SystemPrompt = "Bạn là trợ lý AI chuyên gia hỗ trợ học tập.",
                     IsEnabled = false
                 };
                 _dbContext.AiSettings.Add(settings);
                 await _dbContext.SaveChangesAsync();
             }
+            var normalizedModel = GeminiModelCatalog.Normalize(settings.ModelName);
+            if (!string.Equals(settings.ModelName, normalizedModel, StringComparison.OrdinalIgnoreCase))
+            {
+                settings.ModelName = normalizedModel;
+                settings.UpdatedAt = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync();
+            }
+
             return settings;
         }
 
         public async Task<AiSettings> UpdateSettingsAsync(AiSettings newSettings)
         {
+            newSettings.ModelName = GeminiModelCatalog.Normalize(newSettings.ModelName);
+
             var existing = await _dbContext.AiSettings.FirstOrDefaultAsync();
             if (existing == null)
             {

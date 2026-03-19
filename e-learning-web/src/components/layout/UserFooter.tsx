@@ -140,7 +140,7 @@ const UserFooter: React.FC = () => {
                                 <FaYoutube className="h-[18px] w-[18px]" />
                             </a>
                             <a
-                                href="https://www.tiktok.com/@nhinanchualanhvn"
+                                href="https://www.tiktok.com/@nhinanchualanh.vn"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-[#0c1c1d] transition-colors hover:border-primary hover:bg-primary hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-white"

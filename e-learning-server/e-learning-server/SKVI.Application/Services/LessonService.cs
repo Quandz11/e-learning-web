@@ -92,11 +92,31 @@ public class LessonService : ILessonService
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+        var lesson = await _context.Lessons
+            .Include(l => l.LessonParts)
+            .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
         
         if (lesson == null)
         {
             throw new KeyNotFoundException("Lesson not found");
+        }
+
+        var lessonPartIds = lesson.LessonParts.Select(part => part.Id).ToList();
+        if (lessonPartIds.Count > 0)
+        {
+            var tasksUsingParts = await _context.DailyStudyTasks
+                .Where(task => task.RelatedLessonPartId.HasValue && lessonPartIds.Contains(task.RelatedLessonPartId.Value))
+                .ToListAsync(cancellationToken);
+
+            foreach (var task in tasksUsingParts)
+            {
+                task.RelatedLessonPartId = null;
+            }
+
+            if (tasksUsingParts.Count > 0)
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
         }
 
         _context.Lessons.Remove(lesson);
@@ -149,6 +169,20 @@ public class LessonService : ILessonService
     {
         var part = await _context.LessonParts.FirstOrDefaultAsync(p => p.Id == partId && p.LessonId == lessonId, cancellationToken);
         if (part == null) throw new KeyNotFoundException("Lesson part not found");
+
+        var tasksUsingPart = await _context.DailyStudyTasks
+            .Where(task => task.RelatedLessonPartId == partId)
+            .ToListAsync(cancellationToken);
+
+        foreach (var task in tasksUsingPart)
+        {
+            task.RelatedLessonPartId = null;
+        }
+
+        if (tasksUsingPart.Count > 0)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
         _context.LessonParts.Remove(part);
         await _context.SaveChangesAsync(cancellationToken);

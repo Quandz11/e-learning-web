@@ -39,6 +39,21 @@ const ChatButton: React.FC = () => {
         return () => clearInterval(interval);
     }, [isAuthenticated]);
 
+    useEffect(() => {
+        const chatOpen = !shouldHideButton && isOpen;
+        const appWindow = window as Window & { __elearningChatOpen?: boolean };
+        appWindow.__elearningChatOpen = chatOpen;
+        window.dispatchEvent(new CustomEvent('chat-widget-state-change', { detail: { isOpen: chatOpen } }));
+    }, [isOpen, shouldHideButton]);
+
+    useEffect(() => {
+        return () => {
+            const appWindow = window as Window & { __elearningChatOpen?: boolean };
+            appWindow.__elearningChatOpen = false;
+            window.dispatchEvent(new CustomEvent('chat-widget-state-change', { detail: { isOpen: false } }));
+        };
+    }, []);
+
     // Don't render if should be hidden
     if (shouldHideButton) {
         return null;

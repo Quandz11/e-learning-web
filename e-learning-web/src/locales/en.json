@@ -1278,7 +1278,8 @@
             "profileTitle": "Profile",
             "userMenu": {
                 "profile": "Profile",
-                "settings": "Settings"
+                "settings": "Settings",
+                "learningPlan": "My Learning Plan"
             }
         },
         "hero": {
@@ -2197,6 +2198,163 @@
         },
         "toasts": {
             "loadFailed": "Failed to load agent data."
+        }
+    },
+    "aiCoach": {
+        "title": "AI Coach",
+        "streak": "{{count}} day streak",
+        "startHint": "Create a plan tailored to you",
+        "navigation": {
+            "openPage": "Full page"
+        },
+        "page": {
+            "eyebrow": "Personal coaching",
+            "title": "My learning plan",
+            "subtitle": "Track today’s work, check in after studying, and let the AI coach adjust tomorrow’s plan to your real progress.",
+            "backToCourses": "Back to my courses",
+            "planBadge": "Adaptive daily plan",
+            "onboardingBadge": "AI builds from your real goal",
+            "onboardingDescription": "The system combines your goal, current level, enrolled courses and daily signals to build a cleaner rhythm with AI support.",
+            "goalLabel": "Desired outcome",
+            "currentLevelLabel": "Current knowledge",
+            "motivationLabel": "Main motivation",
+            "timeBudgetLabel": "Daily time budget",
+            "studyWindowLabel": "Preferred study window",
+            "priorityCourseLabel": "Priority course",
+            "constraintsLabel": "Constraints or blockers",
+            "onboardingNote": "AI does not invent the plan. It only adjusts inside your real courses, your actual time budget and the signals you send back each day.",
+            "aiLaneTitle": "AI planner lane",
+            "aiLaneHeadline": "A sharper rhythm that adapts itself.",
+            "aiLaneDescription": "You only see the work that matters today. After check-in, AI reads progress and blockers, then adjusts tomorrow.",
+            "loadingDescription": "AI is collecting progress, tasks and support signals to build your planner.",
+            "goalFallback": "AI keeps this goal on track and adjusts tomorrow from your daily feedback.",
+            "todayPill": "Today",
+            "futureStateTitle": "This day will unlock when it is due.",
+            "futureStateDescription": "The planner only shows the amount of work that matters today. Finish today and submit check-in to unlock the next day.",
+            "backToToday": "Back to today",
+            "generalTrack": "General track",
+            "todayHeadline": "Today, {{date}}",
+            "completedBadge": "Completed",
+            "startFocusTask": "Start focus task",
+            "emptyDayDescription": "Keep using end-of-day check-in so AI can keep the rhythm and adjust tomorrow.",
+            "taskRailEyebrow": "Daily flow",
+            "taskRailTitle": "Remaining touchpoints today",
+            "feedbackLogged": "Feedback logged",
+            "reviewTask": "Review",
+            "updateTask": "Update",
+            "openLesson": "Open lesson",
+            "noMoreItems": "No extra steps are left today. Use check-in and the AI coach to close the day cleanly.",
+            "sidebarTitle": "Statistics",
+            "sidebarHeadline": "Today pulse",
+            "coachLaneEyebrow": "Coach lane",
+            "coachLaneTitle": "AI in the loop",
+            "coachFallback": "The coach reads task feedback, mood and tomorrow capacity to keep your plan realistic.",
+            "chatPreviewTitle": "Latest conversation",
+            "chatPreviewEmpty": "No conversation yet. Use a quick status or ask the coach directly.",
+            "checkInHeadline": "Close the day and shape tomorrow",
+            "checkInNotesLabel": "Daily signal",
+            "latestCoachAdvice": "Latest coach note",
+            "previewCards": {
+                "today": "Today lane",
+                "checkIn": "End-of-day check-in",
+                "yes": "Enabled",
+                "coach": "Coach AI",
+                "live": "Always on"
+            },
+            "metrics": {
+                "streak": "Streak",
+                "days": "days",
+                "focusMinutes": "Time budget",
+                "version": "Plan version",
+                "tasks": "tasks",
+                "difficulty": "Difficulty",
+                "confidence": "Confidence",
+                "tasksDone": "Tasks handled",
+                "plannedMinutes": "Focus minutes",
+                "supportSignals": "Support signals",
+                "completionRate": "Completion rate"
+            },
+            "taskTypes": {
+                "watch": "Video lesson",
+                "quiz": "Quiz and recall",
+                "practice": "Practice block",
+                "read": "Reading focus",
+                "default": "AI suggested task"
+            },
+            "quickStatus": {
+                "overloaded": "I feel overloaded",
+                "confused": "I am stuck on this lesson",
+                "strong": "I have strong momentum today",
+                "focus": "I need sharper focus"
+            },
+            "quickStatusPrompts": {
+                "overloaded": "I feel overloaded with the current pace. Please adjust tomorrow so it is easier to follow.",
+                "confused": "I am stuck on the current lesson. Explain briefly what I should do next.",
+                "strong": "I have strong momentum today. Suggest a reasonable challenge for tomorrow.",
+                "focus": "I need sharper focus in my next study block. Give me a very short ritual to start."
+            }
+        },
+        "states": {
+            "onlyStudents": "This feature is available for student accounts only.",
+            "disabled": "The AI coach is currently disabled. Please try again later or contact an administrator."
+        },
+        "tabs": {
+            "today": "Today",
+            "checkIn": "Check-in",
+            "coach": "Coach"
+        },
+        "onboarding": {
+            "title": "Create a personalized plan",
+            "goalPlaceholder": "What outcome do you want to reach?",
+            "currentKnowledgePlaceholder": "Your current knowledge",
+            "motivationPlaceholder": "Your main motivation",
+            "minutesPerDay": "{{count}} min/day",
+            "primaryCoursePlaceholder": "Choose a priority course",
+            "constraintsPlaceholder": "Constraints or current blockers",
+            "submit": "Start plan"
+        },
+        "preferredStudyTimeOptions": {
+            "morning": "Morning",
+            "afternoon": "Afternoon",
+            "evening": "Evening",
+            "flexible": "Flexible"
+        },
+        "tasks": {
+            "openSupportAlerts": "The system has flagged {{count}} support signals to monitor.",
+            "empty": "You have finished all tasks for today.",
+            "minutes": "{{count}} min",
+            "update": "Update",
+            "reflectionPrompt": "Reflection prompt: {{prompt}}",
+            "feedbackPlaceholder": "How far did you get, what blocked you, or how easy/hard was this task?",
+            "actualMinutesPlaceholder": "Actual minutes",
+            "difficultyOption": "Difficulty {{count}}",
+            "confidenceOption": "Confidence {{count}}",
+            "needSupport": "I need extra support on this task",
+            "complete": "Complete",
+            "skip": "Skip for now"
+        },
+        "checkIn": {
+            "mood": "Mood",
+            "energy": "Energy",
+            "confidence": "Confidence",
+            "actualMinutesPlaceholder": "Minutes studied today",
+            "tomorrowMinutesPlaceholder": "Free minutes tomorrow",
+            "notesPlaceholder": "What is blocking you, what slowed you down, or what should the coach watch closely?",
+            "needSupport": "I want the support team to follow me more closely",
+            "submit": "Save check-in"
+        },
+        "chat": {
+            "placeholder": "Ask the AI coach...",
+            "send": "Send"
+        },
+        "toasts": {
+            "planCreated": "Personalized plan created.",
+            "planCreateFailed": "Unable to create plan.",
+            "taskUpdated": "Task updated.",
+            "taskUpdateFailed": "Unable to update task.",
+            "checkInSaved": "Check-in saved.",
+            "checkInFailed": "Unable to save check-in.",
+            "chatFailed": "Unable to message the coach."
         }
     }
 }

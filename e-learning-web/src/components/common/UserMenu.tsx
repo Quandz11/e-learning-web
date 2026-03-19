@@ -95,6 +95,17 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
                             {t('home.header.nav.myCourses')}
                         </Link>
 
+                        {user.role?.toUpperCase() === 'STUDENT' && (
+                            <Link
+                                to="/my-learning-plan"
+                                onClick={() => handleMenuItemClick()}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">track_changes</span>
+                                {t('home.header.userMenu.learningPlan', { defaultValue: 'Lộ trình học của tôi' })}
+                            </Link>
+                        )}
+
                         <Link
                             to="/my-orders"
                             onClick={() => handleMenuItemClick()}

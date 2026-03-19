@@ -1,7 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { aiSettingsApi, type AiSettings } from '../../../services/aiSettingsApi';
 import AdminLayout from '../../../components/admin/AdminLayout';
+
+const DEFAULT_AI_SETTINGS: AiSettings = {
+    id: '',
+    apiKey: '',
+    modelName: 'gemini-2.5-flash',
+    systemPrompt: '',
+    isEnabled: false
+};
+
+const SUPPORTED_MODELS = [
+    {
+        value: 'gemini-2.5-flash',
+        label: 'Gemini 2.5 Flash',
+        description: 'Stable, cân bằng giữa tốc độ, chi phí và chất lượng.'
+    },
+    {
+        value: 'gemini-2.5-flash-lite',
+        label: 'Gemini 2.5 Flash-Lite',
+        description: 'Stable, tiết kiệm chi phí nhất cho các tác vụ ngắn.'
+    },
+    {
+        value: 'gemini-2.5-pro',
+        label: 'Gemini 2.5 Pro',
+        description: 'Stable, mạnh hơn cho reasoning sâu và phản hồi dài.'
+    }
+] as const;
 
 const AdminAiSettingsPage: React.FC = () => {
     const [settings, setSettings] = useState<AiSettings | null>(null);
@@ -9,14 +35,17 @@ const AdminAiSettingsPage: React.FC = () => {
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        fetchSettings();
+        void fetchSettings();
     }, []);
 
     const fetchSettings = async () => {
         try {
             setLoading(true);
             const data = await aiSettingsApi.getSettings();
-            setSettings(data);
+            setSettings({
+                ...DEFAULT_AI_SETTINGS,
+                ...data
+            });
         } catch (error: any) {
             toast.error(error.message || 'Lỗi khi tải cấu hình AI');
         } finally {
@@ -24,28 +53,32 @@ const AdminAiSettingsPage: React.FC = () => {
         }
     };
 
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!settings) return;
+    const handleSave = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!settings) {
+            return;
+        }
 
         try {
             setSaving(true);
             await aiSettingsApi.updateSettings(settings);
             toast.success('Đã lưu cấu hình AI thành công');
         } catch (error: any) {
-            toast.error(error.message || 'Lỗi khi lưu cấu hình');
+            toast.error(error.message || 'Lỗi khi lưu cấu hình AI');
         } finally {
             setSaving(false);
         }
     };
+
+    const currentModel = SUPPORTED_MODELS.find((model) => model.value === (settings?.modelName || DEFAULT_AI_SETTINGS.modelName));
 
     if (loading) {
         return (
             <AdminLayout>
                 <div className="p-6">
                     <div className="animate-pulse space-y-6">
-                        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
-                        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+                        <div className="h-8 w-1/4 rounded bg-gray-200 dark:bg-gray-700" />
+                        <div className="h-64 rounded-xl bg-gray-200 dark:bg-gray-700" />
                     </div>
                 </div>
             </AdminLayout>
@@ -54,103 +87,116 @@ const AdminAiSettingsPage: React.FC = () => {
 
     return (
         <AdminLayout>
-            <div className="p-6 max-w-4xl mx-auto">
+            <div className="mx-auto max-w-4xl p-6">
                 <div className="mb-6 flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                        <div className="mb-2 flex items-center gap-2 text-sm text-gray-500">
                             <span className="material-symbols-outlined text-[16px]">smart_toy</span>
-                            <span>AI Gia sư</span>
+                            <span>AI Coach</span>
                             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-                            <span className="text-gray-900 dark:text-gray-100 font-medium">Cấu hình hệ thống</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">Cấu hình hệ thống</span>
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Cấu hình AI Trợ lý ảo (Gemini)</h1>
-                        <p className="text-gray-500 text-sm mt-1">Cài đặt API Key và đóng vai cho trợ lý ảo thông minh.</p>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Cấu hình Gemini API</h1>
+                        <p className="mt-1 text-sm text-gray-500">
+                            Dùng model Gemini 2.5 còn hỗ trợ để chatbot và lộ trình cá nhân hóa hoạt động ổn định.
+                        </p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSave} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    <div className="p-6 space-y-8">
-                        {/* API Key */}
+                <form onSubmit={handleSave} className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div className="space-y-8 p-6">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-2">
+                            <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-gray-200">
                                 Gemini API Key <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="password"
                                 value={settings?.apiKey || ''}
-                                onChange={(e) => setSettings(prev => ({ ...(prev || { id: '', apiKey: '', modelName: 'gemini-1.5-pro', systemPrompt: '', isEnabled: false }), apiKey: e.target.value }))}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-mono"
+                                onChange={(event) => setSettings((prev) => ({ ...(prev || DEFAULT_AI_SETTINGS), apiKey: event.target.value }))}
+                                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 font-mono text-gray-900 transition-all focus:border-transparent focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                                 placeholder="AIzaSy..."
                                 required
                             />
-                            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                            <p className="mt-2 flex items-center gap-1 text-xs text-gray-500">
                                 <span className="material-symbols-outlined text-[14px]">info</span>
-                                Lấy API Key tại <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-primary hover:underline">Google AI Studio</a>.
+                                Lấy API key tại{' '}
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+                                    Google AI Studio
+                                </a>
+                                .
                             </p>
                         </div>
 
-                        {/* Model Info */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-2">
+                                <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-gray-200">
                                     AI Model Name
                                 </label>
                                 <select
-                                    value={settings?.modelName || 'gemini-1.5-pro'}
-                                    onChange={(e) => setSettings(prev => ({ ...(prev || { id: '', apiKey: '', modelName: 'gemini-1.5-pro', systemPrompt: '', isEnabled: false }), modelName: e.target.value }))}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    value={settings?.modelName || DEFAULT_AI_SETTINGS.modelName}
+                                    onChange={(event) => setSettings((prev) => ({ ...(prev || DEFAULT_AI_SETTINGS), modelName: event.target.value }))}
+                                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-900 transition-all focus:border-transparent focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:text-white"
                                 >
-                                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Khuyên dùng, thông minh hơn)</option>
-                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Nhanh, rẻ, phù hợp task ngắn)</option>
-                                    <option value="gemini-exp-1206">Gemini Experimental 1206</option>
+                                    {SUPPORTED_MODELS.map((model) => (
+                                        <option key={model.value} value={model.value}>
+                                            {model.label}
+                                        </option>
+                                    ))}
                                 </select>
+                                <p className="mt-2 text-xs text-gray-500">{currentModel?.description}</p>
+                                <p className="mt-2 text-xs text-gray-500">
+                                    Model legacy như `gemini-1.5-pro` và `gemini-exp-1206` đã bị loại khỏi cấu hình để tránh lỗi gọi API.
+                                </p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-2">
+                                <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-gray-200">
                                     Trạng thái hoạt động
                                 </label>
-                                <label className="flex items-center cursor-pointer mt-3">
+                                <label className="mt-3 flex cursor-pointer items-center">
                                     <div className="relative">
                                         <input
                                             type="checkbox"
                                             className="sr-only"
                                             checked={settings?.isEnabled || false}
-                                            onChange={(e) => setSettings(prev => ({ ...(prev || { id: '', apiKey: '', modelName: 'gemini-1.5-pro', systemPrompt: '', isEnabled: false }), isEnabled: e.target.checked }))}
+                                            onChange={(event) => setSettings((prev) => ({ ...(prev || DEFAULT_AI_SETTINGS), isEnabled: event.target.checked }))}
                                         />
-                                        <div className={`block w-14 h-8 rounded-full transition-colors ${settings?.isEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
-                                        <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${settings?.isEnabled ? 'transform translate-x-6' : ''}`}></div>
+                                        <div className={`block h-8 w-14 rounded-full transition-colors ${settings?.isEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
+                                        <div className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-white transition-transform ${settings?.isEnabled ? 'translate-x-6 transform' : ''}`}></div>
                                     </div>
-                                    <div className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
-                                        {settings?.isEnabled ? 'Đang bật (Hiển thị Chatbot)' : 'Đang tắt'}
+                                    <div className="ml-3 font-medium text-gray-700 dark:text-gray-300">
+                                        {settings?.isEnabled ? 'Đang bật' : 'Đang tắt'}
                                     </div>
                                 </label>
                             </div>
                         </div>
 
-                        {/* System Prompt */}
+                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200">
+                            Google hiện liệt kê `gemini-2.5-flash`, `gemini-2.5-flash-lite` và `gemini-2.5-pro` là các model Gemini 2.5 đang còn hỗ trợ cho Gemini API.
+                        </div>
+
                         <div>
-                            <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200 mb-2">
-                                System Prompt (Định hướng tính cách)
+                            <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-gray-200">
+                                System Prompt
                             </label>
                             <textarea
                                 value={settings?.systemPrompt || ''}
-                                onChange={(e) => setSettings(prev => ({ ...(prev || { id: '', apiKey: '', modelName: 'gemini-1.5-pro', systemPrompt: '', isEnabled: false }), systemPrompt: e.target.value }))}
+                                onChange={(event) => setSettings((prev) => ({ ...(prev || DEFAULT_AI_SETTINGS), systemPrompt: event.target.value }))}
                                 rows={5}
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none leading-relaxed"
-                                placeholder="Bắt đầu prompt với: Bạn là một gia sư AI thân thiện..."
+                                className="w-full resize-none rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 leading-relaxed text-gray-900 transition-all focus:border-transparent focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                                placeholder="Bạn là một AI coach thân thiện, theo dõi tiến độ học và đưa ra lời khuyên kịp thời..."
                             />
-                            <p className="text-xs text-gray-500 mt-2">
-                                Đây là chỉ thị ngầm định hướng cách AI phản hồi. Ví dụ nói AI đóng vai chuyên gia lập trình, hay một gia sư nghiêm khắc.
+                            <p className="mt-2 text-xs text-gray-500">
+                                Prompt này định hướng cách AI phản hồi khi chat, nhắc việc, tư vấn và điều chỉnh lộ trình học.
                             </p>
                         </div>
                     </div>
 
-                    <div className="p-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+                    <div className="flex justify-end border-t border-gray-100 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900/50">
                         <button
                             type="submit"
                             disabled={saving}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-70 font-medium"
+                            className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-white transition-colors hover:bg-primary-dark disabled:opacity-70"
                         >
                             {saving ? (
                                 <>

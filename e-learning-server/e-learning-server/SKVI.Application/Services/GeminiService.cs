@@ -28,10 +28,10 @@ namespace SKVI.Application.Services
             return settings;
         }
 
-        private async Task<string> CallGeminiApiAsync(string prompt, string systemInstruction = null)
+        private async Task<string> CallGeminiApiAsync(string prompt, string? systemInstruction = null)
         {
             var settings = await GetSettingsAsync();
-            var model = settings.ModelName; // e.g. gemini-1.5-pro
+            var model = GeminiModelCatalog.Normalize(settings.ModelName);
             var apiKey = settings.ApiKey;
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
 
@@ -61,12 +61,17 @@ namespace SKVI.Application.Services
 
             var responseStr = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(responseStr);
-            var textResult = doc.RootElement
-                                .GetProperty("candidates")[0]
-                                .GetProperty("content")
-                                .GetProperty("parts")[0]
-                                .GetProperty("text")
-                                .GetString();
+
+            if (!doc.RootElement.TryGetProperty("candidates", out var candidates) || candidates.GetArrayLength() == 0)
+            {
+                throw new Exception("Gemini API returned no candidates.");
+            }
+
+            var textResult = candidates[0]
+                .GetProperty("content")
+                .GetProperty("parts")[0]
+                .GetProperty("text")
+                .GetString();
 
             return textResult ?? string.Empty;
         }

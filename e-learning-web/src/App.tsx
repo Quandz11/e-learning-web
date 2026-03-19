@@ -58,6 +58,7 @@ import ForumThreadPage from './pages/ForumThreadPage';
 import NewThreadPage from './pages/NewThreadPage';
 import AdminForumCategoriesPage from './pages/admin/forum/AdminForumCategoriesPage';
 import MyCoursesPage from './pages/MyCoursesPage';
+import MyLearningPlanPage from './pages/MyLearningPlanPage';
 import AdminHomeSectionPage from './pages/admin/home-section/AdminHomeSectionPage';
 import CheckoutPage from './pages/CheckoutPage';
 import PaymentResultPage from './pages/PaymentResultPage';
@@ -168,6 +169,14 @@ function App() {
                   element: (
                     <ProtectedRoute>
                       <MyCoursesPage />
+                    </ProtectedRoute>
+                  ),
+                },
+                {
+                  path: 'my-learning-plan',
+                  element: (
+                    <ProtectedRoute>
+                      <MyLearningPlanPage />
                     </ProtectedRoute>
                   ),
                 },

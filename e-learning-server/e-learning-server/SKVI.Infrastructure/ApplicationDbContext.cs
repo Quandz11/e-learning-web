@@ -88,6 +88,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<AiSettings> AiSettings { get; set; }
     public DbSet<UserStudyPlan> UserStudyPlans { get; set; }
     public DbSet<DailyStudyTask> DailyStudyTasks { get; set; }
+    public DbSet<DailyStudyCheckIn> DailyStudyCheckIns { get; set; }
+    public DbSet<StudentSupportAlert> StudentSupportAlerts { get; set; }
     public DbSet<AiChatMessage> AiChatMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -457,7 +459,7 @@ public class ApplicationDbContext : DbContext
             .HasIndex(s => s.IsEnabled);
 
         modelBuilder.Entity<UserStudyPlan>()
-            .HasIndex(p => p.UserId);
+            .HasIndex(p => new { p.UserId, p.Status });
 
         modelBuilder.Entity<UserStudyPlan>()
             .HasOne(p => p.User)
@@ -465,14 +467,69 @@ public class ApplicationDbContext : DbContext
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<UserStudyPlan>()
+            .HasOne(p => p.PrimaryCourse)
+            .WithMany()
+            .HasForeignKey(p => p.PrimaryCourseId)
+            .OnDelete(DeleteBehavior.ClientSetNull);
+
         modelBuilder.Entity<DailyStudyTask>()
-            .HasIndex(t => t.PlanId);
+            .HasIndex(t => new { t.PlanId, t.TaskDate, t.Status });
 
         modelBuilder.Entity<DailyStudyTask>()
             .HasOne(t => t.Plan)
             .WithMany(p => p.DailyTasks)
             .HasForeignKey(t => t.PlanId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DailyStudyTask>()
+            .HasOne(t => t.RelatedCourse)
+            .WithMany()
+            .HasForeignKey(t => t.RelatedCourseId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DailyStudyTask>()
+            .HasOne(t => t.RelatedLessonPart)
+            .WithMany()
+            .HasForeignKey(t => t.RelatedLessonPartId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<DailyStudyCheckIn>()
+            .HasIndex(c => new { c.PlanId, c.CheckInDate })
+            .IsUnique();
+
+        modelBuilder.Entity<DailyStudyCheckIn>()
+            .HasOne(c => c.Plan)
+            .WithMany(p => p.DailyCheckIns)
+            .HasForeignKey(c => c.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<StudentSupportAlert>()
+            .HasIndex(a => new { a.UserId, a.Status, a.CreatedAt });
+
+        modelBuilder.Entity<StudentSupportAlert>()
+            .HasOne(a => a.User)
+            .WithMany()
+            .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<StudentSupportAlert>()
+            .HasOne(a => a.Plan)
+            .WithMany(p => p.SupportAlerts)
+            .HasForeignKey(a => a.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<StudentSupportAlert>()
+            .HasOne(a => a.DailyStudyTask)
+            .WithMany()
+            .HasForeignKey(a => a.DailyStudyTaskId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<StudentSupportAlert>()
+            .HasOne(a => a.DailyStudyCheckIn)
+            .WithMany()
+            .HasForeignKey(a => a.DailyStudyCheckInId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<AiChatMessage>()
             .HasIndex(m => m.UserId);

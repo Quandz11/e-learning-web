@@ -1283,7 +1283,8 @@
             "profileTitle": "Hồ sơ",
             "userMenu": {
                 "profile": "Hồ sơ",
-                "settings": "Cài đặt"
+                "settings": "Cài đặt",
+                "learningPlan": "Lộ trình học của tôi"
             }
         },
         "hero": {
@@ -2203,6 +2204,163 @@
         },
         "toasts": {
             "loadFailed": "Không thể tải dữ liệu đại lý."
+        }
+    },
+    "aiCoach": {
+        "title": "Coach AI",
+        "streak": "{{count}} ngày giữ nhịp",
+        "startHint": "Khởi tạo lộ trình cho riêng bạn",
+        "navigation": {
+            "openPage": "Trang riêng"
+        },
+        "page": {
+            "eyebrow": "Huấn luyện cá nhân",
+            "title": "Lộ trình học của tôi",
+            "subtitle": "Theo dõi công việc hôm nay, check-in sau buổi học và để AI điều chỉnh kế hoạch ngày mai theo tiến độ thực tế.",
+            "backToCourses": "Quay lại khóa học của tôi"
+            ,"planBadge": "Lộ trình thích nghi theo ngày",
+            "onboardingBadge": "AI dựng kế hoạch từ mục tiêu thật của bạn",
+            "onboardingDescription": "Hệ thống kết hợp mục tiêu, năng lực hiện tại, khóa học đang có và tín hiệu hằng ngày để tạo nhịp học gọn hơn có AI đồng hành.",
+            "goalLabel": "Kết quả mong muốn",
+            "currentLevelLabel": "Kiến thức hiện tại",
+            "motivationLabel": "Động lực chính",
+            "timeBudgetLabel": "Quỹ thời gian mỗi ngày",
+            "studyWindowLabel": "Khung học ưu tiên",
+            "priorityCourseLabel": "Khóa học ưu tiên",
+            "constraintsLabel": "Ràng buộc hoặc điểm nghẽn",
+            "onboardingNote": "AI không tự bịa lộ trình. Hệ thống chỉ điều chỉnh trong phạm vi khóa học thật, quỹ thời gian thật và phản hồi bạn gửi lại mỗi ngày.",
+            "aiLaneTitle": "Luồng planner AI",
+            "aiLaneHeadline": "Một nhịp học sắc gọn và tự thích nghi.",
+            "aiLaneDescription": "Bạn chỉ nhìn thấy đúng phần cần làm trong ngày. Sau check-in, AI đọc lại tiến độ và điểm nghẽn để điều chỉnh ngày mai.",
+            "loadingDescription": "AI đang gom tiến độ, task và tín hiệu hỗ trợ để dựng planner cho bạn.",
+            "goalFallback": "AI đang giữ nhịp cho mục tiêu này và điều chỉnh ngày mai từ phản hồi hôm nay của bạn.",
+            "todayPill": "Hôm nay",
+            "futureStateTitle": "Ngày này sẽ mở khi đến lượt.",
+            "futureStateDescription": "Planner chỉ show đúng lượng việc cần xử lý trong hôm nay. Hoàn thành hôm nay và gửi check-in để mở ngày tiếp theo.",
+            "backToToday": "Quay lại hôm nay",
+            "generalTrack": "Lộ trình tổng quát",
+            "todayHeadline": "Hôm nay, {{date}}",
+            "completedBadge": "Đã hoàn thành",
+            "startFocusTask": "Bắt đầu task trọng tâm",
+            "emptyDayDescription": "Tiếp tục dùng check-in cuối ngày để AI giữ nhịp và điều chỉnh ngày mai.",
+            "taskRailEyebrow": "Nhịp trong ngày",
+            "taskRailTitle": "Các điểm chạm còn lại hôm nay",
+            "feedbackLogged": "Đã có phản hồi",
+            "reviewTask": "Xem lại",
+            "updateTask": "Cập nhật",
+            "openLesson": "Mở bài học",
+            "noMoreItems": "Hôm nay không còn bước phụ. Hãy dùng check-in và AI coach để khóa ngày học gọn gẽ.",
+            "sidebarTitle": "Thống kê",
+            "sidebarHeadline": "Nhịp học hôm nay",
+            "coachLaneEyebrow": "Luồng coach",
+            "coachLaneTitle": "AI đang bám cùng bạn",
+            "coachFallback": "Coach đọc phản hồi task, tâm trạng và quỹ thời gian ngày mai để giữ kế hoạch luôn thực tế.",
+            "chatPreviewTitle": "Trao đổi gần nhất",
+            "chatPreviewEmpty": "Chưa có hội thoại nào. Chọn quick status hoặc hỏi thẳng coach.",
+            "checkInHeadline": "Chốt ngày học để định hình ngày mai",
+            "checkInNotesLabel": "Tín hiệu trong ngày",
+            "latestCoachAdvice": "Ghi chú coach gần nhất",
+            "previewCards": {
+                "today": "Luồng hôm nay",
+                "checkIn": "Check-in cuối ngày",
+                "yes": "Đã bật",
+                "coach": "Coach AI",
+                "live": "Theo sát"
+            },
+            "metrics": {
+                "streak": "Streak",
+                "days": "ngày",
+                "focusMinutes": "Quỹ thời gian",
+                "version": "Phiên bản plan",
+                "tasks": "task",
+                "difficulty": "Độ khó",
+                "confidence": "Độ tự tin",
+                "tasksDone": "Task đã xử lý",
+                "plannedMinutes": "Phút tập trung",
+                "supportSignals": "Tín hiệu cần hỗ trợ",
+                "completionRate": "Tỉ lệ hoàn thành"
+            },
+            "taskTypes": {
+                "watch": "Bài video",
+                "quiz": "Quiz và nhớ lại",
+                "practice": "Khối thực hành",
+                "read": "Đọc trọng tâm",
+                "default": "Task AI đề xuất"
+            },
+            "quickStatus": {
+                "overloaded": "Tôi đang hơi quá tải",
+                "confused": "Tôi đang kẹt ở bài này",
+                "strong": "Hôm nay tôi đang vào nhịp tốt",
+                "focus": "Tôi cần tập trung hơn"
+            },
+            "quickStatusPrompts": {
+                "overloaded": "Tôi đang bị quá tải với nhịp hiện tại. Hãy điều chỉnh ngày mai cho dễ theo hơn.",
+                "confused": "Tôi đang kẹt ở phần hiện tại. Hãy giải thích ngắn gọn tôi nên làm gì tiếp theo.",
+                "strong": "Hôm nay tôi đang vào nhịp tốt. Hãy đề xuất thử thách hợp lý cho ngày mai.",
+                "focus": "Tôi cần tập trung hơn cho buổi học tới. Hãy cho tôi một nghi thức bắt đầu thật ngắn."
+            }
+        },
+        "states": {
+            "onlyStudents": "Tính năng này chỉ dành cho tài khoản học viên.",
+            "disabled": "AI coach hiện đang tắt. Vui lòng thử lại sau hoặc liên hệ quản trị viên."
+        },
+        "tabs": {
+            "today": "Hôm nay",
+            "checkIn": "Check-in",
+            "coach": "Coach"
+        },
+        "onboarding": {
+            "title": "Tạo lộ trình cá nhân",
+            "goalPlaceholder": "Mục tiêu bạn muốn đạt",
+            "currentKnowledgePlaceholder": "Kiến thức hiện tại",
+            "motivationPlaceholder": "Động lực chính của bạn",
+            "minutesPerDay": "{{count}} phút/ngày",
+            "primaryCoursePlaceholder": "Chọn khóa học ưu tiên",
+            "constraintsPlaceholder": "Ràng buộc hoặc điều bạn đang gặp khó",
+            "submit": "Bắt đầu lộ trình"
+        },
+        "preferredStudyTimeOptions": {
+            "morning": "Buổi sáng",
+            "afternoon": "Buổi chiều",
+            "evening": "Buổi tối",
+            "flexible": "Linh hoạt"
+        },
+        "tasks": {
+            "openSupportAlerts": "Hệ thống đang đánh dấu {{count}} tín hiệu cần theo dõi hỗ trợ.",
+            "empty": "Bạn đã xử lý xong toàn bộ việc của hôm nay.",
+            "minutes": "{{count}} phút",
+            "update": "Cập nhật",
+            "reflectionPrompt": "Gợi ý tự đánh giá: {{prompt}}",
+            "feedbackPlaceholder": "Bạn làm đến đâu, đang vướng gì, hoặc bài này dễ/khó ra sao?",
+            "actualMinutesPlaceholder": "Phút thực tế",
+            "difficultyOption": "Khó {{count}}",
+            "confidenceOption": "Tự tin {{count}}",
+            "needSupport": "Tôi cần người hỗ trợ thêm ở task này",
+            "complete": "Hoàn thành",
+            "skip": "Tạm bỏ qua"
+        },
+        "checkIn": {
+            "mood": "Tâm trạng",
+            "energy": "Năng lượng",
+            "confidence": "Tự tin",
+            "actualMinutesPlaceholder": "Phút học hôm nay",
+            "tomorrowMinutesPlaceholder": "Phút rảnh ngày mai",
+            "notesPlaceholder": "Bạn đang vướng gì, điều gì làm bạn chậm lại, hoặc cần coach lưu ý gì?",
+            "needSupport": "Tôi muốn đội ngũ hỗ trợ theo dõi sát hơn",
+            "submit": "Lưu check-in"
+        },
+        "chat": {
+            "placeholder": "Hỏi coach AI...",
+            "send": "Gửi"
+        },
+        "toasts": {
+            "planCreated": "Đã tạo lộ trình cá nhân hóa.",
+            "planCreateFailed": "Không thể tạo lộ trình.",
+            "taskUpdated": "Đã cập nhật task.",
+            "taskUpdateFailed": "Không thể cập nhật task.",
+            "checkInSaved": "Đã lưu check-in.",
+            "checkInFailed": "Không thể lưu check-in.",
+            "chatFailed": "Không thể gửi tin nhắn cho coach."
         }
     }
 }

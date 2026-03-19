@@ -179,6 +179,31 @@ public class CourseService : ICourseService
             throw new KeyNotFoundException("Course not found");
         }
 
+        // Clear optional study-plan references before deleting the course because SQL Server
+        // cannot combine these nullable FKs with the existing cascade graph.
+        var plansUsingCourse = await _dbContext.UserStudyPlans
+            .Where(plan => plan.PrimaryCourseId == id)
+            .ToListAsync(cancellationToken);
+
+        foreach (var plan in plansUsingCourse)
+        {
+            plan.PrimaryCourseId = null;
+        }
+
+        var tasksUsingCourse = await _dbContext.DailyStudyTasks
+            .Where(task => task.RelatedCourseId == id)
+            .ToListAsync(cancellationToken);
+
+        foreach (var task in tasksUsingCourse)
+        {
+            task.RelatedCourseId = null;
+        }
+
+        if (plansUsingCourse.Count > 0 || tasksUsingCourse.Count > 0)
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         // Only delete the course and links, NOT the lessons themselves (reusable)
         _dbContext.Courses.Remove(course);
         await _dbContext.SaveChangesAsync(cancellationToken);

@@ -553,15 +553,73 @@ namespace e_learning_server.Migrations
                     b.ToTable("CourseLessons");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.DailyStudyCheckIn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("ActualMinutesSpentToday")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CheckInDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CoachAdvice")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ConfidenceScore")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EnergyScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinutesAvailableTomorrow")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MoodScore")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("NeedsSupport")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "CheckInDate")
+                        .IsUnique();
+
+                    b.ToTable("DailyStudyCheckIns");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.DailyStudyTask", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("ActualMinutesSpent")
+                        .HasColumnType("int");
+
                     b.Property<string>("AiAdvice")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ConfidenceRating")
+                        .HasColumnType("int");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -570,14 +628,48 @@ namespace e_learning_server.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DifficultyRating")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EstimatedMinutes")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NeedsSupport")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("PlanId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ReflectionPrompt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("RelatedCourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RelatedLessonPartId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("TaskDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("TaskType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserFeedback")
                         .IsRequired()
@@ -585,7 +677,11 @@ namespace e_learning_server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlanId");
+                    b.HasIndex("RelatedCourseId");
+
+                    b.HasIndex("RelatedLessonPartId");
+
+                    b.HasIndex("PlanId", "TaskDate", "Status");
 
                     b.ToTable("DailyStudyTasks");
                 });
@@ -1488,6 +1584,59 @@ namespace e_learning_server.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.StudentSupportAlert", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DailyStudyCheckInId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("DailyStudyTaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DailyStudyCheckInId");
+
+                    b.HasIndex("DailyStudyTaskId");
+
+                    b.HasIndex("PlanId");
+
+                    b.HasIndex("UserId", "Status", "CreatedAt");
+
+                    b.ToTable("StudentSupportAlerts");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.Testimonial", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1649,6 +1798,10 @@ namespace e_learning_server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Constraints")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -1656,20 +1809,49 @@ namespace e_learning_server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("CurrentStreakDays")
+                        .HasColumnType("int");
+
                     b.Property<string>("Goal")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
+                    b.Property<DateTime?>("LastCheckInDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LatestGuidanceMessage")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Motivation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PlanVersion")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PreferredStudyTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("PrimaryCourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("TimeBudgetMinutesPerDay")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("PrimaryCourseId");
+
+                    b.HasIndex("UserId", "Status");
 
                     b.ToTable("UserStudyPlans");
                 });
@@ -1879,6 +2061,17 @@ namespace e_learning_server.Migrations
                     b.Navigation("Lesson");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.DailyStudyCheckIn", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.UserStudyPlan", "Plan")
+                        .WithMany("DailyCheckIns")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.DailyStudyTask", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.UserStudyPlan", "Plan")
@@ -1887,7 +2080,21 @@ namespace e_learning_server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SKVI.Domain.Entities.Course", "RelatedCourse")
+                        .WithMany()
+                        .HasForeignKey("RelatedCourseId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("SKVI.Domain.Entities.LessonPart", "RelatedLessonPart")
+                        .WithMany()
+                        .HasForeignKey("RelatedLessonPartId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Plan");
+
+                    b.Navigation("RelatedCourse");
+
+                    b.Navigation("RelatedLessonPart");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Enrollment", b =>
@@ -2232,6 +2439,39 @@ namespace e_learning_server.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.StudentSupportAlert", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.DailyStudyCheckIn", "DailyStudyCheckIn")
+                        .WithMany()
+                        .HasForeignKey("DailyStudyCheckInId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("SKVI.Domain.Entities.DailyStudyTask", "DailyStudyTask")
+                        .WithMany()
+                        .HasForeignKey("DailyStudyTaskId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("SKVI.Domain.Entities.UserStudyPlan", "Plan")
+                        .WithMany("SupportAlerts")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DailyStudyCheckIn");
+
+                    b.Navigation("DailyStudyTask");
+
+                    b.Navigation("Plan");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.User", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.User", null)
@@ -2253,11 +2493,17 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.UserStudyPlan", b =>
                 {
+                    b.HasOne("SKVI.Domain.Entities.Course", "PrimaryCourse")
+                        .WithMany()
+                        .HasForeignKey("PrimaryCourseId");
+
                     b.HasOne("SKVI.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("PrimaryCourse");
 
                     b.Navigation("User");
                 });
@@ -2394,7 +2640,11 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.UserStudyPlan", b =>
                 {
+                    b.Navigation("DailyCheckIns");
+
                     b.Navigation("DailyTasks");
+
+                    b.Navigation("SupportAlerts");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.Video", b =>

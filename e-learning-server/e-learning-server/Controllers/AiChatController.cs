@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SKVI.Application.DTOs.Ai;
 using SKVI.Application.Services;
 
 namespace e_learning_server.Controllers
@@ -33,18 +34,34 @@ namespace e_learning_server.Controllers
             return Ok(new { isEnabled = settings.IsEnabled });
         }
 
-        [HttpPost("plan/init")]
-        public async Task<IActionResult> InitializePlan([FromBody] InitPlanRequest request)
+        [HttpGet("plan/dashboard")]
+        public async Task<IActionResult> GetDashboard()
         {
             var userId = GetUserId();
+            var dashboard = await _studyPlanService.GetDashboardAsync(userId);
+            return Ok(dashboard ?? new StudyPlanDashboardDto
+            {
+                Plan = null,
+                TodayTasks = [],
+                LatestCheckIn = null,
+                OpenSupportAlerts = 0,
+                GuidanceMessage = string.Empty
+            });
+        }
+
+        [HttpPost("plan/init")]
+        public async Task<IActionResult> InitializePlan([FromBody] InitializeStudyPlanRequest request)
+        {
+            var userId = GetUserId();
+
             try
             {
-                var plan = await _studyPlanService.InitializePlanAsync(userId, request.Goal, request.CurrentKnowledge);
+                var plan = await _studyPlanService.InitializePlanAsync(userId, request);
                 return Ok(plan);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message }); // AI not configured
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -57,7 +74,6 @@ namespace e_learning_server.Controllers
         {
             var userId = GetUserId();
             var plan = await _studyPlanService.GetActivePlanAsync(userId);
-            if (plan == null) return NotFound("No active plan");
             return Ok(plan);
         }
 
@@ -68,17 +84,41 @@ namespace e_learning_server.Controllers
             return Ok(tasks);
         }
 
-        [HttpPost("tasks/{taskId}/submit")]
-        public async Task<IActionResult> SubmitTask(Guid taskId, [FromBody] SubmitTaskRequest request)
+        [HttpPost("check-in")]
+        public async Task<IActionResult> SubmitCheckIn([FromBody] DailyStudyCheckInRequest request)
         {
+            var userId = GetUserId();
+
             try
             {
-                var result = await _studyPlanService.SubmitTaskResultAsync(taskId, request.Feedback);
-                return Ok(result);
+                var checkIn = await _studyPlanService.SubmitDailyCheckInAsync(userId, request);
+                return Ok(checkIn);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
+                return StatusCode(500, new { message = "Không thể lưu check-in: " + ex.Message });
+            }
+        }
+
+        [HttpPost("tasks/{taskId}/submit")]
+        public async Task<IActionResult> SubmitTask(Guid taskId, [FromBody] SubmitStudyTaskResultRequest request)
+        {
+            try
+            {
+                var result = await _studyPlanService.SubmitTaskResultAsync(taskId, request);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Không thể cập nhật task: " + ex.Message });
             }
         }
 
@@ -110,19 +150,8 @@ namespace e_learning_server.Controllers
         }
     }
 
-    public class InitPlanRequest
-    {
-        public string Goal { get; set; }
-        public string CurrentKnowledge { get; set; }
-    }
-
-    public class SubmitTaskRequest
-    {
-        public string Feedback { get; set; }
-    }
-
     public class ChatRequest
     {
-        public string Prompt { get; set; }
+        public string Prompt { get; set; } = string.Empty;
     }
 }

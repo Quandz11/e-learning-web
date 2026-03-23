@@ -2,6 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SKVI.Application.DTOs.Ai;
+using SKVI.Application.Interfaces;
+using SKVI.Application.Models;
 using SKVI.Application.Services;
 
 namespace e_learning_server.Controllers
@@ -13,11 +15,16 @@ namespace e_learning_server.Controllers
     {
         private readonly IStudyPlanService _studyPlanService;
         private readonly IAiSettingsService _aiSettingsService;
+        private readonly IWellnessAccessService _wellnessAccessService;
 
-        public AiChatController(IStudyPlanService studyPlanService, IAiSettingsService aiSettingsService)
+        public AiChatController(
+            IStudyPlanService studyPlanService,
+            IAiSettingsService aiSettingsService,
+            IWellnessAccessService wellnessAccessService)
         {
             _studyPlanService = studyPlanService;
             _aiSettingsService = aiSettingsService;
+            _wellnessAccessService = wellnessAccessService;
         }
 
         private Guid GetUserId()
@@ -31,22 +38,56 @@ namespace e_learning_server.Controllers
         public async Task<IActionResult> GetAiStatus()
         {
             var settings = await _aiSettingsService.GetSettingsAsync();
-            return Ok(new { isEnabled = settings.IsEnabled });
+            var response = new AiCoachStatusDto
+            {
+                IsEnabled = settings.IsEnabled
+            };
+
+            if (!settings.IsEnabled)
+            {
+                return Ok(response);
+            }
+
+            if (!(User?.Identity?.IsAuthenticated ?? false))
+            {
+                return Ok(response);
+            }
+
+            var userId = GetUserId();
+            if (userId == Guid.Empty)
+            {
+                return Ok(response);
+            }
+
+            var evaluation = await _wellnessAccessService.EvaluateAccessAsync(userId);
+            response.Access = evaluation.Access;
+            return Ok(response);
         }
 
         [HttpGet("plan/dashboard")]
         public async Task<IActionResult> GetDashboard()
         {
-            var userId = GetUserId();
-            var dashboard = await _studyPlanService.GetDashboardAsync(userId);
-            return Ok(dashboard ?? new StudyPlanDashboardDto
+            try
             {
-                Plan = null,
-                TodayTasks = [],
-                LatestCheckIn = null,
-                OpenSupportAlerts = 0,
-                GuidanceMessage = string.Empty
-            });
+                var userId = GetUserId();
+                var dashboard = await _studyPlanService.GetDashboardAsync(userId);
+                return Ok(dashboard ?? new StudyPlanDashboardDto
+                {
+                    Plan = null,
+                    TodayTasks = [],
+                    LatestCheckIn = null,
+                    OpenSupportAlerts = 0,
+                    GuidanceMessage = string.Empty
+                });
+            }
+            catch (WellnessAccessException ex)
+            {
+                return PackageForbidden(ex.Code, ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
+            }
         }
 
         [HttpPost("plan/init")]
@@ -58,6 +99,14 @@ namespace e_learning_server.Controllers
             {
                 var plan = await _studyPlanService.InitializePlanAsync(userId, request);
                 return Ok(plan);
+            }
+            catch (WellnessAccessException ex)
+            {
+                return PackageForbidden(ex.Code, ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
             }
             catch (InvalidOperationException ex)
             {
@@ -72,16 +121,39 @@ namespace e_learning_server.Controllers
         [HttpGet("plan/active")]
         public async Task<IActionResult> GetActivePlan()
         {
-            var userId = GetUserId();
-            var plan = await _studyPlanService.GetActivePlanAsync(userId);
-            return Ok(plan);
+            try
+            {
+                var userId = GetUserId();
+                var plan = await _studyPlanService.GetActivePlanAsync(userId);
+                return Ok(plan);
+            }
+            catch (WellnessAccessException ex)
+            {
+                return PackageForbidden(ex.Code, ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
+            }
         }
 
         [HttpGet("plan/{planId}/today-tasks")]
         public async Task<IActionResult> GetTodayTasks(Guid planId)
         {
-            var tasks = await _studyPlanService.GetTodayTasksAsync(planId);
-            return Ok(tasks);
+            try
+            {
+                var userId = GetUserId();
+                var tasks = await _studyPlanService.GetTodayTasksAsync(userId, planId);
+                return Ok(tasks);
+            }
+            catch (WellnessAccessException ex)
+            {
+                return PackageForbidden(ex.Code, ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
+            }
         }
 
         [HttpPost("check-in")]
@@ -93,6 +165,14 @@ namespace e_learning_server.Controllers
             {
                 var checkIn = await _studyPlanService.SubmitDailyCheckInAsync(userId, request);
                 return Ok(checkIn);
+            }
+            catch (WellnessAccessException ex)
+            {
+                return PackageForbidden(ex.Code, ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
             }
             catch (InvalidOperationException ex)
             {
@@ -109,8 +189,17 @@ namespace e_learning_server.Controllers
         {
             try
             {
-                var result = await _studyPlanService.SubmitTaskResultAsync(taskId, request);
+                var userId = GetUserId();
+                var result = await _studyPlanService.SubmitTaskResultAsync(userId, taskId, request);
                 return Ok(result);
+            }
+            catch (WellnessAccessException ex)
+            {
+                return PackageForbidden(ex.Code, ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
             }
             catch (InvalidOperationException ex)
             {
@@ -131,6 +220,14 @@ namespace e_learning_server.Controllers
                 var response = await _studyPlanService.ChatDirectlyAsync(userId, request.Prompt);
                 return Ok(new { response });
             }
+            catch (WellnessAccessException ex)
+            {
+                return PackageForbidden(ex.Code, ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
+            }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
@@ -144,9 +241,29 @@ namespace e_learning_server.Controllers
         [HttpGet("chat/history")]
         public async Task<IActionResult> GetChatHistory()
         {
-            var userId = GetUserId();
-            var history = await _studyPlanService.GetChatHistoryAsync(userId);
-            return Ok(history);
+            try
+            {
+                var userId = GetUserId();
+                var history = await _studyPlanService.GetChatHistoryAsync(userId);
+                return Ok(history);
+            }
+            catch (WellnessAccessException ex)
+            {
+                return PackageForbidden(ex.Code, ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
+            }
+        }
+
+        private IActionResult PackageForbidden(string code, string message)
+        {
+            return StatusCode(403, new
+            {
+                code,
+                message
+            });
         }
     }
 

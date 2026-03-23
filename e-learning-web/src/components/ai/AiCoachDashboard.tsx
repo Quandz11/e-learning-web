@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../store/store';
 import {
     aiWidgetApi,
+    type AiRoadmapAccessState,
     type AiChatMessage,
     type DailyStudyCheckIn,
     type DailyStudyTask,
@@ -25,6 +26,17 @@ interface AiCoachDashboardProps {
 const scoreOptions = [1, 2, 3, 4, 5];
 
 const quickStatusKeys = ['overloaded', 'confused', 'strong', 'focus'] as const;
+const normalizePackageCode = (value?: string | null) => (value ?? '').trim().toUpperCase();
+const buildWellnessCheckoutPath = (packageCode?: string | null) => {
+    const normalizedCode = normalizePackageCode(packageCode);
+    const params = new URLSearchParams();
+    params.set('single', '1');
+    params.set('source', 'wellness');
+    if (normalizedCode) {
+        params.set('wellnessPackage', normalizedCode);
+    }
+    return `/checkout?${params.toString()}`;
+};
 
 const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onClose }) => {
     const { t, i18n } = useTranslation();
@@ -33,6 +45,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
 
     const [statusChecked, setStatusChecked] = useState(false);
     const [isEnabled, setIsEnabled] = useState(false);
+    const [access, setAccess] = useState<AiRoadmapAccessState | null>(null);
     const [loading, setLoading] = useState(false);
     const [view, setView] = useState<View>('onboarding');
 
@@ -82,6 +95,16 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
     );
 
     const locale = i18n.resolvedLanguage?.toLowerCase().startsWith('vi') ? 'vi-VN' : 'en-US';
+    const isUnlocked = access?.isUnlocked ?? true;
+    const accessMessage = access?.message || t('aiCoach.states.packageRequired');
+    const requiredPackageLabels = (access?.requiredPackages ?? [])
+        .map((pkg) => t(`wellness.dashboard.packages.${pkg}`, { defaultValue: pkg }))
+        .join(', ');
+    const lockedDescription = requiredPackageLabels
+        ? `${accessMessage} ${t('aiCoach.states.requiredPackages', { packages: requiredPackageLabels })}`
+        : accessMessage;
+    const requiredPackageCode = normalizePackageCode(access?.requiredPackages?.[0] ?? null);
+    const ctaPath = requiredPackageCode ? buildWellnessCheckoutPath(requiredPackageCode) : '/wellness';
     const today = useMemo(() => startOfDay(new Date()), []);
     const selectedDate = useMemo(() => startOfDay(new Date(`${selectedDateKey}T00:00:00`)), [selectedDateKey]);
     const weekDates = useMemo(() => Array.from({ length: 7 }, (_, index) => addDays(today, index - 3)), [today]);
@@ -134,9 +157,12 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
 
         setStatusChecked(true);
         setIsEnabled(false);
+        setAccess(null);
         setPlan(null);
         setTasks([]);
         setLatestCheckIn(null);
+        setGuidanceMessage('');
+        setOpenSupportAlerts(0);
     }, [isAuthenticated, isStudent]);
 
     useEffect(() => {
@@ -153,14 +179,34 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
         try {
             const status = await aiWidgetApi.getStatus();
             setIsEnabled(status.isEnabled);
+            setAccess(status.access ?? null);
 
             if (!status.isEnabled) {
+                startTransition(() => {
+                    setPlan(null);
+                    setTasks([]);
+                    setLatestCheckIn(null);
+                    setGuidanceMessage('');
+                    setOpenSupportAlerts(0);
+                });
+                return;
+            }
+
+            if (status.access && !status.access.isUnlocked) {
+                startTransition(() => {
+                    setPlan(null);
+                    setTasks([]);
+                    setLatestCheckIn(null);
+                    setGuidanceMessage('');
+                    setOpenSupportAlerts(0);
+                });
                 return;
             }
 
             await Promise.all([loadEnrollments(), loadDashboard()]);
         } catch (error) {
             console.error('Failed to bootstrap AI coach', error);
+            setAccess(null);
         } finally {
             setStatusChecked(true);
         }
@@ -505,13 +551,14 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
         </div>
     );
 
-    const renderInfoState = (icon: string, title: string, description?: string) => (
+    const renderInfoState = (icon: string, title: string, description?: string, action?: React.ReactNode) => (
         <div className="rounded-[32px] border border-white/70 bg-white/85 p-8 text-center shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/85">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 <span className="material-symbols-outlined text-[28px]">{icon}</span>
             </div>
             <h3 className="mt-5 text-xl font-semibold text-slate-900 dark:text-white">{title}</h3>
             {description && <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-slate-600 dark:text-slate-300">{description}</p>}
+            {action && <div className="mt-5">{action}</div>}
         </div>
     );
 
@@ -736,6 +783,21 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
 
         if (!isEnabled) {
             return renderInfoState('smart_toy', t('aiCoach.states.disabled'));
+        }
+
+        if (!isUnlocked) {
+            return renderInfoState(
+                'lock',
+                t('aiCoach.states.packageLockedTitle'),
+                lockedDescription,
+                <Link
+                    to={ctaPath}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary/90"
+                >
+                    <span className="material-symbols-outlined text-[18px]">local_mall</span>
+                    {t('aiCoach.states.openPricing')}
+                </Link>
+            );
         }
 
         if (!plan) {
@@ -1304,6 +1366,24 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
             return (
                 <div className="w-[min(92vw,380px)] rounded-[28px] border border-white/70 bg-white/92 p-6 shadow-2xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/92">
                     <div className="text-sm text-slate-700 dark:text-slate-300">{t('aiCoach.states.disabled')}</div>
+                </div>
+            );
+        }
+
+        if (!isUnlocked) {
+            return (
+                <div className="w-[min(92vw,380px)] rounded-[28px] border border-white/70 bg-white/92 p-6 shadow-2xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/92">
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                        {t('aiCoach.states.packageLockedTitle')}
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">{lockedDescription}</p>
+                    <Link
+                        to={ctaPath}
+                        className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary/90"
+                    >
+                        <span className="material-symbols-outlined text-[16px]">local_mall</span>
+                        {t('aiCoach.states.openPricing')}
+                    </Link>
                 </div>
             );
         }

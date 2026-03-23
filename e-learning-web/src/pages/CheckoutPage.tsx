@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { courseApi } from '../services/courseApi';
 import { paymentApi, type PaymentInstructionDto, type ReferralPreviewResponse } from '../services/paymentApi';
 import { paymentCart, type PaymentCartItem } from '../services/paymentCart';
+import { wellnessApi } from '../services/wellnessApi';
 
 interface PendingPaymentSession {
   orderId: string;
@@ -19,6 +20,11 @@ interface PendingPaymentSession {
 }
 
 type ReferralPreviewState = 'idle' | 'loading' | 'valid' | 'invalid' | 'error';
+
+interface CheckoutDisplayItem extends PaymentCartItem {
+  itemType: 'COURSE' | 'WELLNESS';
+  wellnessPackageCode?: string;
+}
 
 const parseCourseIds = (raw: string | null): string[] => {
   if (!raw) {
@@ -41,7 +47,7 @@ const CheckoutPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<PaymentCartItem[]>([]);
+  const [items, setItems] = useState<CheckoutDisplayItem[]>([]);
   const [referralCode, setReferralCode] = useState('');
   const [referralPreview, setReferralPreview] = useState<ReferralPreviewResponse | null>(null);
   const [referralPreviewState, setReferralPreviewState] = useState<ReferralPreviewState>('idle');
@@ -54,6 +60,18 @@ const CheckoutPage: React.FC = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const singleMode = searchParams.get('single') === '1';
   const queryCourseIds = useMemo(() => parseCourseIds(searchParams.get('courseIds')), [searchParams]);
+  const wellnessPackageCode = useMemo(
+    () => (searchParams.get('wellnessPackage') || '').trim().toUpperCase(),
+    [searchParams],
+  );
+  const isWellnessCheckout = Boolean(wellnessPackageCode);
+  const backToPath = isWellnessCheckout ? '/wellness' : '/courses';
+  const backLabel = isWellnessCheckout
+    ? t('payments.checkout.continueWellness')
+    : t('payments.checkout.continueCourses');
+  const listTitle = isWellnessCheckout
+    ? t('payments.checkout.packageListTitle')
+    : t('payments.checkout.courseListTitle');
 
   const formatCurrency = useCallback(
     (value: number) => `${value.toLocaleString(locale)} ${t('payments.common.currency')}`,
@@ -140,13 +158,47 @@ const CheckoutPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
+        if (isWellnessCheckout) {
+          const config = await wellnessApi.getCheckoutConfig();
+          const packageMatch = (config.packages ?? []).find(
+            (pkg) => pkg.code.trim().toUpperCase() === wellnessPackageCode,
+          );
+
+          if (!packageMatch) {
+            setItems([]);
+            setError(t('payments.checkout.errors.wellnessPackageNotFound'));
+            return;
+          }
+
+          setItems([
+            {
+              courseId: `WELLNESS:${packageMatch.code}`,
+              title: packageMatch.name,
+              price: Number(packageMatch.priceVnd || 0),
+              isFree: Number(packageMatch.priceVnd || 0) <= 0,
+              thumbnailUrl: undefined,
+              itemType: 'WELLNESS',
+              wellnessPackageCode: packageMatch.code,
+            },
+          ]);
+
+          return;
+        }
+
         const fromCart = paymentCart.getItems();
         const sourceIds = singleMode
           ? queryCourseIds
           : Array.from(new Set([...fromCart.map((item) => item.courseId), ...queryCourseIds]));
 
         if (sourceIds.length === 0) {
-          setItems(singleMode ? [] : fromCart);
+          setItems(
+            singleMode
+              ? []
+              : fromCart.map((item) => ({
+                  ...item,
+                  itemType: 'COURSE' as const,
+                })),
+          );
           return;
         }
 
@@ -159,6 +211,7 @@ const CheckoutPage: React.FC = () => {
             price: course.price,
             isFree: course.isFree,
             thumbnailUrl: course.thumbnailUrl,
+            itemType: 'COURSE' as const,
           }));
 
         if (!singleMode) {
@@ -174,7 +227,7 @@ const CheckoutPage: React.FC = () => {
     };
 
     void loadCheckoutItems();
-  }, [queryCourseIds, singleMode]);
+  }, [isWellnessCheckout, queryCourseIds, singleMode, t, wellnessPackageCode]);
 
   useEffect(() => {
     const normalizedCode = referralCode.trim();
@@ -230,7 +283,11 @@ const CheckoutPage: React.FC = () => {
     return items.reduce((sum, item) => sum + (item.isFree ? 0 : item.price), 0);
   }, [items]);
 
-  const handleRemove = (courseId: string) => {
+  const handleRemove = (courseId: string, itemType: CheckoutDisplayItem['itemType']) => {
+    if (itemType !== 'COURSE') {
+      return;
+    }
+
     const updated = items.filter((item) => item.courseId !== courseId);
     setItems(updated);
 
@@ -259,13 +316,23 @@ const CheckoutPage: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
-      const result = await paymentApi.createCheckout({
-        courseIds: items.map((item) => item.courseId),
-        referralCode: normalizedReferralCode || undefined,
-      });
+      const result = await paymentApi.createCheckout(
+        isWellnessCheckout
+          ? {
+              courseIds: [],
+              wellnessPackageCode,
+              referralCode: normalizedReferralCode || undefined,
+            }
+          : {
+              courseIds: items.map((item) => item.courseId),
+              referralCode: normalizedReferralCode || undefined,
+            },
+      );
 
       if (!result.requiresPayment) {
-        paymentCart.removeMany(result.items.map((item) => item.courseId));
+        if (!isWellnessCheckout) {
+          paymentCart.removeMany(result.items.map((item) => item.courseId));
+        }
         navigate(`/payment/result?orderId=${result.orderId}&status=success`);
         return;
       }
@@ -303,7 +370,12 @@ const CheckoutPage: React.FC = () => {
         const status = await paymentApi.getOrderStatus(pendingPayment.orderId, true);
 
         if (status.isPaid) {
-          paymentCart.removeMany(status.items.map((item) => item.courseId));
+          const paidCourseIds = status.items
+            .filter((item) => (item.itemType || 'COURSE').toUpperCase() === 'COURSE')
+            .map((item) => item.courseId);
+          if (paidCourseIds.length > 0) {
+            paymentCart.removeMany(paidCourseIds);
+          }
           navigate(`/payment/result?orderId=${status.orderId}&status=success`);
           return;
         }
@@ -378,11 +450,11 @@ const CheckoutPage: React.FC = () => {
             </p>
           </div>
           <Link
-            to="/courses"
+            to={backToPath}
             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:border-primary hover:text-primary transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-            {t('payments.checkout.continueCourses')}
+            {backLabel}
           </Link>
         </div>
 
@@ -395,7 +467,7 @@ const CheckoutPage: React.FC = () => {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 shadow-sm">
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('payments.checkout.courseListTitle')}</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{listTitle}</h2>
             </div>
 
             {loading ? (
@@ -407,7 +479,11 @@ const CheckoutPage: React.FC = () => {
             ) : items.length === 0 ? (
               <div className="p-12 text-center">
                 <span className="material-symbols-outlined text-[52px] text-gray-300 dark:text-gray-600">shopping_cart</span>
-                <p className="mt-4 text-gray-500 dark:text-gray-400">{t('payments.checkout.emptyCart')}</p>
+                <p className="mt-4 text-gray-500 dark:text-gray-400">
+                  {isWellnessCheckout
+                    ? t('payments.checkout.emptyWellnessSelection')
+                    : t('payments.checkout.emptyCart')}
+                </p>
               </div>
             ) : (
               <div className={`divide-y divide-gray-200 dark:divide-gray-700 ${pendingPayment ? 'max-h-[320px] overflow-y-auto' : ''}`}>
@@ -423,16 +499,21 @@ const CheckoutPage: React.FC = () => {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900 dark:text-white">{item.title}</p>
+                        {item.itemType === 'WELLNESS' && (
+                          <p className="mt-1 inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200">
+                            {t('payments.checkout.badges.wellness')}
+                          </p>
+                        )}
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           {item.isFree ? t('payments.common.free') : formatCurrency(item.price)}
                         </p>
                       </div>
                     </div>
 
-                    {!singleMode && (
+                    {!singleMode && item.itemType === 'COURSE' && (
                       <button
                         type="button"
-                        onClick={() => handleRemove(item.courseId)}
+                        onClick={() => handleRemove(item.courseId, item.itemType)}
                         className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -660,7 +741,11 @@ const CheckoutPage: React.FC = () => {
               <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t('payments.checkout.summary.title')}</h3>
               <div className="mt-4 space-y-2 text-sm">
                 <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
-                  <span>{t('payments.checkout.summary.courseCount')}</span>
+                  <span>
+                    {isWellnessCheckout
+                      ? t('payments.checkout.summary.itemCount')
+                      : t('payments.checkout.summary.courseCount')}
+                  </span>
                   <span>{items.length}</span>
                 </div>
                 <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
@@ -679,7 +764,9 @@ const CheckoutPage: React.FC = () => {
                   ? t('payments.checkout.actions.creatingOrder')
                   : totalAmount > 0
                     ? t('payments.checkout.actions.payWithVietQr')
-                    : t('payments.checkout.actions.confirmFreeCourses')}
+                    : isWellnessCheckout
+                      ? t('payments.checkout.actions.confirmFreeWellness')
+                      : t('payments.checkout.actions.confirmFreeCourses')}
               </button>
 
               <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">

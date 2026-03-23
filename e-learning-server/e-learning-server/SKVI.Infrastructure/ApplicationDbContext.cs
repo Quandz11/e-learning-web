@@ -91,6 +91,16 @@ public class ApplicationDbContext : DbContext
     public DbSet<DailyStudyCheckIn> DailyStudyCheckIns { get; set; }
     public DbSet<StudentSupportAlert> StudentSupportAlerts { get; set; }
     public DbSet<AiChatMessage> AiChatMessages { get; set; }
+    public DbSet<WellnessPlan> WellnessPlans { get; set; }
+    public DbSet<WellnessDailyLog> WellnessDailyLogs { get; set; }
+    public DbSet<WellnessResource> WellnessResources { get; set; }
+    public DbSet<WellnessResourceAssignment> WellnessResourceAssignments { get; set; }
+    public DbSet<WellnessInsight> WellnessInsights { get; set; }
+    public DbSet<WellnessCoachMessage> WellnessCoachMessages { get; set; }
+    public DbSet<WellnessMealSuggestion> WellnessMealSuggestions { get; set; }
+    public DbSet<WellnessSettings> WellnessSettings { get; set; }
+    public DbSet<WellnessPackage> WellnessPackages { get; set; }
+    public DbSet<WellnessUserPackage> WellnessUserPackages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -165,6 +175,8 @@ public class ApplicationDbContext : DbContext
             .HasIndex(o => o.PayOSOrderCode)
             .IsUnique()
             .HasFilter("[PayOSOrderCode] IS NOT NULL");
+        modelBuilder.Entity<Order>()
+            .HasIndex(o => o.WellnessPackageId);
         modelBuilder.Entity<Order>()
             .Property(o => o.TotalAmount)
             .HasColumnType("decimal(18,2)");
@@ -296,6 +308,13 @@ public class ApplicationDbContext : DbContext
             .HasOne(o => o.Cabin)
             .WithMany(c => c.Orders)
             .HasForeignKey(o => o.CabinId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Order - WellnessPackage (optional attribution)
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.WellnessPackage)
+            .WithMany()
+            .HasForeignKey(o => o.WellnessPackageId)
             .OnDelete(DeleteBehavior.SetNull);
 
         // Lead - AssignedCare (User)
@@ -458,6 +477,37 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<AiSettings>()
             .HasIndex(s => s.IsEnabled);
 
+        modelBuilder.Entity<WellnessSettings>()
+            .HasIndex(s => s.UpdatedAt);
+
+        modelBuilder.Entity<WellnessPackage>()
+            .HasIndex(p => p.Code)
+            .IsUnique();
+
+        modelBuilder.Entity<WellnessPackage>()
+            .HasIndex(p => new { p.IsActive, p.SortOrder });
+
+        modelBuilder.Entity<WellnessUserPackage>()
+            .HasIndex(p => new { p.UserId, p.Status, p.ExpiresAt });
+
+        modelBuilder.Entity<WellnessUserPackage>()
+            .HasOne(p => p.User)
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessUserPackage>()
+            .HasOne(p => p.Package)
+            .WithMany(p => p.UserPackages)
+            .HasForeignKey(p => p.PackageId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<WellnessUserPackage>()
+            .HasOne(p => p.GrantedByUser)
+            .WithMany()
+            .HasForeignKey(p => p.GrantedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<UserStudyPlan>()
             .HasIndex(p => new { p.UserId, p.Status });
 
@@ -539,6 +589,84 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(m => m.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessPlan>()
+            .HasIndex(p => new { p.UserId, p.Status });
+
+        modelBuilder.Entity<WellnessPlan>()
+            .HasOne(p => p.User)
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessDailyLog>()
+            .HasIndex(l => new { l.PlanId, l.LogDate })
+            .IsUnique();
+
+        modelBuilder.Entity<WellnessDailyLog>()
+            .HasOne(l => l.Plan)
+            .WithMany(p => p.DailyLogs)
+            .HasForeignKey(l => l.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessInsight>()
+            .HasIndex(i => new { i.PlanId, i.InsightDate })
+            .IsUnique();
+
+        modelBuilder.Entity<WellnessInsight>()
+            .HasOne(i => i.Plan)
+            .WithMany(p => p.Insights)
+            .HasForeignKey(i => i.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessCoachMessage>()
+            .HasIndex(m => new { m.PlanId, m.CreatedAt });
+
+        modelBuilder.Entity<WellnessCoachMessage>()
+            .HasOne(m => m.Plan)
+            .WithMany(p => p.CoachMessages)
+            .HasForeignKey(m => m.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessMealSuggestion>()
+            .HasIndex(m => new { m.PlanId, m.CreatedAt });
+
+        modelBuilder.Entity<WellnessMealSuggestion>()
+            .HasOne(m => m.Plan)
+            .WithMany(p => p.MealSuggestions)
+            .HasForeignKey(m => m.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessResource>()
+            .HasIndex(r => new { r.ResourceType, r.IsActive });
+
+        modelBuilder.Entity<WellnessResourceAssignment>()
+            .HasIndex(a => new { a.PlanId, a.AssignmentDate })
+            .IsUnique();
+
+        modelBuilder.Entity<WellnessResourceAssignment>()
+            .HasOne(a => a.Plan)
+            .WithMany(p => p.ResourceAssignments)
+            .HasForeignKey(a => a.PlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessResourceAssignment>()
+            .HasOne(a => a.MeditationResource)
+            .WithMany()
+            .HasForeignKey(a => a.MeditationResourceId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<WellnessResourceAssignment>()
+            .HasOne(a => a.BreathingResource)
+            .WithMany()
+            .HasForeignKey(a => a.BreathingResourceId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<WellnessResourceAssignment>()
+            .HasOne(a => a.WorkoutResource)
+            .WithMany()
+            .HasForeignKey(a => a.WorkoutResourceId)
+            .OnDelete(DeleteBehavior.Restrict);
             
         // Relationships are automatically configured by EF Core conventions based on navigation properties,
         // but explicit configuration can be added here if needed.

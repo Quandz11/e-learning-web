@@ -5,6 +5,7 @@ namespace SKVI.Application.DTOs.Payments;
 public class CheckoutRequest
 {
     public List<string> CourseIds { get; set; } = new();
+    public string? WellnessPackageCode { get; set; }
     public string? ReferralCode { get; set; }
 }
 
@@ -23,6 +24,8 @@ public class CheckoutItemDto
     public string Title { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public bool IsFree { get; set; }
+    public string ItemType { get; set; } = "COURSE";
+    public string? WellnessPackageCode { get; set; }
 }
 
 public class PaymentInstructionDto

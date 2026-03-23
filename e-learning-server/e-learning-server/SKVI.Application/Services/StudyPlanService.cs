@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SKVI.Application.DTOs.Ai;
 using SKVI.Application.Interfaces;
+using SKVI.Application.Models;
 using SKVI.Domain.Entities;
 using SKVI.Infrastructure;
 
@@ -11,8 +12,8 @@ namespace SKVI.Application.Services
         Task<UserStudyPlanDto> InitializePlanAsync(Guid userId, InitializeStudyPlanRequest request);
         Task<UserStudyPlanDto?> GetActivePlanAsync(Guid userId);
         Task<StudyPlanDashboardDto?> GetDashboardAsync(Guid userId);
-        Task<List<DailyStudyTaskDto>> GetTodayTasksAsync(Guid planId);
-        Task<DailyStudyTaskDto> SubmitTaskResultAsync(Guid taskId, SubmitStudyTaskResultRequest request);
+        Task<List<DailyStudyTaskDto>> GetTodayTasksAsync(Guid userId, Guid planId);
+        Task<DailyStudyTaskDto> SubmitTaskResultAsync(Guid userId, Guid taskId, SubmitStudyTaskResultRequest request);
         Task<DailyStudyCheckInDto> SubmitDailyCheckInAsync(Guid userId, DailyStudyCheckInRequest request);
         Task<string> ChatDirectlyAsync(Guid userId, string prompt);
         Task<List<AiChatMessage>> GetChatHistoryAsync(Guid userId);
@@ -30,6 +31,7 @@ namespace SKVI.Application.Services
         private readonly IGeminiService _geminiService;
         private readonly INotificationService _notificationService;
         private readonly ILessonProgressService _lessonProgressService;
+        private readonly IWellnessAccessService _wellnessAccessService;
         private readonly ILogger<StudyPlanService> _logger;
 
         public StudyPlanService(
@@ -37,17 +39,21 @@ namespace SKVI.Application.Services
             IGeminiService geminiService,
             INotificationService notificationService,
             ILessonProgressService lessonProgressService,
+            IWellnessAccessService wellnessAccessService,
             ILogger<StudyPlanService> logger)
         {
             _dbContext = dbContext;
             _geminiService = geminiService;
             _notificationService = notificationService;
             _lessonProgressService = lessonProgressService;
+            _wellnessAccessService = wellnessAccessService;
             _logger = logger;
         }
 
         public async Task<UserStudyPlanDto> InitializePlanAsync(Guid userId, InitializeStudyPlanRequest request)
         {
+            await EnsureRoadmapAccessAsync(userId);
+
             if (string.IsNullOrWhiteSpace(request.Goal))
             {
                 throw new InvalidOperationException("Goal is required.");
@@ -120,12 +126,14 @@ namespace SKVI.Application.Services
 
         public async Task<UserStudyPlanDto?> GetActivePlanAsync(Guid userId)
         {
+            await EnsureRoadmapAccessAsync(userId);
             var plan = await GetActivePlanEntityAsync(userId);
             return plan == null ? null : MapPlan(plan);
         }
 
         public async Task<StudyPlanDashboardDto?> GetDashboardAsync(Guid userId)
         {
+            await EnsureRoadmapAccessAsync(userId);
             var plan = await GetActivePlanEntityAsync(userId);
             if (plan == null)
             {
@@ -164,9 +172,12 @@ namespace SKVI.Application.Services
             };
         }
 
-        public async Task<List<DailyStudyTaskDto>> GetTodayTasksAsync(Guid planId)
+        public async Task<List<DailyStudyTaskDto>> GetTodayTasksAsync(Guid userId, Guid planId)
         {
-            var plan = await _dbContext.UserStudyPlans.FirstOrDefaultAsync(p => p.Id == planId);
+            await EnsureRoadmapAccessAsync(userId);
+
+            var plan = await _dbContext.UserStudyPlans
+                .FirstOrDefaultAsync(p => p.Id == planId && p.UserId == userId);
             if (plan == null)
             {
                 return [];
@@ -181,15 +192,17 @@ namespace SKVI.Application.Services
             return tasks.Select(MapTask).ToList();
         }
 
-        public async Task<DailyStudyTaskDto> SubmitTaskResultAsync(Guid taskId, SubmitStudyTaskResultRequest request)
+        public async Task<DailyStudyTaskDto> SubmitTaskResultAsync(Guid userId, Guid taskId, SubmitStudyTaskResultRequest request)
         {
+            await EnsureRoadmapAccessAsync(userId);
+
             var task = await _dbContext.DailyStudyTasks
                 .Include(t => t.Plan)
                     .ThenInclude(p => p.PrimaryCourse)
                 .Include(t => t.RelatedCourse)
                 .Include(t => t.RelatedLessonPart)
                     .ThenInclude(lp => lp!.Lesson)
-                .FirstOrDefaultAsync(t => t.Id == taskId);
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.Plan.UserId == userId);
 
             if (task == null)
             {
@@ -236,6 +249,7 @@ namespace SKVI.Application.Services
 
         public async Task<DailyStudyCheckInDto> SubmitDailyCheckInAsync(Guid userId, DailyStudyCheckInRequest request)
         {
+            await EnsureRoadmapAccessAsync(userId);
             var plan = await GetActivePlanEntityAsync(userId);
             if (plan == null)
             {
@@ -293,6 +307,7 @@ namespace SKVI.Application.Services
 
         public async Task<string> ChatDirectlyAsync(Guid userId, string prompt)
         {
+            await EnsureRoadmapAccessAsync(userId);
             var userPrompt = prompt?.Trim();
             if (string.IsNullOrWhiteSpace(userPrompt))
             {
@@ -333,10 +348,29 @@ namespace SKVI.Application.Services
 
         public async Task<List<AiChatMessage>> GetChatHistoryAsync(Guid userId)
         {
+            await EnsureRoadmapAccessAsync(userId);
             return await _dbContext.AiChatMessages
                 .Where(m => m.UserId == userId)
                 .OrderBy(m => m.CreatedAt)
                 .ToListAsync();
+        }
+
+        private async Task EnsureRoadmapAccessAsync(Guid userId)
+        {
+            var evaluation = await _wellnessAccessService.EvaluateAccessAsync(userId);
+            if (evaluation.Access.IsUnlocked)
+            {
+                return;
+            }
+
+            var code = string.IsNullOrWhiteSpace(evaluation.Access.ReasonCode)
+                ? "WELLNESS_PACKAGE_REQUIRED"
+                : evaluation.Access.ReasonCode;
+            var message = string.IsNullOrWhiteSpace(evaluation.Access.Message)
+                ? "Bạn cần mua gói để kích hoạt lộ trình học cá nhân hóa."
+                : evaluation.Access.Message;
+
+            throw new WellnessAccessException(code, message);
         }
 
         private async Task<UserStudyPlan?> GetActivePlanEntityAsync(Guid userId)

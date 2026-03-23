@@ -1,13 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-hot-toast';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { userApi, type UserDto, type UserRole, type UserStatus } from '../../../services/userApi';
 import { adminEnrollmentApi, type AdminEnrollmentResponse } from '../../../services/adminEnrollmentApi';
+import {
+    wellnessApi,
+    type WellnessPackageAdmin,
+    type WellnessUserPackage,
+} from '../../../services/wellnessApi';
 import { format } from 'date-fns';
 import UserFormModal from './components/UserFormModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
 import AddEnrollmentModal from './components/AddEnrollmentModal';
+
+interface WellnessDraft {
+    status: string;
+    expiresAt: string;
+    notes: string;
+}
 
 const UserDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -23,7 +35,7 @@ const UserDetailPage: React.FC = () => {
     const [showResetModal, setShowResetModal] = useState(false);
 
     // Tabs state
-    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'activity'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'wellness' | 'activity'>('overview');
 
     // Enrollment management
     const [enrollments, setEnrollments] = useState<AdminEnrollmentResponse[]>([]);
@@ -31,6 +43,19 @@ const UserDetailPage: React.FC = () => {
     const [showAddCourseModal, setShowAddCourseModal] = useState(false);
     const [togglingId, setTogglingId] = useState<string | null>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
+
+    // Wellness package management
+    const [wellnessPackages, setWellnessPackages] = useState<WellnessUserPackage[]>([]);
+    const [wellnessLoading, setWellnessLoading] = useState(false);
+    const [wellnessDrafts, setWellnessDrafts] = useState<Record<string, WellnessDraft>>({});
+    const [wellnessPackageOptions, setWellnessPackageOptions] = useState<WellnessPackageAdmin[]>([]);
+    const [wellnessPackageOptionsLoading, setWellnessPackageOptionsLoading] = useState(false);
+    const [assigningWellness, setAssigningWellness] = useState(false);
+    const [updatingWellnessId, setUpdatingWellnessId] = useState<string | null>(null);
+    const [grantPackageCode, setGrantPackageCode] = useState('');
+    const [grantStartsAt, setGrantStartsAt] = useState('');
+    const [grantExpiresAt, setGrantExpiresAt] = useState('');
+    const [grantNotes, setGrantNotes] = useState('');
 
     const roleLabel = (value: UserRole) => t(`admin.users.roles.${value}`);
     const statusLabel = (value: UserStatus) => t(`admin.users.statuses.${value}`);
@@ -50,6 +75,46 @@ const UserDetailPage: React.FC = () => {
         }
 
         return `${base} (${t('admin.users.enrollment.daysRemaining', { defaultValue: '{{days}} days left', days: diffDays })})`;
+    };
+
+    const toInputDateTime = (value?: string) => {
+        if (!value) return '';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        const timezoneOffset = date.getTimezoneOffset() * 60000;
+        return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16);
+    };
+
+    const toUtcIsoString = (value?: string) => {
+        if (!value) return undefined;
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+    };
+
+    const formatDateTime = (value?: string) => {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '-';
+        return format(date, 'dd/MM/yyyy HH:mm');
+    };
+
+    const formatVnd = (value: number) =>
+        new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            maximumFractionDigits: 0,
+        }).format(value);
+
+    const getWellnessStatusClassName = (status: string) => {
+        if (status === 'ACTIVE') {
+            return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+        }
+
+        if (status === 'REVOKED') {
+            return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+        }
+
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
     };
 
     useEffect(() => {
@@ -86,11 +151,145 @@ const UserDetailPage: React.FC = () => {
         }
     };
 
+    const hydrateWellnessDrafts = (rows: WellnessUserPackage[]) => {
+        const nextDrafts: Record<string, WellnessDraft> = {};
+        rows.forEach((row) => {
+            nextDrafts[row.id] = {
+                status: row.status || 'ACTIVE',
+                expiresAt: toInputDateTime(row.expiresAt),
+                notes: row.notes || '',
+            };
+        });
+        setWellnessDrafts(nextDrafts);
+    };
+
+    const fetchWellnessPackages = async (userId: string) => {
+        setWellnessLoading(true);
+        try {
+            const data = await wellnessApi.getUserPackages(userId);
+            setWellnessPackages(data);
+            hydrateWellnessDrafts(data);
+        } catch (err: any) {
+            toast.error(
+                err?.message
+                || t('admin.users.wellness.errors.loadAssignments', { defaultValue: 'Unable to load wellness package assignments.' }),
+            );
+        } finally {
+            setWellnessLoading(false);
+        }
+    };
+
+    const fetchWellnessPackageOptions = async () => {
+        setWellnessPackageOptionsLoading(true);
+        try {
+            const settings = await wellnessApi.getAdminSettings();
+            const packages = (settings.packages ?? []).sort(
+                (a, b) => a.sortOrder - b.sortOrder || a.durationDays - b.durationDays || a.code.localeCompare(b.code),
+            );
+
+            setWellnessPackageOptions(packages);
+
+            const firstActiveCode = packages.find((pkg) => pkg.isActive)?.code ?? '';
+            setGrantPackageCode((prev) => prev || firstActiveCode);
+        } catch (err: any) {
+            toast.error(
+                err?.message
+                || t('admin.users.wellness.errors.loadCatalog', { defaultValue: 'Unable to load wellness package catalog.' }),
+            );
+        } finally {
+            setWellnessPackageOptionsLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (activeTab === 'courses' && id) {
             void fetchEnrollments(id);
         }
     }, [activeTab, id]);
+
+    useEffect(() => {
+        if (activeTab === 'wellness' && id) {
+            void fetchWellnessPackages(id);
+            void fetchWellnessPackageOptions();
+        }
+    }, [activeTab, id]);
+
+    const updateWellnessDraft = (row: WellnessUserPackage, patch: Partial<WellnessDraft>) => {
+        setWellnessDrafts((prev) => {
+            const current = prev[row.id] ?? {
+                status: row.status || 'ACTIVE',
+                expiresAt: toInputDateTime(row.expiresAt),
+                notes: row.notes || '',
+            };
+
+            return {
+                ...prev,
+                [row.id]: {
+                    ...current,
+                    ...patch,
+                },
+            };
+        });
+    };
+
+    const handleGrantWellnessPackage = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!id) return;
+
+        if (!grantPackageCode) {
+            toast.error(t('admin.users.wellness.errors.packageRequired', { defaultValue: 'Please select a wellness package.' }));
+            return;
+        }
+
+        setAssigningWellness(true);
+        try {
+            await wellnessApi.grantUserPackage(id, {
+                packageCode: grantPackageCode,
+                startsAt: toUtcIsoString(grantStartsAt),
+                expiresAt: toUtcIsoString(grantExpiresAt),
+                source: 'MANUAL',
+                notes: grantNotes.trim() || undefined,
+            });
+
+            toast.success(t('admin.users.wellness.success.assigned', { defaultValue: 'Wellness package assigned.' }));
+            setGrantStartsAt('');
+            setGrantExpiresAt('');
+            setGrantNotes('');
+            await fetchWellnessPackages(id);
+        } catch (err: any) {
+            toast.error(
+                err?.message
+                || t('admin.users.wellness.errors.assignFailed', { defaultValue: 'Unable to assign wellness package.' }),
+            );
+        } finally {
+            setAssigningWellness(false);
+        }
+    };
+
+    const handleSaveWellnessAssignment = async (row: WellnessUserPackage) => {
+        if (!id) return;
+        const draft = wellnessDrafts[row.id];
+        if (!draft) return;
+
+        setUpdatingWellnessId(row.id);
+        try {
+            await wellnessApi.updateUserPackage(id, row.id, {
+                status: draft.status,
+                expiresAt: toUtcIsoString(draft.expiresAt),
+                notes: draft.notes.trim(),
+            });
+
+            toast.success(t('admin.users.wellness.success.updated', { defaultValue: 'Wellness assignment updated.' }));
+            await fetchWellnessPackages(id);
+        } catch (err: any) {
+            toast.error(
+                err?.message
+                || t('admin.users.wellness.errors.updateFailed', { defaultValue: 'Unable to update wellness assignment.' }),
+            );
+        } finally {
+            setUpdatingWellnessId(null);
+        }
+    };
 
     const handleToggleStatus = async (enrollment: AdminEnrollmentResponse) => {
         if (!id) return;
@@ -119,6 +318,13 @@ const UserDetailPage: React.FC = () => {
             setRemovingId(null);
         }
     };
+
+    const tabItems: Array<{ key: 'overview' | 'courses' | 'wellness' | 'activity'; label: string }> = [
+        { key: 'overview', label: t('admin.users.detail.tabs.overview', { defaultValue: 'Overview' }) },
+        { key: 'courses', label: t('admin.users.detail.tabs.courses', { defaultValue: 'Courses' }) },
+        { key: 'wellness', label: t('admin.users.detail.tabs.wellness', { defaultValue: 'Wellness Packages' }) },
+        { key: 'activity', label: t('admin.users.detail.tabs.activity', { defaultValue: 'Activity' }) },
+    ];
 
     if (loading) {
         return (
@@ -227,16 +433,16 @@ const UserDetailPage: React.FC = () => {
                     {/* Tabs */}
                     <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-dashboard-surface-dark">
                         <div className="flex border-b border-slate-200 px-6 dark:border-slate-800">
-                            {(['overview', 'courses', 'activity'] as const).map((tab) => (
+                            {tabItems.map((tab) => (
                                 <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`mr-6 border-b-2 py-4 text-sm font-medium transition ${activeTab === tab
+                                    key={tab.key}
+                                    onClick={() => setActiveTab(tab.key)}
+                                    className={`mr-6 border-b-2 py-4 text-sm font-medium transition ${activeTab === tab.key
                                         ? 'border-dashboard-primary text-dashboard-primary'
                                         : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                         }`}
                                 >
-                                    {t(`admin.users.detail.tabs.${tab}`)}
+                                    {tab.label}
                                 </button>
                             ))}
                         </div>
@@ -355,6 +561,217 @@ const UserDetailPage: React.FC = () => {
                                             </table>
                                         </div>
                                     )}
+                                </div>
+                            )}
+                            {activeTab === 'wellness' && (
+                                <div className="space-y-6">
+                                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                                                {t('admin.users.wellness.assign.title', { defaultValue: 'Assign wellness package' })}
+                                            </h3>
+                                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                                                {t('admin.users.wellness.assign.subtitle', { defaultValue: 'Manually assign standalone wellness package to this user.' })}
+                                            </span>
+                                        </div>
+
+                                        <form onSubmit={handleGrantWellnessPackage} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
+                                            <div className="sm:col-span-2">
+                                                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                    {t('admin.users.wellness.assign.package', { defaultValue: 'Package' })}
+                                                </label>
+                                                <select
+                                                    value={grantPackageCode}
+                                                    onChange={(event) => setGrantPackageCode(event.target.value)}
+                                                    disabled={wellnessPackageOptionsLoading || assigningWellness}
+                                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                                                >
+                                                    <option value="">
+                                                        {t('admin.users.wellness.assign.selectPackage', { defaultValue: 'Select package' })}
+                                                    </option>
+                                                    {wellnessPackageOptions
+                                                        .filter((pkg) => pkg.isActive)
+                                                        .map((pkg) => (
+                                                            <option key={pkg.id} value={pkg.code}>
+                                                                {pkg.name} ({formatVnd(pkg.priceVnd)} / {pkg.durationDays}d)
+                                                            </option>
+                                                        ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                    {t('admin.users.wellness.assign.startsAt', { defaultValue: 'Starts At' })}
+                                                </label>
+                                                <input
+                                                    type="datetime-local"
+                                                    value={grantStartsAt}
+                                                    onChange={(event) => setGrantStartsAt(event.target.value)}
+                                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                    {t('admin.users.wellness.assign.expiresAt', { defaultValue: 'Expires At' })}
+                                                </label>
+                                                <input
+                                                    type="datetime-local"
+                                                    value={grantExpiresAt}
+                                                    onChange={(event) => setGrantExpiresAt(event.target.value)}
+                                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                                                />
+                                            </div>
+
+                                            <div className="sm:col-span-3">
+                                                <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                    {t('admin.users.wellness.assign.notes', { defaultValue: 'Notes' })}
+                                                </label>
+                                                <input
+                                                    value={grantNotes}
+                                                    onChange={(event) => setGrantNotes(event.target.value)}
+                                                    placeholder={t('admin.users.wellness.assign.notesPlaceholder', { defaultValue: 'Internal note for this manual assignment' })}
+                                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                                                />
+                                            </div>
+
+                                            <div className="flex items-end justify-end">
+                                                <button
+                                                    type="submit"
+                                                    disabled={assigningWellness || wellnessPackageOptionsLoading}
+                                                    className="inline-flex h-10 items-center rounded-lg bg-dashboard-primary px-4 text-sm font-semibold text-white hover:bg-dashboard-primary-dark disabled:opacity-60"
+                                                >
+                                                    {assigningWellness
+                                                        ? t('admin.users.wellness.assign.assigning', { defaultValue: 'Assigning...' })
+                                                        : t('admin.users.wellness.assign.action', { defaultValue: 'Assign package' })}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-dashboard-surface-dark">
+                                        <div className="mb-4 flex items-center justify-between">
+                                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                                                {t('admin.users.wellness.assignments.title', { defaultValue: 'Assigned packages' })}
+                                            </h3>
+                                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                {wellnessPackages.length}
+                                            </span>
+                                        </div>
+
+                                        {wellnessLoading ? (
+                                            <div className="flex h-32 items-center justify-center">
+                                                <div className="h-6 w-6 animate-spin rounded-full border-4 border-dashboard-primary border-t-transparent" />
+                                            </div>
+                                        ) : wellnessPackages.length === 0 ? (
+                                            <div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                                                {t('admin.users.wellness.assignments.empty', { defaultValue: 'No wellness package assignment yet.' })}
+                                            </div>
+                                        ) : (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                    <thead>
+                                                        <tr className="border-b border-slate-200 dark:border-slate-700">
+                                                            <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                                                {t('admin.users.wellness.assignments.package', { defaultValue: 'Package' })}
+                                                            </th>
+                                                            <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                                                {t('admin.users.wellness.assignments.status', { defaultValue: 'Status' })}
+                                                            </th>
+                                                            <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                                                {t('admin.users.wellness.assignments.source', { defaultValue: 'Source' })}
+                                                            </th>
+                                                            <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                                                {t('admin.users.wellness.assignments.period', { defaultValue: 'Start / Expire' })}
+                                                            </th>
+                                                            <th className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                                                {t('admin.users.wellness.assignments.edit', { defaultValue: 'Edit' })}
+                                                            </th>
+                                                            <th className="pb-2 text-right text-xs font-semibold text-slate-500 dark:text-slate-400"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                                        {wellnessPackages.map((row) => {
+                                                            const draft = wellnessDrafts[row.id] ?? {
+                                                                status: row.status || 'ACTIVE',
+                                                                expiresAt: toInputDateTime(row.expiresAt),
+                                                                notes: row.notes || '',
+                                                            };
+
+                                                            return (
+                                                                <tr key={row.id}>
+                                                                    <td className="py-3 pr-4">
+                                                                        <div className="font-medium text-slate-900 dark:text-white">{row.packageName}</div>
+                                                                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                                            {row.packageCode} • {formatVnd(row.priceVnd)} • {row.durationDays}d
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="py-3 pr-4">
+                                                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getWellnessStatusClassName(draft.status)}`}>
+                                                                            {draft.status}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="py-3 pr-4 text-xs text-slate-600 dark:text-slate-300">
+                                                                        <div>{row.source}</div>
+                                                                        <div>{formatDateTime(row.grantedAt)}</div>
+                                                                    </td>
+                                                                    <td className="py-3 pr-4 text-xs text-slate-600 dark:text-slate-300">
+                                                                        <div>
+                                                                            <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                                                                {t('admin.users.wellness.assignments.startsAt', { defaultValue: 'Start' })}:
+                                                                            </span> {formatDateTime(row.startsAt)}
+                                                                        </div>
+                                                                        <div>
+                                                                            <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                                                                {t('admin.users.wellness.assignments.expiresAt', { defaultValue: 'Expire' })}:
+                                                                            </span> {formatDateTime(row.expiresAt)}
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="py-3 pr-4">
+                                                                        <div className="grid gap-2">
+                                                                            <select
+                                                                                value={draft.status}
+                                                                                onChange={(event) => updateWellnessDraft(row, { status: event.target.value })}
+                                                                                className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800"
+                                                                            >
+                                                                                <option value="ACTIVE">ACTIVE</option>
+                                                                                <option value="REVOKED">REVOKED</option>
+                                                                                <option value="EXPIRED">EXPIRED</option>
+                                                                            </select>
+                                                                            <input
+                                                                                type="datetime-local"
+                                                                                value={draft.expiresAt}
+                                                                                onChange={(event) => updateWellnessDraft(row, { expiresAt: event.target.value })}
+                                                                                className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800"
+                                                                            />
+                                                                            <input
+                                                                                value={draft.notes}
+                                                                                onChange={(event) => updateWellnessDraft(row, { notes: event.target.value })}
+                                                                                placeholder={t('admin.users.wellness.assignments.notes', { defaultValue: 'Notes' })}
+                                                                                className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs dark:border-slate-700 dark:bg-slate-800"
+                                                                            />
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="py-3 text-right">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => void handleSaveWellnessAssignment(row)}
+                                                                            disabled={updatingWellnessId === row.id}
+                                                                            className="rounded-lg bg-dashboard-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-dashboard-primary-dark disabled:opacity-60"
+                                                                        >
+                                                                            {updatingWellnessId === row.id
+                                                                                ? t('common.saving', { defaultValue: 'Saving...' })
+                                                                                : t('common.save', { defaultValue: 'Save' })}
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                             {activeTab === 'activity' && (

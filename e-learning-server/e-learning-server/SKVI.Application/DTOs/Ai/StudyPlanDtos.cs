@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using SKVI.Application.DTOs.Wellness;
 
 namespace SKVI.Application.DTOs.Ai;
 
@@ -127,4 +128,10 @@ public class StudyPlanDashboardDto
     public DailyStudyCheckInDto? LatestCheckIn { get; set; }
     public int OpenSupportAlerts { get; set; }
     public string GuidanceMessage { get; set; } = string.Empty;
+}
+
+public class AiCoachStatusDto
+{
+    public bool IsEnabled { get; set; }
+    public WellnessAccessDto? Access { get; set; }
 }

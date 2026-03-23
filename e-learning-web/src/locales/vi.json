@@ -39,6 +39,21 @@
         "verifyAndProceed": "Xác minh & Tiếp tục",
         "phone": "Số điện thoại",
         "phonePlaceholder": "Nhập số điện thoại của bạn",
+        "loginIdentifier": "Email hoặc số điện thoại",
+        "loginIdentifierPlaceholder": "Nhập email hoặc số điện thoại",
+        "requestOtp": "Nhận OTP",
+        "sendingOtp": "Đang gửi OTP...",
+        "loggingIn": "Đang đăng nhập...",
+        "phoneOtpSent": "Đã gửi OTP qua số điện thoại của bạn.",
+        "otpChannelTitle": "Chọn phương thức gửi OTP",
+        "otpViaEmail": "Qua email",
+        "otpViaPhone": "Qua số điện thoại",
+        "registerByEmail": "Đăng ký bằng email",
+        "registerByPhone": "Đăng ký bằng số điện thoại",
+        "confirmPassword": "Xác nhận mật khẩu",
+        "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+        "referralDetected": "Bạn đang đăng ký từ link mời",
+        "referralCodeLabel": "Mã giới thiệu",
         "creating": "Đang tạo tài khoản...",
         "verifying": "Đang xác minh...",
         "otpResent": "Mã xác minh mới đã được gửi đến email của bạn",
@@ -48,6 +63,12 @@
             "emailInvalid": "Email không hợp lệ",
             "passwordRequired": "Vui lòng nhập mật khẩu",
             "passwordLength": "Mật khẩu phải có ít nhất 8 ký tự",
+            "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu.",
+            "confirmPasswordMismatch": "Mật khẩu xác nhận không khớp.",
+            "phoneRequired": "Vui lòng nhập số điện thoại",
+            "phoneInvalid": "Số điện thoại không hợp lệ",
+            "loginIdentifierRequired": "Vui lòng nhập email hoặc số điện thoại.",
+            "loginIdentifierInvalid": "Định dạng email hoặc số điện thoại chưa hợp lệ.",
             "registrationFailed": "Đăng ký thất bại. Vui lòng thử lại.",
             "otpInvalid": "Vui lòng nhập mã OTP gồm 6 chữ số",
             "otpVerificationFailed": "Mã OTP không hợp lệ hoặc đã hết hạn",
@@ -248,7 +269,8 @@
             "articles": "Bài viết",
             "referrals": "Mã giới thiệu",
             "consultRegistrations": "Đăng ký tư vấn",
-            "whyChooseUs": "Tại sao chọn chúng tôi"
+            "whyChooseUs": "Tại sao chọn chúng tôi",
+            "wellnessSettings": "Cấu hình wellness"
         },
         "articles": {
             "title": "Quản lý Bài viết",
@@ -1493,6 +1515,14 @@
             "title": "NHỊN ĂN CHỮA LÀNH 2026",
             "subtitle": "Lộ trình tươi sáng cho một cơ thể chuyển hóa hoàn hảo"
         },
+        "wellnessUpgrade": {
+            "badge": "Nâng cấp wellness",
+            "title": "Kích hoạt lộ trình wellness cá nhân hóa",
+            "description": "Gói wellness được mua riêng với khóa học. Sau khi thanh toán, AI sẽ dựa trên hồ sơ cá nhân để gợi ý điều chỉnh lộ trình, bữa ăn và cải thiện tiến độ theo thời gian.",
+            "cta": "Nâng cấp wellness ngay",
+            "chooseCta": "Chọn gói wellness",
+            "defaultPackageLabel": "Chọn gói từ dashboard wellness"
+        },
         "table": {
             "featureCol": "THÔNG TIN GÓI",
             "col1": "Trải Nghiệm",
@@ -1595,7 +1625,6 @@
             ]
         }
     },
-
     "ambassadorPage": {
         "hero": {
             "title": "Đại Sứ Sức Khỏe",
@@ -1903,10 +1932,14 @@
             "title": "Thanh toán khóa học",
             "subtitle": "Kiểm tra đơn hàng trước khi tạo mã thanh toán PayOS VietQR.",
             "continueCourses": "Tiếp tục chọn khóa học",
+            "continueWellness": "Tiếp tục nâng cấp gói",
             "courseListTitle": "Danh sách khóa học",
+            "packageListTitle": "Gói nâng cấp đã chọn",
             "emptyCart": "Giỏ hàng đang trống.",
+            "emptyWellnessSelection": "Chưa chọn gói wellness để thanh toán.",
             "errors": {
                 "loadInfo": "Không thể tải thông tin checkout.",
+                "wellnessPackageNotFound": "Không tìm thấy gói wellness đã chọn hoặc gói đã ngừng kích hoạt.",
                 "noQrData": "Không nhận được dữ liệu QR thanh toán. Vui lòng thử lại.",
                 "create": "Không thể tạo đơn thanh toán. Vui lòng thử lại.",
                 "checkStatus": "Không thể kiểm tra trạng thái đơn hàng."
@@ -1925,6 +1958,7 @@
             "summary": {
                 "title": "Tổng quan thanh toán",
                 "courseCount": "Số khóa học",
+                "itemCount": "Số hạng mục",
                 "totalAmount": "Tổng tiền",
                 "note": "Đơn hàng được tạo với hạn thanh toán 15 phút. Kết quả cuối cùng được xác nhận bởi webhook PayOS."
             },
@@ -1932,6 +1966,7 @@
                 "creatingOrder": "Đang tạo đơn hàng...",
                 "payWithVietQr": "Thanh toán với VietQR",
                 "confirmFreeCourses": "Xác nhận nhận khóa học",
+                "confirmFreeWellness": "Kích hoạt gói wellness miễn phí",
                 "checkingStatus": "Đang kiểm tra...",
                 "iPaid": "Tôi đã thanh toán",
                 "openFallback": "Mở trang PayOS dự phòng"
@@ -1964,6 +1999,9 @@
                 "statusLabel": "Trạng thái",
                 "expiresAtLabel": "Hạn thanh toán",
                 "courseList": "Khóa học trong đơn"
+            },
+            "badges": {
+                "wellness": "Gói wellness"
             }
         },
         "orders": {
@@ -2217,8 +2255,8 @@
             "eyebrow": "Huấn luyện cá nhân",
             "title": "Lộ trình học của tôi",
             "subtitle": "Theo dõi công việc hôm nay, check-in sau buổi học và để AI điều chỉnh kế hoạch ngày mai theo tiến độ thực tế.",
-            "backToCourses": "Quay lại khóa học của tôi"
-            ,"planBadge": "Lộ trình thích nghi theo ngày",
+            "backToCourses": "Quay lại khóa học của tôi",
+            "planBadge": "Lộ trình thích nghi theo ngày",
             "onboardingBadge": "AI dựng kế hoạch từ mục tiêu thật của bạn",
             "onboardingDescription": "Hệ thống kết hợp mục tiêu, năng lực hiện tại, khóa học đang có và tín hiệu hằng ngày để tạo nhịp học gọn hơn có AI đồng hành.",
             "goalLabel": "Kết quả mong muốn",
@@ -2302,7 +2340,11 @@
         },
         "states": {
             "onlyStudents": "Tính năng này chỉ dành cho tài khoản học viên.",
-            "disabled": "AI coach hiện đang tắt. Vui lòng thử lại sau hoặc liên hệ quản trị viên."
+            "disabled": "AI coach hiện đang tắt. Vui lòng thử lại sau hoặc liên hệ quản trị viên.",
+            "packageLockedTitle": "Cần kích hoạt gói",
+            "packageRequired": "Bạn cần mua gói để kích hoạt lộ trình học cá nhân hóa.",
+            "requiredPackages": "Gói cần có: {{packages}}",
+            "openPricing": "Nâng cấp ngay"
         },
         "tabs": {
             "today": "Hôm nay",
@@ -2361,6 +2403,212 @@
             "checkInSaved": "Đã lưu check-in.",
             "checkInFailed": "Không thể lưu check-in.",
             "chatFailed": "Không thể gửi tin nhắn cho coach."
+        }
+    },
+    "wellness": {
+        "dashboard": {
+            "loading": "Đang tải dashboard wellness...",
+            "brand": "Wellness",
+            "viewProfile": "Xem hồ sơ",
+            "header": {
+                "title": "Lộ trình nhịn ăn cá nhân hóa",
+                "subtitle": "Layout 3 cột theo font và màu hệ thống."
+            },
+            "upgrade": {
+                "title": "Nâng cấp gói",
+                "subtitle": "Thanh toán tự động qua checkout có sẵn.",
+                "trialButton": "Gói 3 ngày",
+                "planButton": "Gói 30 ngày"
+            },
+            "packages": {
+                "TRIAL_3_DAYS": "Gói 3 ngày",
+                "PLAN_30_DAYS": "Gói 30 ngày"
+            },
+            "locked": {
+                "badge": "Cần kích hoạt gói",
+                "title": "Mở khóa lộ trình cá nhân hóa",
+                "subtitle": "Bạn cần mua gói để kích hoạt tính năng này.",
+                "required": "Gói cần có: {{packages}}",
+                "current": "Gói đang kích hoạt: {{package}}",
+                "openPricing": "Nâng cấp ngay"
+            },
+            "calendar": {
+                "title": "Lịch tuần",
+                "previous": "Trước",
+                "next": "Sau"
+            },
+            "timeline": {
+                "title": "Tiến trình theo thời gian",
+                "subtitle": "Theo dõi nước uống, vận động và cân nặng theo từng ngày.",
+                "range": "Từ {{from}} đến {{to}}",
+                "days": "{{days}} ngày",
+                "loading": "Đang tải dữ liệu tiến trình...",
+                "empty": "Chưa có log trong khoảng thời gian này.",
+                "tooltip": "{{date}} - Nước: {{water}}ml, Vận động: {{workout}} phút",
+                "metrics": {
+                    "loggedDays": "Ngày đã log",
+                    "avgWater": "Nước trung bình",
+                    "totalWorkout": "Tổng vận động",
+                    "latestWeight": "Cân nặng gần nhất"
+                }
+            },
+            "form": {
+                "startDate": "Ngày bắt đầu",
+                "endDate": "Ngày kết thúc",
+                "fastingHours": "Số giờ nhịn",
+                "eatingHours": "Số giờ ăn",
+                "fastStart": "Giờ bắt đầu nhịn",
+                "startWeight": "Cân nặng bắt đầu (kg)",
+                "targetWeight": "Cân nặng mục tiêu (kg)",
+                "timezone": "Múi giờ"
+            },
+            "actions": {
+                "savePlan": "Lưu lộ trình",
+                "upgrade": "Nâng cấp thanh toán",
+                "saveLog": "Lưu log ngày hôm nay"
+            },
+            "log": {
+                "logDate": "Ngày log",
+                "ateAt": "Giờ đã ăn",
+                "water": "Nước uống (ml)",
+                "workoutMinutes": "Số phút tập",
+                "workoutType": "Loại bài tập",
+                "currentWeight": "Cân nặng hiện tại (kg)",
+                "notes": "Ghi chú"
+            },
+            "coach": {
+                "title": "AI tư vấn sức khỏe",
+                "subtitle": "Gợi ý dựa trên tâm trạng, tín hiệu cơ thể và cường độ học trong ngày.",
+                "form": {
+                    "mood": "Tâm trạng",
+                    "energy": "Năng lượng",
+                    "hunger": "Độ đói",
+                    "thirst": "Độ khát",
+                    "stress": "Mức căng thẳng",
+                    "sleepHours": "Số giờ ngủ",
+                    "studyLoad": "Khối lượng học hôm nay",
+                    "notes": "Thông tin bổ sung cho AI coach"
+                },
+                "options": {
+                    "mood": {
+                        "balanced": "Cân bằng",
+                        "motivated": "Có động lực",
+                        "tired": "Mệt",
+                        "stressed": "Căng thẳng"
+                    },
+                    "level": {
+                        "low": "Thấp",
+                        "medium": "Trung bình",
+                        "normal": "Bình thường",
+                        "moderate": "Vừa",
+                        "high": "Cao"
+                    },
+                    "studyLoad": {
+                        "light": "Học nhẹ",
+                        "normal": "Học bình thường",
+                        "heavy": "Học nặng"
+                    }
+                },
+                "actions": {
+                    "send": "Nhận tư vấn AI"
+                },
+                "replyTitle": "Khuyến nghị từ AI"
+            },
+            "meal": {
+                "title": "AI công thức bữa ăn",
+                "subtitle": "Tạo gợi ý bữa ăn theo mục tiêu sức khỏe và nhịp học của bạn.",
+                "form": {
+                    "ingredients": "Nguyên liệu (cách nhau bởi dấu phẩy hoặc xuống dòng)",
+                    "servings": "Số khẩu phần",
+                    "goal": "Mục tiêu bữa ăn",
+                    "dietaryPreference": "Chế độ ăn ưu tiên (tuỳ chọn)"
+                },
+                "options": {
+                    "goal": {
+                        "focusStudy": "Ngày học cần tập trung",
+                        "fatLoss": "Giảm mỡ",
+                        "recovery": "Phục hồi"
+                    }
+                },
+                "actions": {
+                    "generate": "Tạo công thức"
+                },
+                "resultTitle": "Thực đơn đề xuất"
+            },
+            "sidebar": {
+                "fasting": "NHỊN - ĂN",
+                "water": "Nước",
+                "weight": "Cân nặng X đến Y",
+                "weightRange": "{{start}}kg đến {{target}}kg",
+                "currentWeight": "Hiện tại: {{current}}kg"
+            },
+            "defaults": {
+                "workoutType": "Đi bộ",
+                "userName": "Người dùng"
+            },
+            "success": {
+                "savePlan": "Đã lưu lộ trình",
+                "saveLog": "Đã cập nhật log",
+                "coachReply": "Đã tạo tư vấn AI",
+                "mealReady": "Đã tạo công thức bữa ăn"
+            },
+            "errors": {
+                "loadDashboard": "Không tải được dashboard wellness",
+                "savePlan": "Không thể lưu lộ trình",
+                "saveLog": "Không lưu được log",
+                "loadTimeline": "Không tải được tiến trình theo thời gian",
+                "checkoutNotConfigured": "Chưa có gói wellness khả dụng để checkout.",
+                "createCheckout": "Không thể tạo checkout",
+                "packageRequired": "Bạn cần mua gói để sử dụng tính năng này.",
+                "moodCoach": "Không thể lấy tư vấn từ AI",
+                "mealCoach": "Không thể tạo công thức bữa ăn",
+                "mealIngredients": "Vui lòng nhập ít nhất một nguyên liệu"
+            }
+        },
+        "admin": {
+            "title": "Cấu hình gói Wellness",
+            "subtitle": "Quản lý các gói wellness độc lập và giá bán ngay trong admin dashboard.",
+            "overview": {
+                "checkout": "CTA thanh toán",
+                "totalPackages": "Tổng gói",
+                "activePackages": "Gói đang bật",
+                "featuredPackages": "Gói nổi bật",
+                "priceRange": "Khoảng giá"
+            },
+            "status": {
+                "ready": "Sẵn sàng",
+                "needsConfig": "Cần cấu hình"
+            },
+            "warnings": {
+                "title": "Cảnh báo cấu hình",
+                "noPackage": "Chưa có gói nào được cấu hình.",
+                "noActivePackage": "Chưa có gói đang bật. Người dùng sẽ không thể mở khóa wellness.",
+                "duplicateCode": "Mã gói bị trùng: {{codes}}",
+                "invalidPackage": "{{count}} dòng gói đang thiếu mã/tên hoặc giá/thời lượng không hợp lệ."
+            },
+            "actions": {
+                "addPackage": "Thêm gói",
+                "save": "Lưu cấu hình",
+                "saving": "Đang lưu..."
+            },
+            "labels": {
+                "featured": "Nổi bật"
+            },
+            "placeholders": {
+                "packageName": "Tên gói",
+                "packageDescription": "Quyền lợi người dùng nhận được từ gói này"
+            },
+            "table": {
+                "empty": "Chưa có gói nào được cấu hình."
+            },
+            "success": {
+                "saved": "Đã lưu cấu hình wellness"
+            },
+            "errors": {
+                "loadFailed": "Không tải được cấu hình wellness",
+                "saveFailed": "Không thể lưu cấu hình wellness",
+                "invalidPackageData": "Vui lòng xử lý mã gói trùng và các dòng dữ liệu không hợp lệ trước khi lưu."
+            }
         }
     }
 }

@@ -39,6 +39,21 @@
         "verifyAndProceed": "Verify & Proceed",
         "phone": "Phone",
         "phonePlaceholder": "Enter your phone number",
+        "loginIdentifier": "Email or phone number",
+        "loginIdentifierPlaceholder": "Enter email or phone number",
+        "requestOtp": "Get OTP",
+        "sendingOtp": "Sending OTP...",
+        "loggingIn": "Logging in...",
+        "phoneOtpSent": "OTP has been sent to your phone number.",
+        "otpChannelTitle": "Choose OTP delivery method",
+        "otpViaEmail": "Via email",
+        "otpViaPhone": "Via phone number",
+        "registerByEmail": "Register with email",
+        "registerByPhone": "Register with phone number",
+        "confirmPassword": "Confirm password",
+        "confirmPasswordPlaceholder": "Re-enter your password",
+        "referralDetected": "You are registering from an invite link",
+        "referralCodeLabel": "Referral code",
         "creating": "Creating account...",
         "verifying": "Verifying...",
         "otpResent": "A new verification code has been sent to your email",
@@ -48,6 +63,12 @@
             "emailInvalid": "Invalid email format",
             "passwordRequired": "Password is required",
             "passwordLength": "Password must be at least 8 characters",
+            "confirmPasswordRequired": "Please confirm your password.",
+            "confirmPasswordMismatch": "Password confirmation does not match.",
+            "phoneRequired": "Phone number is required",
+            "phoneInvalid": "Invalid phone number format",
+            "loginIdentifierRequired": "Please enter email or phone number.",
+            "loginIdentifierInvalid": "Invalid email or phone number format.",
             "registrationFailed": "Registration failed. Please try again.",
             "otpInvalid": "Please enter a 6-digit code",
             "otpVerificationFailed": "Invalid or expired OTP code",
@@ -248,7 +269,8 @@
             "articles": "Articles",
             "referrals": "Referral Codes",
             "consultRegistrations": "Consultation Registrations",
-            "whyChooseUs": "Why Choose Us"
+            "whyChooseUs": "Why Choose Us",
+            "wellnessSettings": "Wellness settings"
         },
         "header": {
             "searchPlaceholder": "Search students, courses, or orders...",
@@ -1488,6 +1510,14 @@
             "title": "NHIN AN CHUA LANH 2026",
             "subtitle": "A bright pathway for a perfectly transformed body"
         },
+        "wellnessUpgrade": {
+            "badge": "Wellness Upgrade",
+            "title": "Activate your personalized wellness roadmap",
+            "description": "Wellness packages are purchased separately from courses. After payment, AI uses personal profile data to suggest roadmap adjustments, meal plans, and progress improvements over time.",
+            "cta": "Upgrade wellness now",
+            "chooseCta": "Choose wellness package",
+            "defaultPackageLabel": "Select a package from wellness dashboard"
+        },
         "table": {
             "featureCol": "PACKAGE INFO",
             "col1": "Experience",
@@ -1897,10 +1927,14 @@
             "title": "Course Checkout",
             "subtitle": "Review your order before creating a PayOS VietQR payment code.",
             "continueCourses": "Continue browsing courses",
+            "continueWellness": "Continue package upgrade",
             "courseListTitle": "Course list",
+            "packageListTitle": "Selected upgrade package",
             "emptyCart": "Your cart is empty.",
+            "emptyWellnessSelection": "No wellness package selected for checkout.",
             "errors": {
                 "loadInfo": "Failed to load checkout information.",
+                "wellnessPackageNotFound": "Selected wellness package was not found or is inactive.",
                 "noQrData": "No payment QR data was returned. Please try again.",
                 "create": "Failed to create checkout order. Please try again.",
                 "checkStatus": "Failed to check order status."
@@ -1919,6 +1953,7 @@
             "summary": {
                 "title": "Payment summary",
                 "courseCount": "Courses",
+                "itemCount": "Item count",
                 "totalAmount": "Total amount",
                 "note": "Orders expire after 15 minutes. Final status is confirmed by PayOS webhook."
             },
@@ -1926,6 +1961,7 @@
                 "creatingOrder": "Creating order...",
                 "payWithVietQr": "Pay with VietQR",
                 "confirmFreeCourses": "Confirm free enrollment",
+                "confirmFreeWellness": "Activate free wellness package",
                 "checkingStatus": "Checking...",
                 "iPaid": "I have paid",
                 "openFallback": "Open PayOS fallback page"
@@ -1958,6 +1994,9 @@
                 "statusLabel": "Status",
                 "expiresAtLabel": "Payment deadline",
                 "courseList": "Courses in this order"
+            },
+            "badges": {
+                "wellness": "Wellness package"
             }
         },
         "orders": {
@@ -2296,7 +2335,11 @@
         },
         "states": {
             "onlyStudents": "This feature is available for student accounts only.",
-            "disabled": "The AI coach is currently disabled. Please try again later or contact an administrator."
+            "disabled": "The AI coach is currently disabled. Please try again later or contact an administrator.",
+            "packageLockedTitle": "Package required",
+            "packageRequired": "You need to purchase a package to activate the personalized roadmap.",
+            "requiredPackages": "Required package: {{packages}}",
+            "openPricing": "Upgrade now"
         },
         "tabs": {
             "today": "Today",
@@ -2355,6 +2398,213 @@
             "checkInSaved": "Check-in saved.",
             "checkInFailed": "Unable to save check-in.",
             "chatFailed": "Unable to message the coach."
+        }
+    },
+    "wellness": {
+        "dashboard": {
+            "loading": "Loading wellness dashboard...",
+            "brand": "Wellness",
+            "viewProfile": "View profile",
+            "header": {
+                "title": "Personalized fasting roadmap",
+                "subtitle": "3-column layout with system font and color palette."
+            },
+            "upgrade": {
+                "title": "Upgrade package",
+                "subtitle": "Automatic checkout with the existing payment flow.",
+                "trialButton": "3-day trial",
+                "planButton": "30-day plan"
+            },
+            "packages": {
+                "TRIAL_3_DAYS": "3-day package",
+                "PLAN_30_DAYS": "30-day package"
+            },
+            "locked": {
+                "badge": "Package required",
+                "title": "Unlock personalized roadmap",
+                "subtitle": "You need to purchase a package to activate this feature.",
+                "required": "Required package: {{packages}}",
+                "current": "Current active package: {{package}}",
+                "openPricing": "Upgrade now",
+                "openCheckout": "Open wellness checkout"
+            },
+            "calendar": {
+                "title": "Weekly calendar",
+                "previous": "Previous",
+                "next": "Next"
+            },
+            "timeline": {
+                "title": "Progress timeline",
+                "subtitle": "Track hydration, workouts, and weight changes over time.",
+                "range": "From {{from}} to {{to}}",
+                "days": "{{days}} days",
+                "loading": "Loading timeline...",
+                "empty": "No logs yet in this range.",
+                "tooltip": "{{date}} - Water: {{water}}ml, Workout: {{workout}} min",
+                "metrics": {
+                    "loggedDays": "Logged days",
+                    "avgWater": "Avg water",
+                    "totalWorkout": "Workout total",
+                    "latestWeight": "Latest weight"
+                }
+            },
+            "form": {
+                "startDate": "Start date",
+                "endDate": "End date",
+                "fastingHours": "Fasting hours",
+                "eatingHours": "Eating hours",
+                "fastStart": "Fast start time",
+                "startWeight": "Start weight (kg)",
+                "targetWeight": "Target weight (kg)",
+                "timezone": "Timezone"
+            },
+            "actions": {
+                "savePlan": "Save roadmap",
+                "upgrade": "Upgrade checkout",
+                "saveLog": "Save today's log"
+            },
+            "log": {
+                "logDate": "Log date",
+                "ateAt": "Ate at",
+                "water": "Water (ml)",
+                "workoutMinutes": "Workout minutes",
+                "workoutType": "Workout type",
+                "currentWeight": "Current weight (kg)",
+                "notes": "Notes"
+            },
+            "coach": {
+                "title": "AI health advisor",
+                "subtitle": "Advice adapts to your mood, body signals, and current study load.",
+                "form": {
+                    "mood": "Mood",
+                    "energy": "Energy",
+                    "hunger": "Hunger",
+                    "thirst": "Thirst",
+                    "stress": "Stress",
+                    "sleepHours": "Sleep hours",
+                    "studyLoad": "Study load today",
+                    "notes": "Extra context for AI coach"
+                },
+                "options": {
+                    "mood": {
+                        "balanced": "Balanced",
+                        "motivated": "Motivated",
+                        "tired": "Tired",
+                        "stressed": "Stressed"
+                    },
+                    "level": {
+                        "low": "Low",
+                        "medium": "Medium",
+                        "normal": "Normal",
+                        "moderate": "Moderate",
+                        "high": "High"
+                    },
+                    "studyLoad": {
+                        "light": "Light study",
+                        "normal": "Normal study",
+                        "heavy": "Heavy study"
+                    }
+                },
+                "actions": {
+                    "send": "Get AI advice"
+                },
+                "replyTitle": "AI recommendation"
+            },
+            "meal": {
+                "title": "AI meal formula",
+                "subtitle": "Generate meal formulas aligned with your health target and study rhythm.",
+                "form": {
+                    "ingredients": "Ingredients (comma or new line separated)",
+                    "servings": "Servings",
+                    "goal": "Meal goal",
+                    "dietaryPreference": "Dietary preference (optional)"
+                },
+                "options": {
+                    "goal": {
+                        "focusStudy": "Focus study day",
+                        "fatLoss": "Fat loss",
+                        "recovery": "Recovery day"
+                    }
+                },
+                "actions": {
+                    "generate": "Generate meal"
+                },
+                "resultTitle": "Suggested menu"
+            },
+            "sidebar": {
+                "fasting": "FASTING - EATING",
+                "water": "Water",
+                "weight": "Weight X to Y",
+                "weightRange": "{{start}}kg to {{target}}kg",
+                "currentWeight": "Current: {{current}}kg"
+            },
+            "defaults": {
+                "workoutType": "Walking",
+                "userName": "User"
+            },
+            "success": {
+                "savePlan": "Roadmap saved",
+                "saveLog": "Daily log updated",
+                "coachReply": "AI advice generated",
+                "mealReady": "Meal formula generated"
+            },
+            "errors": {
+                "loadDashboard": "Unable to load wellness dashboard",
+                "savePlan": "Unable to save roadmap",
+                "saveLog": "Unable to save log",
+                "loadTimeline": "Unable to load progress timeline",
+                "checkoutNotConfigured": "No wellness package is available for checkout.",
+                "createCheckout": "Unable to create checkout",
+                "packageRequired": "You need to purchase a package to use this feature.",
+                "moodCoach": "Unable to get AI advisor response",
+                "mealCoach": "Unable to generate meal formula",
+                "mealIngredients": "Enter at least one ingredient"
+            }
+        },
+        "admin": {
+            "title": "Wellness package settings",
+            "subtitle": "Manage standalone wellness packages and pricing from admin dashboard.",
+            "overview": {
+                "checkout": "Checkout CTA",
+                "totalPackages": "Total packages",
+                "activePackages": "Active packages",
+                "featuredPackages": "Featured packages",
+                "priceRange": "Price range"
+            },
+            "status": {
+                "ready": "Ready",
+                "needsConfig": "Needs config"
+            },
+            "warnings": {
+                "title": "Configuration warnings",
+                "noPackage": "No package configured yet.",
+                "noActivePackage": "No active package. Users cannot unlock wellness.",
+                "duplicateCode": "Duplicate package codes: {{codes}}",
+                "invalidPackage": "{{count}} package row(s) have missing code/name or invalid price/duration."
+            },
+            "actions": {
+                "addPackage": "Add package",
+                "save": "Save settings",
+                "saving": "Saving..."
+            },
+            "labels": {
+                "featured": "Featured"
+            },
+            "placeholders": {
+                "packageName": "Package name",
+                "packageDescription": "What users get from this package"
+            },
+            "table": {
+                "empty": "No package configured yet."
+            },
+            "success": {
+                "saved": "Wellness settings saved"
+            },
+            "errors": {
+                "loadFailed": "Unable to load wellness settings",
+                "saveFailed": "Unable to save wellness settings",
+                "invalidPackageData": "Please fix duplicate package codes and invalid package rows before saving."
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import OtpVerifyPage from './pages/auth/OtpVerifyPage';
+import PhoneOtpVerifyPage from './pages/auth/PhoneOtpVerifyPage';
 import AdminDashboardPage from './pages/admin/dashboard/AdminDashboardPage';
 import CoursesPage from './pages/admin/course/CoursesPage';
 import LessonsPage from './pages/admin/lesson/LessonsPage';
@@ -52,6 +53,7 @@ import AdminLessonCategoryEditorPage from './pages/admin/categories/AdminCategor
 import AdminWhyChooseUsPage from './pages/admin/why-choose-us/AdminWhyChooseUsPage';
 import AdminWhyChooseUsEditorPage from './pages/admin/why-choose-us/AdminWhyChooseUsEditorPage';
 import AdminAiSettingsPage from './pages/admin/ai/AdminAiSettingsPage';
+import AdminWellnessSettingsPage from './pages/admin/wellness/AdminWellnessSettingsPage';
 import ForumPage from './pages/ForumPage';
 import ForumCategoryPage from './pages/ForumCategoryPage';
 import ForumThreadPage from './pages/ForumThreadPage';
@@ -100,8 +102,16 @@ function App() {
                   element: <LoginPage />,
                 },
                 {
+                  path: 'login-phone',
+                  element: <Navigate to="/login" replace />,
+                },
+                {
                   path: 'register',
                   element: <RegisterPage />,
+                },
+                {
+                  path: 'register-phone',
+                  element: <Navigate to="/register" replace />,
                 },
                 {
                   path: 'forgot-password',
@@ -110,6 +120,10 @@ function App() {
                 {
                   path: 'otp-verify',
                   element: <OtpVerifyPage />,
+                },
+                {
+                  path: 'otp-verify-phone',
+                  element: <PhoneOtpVerifyPage />,
                 },
               ],
             },
@@ -567,6 +581,14 @@ function App() {
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
                   <AdminAiSettingsPage />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: 'admin/wellness-settings',
+              element: (
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminWellnessSettingsPage />
                 </ProtectedRoute>
               ),
             },

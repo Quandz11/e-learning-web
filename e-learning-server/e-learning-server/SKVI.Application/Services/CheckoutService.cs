@@ -61,36 +61,101 @@ public class CheckoutService : ICheckoutService
 
     public async Task<CheckoutResponse> CreateCheckoutAsync(Guid userId, CheckoutRequest request, CancellationToken cancellationToken = default)
     {
-        if (request.CourseIds == null || request.CourseIds.Count == 0)
+        var now = DateTime.UtcNow;
+        var hasCourseSelection = request.CourseIds is { Count: > 0 };
+        var wellnessPackageCode = NormalizeWellnessPackageCode(request.WellnessPackageCode);
+        var hasWellnessSelection = !string.IsNullOrWhiteSpace(wellnessPackageCode);
+
+        if (!hasCourseSelection && !hasWellnessSelection)
         {
-            throw new ArgumentException("CourseIds is required");
+            throw new ArgumentException("Either CourseIds or WellnessPackageCode is required.");
         }
 
-        var courseIds = ParseCourseIds(request.CourseIds);
-        if (courseIds.Count == 0)
+        if (hasCourseSelection && hasWellnessSelection)
         {
-            throw new ArgumentException("CourseIds is required");
+            throw new InvalidOperationException("Checkout cannot include course and wellness package in the same request.");
         }
 
-        var courses = await _context.Courses
-            .AsNoTracking()
-            .Where(c => courseIds.Contains(c.Id) && c.IsPublished)
-            .ToListAsync(cancellationToken);
+        var courses = new List<Course>();
+        var orderItems = new List<OrderItem>();
+        var payableOrderItems = new List<OrderItem>();
+        WellnessPackage? wellnessPackage = null;
+        decimal payableAmount;
+        bool requiresPayment;
 
-        if (courses.Count != courseIds.Count)
+        if (hasCourseSelection)
         {
-            throw new InvalidOperationException("One or more courses are not found or not published");
+            var courseIds = ParseCourseIds(request.CourseIds);
+            if (courseIds.Count == 0)
+            {
+                throw new ArgumentException("CourseIds is required");
+            }
+
+            courses = await _context.Courses
+                .AsNoTracking()
+                .Where(c => courseIds.Contains(c.Id) && c.IsPublished)
+                .ToListAsync(cancellationToken);
+
+            if (courses.Count != courseIds.Count)
+            {
+                throw new InvalidOperationException("One or more courses are not found or not published");
+            }
+
+            var alreadyEnrolledCourseIds = await _context.Enrollments
+                .AsNoTracking()
+                .Where(e => e.UserId == userId && e.Status == "ACTIVE" && courseIds.Contains(e.CourseId))
+                .Select(e => e.CourseId)
+                .ToListAsync(cancellationToken);
+
+            if (alreadyEnrolledCourseIds.Count > 0)
+            {
+                throw new InvalidOperationException("You already enrolled one or more selected courses.");
+            }
+
+            payableAmount = courses
+                .Where(c => !c.IsFree)
+                .Sum(c => c.Price);
+            requiresPayment = payableAmount > 0;
+
+            if (requiresPayment && payableAmount <= 0)
+            {
+                throw new InvalidOperationException("Selected paid courses are misconfigured. Please contact support.");
+            }
+
+            orderItems = courses
+                .Select(c => new OrderItem
+                {
+                    Id = Guid.NewGuid(),
+                    CourseId = c.Id,
+                    Price = c.IsFree ? 0 : c.Price
+                })
+                .ToList();
+
+            var courseLookup = courses.ToDictionary(c => c.Id, c => c);
+            payableOrderItems = orderItems
+                .Where(i => courseLookup.TryGetValue(i.CourseId, out var course) && !course.IsFree)
+                .ToList();
         }
-
-        var alreadyEnrolledCourseIds = await _context.Enrollments
-            .AsNoTracking()
-            .Where(e => e.UserId == userId && e.Status == "ACTIVE" && courseIds.Contains(e.CourseId))
-            .Select(e => e.CourseId)
-            .ToListAsync(cancellationToken);
-
-        if (alreadyEnrolledCourseIds.Count > 0)
+        else
         {
-            throw new InvalidOperationException("You already enrolled one or more selected courses.");
+            wellnessPackage = await _context.WellnessPackages
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    p => p.IsActive && p.Code == wellnessPackageCode,
+                    cancellationToken);
+
+            if (wellnessPackage == null)
+            {
+                throw new InvalidOperationException("Wellness package is not available.");
+            }
+
+            payableAmount = decimal.Round(wellnessPackage.PriceVnd, 0, MidpointRounding.AwayFromZero);
+            if (payableAmount < 0)
+            {
+                throw new InvalidOperationException("Wellness package price is invalid.");
+            }
+
+            requiresPayment = payableAmount > 0;
         }
 
         Cabin? cabin = null;
@@ -104,24 +169,14 @@ public class CheckoutService : ICheckoutService
             }
         }
 
-        var payableCourses = courses.Where(c => !c.IsFree).ToList();
-        var hasPaidCourse = payableCourses.Count > 0;
-        var payableAmount = payableCourses.Sum(c => c.Price);
-        var requiresPayment = hasPaidCourse;
-
-        if (requiresPayment && payableAmount <= 0)
-        {
-            throw new InvalidOperationException("Selected paid courses are misconfigured. Please contact support.");
-        }
-
         var paymentMethod = await EnsureVietQrPaymentMethodAsync(cancellationToken);
-        var now = DateTime.UtcNow;
 
         var order = new Order
         {
             Id = Guid.NewGuid(),
             BuyerId = userId,
             CabinId = cabin?.Id,
+            WellnessPackageId = wellnessPackage?.Id,
             TotalAmount = payableAmount,
             Status = OrderStatusPending,
             LastPaymentStatus = OrderStatusPending,
@@ -134,16 +189,10 @@ public class CheckoutService : ICheckoutService
             order.PayOSOrderCode = await GenerateUniquePayOSOrderCodeAsync(cancellationToken);
         }
 
-        var courseLookup = courses.ToDictionary(c => c.Id, c => c);
-        var orderItems = courses
-            .Select(c => new OrderItem
-            {
-                Id = Guid.NewGuid(),
-                OrderId = order.Id,
-                CourseId = c.Id,
-                Price = c.IsFree ? 0 : c.Price
-            })
-            .ToList();
+        foreach (var item in orderItems)
+        {
+            item.OrderId = order.Id;
+        }
 
         var paymentTransaction = new PaymentTransaction
         {
@@ -157,7 +206,10 @@ public class CheckoutService : ICheckoutService
         };
 
         _context.Orders.Add(order);
-        _context.OrderItems.AddRange(orderItems);
+        if (orderItems.Count > 0)
+        {
+            _context.OrderItems.AddRange(orderItems);
+        }
         _context.PaymentTransactions.Add(paymentTransaction);
 
         if (!requiresPayment)
@@ -169,7 +221,7 @@ public class CheckoutService : ICheckoutService
             await _context.SaveChangesAsync(cancellationToken);
             await CompletePaidOrderAsync(order.Id, cancellationToken);
 
-            return BuildCheckoutResponse(order, orderItems, courses, null, null, null, false, null);
+            return BuildCheckoutResponse(order, orderItems, courses, wellnessPackage, null, null, null, false, null);
         }
 
         var amountInt = ConvertVndAmount(payableAmount);
@@ -178,13 +230,34 @@ public class CheckoutService : ICheckoutService
         var cancelUrl = _payOSSettings.CancelUrl;
         var returnUrl = _payOSSettings.ReturnUrl;
         var expiredAtUnix = (int)new DateTimeOffset(order.ExpiresAt ?? now.AddMinutes(15)).ToUnixTimeSeconds();
-        var payableOrderItems = orderItems
-            .Where(i => courseLookup.TryGetValue(i.CourseId, out var course) && !course.IsFree)
-            .ToList();
 
-        if (payableOrderItems.Count == 0)
+        List<PayOSItemRequest> payOSItems;
+        if (wellnessPackage != null)
         {
-            throw new InvalidOperationException("No payable items found for payment request.");
+            payOSItems =
+            [
+                new PayOSItemRequest
+                {
+                    Name = NormalizePayOSItemName(wellnessPackage.Name, wellnessPackage.Id),
+                    Quantity = 1,
+                    Price = ConvertVndAmount(payableAmount)
+                }
+            ];
+        }
+        else
+        {
+            var courseLookup = courses.ToDictionary(c => c.Id, c => c);
+            if (payableOrderItems.Count == 0)
+            {
+                throw new InvalidOperationException("No payable items found for payment request.");
+            }
+
+            payOSItems = payableOrderItems.Select(i => new PayOSItemRequest
+            {
+                Name = NormalizePayOSItemName(courseLookup[i.CourseId].Title, i.CourseId),
+                Quantity = 1,
+                Price = ConvertVndAmount(i.Price)
+            }).ToList();
         }
 
         var createLinkRequest = new PayOSCreatePaymentLinkRequest
@@ -195,12 +268,7 @@ public class CheckoutService : ICheckoutService
             CancelUrl = cancelUrl,
             ReturnUrl = returnUrl,
             ExpiredAt = expiredAtUnix,
-            Items = payableOrderItems.Select(i => new PayOSItemRequest
-            {
-                Name = NormalizePayOSItemName(courseLookup[i.CourseId].Title, i.CourseId),
-                Quantity = 1,
-                Price = ConvertVndAmount(i.Price)
-            }).ToList()
+            Items = payOSItems
         };
 
         createLinkRequest.Signature = _payOSService.CreatePaymentRequestSignature(
@@ -220,7 +288,7 @@ public class CheckoutService : ICheckoutService
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return BuildCheckoutResponse(order, orderItems, courses, payOSData.CheckoutUrl, payOSData.QrCode, payOSData.PaymentLinkId, true, payOSData);
+            return BuildCheckoutResponse(order, orderItems, courses, wellnessPackage, payOSData.CheckoutUrl, payOSData.QrCode, payOSData.PaymentLinkId, true, payOSData);
         }
         catch (Exception ex)
         {
@@ -242,6 +310,7 @@ public class CheckoutService : ICheckoutService
             .AsNoTracking()
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Course)
+            .Include(o => o.WellnessPackage)
             .Where(o => o.BuyerId == userId)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
@@ -255,13 +324,7 @@ public class CheckoutService : ICheckoutService
             LastPaymentStatus = o.LastPaymentStatus,
             CreatedAt = o.CreatedAt,
             PaidAt = o.PaidAt,
-            Items = o.OrderItems.Select(oi => new CheckoutItemDto
-            {
-                CourseId = oi.CourseId.ToString(),
-                Title = oi.Course.Title,
-                Price = oi.Price,
-                IsFree = oi.Course.IsFree
-            }).ToList()
+            Items = BuildCheckoutItemsFromOrder(o)
         }).ToList();
     }
 
@@ -271,6 +334,7 @@ public class CheckoutService : ICheckoutService
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Course)
             .Include(o => o.PaymentTransactions)
+            .Include(o => o.WellnessPackage)
             .FirstOrDefaultAsync(o => o.Id == orderId && o.BuyerId == userId, cancellationToken);
 
         if (order == null)
@@ -292,6 +356,7 @@ public class CheckoutService : ICheckoutService
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Course)
             .Include(o => o.PaymentTransactions)
+            .Include(o => o.WellnessPackage)
             .FirstOrDefaultAsync(o => o.PayOSOrderCode == orderCode && o.BuyerId == userId, cancellationToken);
 
         if (order == null)
@@ -326,6 +391,7 @@ public class CheckoutService : ICheckoutService
                 .ThenInclude(oi => oi.Course)
             .Include(o => o.PaymentTransactions)
             .Include(o => o.Cabin)
+            .Include(o => o.WellnessPackage)
             .FirstOrDefaultAsync(o => o.PayOSOrderCode == orderCode, cancellationToken);
 
         if (order == null)
@@ -500,6 +566,7 @@ public class CheckoutService : ICheckoutService
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Course)
             .Include(o => o.Cabin)
+            .Include(o => o.WellnessPackage)
             .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
 
         if (order == null)
@@ -509,6 +576,41 @@ public class CheckoutService : ICheckoutService
 
         var userId = order.BuyerId;
         var now = DateTime.UtcNow;
+
+        if (order.WellnessPackageId.HasValue && order.WellnessPackage != null)
+        {
+            var purchaseToken = $"PURCHASE_ORDER:{order.Id:N}";
+            var assignmentExists = await _context.WellnessUserPackages
+                .AnyAsync(
+                    p => p.UserId == userId
+                         && p.PackageId == order.WellnessPackageId.Value
+                         && p.Source == "PURCHASE"
+                         && p.Notes == purchaseToken,
+                    cancellationToken);
+
+            if (!assignmentExists)
+            {
+                var startsAt = now;
+                var durationDays = Math.Clamp(order.WellnessPackage.DurationDays, 1, 3650);
+
+                _context.WellnessUserPackages.Add(new WellnessUserPackage
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    PackageId = order.WellnessPackageId.Value,
+                    Status = "ACTIVE",
+                    Source = "PURCHASE",
+                    GrantedByUserId = null,
+                    Notes = purchaseToken,
+                    GrantedAt = now,
+                    StartsAt = startsAt,
+                    ExpiresAt = startsAt.AddDays(durationDays),
+                    CreatedAt = now,
+                    UpdatedAt = now
+                });
+            }
+        }
+
         foreach (var item in order.OrderItems)
         {
             var defaultDurationDays = item.Course?.DefaultAccessDurationDays;
@@ -795,6 +897,30 @@ public class CheckoutService : ICheckoutService
         return parsed.Distinct().ToList();
     }
 
+    private static string? NormalizeWellnessPackageCode(string? rawCode)
+    {
+        if (string.IsNullOrWhiteSpace(rawCode))
+        {
+            return null;
+        }
+
+        var code = rawCode.Trim().ToUpperInvariant();
+        if (code.Length < 3 || code.Length > 32)
+        {
+            throw new ArgumentException("WellnessPackageCode is invalid.");
+        }
+
+        foreach (var character in code)
+        {
+            if (!char.IsLetterOrDigit(character) && character != '_')
+            {
+                throw new ArgumentException("WellnessPackageCode is invalid.");
+            }
+        }
+
+        return code;
+    }
+
     private static int ConvertVndAmount(decimal amount)
     {
         if (amount < 0)
@@ -901,6 +1027,7 @@ public class CheckoutService : ICheckoutService
         Order order,
         IEnumerable<OrderItem> orderItems,
         IEnumerable<Course> courses,
+        WellnessPackage? wellnessPackage,
         string? checkoutUrl,
         string? qrCode,
         string? paymentLinkId,
@@ -923,13 +1050,7 @@ public class CheckoutService : ICheckoutService
             PaymentInstruction = paymentInstruction,
             CreatedAt = order.CreatedAt,
             ExpiresAt = order.ExpiresAt,
-            Items = orderItems.Select(oi => new CheckoutItemDto
-            {
-                CourseId = oi.CourseId.ToString(),
-                Title = courseLookup.TryGetValue(oi.CourseId, out var mappedCourse) ? mappedCourse.Title : string.Empty,
-                Price = oi.Price,
-                IsFree = courseLookup.TryGetValue(oi.CourseId, out var mappedCourseForFree) ? mappedCourseForFree.IsFree : oi.Price <= 0
-            }).ToList()
+            Items = BuildCheckoutItems(orderItems, courseLookup, wellnessPackage)
         };
     }
 
@@ -966,14 +1087,50 @@ public class CheckoutService : ICheckoutService
             CheckoutUrl = checkoutUrl,
             QrCode = qrCode,
             PaymentInstruction = paymentInstruction,
-            Items = order.OrderItems.Select(oi => new CheckoutItemDto
+            Items = BuildCheckoutItemsFromOrder(order)
+        };
+    }
+
+    private static List<CheckoutItemDto> BuildCheckoutItemsFromOrder(Order order)
+    {
+        var courseLookup = order.OrderItems
+            .Where(oi => oi.Course != null)
+            .GroupBy(oi => oi.CourseId)
+            .ToDictionary(group => group.Key, group => group.First().Course);
+
+        return BuildCheckoutItems(order.OrderItems, courseLookup, order.WellnessPackage);
+    }
+
+    private static List<CheckoutItemDto> BuildCheckoutItems(
+        IEnumerable<OrderItem> orderItems,
+        IReadOnlyDictionary<Guid, Course> courseLookup,
+        WellnessPackage? wellnessPackage)
+    {
+        var items = orderItems.Select(oi => new CheckoutItemDto
             {
                 CourseId = oi.CourseId.ToString(),
-                Title = oi.Course.Title,
+                Title = courseLookup.TryGetValue(oi.CourseId, out var mappedCourse) ? mappedCourse.Title : string.Empty,
                 Price = oi.Price,
-                IsFree = oi.Course.IsFree
-            }).ToList()
-        };
+                IsFree = courseLookup.TryGetValue(oi.CourseId, out var mappedCourseForFree) ? mappedCourseForFree.IsFree : oi.Price <= 0,
+                ItemType = "COURSE",
+                WellnessPackageCode = null
+            })
+            .ToList();
+
+        if (wellnessPackage != null)
+        {
+            items.Add(new CheckoutItemDto
+            {
+                CourseId = $"WELLNESS:{wellnessPackage.Code}",
+                Title = wellnessPackage.Name,
+                Price = wellnessPackage.PriceVnd,
+                IsFree = wellnessPackage.PriceVnd <= 0,
+                ItemType = "WELLNESS",
+                WellnessPackageCode = wellnessPackage.Code
+            });
+        }
+
+        return items;
     }
 
     private static PaymentInstructionDto? BuildPaymentInstructionFromCreateData(PayOSCreatePaymentLinkData? payOSData, int? orderCode, decimal fallbackAmount)

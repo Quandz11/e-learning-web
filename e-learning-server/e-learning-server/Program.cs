@@ -24,12 +24,21 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.Configure<BunnySettings>(builder.Configuration.GetSection("BunnySettings"));
 builder.Services.Configure<PayOSSettings>(builder.Configuration.GetSection("PayOSSettings"));
+builder.Services.Configure<ZaloOtpSettings>(builder.Configuration.GetSection("ZaloOtpSettings"));
+builder.Services.Configure<WellnessSecuritySettings>(builder.Configuration.GetSection("WellnessSecuritySettings"));
 
 // Services
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPhoneAuthService, PhoneAuthService>();
+builder.Services.AddScoped<IWellnessService, WellnessService>();
+builder.Services.AddScoped<IWellnessAccessService, WellnessAccessService>();
+builder.Services.AddScoped<IWellnessSettingsService, WellnessSettingsService>();
+builder.Services.AddSingleton<IWellnessRateLimiter, WellnessRateLimiter>();
+builder.Services.AddScoped<IWellnessEncryptionService, WellnessEncryptionService>();
 builder.Services.AddScoped<IUserReferralService, UserReferralService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
@@ -79,6 +88,12 @@ builder.Services.AddHttpClient<IBunnyStreamService, BunnyStreamService>();
 builder.Services.AddHttpClient<IPayOSService, PayOSService>((sp, client) =>
 {
     var settings = sp.GetRequiredService<IOptions<PayOSSettings>>().Value;
+    client.BaseAddress = new Uri(settings.ApiBaseUrl.TrimEnd('/'));
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
+builder.Services.AddHttpClient<IPhoneOtpSender, ZaloOtpService>((sp, client) =>
+{
+    var settings = sp.GetRequiredService<IOptions<ZaloOtpSettings>>().Value;
     client.BaseAddress = new Uri(settings.ApiBaseUrl.TrimEnd('/'));
     client.Timeout = TimeSpan.FromSeconds(20);
 });

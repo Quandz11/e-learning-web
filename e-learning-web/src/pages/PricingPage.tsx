@@ -1,10 +1,38 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 const PricingPage: React.FC = () => {
     const { t } = useTranslation();
+    const location = useLocation();
     const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const wellnessPackageCode = (searchParams.get('wellnessPackage') || '').trim().toUpperCase();
+    const source = (searchParams.get('source') || '').trim().toLowerCase();
+    const isWellnessUpgradeContext = source === 'wellness' || Boolean(wellnessPackageCode);
+    const hasWellnessPackageSelection = Boolean(wellnessPackageCode);
+    const wellnessCheckoutPath = useMemo(() => {
+        const params = new URLSearchParams();
+        params.set('single', '1');
+        if (wellnessPackageCode) {
+            params.set('wellnessPackage', wellnessPackageCode);
+        }
+        params.set('source', 'wellness');
+        return `/checkout?${params.toString()}`;
+    }, [wellnessPackageCode]);
+    const highlightedActionPath = isWellnessUpgradeContext
+        ? hasWellnessPackageSelection
+            ? wellnessCheckoutPath
+            : '/wellness'
+        : '/courses';
+    const highlightedActionLabel = isWellnessUpgradeContext
+        ? hasWellnessPackageSelection
+            ? t('pricingPage.wellnessUpgrade.cta')
+            : t('pricingPage.wellnessUpgrade.chooseCta')
+        : t('pricingPage.table.cta2');
+    const wellnessPackageLabel = hasWellnessPackageSelection
+        ? wellnessPackageCode.replace(/_/g, ' ')
+        : t('pricingPage.wellnessUpgrade.defaultPackageLabel');
 
     const faqItems: { q: string; a: string }[] = t('pricingPage.faq.items', { returnObjects: true }) as { q: string; a: string }[];
 
@@ -21,6 +49,31 @@ const PricingPage: React.FC = () => {
                         {t('pricingPage.hero.subtitle')}
                     </p>
                 </div>
+
+                {isWellnessUpgradeContext && (
+                    <div className="mb-8 rounded-2xl border border-[#b2dfdb] bg-[#f1f8f6] p-6 shadow-sm dark:border-emerald-700/60 dark:bg-emerald-950/30">
+                        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#00796b] dark:text-emerald-300">
+                            {t('pricingPage.wellnessUpgrade.badge')}
+                        </p>
+                        <h2 className="mt-2 text-xl font-black text-[#004d40] dark:text-emerald-100">
+                            {t('pricingPage.wellnessUpgrade.title')}
+                        </h2>
+                        <p className="mt-2 text-sm text-[#205c53] dark:text-emerald-200/90">
+                            {t('pricingPage.wellnessUpgrade.description')}
+                        </p>
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                            <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-bold text-[#00695c] dark:bg-emerald-900/40 dark:text-emerald-100">
+                                {wellnessPackageLabel}
+                            </span>
+                            <Link
+                                to={wellnessCheckoutPath}
+                                className="inline-flex items-center rounded-full bg-[#e64a19] px-5 py-2 text-sm font-bold text-white shadow-md transition-all hover:bg-[#bf360c]"
+                            >
+                                {highlightedActionLabel}
+                            </Link>
+                        </div>
+                    </div>
+                )}
 
                 {/* Comparison Table */}
                 <div className="overflow-x-auto mb-8 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.1)] border border-[#e0e0e0]">
@@ -132,8 +185,8 @@ const PricingPage: React.FC = () => {
                                     </Link>
                                 </td>
                                 <td className="py-2 border-[3px] border-[#ffc107] bg-[#fffef7] dark:bg-slate-700">
-                                    <Link to="/courses" className="inline-block px-4 py-2 bg-[#e64a19] text-white rounded-full font-bold text-sm hover:bg-[#bf360c] transition-all shadow-md">
-                                        {t('pricingPage.table.cta2')}
+                                    <Link to={highlightedActionPath} className="inline-block px-4 py-2 bg-[#e64a19] text-white rounded-full font-bold text-sm hover:bg-[#bf360c] transition-all shadow-md">
+                                        {highlightedActionLabel}
                                     </Link>
                                 </td>
                                 <td className="py-2 border border-[#eee]">

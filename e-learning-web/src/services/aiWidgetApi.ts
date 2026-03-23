@@ -99,9 +99,24 @@ export interface DailyStudyCheckInPayload {
     needsSupport: boolean;
 }
 
+export interface AiRoadmapAccessState {
+    isUnlocked: boolean;
+    currentPackage?: string;
+    allowedPackages: string[];
+    requiredPackages: string[];
+    ctaPath: string;
+    reasonCode: string;
+    message: string;
+}
+
+export interface AiCoachStatus {
+    isEnabled: boolean;
+    access?: AiRoadmapAccessState;
+}
+
 export const aiWidgetApi = {
-    getStatus: async (): Promise<{ isEnabled: boolean }> => {
-        return await apiClient<{ isEnabled: boolean }>('/ai/settings/status', { method: 'GET' });
+    getStatus: async (): Promise<AiCoachStatus> => {
+        return await apiClient<AiCoachStatus>('/ai/settings/status', { method: 'GET' });
     },
 
     getDashboard: async (): Promise<StudyPlanDashboard> => {

@@ -2,6 +2,7 @@ import { apiClient } from './apiClient';
 
 export interface CheckoutRequest {
   courseIds: string[];
+  wellnessPackageCode?: string;
   referralCode?: string;
 }
 
@@ -18,6 +19,8 @@ export interface CheckoutItemDto {
   title: string;
   price: number;
   isFree: boolean;
+  itemType?: 'COURSE' | 'WELLNESS' | string;
+  wellnessPackageCode?: string;
 }
 
 export interface PaymentInstructionDto {

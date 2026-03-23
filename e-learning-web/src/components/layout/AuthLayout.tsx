@@ -1,11 +1,9 @@
-
 import { Outlet } from 'react-router-dom';
 import logoImg from '../../assets/logo-rm-bg.png';
 
 const AuthLayout = () => {
     return (
         <div className="flex min-h-screen w-full flex-col bg-background-light font-display text-[#1c1f22] dark:bg-background-dark dark:text-[#f9f7f6] lg:flex-row">
-            {/* Visual Panel (Left side) */}
             <div className="hidden lg:flex w-5/12 relative flex-col justify-end p-12 bg-primary overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img
@@ -17,7 +15,7 @@ const AuthLayout = () => {
                 </div>
                 <div className="relative z-10 text-white max-w-md">
                     <div className="flex items-center gap-2 mb-8">
-                        <img src={logoImg} alt="Logo" className="w-20 h-20 object-contain border-2 border-white shadow-sm bg-white"  />
+                        <img src={logoImg} alt="Logo" className="w-20 h-20 object-contain border-2 border-white shadow-sm bg-white" />
                         <span className="text-3xl font-bold tracking-tight">Nhinanchualanh.vn</span>
                     </div>
                     <p className="text-4xl font-bold leading-tight mb-6">Đánh thức bác sĩ tự thân trong cơ thể bạn.</p>
@@ -31,10 +29,8 @@ const AuthLayout = () => {
                 </div>
             </div>
 
-            {/* Form Panel (Right side) */}
             <div className="flex w-full flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-8 sm:px-6 sm:py-10 lg:w-7/12 lg:px-10 xl:px-12">
                 <div className="flex w-full max-w-md flex-col gap-6 sm:gap-8">
-                    {/* Mobile Branding */}
                     <div className="mb-2 flex justify-center sm:mb-4 lg:hidden">
                         <div className="flex items-center gap-2 text-primary dark:text-white">
                             <img src={logoImg} alt="Logo" className="h-12 w-12 border-2 border-primary object-contain shadow-sm sm:h-14 sm:w-14" />

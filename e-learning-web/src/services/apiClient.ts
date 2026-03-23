@@ -91,12 +91,14 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
 
         if (!response.ok) {
             let errorMessage = response.statusText;
+            let errorCode: string | undefined;
             let errors: Record<string, string[]> | undefined;
 
             try {
                 // Clone response because json() consumes it
                 const errorData = await response.clone().json();
                 errorMessage = errorData.message || errorMessage;
+                errorCode = errorData.code;
                 errors = errorData.errors;
             } catch (e) {
                 try {
@@ -107,7 +109,7 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
 
             // Import ApiError dynamically to avoid circular dependency
             const { ApiError } = await import('../types/apiErrors');
-            throw new ApiError(errorMessage, response.status, errors);
+            throw new ApiError(errorMessage, response.status, errors, errorCode);
         }
 
         if (response.status === 204) {

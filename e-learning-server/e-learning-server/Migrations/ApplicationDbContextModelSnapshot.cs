@@ -1212,6 +1212,9 @@ namespace e_learning_server.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid?>("WellnessPackageId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BuyerId");
@@ -1221,6 +1224,8 @@ namespace e_learning_server.Migrations
                     b.HasIndex("PayOSOrderCode")
                         .IsUnique()
                         .HasFilter("[PayOSOrderCode] IS NOT NULL");
+
+                    b.HasIndex("WellnessPackageId");
 
                     b.HasIndex("Status", "BuyerId");
 
@@ -1879,6 +1884,443 @@ namespace e_learning_server.Migrations
                     b.ToTable("Videos");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessCoachMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "CreatedAt");
+
+                    b.ToTable("WellnessCoachMessages");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessDailyLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AteAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("CurrentWeightKg")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<DateTime>("LogDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NotesEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WaterMl")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WorkoutMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WorkoutType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "LogDate")
+                        .IsUnique();
+
+                    b.ToTable("WellnessDailyLogs");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessInsight", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GeneratedBy")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTime>("InsightDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RisksEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SummaryEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TipEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "InsightDate")
+                        .IsUnique();
+
+                    b.ToTable("WellnessInsights");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessMealSuggestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IngredientsEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NutritionNotesEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Servings")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SuggestedMenuEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "CreatedAt");
+
+                    b.ToTable("WellnessMealSuggestions");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessPackage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<int>("DurationDays")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<decimal>("PriceVnd")
+                        .HasColumnType("decimal(18,0)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive", "SortOrder");
+
+                    b.ToTable("WellnessPackages");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DailyFastStartMinuteOfDay")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EatingHours")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FastingHours")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastInsightAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("LatestWeightKg")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<string>("PackageType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("StartWeightKg")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<decimal>("TargetWeightKg")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<string>("Timezone")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpgradeSuggestionLevel")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Status");
+
+                    b.ToTable("WellnessPlans");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessResource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ResourceType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<int>("RotationWeight")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceType", "IsActive");
+
+                    b.ToTable("WellnessResources");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessResourceAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AssignmentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("BreathingResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("MeditationResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SelectionStrategy")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
+
+                    b.Property<Guid>("WorkoutResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BreathingResourceId");
+
+                    b.HasIndex("MeditationResourceId");
+
+                    b.HasIndex("WorkoutResourceId");
+
+                    b.HasIndex("PlanId", "AssignmentDate")
+                        .IsUnique();
+
+                    b.ToTable("WellnessResourceAssignments");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CtaPath")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.ToTable("WellnessSettings");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessUserPackage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("GrantedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTime>("StartsAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GrantedByUserId");
+
+                    b.HasIndex("PackageId");
+
+                    b.HasIndex("UserId", "Status", "ExpiresAt");
+
+                    b.ToTable("WellnessUserPackages");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.WhyChooseUsItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2281,9 +2723,16 @@ namespace e_learning_server.Migrations
                         .HasForeignKey("CabinId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("SKVI.Domain.Entities.WellnessPackage", "WellnessPackage")
+                        .WithMany()
+                        .HasForeignKey("WellnessPackageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Buyer");
 
                     b.Navigation("Cabin");
+
+                    b.Navigation("WellnessPackage");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.OrderItem", b =>
@@ -2508,6 +2957,122 @@ namespace e_learning_server.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessCoachMessage", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.WellnessPlan", "Plan")
+                        .WithMany("CoachMessages")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessDailyLog", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.WellnessPlan", "Plan")
+                        .WithMany("DailyLogs")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessInsight", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.WellnessPlan", "Plan")
+                        .WithMany("Insights")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessMealSuggestion", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.WellnessPlan", "Plan")
+                        .WithMany("MealSuggestions")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessPlan", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessResourceAssignment", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.WellnessResource", "BreathingResource")
+                        .WithMany()
+                        .HasForeignKey("BreathingResourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.WellnessResource", "MeditationResource")
+                        .WithMany()
+                        .HasForeignKey("MeditationResourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.WellnessPlan", "Plan")
+                        .WithMany("ResourceAssignments")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.WellnessResource", "WorkoutResource")
+                        .WithMany()
+                        .HasForeignKey("WorkoutResourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BreathingResource");
+
+                    b.Navigation("MeditationResource");
+
+                    b.Navigation("Plan");
+
+                    b.Navigation("WorkoutResource");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessUserPackage", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.User", "GrantedByUser")
+                        .WithMany()
+                        .HasForeignKey("GrantedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SKVI.Domain.Entities.WellnessPackage", "Package")
+                        .WithMany("UserPackages")
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GrantedByUser");
+
+                    b.Navigation("Package");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.ArticleCategory", b =>
                 {
                     b.Navigation("Articles");
@@ -2650,6 +3215,24 @@ namespace e_learning_server.Migrations
             modelBuilder.Entity("SKVI.Domain.Entities.Video", b =>
                 {
                     b.Navigation("CourseLessons");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessPackage", b =>
+                {
+                    b.Navigation("UserPackages");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessPlan", b =>
+                {
+                    b.Navigation("CoachMessages");
+
+                    b.Navigation("DailyLogs");
+
+                    b.Navigation("Insights");
+
+                    b.Navigation("MealSuggestions");
+
+                    b.Navigation("ResourceAssignments");
                 });
 #pragma warning restore 612, 618
         }

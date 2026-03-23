@@ -12,6 +12,6 @@ public record PhoneRegisterOtpVerifyRequest(string Phone, string Otp);
 
 public record PhoneRegisterResendOtpRequest(string Phone);
 
-public record PhoneLoginOtpRequest(string Phone);
+public record PhoneForgotPasswordOtpRequest(string Phone);
 
-public record PhoneLoginOtpVerifyRequest(string Phone, string Otp);
+public record PhoneForgotPasswordOtpVerifyRequest(string Phone, string Otp, string NewPassword);

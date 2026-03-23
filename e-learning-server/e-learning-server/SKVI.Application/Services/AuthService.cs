@@ -5,6 +5,7 @@ using SKVI.Domain.Entities;
 using SKVI.Infrastructure;
 using SKVI.Infrastructure.Security; // For JwtSettings access if needed directly, but mostly config in Program.cs
 using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 
 namespace SKVI.Application.Services;
 
@@ -36,11 +37,22 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, string ipAddress, string userAgent)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-        
+        var identifier = request.Email?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(identifier))
+        {
+            throw new UnauthorizedAccessException("Invalid credentials.");
+        }
+        if (string.IsNullOrWhiteSpace(request.Password))
+        {
+            throw new UnauthorizedAccessException("Invalid credentials.");
+        }
+
+        var isPhoneLogin = IsPhoneIdentifier(identifier);
+        var user = await FindUserForLoginAsync(identifier, isPhoneLogin);
+
         if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid email or password.");
+            throw new UnauthorizedAccessException("Invalid credentials.");
         }
 
         if (user.IsDeleted)
@@ -48,10 +60,14 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Account is deleted.");
         }
 
-        if (!user.IsEmailVerified)
+        if (!user.IsEmailVerified && !user.IsPhoneVerified)
         {
-             // Or check Status == "PENDING"
-             throw new UnauthorizedAccessException("Account is not verified. Please check your email for OTP.");
+            throw new UnauthorizedAccessException("Account is not verified. Please complete OTP verification.");
+        }
+
+        if (isPhoneLogin && !user.IsPhoneVerified)
+        {
+            throw new UnauthorizedAccessException("Phone number is not verified.");
         }
 
         if (user.Status != "ACTIVE")
@@ -89,6 +105,61 @@ public class AuthService : IAuthService
         }
 
         return await GenerateTokensForUser(user, ipAddress, userAgent);
+    }
+
+    private async Task<User?> FindUserForLoginAsync(string identifier, bool isPhoneLogin)
+    {
+        if (!isPhoneLogin)
+        {
+            var normalizedEmail = identifier.Trim().ToLowerInvariant();
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+        }
+
+        var normalizedPhone = NormalizePhone(identifier);
+        var users = await _context.Users
+            .Where(u => u.Phone == normalizedPhone && !u.IsDeleted)
+            .OrderByDescending(u => u.CreatedAt)
+            .ToListAsync();
+
+        if (users.Count <= 1)
+        {
+            return users.SingleOrDefault();
+        }
+
+        throw new UnauthorizedAccessException("Phone number is linked to multiple accounts. Please contact support.");
+    }
+
+    private static bool IsPhoneIdentifier(string identifier)
+    {
+        if (string.IsNullOrWhiteSpace(identifier))
+        {
+            return false;
+        }
+
+        var normalized = Regex.Replace(identifier.Trim(), @"[\s\-\.\(\)]", string.Empty);
+        if (normalized.StartsWith("+", StringComparison.Ordinal))
+        {
+            normalized = normalized[1..];
+        }
+
+        return Regex.IsMatch(normalized, @"^\d{9,15}$");
+    }
+
+    private static string NormalizePhone(string phone)
+    {
+        var normalized = Regex.Replace(phone.Trim(), @"[\s\-\.\(\)]", string.Empty);
+
+        if (normalized.StartsWith("+", StringComparison.Ordinal))
+        {
+            normalized = normalized[1..];
+        }
+
+        if (normalized.StartsWith("0", StringComparison.Ordinal))
+        {
+            normalized = "84" + normalized[1..];
+        }
+
+        return normalized;
     }
 
     public async Task RegisterAsync(RegisterRequest request)

@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SKVI.Application.DTOs.Auth;
@@ -44,7 +44,7 @@ public class PhoneAuthService : IPhoneAuthService
         var existingByPhone = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
         if (existingByPhone != null)
         {
-            throw new InvalidOperationException("Số điện thoại đã được đăng ký.");
+            throw new InvalidOperationException("Phone number is already registered.");
         }
 
         var hasExplicitEmail = !string.IsNullOrWhiteSpace(request.Email);
@@ -59,7 +59,7 @@ public class PhoneAuthService : IPhoneAuthService
 
             if (emailExists)
             {
-                throw new InvalidOperationException("Email đã tồn tại.");
+                throw new InvalidOperationException("Email already exists.");
             }
         }
 
@@ -116,12 +116,12 @@ public class PhoneAuthService : IPhoneAuthService
         var user = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
         if (user == null)
         {
-            throw new UnauthorizedAccessException("Số điện thoại không tồn tại.");
+            throw new UnauthorizedAccessException("Phone number does not exist.");
         }
 
         if (user.IsDeleted)
         {
-            throw new UnauthorizedAccessException("Tài khoản đã bị xóa.");
+            throw new UnauthorizedAccessException("Account has been deleted.");
         }
 
         if (user.Status == "ACTIVE" && user.IsPhoneVerified)
@@ -152,17 +152,17 @@ public class PhoneAuthService : IPhoneAuthService
         var user = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
         if (user == null)
         {
-            throw new UnauthorizedAccessException("Số điện thoại không tồn tại.");
+            throw new UnauthorizedAccessException("Phone number does not exist.");
         }
 
         if (user.IsDeleted)
         {
-            throw new UnauthorizedAccessException("Tài khoản đã bị xóa.");
+            throw new UnauthorizedAccessException("Account has been deleted.");
         }
 
         if (user.Status == "ACTIVE" && user.IsPhoneVerified)
         {
-            throw new InvalidOperationException("Số điện thoại đã được xác minh.");
+            throw new InvalidOperationException("Phone number is already verified.");
         }
 
         var otp = GenerateOtp();
@@ -182,46 +182,8 @@ public class PhoneAuthService : IPhoneAuthService
         );
     }
 
-    public async Task RequestPhoneLoginOtpAsync(PhoneLoginOtpRequest request, CancellationToken cancellationToken = default)
-    {
-        var normalizedPhone = NormalizePhone(request.Phone);
-        var user = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException("Số điện thoại không tồn tại.");
-        }
-
-        if (user.IsDeleted)
-        {
-            throw new UnauthorizedAccessException("Tài khoản đã bị xóa.");
-        }
-
-        if (user.Status != "ACTIVE")
-        {
-            throw new UnauthorizedAccessException("Tài khoản chưa sẵn sàng để đăng nhập.");
-        }
-
-        var otp = GenerateOtp();
-        user.OtpCode = otp;
-        user.OtpExpiration = DateTime.UtcNow.AddMinutes(OtpExpirationMinutes);
-        user.UpdatedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync(cancellationToken);
-
-        var trackingId = BuildTrackingId("login", user.Id);
-        await _phoneOtpSender.SendOtpAsync(
-            normalizedPhone,
-            otp,
-            "login",
-            trackingId,
-            cancellationToken
-        );
-    }
-
-    public async Task<AuthResponse> VerifyPhoneLoginOtpAsync(
-        PhoneLoginOtpVerifyRequest request,
-        string ipAddress,
-        string userAgent,
+    public async Task RequestPhoneForgotPasswordOtpAsync(
+        PhoneForgotPasswordOtpRequest request,
         CancellationToken cancellationToken = default
     )
     {
@@ -239,36 +201,114 @@ public class PhoneAuthService : IPhoneAuthService
 
         if (user.Status != "ACTIVE")
         {
-            throw new UnauthorizedAccessException("Tài khoản chưa active.");
+            throw new UnauthorizedAccessException("Tài khoản chưa sẵn sàng để khởi tạo lại mật khẩu.");
+        }
+
+        var otp = GenerateOtp();
+        user.OtpCode = otp;
+        user.OtpExpiration = DateTime.UtcNow.AddMinutes(OtpExpirationMinutes);
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var trackingId = BuildTrackingId("forgot_password", user.Id);
+        await _phoneOtpSender.SendOtpAsync(
+            normalizedPhone,
+            otp,
+            "forgot_password",
+            trackingId,
+            cancellationToken
+        );
+    }
+
+    public async Task ResendPhoneForgotPasswordOtpAsync(
+        PhoneForgotPasswordOtpRequest request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var normalizedPhone = NormalizePhone(request.Phone);
+        var user = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Số điện thoại không tồn tại.");
+        }
+
+        if (user.IsDeleted)
+        {
+            throw new UnauthorizedAccessException("Tài khoản đã bị xóa.");
+        }
+
+        if (user.Status != "ACTIVE")
+        {
+            throw new UnauthorizedAccessException("Tài khoản chưa sẵn sàng để khởi tạo lại mật khẩu.");
+        }
+
+        var otp = GenerateOtp();
+        user.OtpCode = otp;
+        user.OtpExpiration = DateTime.UtcNow.AddMinutes(OtpExpirationMinutes);
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var trackingId = BuildTrackingId("resend_forgot_password", user.Id);
+        await _phoneOtpSender.SendOtpAsync(
+            normalizedPhone,
+            otp,
+            "forgot_password",
+            trackingId,
+            cancellationToken
+        );
+    }
+
+    public async Task VerifyPhoneForgotPasswordOtpAsync(
+        PhoneForgotPasswordOtpVerifyRequest request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var normalizedPhone = NormalizePhone(request.Phone);
+        var user = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Số điện thoại không tồn tại.");
+        }
+
+        if (user.IsDeleted)
+        {
+            throw new UnauthorizedAccessException("Tài khoản đã bị xóa.");
+        }
+
+        if (user.Status != "ACTIVE")
+        {
+            throw new UnauthorizedAccessException("Tài khoản chưa sẵn sàng để khởi tạo lại mật khẩu.");
         }
 
         ValidateOtp(user, request.Otp);
+        ValidatePassword(request.NewPassword);
 
+        user.PasswordHash = _passwordHasher.HashPassword(request.NewPassword.Trim());
         user.IsPhoneVerified = true;
         user.OtpCode = null;
         user.OtpExpiration = null;
         user.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
-
-        return await GenerateTokensForUserAsync(user, ipAddress, userAgent, cancellationToken);
     }
 
     private static void ValidateOtp(User user, string otp)
     {
         if (string.IsNullOrWhiteSpace(user.OtpCode) || user.OtpExpiration == null)
         {
-            throw new UnauthorizedAccessException("OTP không tồn tại hoặc đã hết hạn.");
+            throw new UnauthorizedAccessException("OTP does not exist or has expired.");
         }
 
         if (!string.Equals(user.OtpCode, otp, StringComparison.Ordinal))
         {
-            throw new UnauthorizedAccessException("OTP không hợp lệ.");
+            throw new UnauthorizedAccessException("OTP is invalid.");
         }
 
         if (user.OtpExpiration.Value < DateTime.UtcNow)
         {
-            throw new UnauthorizedAccessException("OTP đã hết hạn.");
+            throw new UnauthorizedAccessException("OTP has expired.");
         }
     }
 
@@ -284,7 +324,7 @@ public class PhoneAuthService : IPhoneAuthService
             return users.SingleOrDefault();
         }
 
-        throw new InvalidOperationException("Số điện thoại đang gắn với nhiều tài khoản. Vui lòng liên hệ hỗ trợ.");
+        throw new InvalidOperationException("Phone number is linked to multiple accounts. Please contact support.");
     }
 
     private async Task<AuthResponse> GenerateTokensForUserAsync(
@@ -328,11 +368,19 @@ public class PhoneAuthService : IPhoneAuthService
         return $"{purpose}_{userId:N}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
     }
 
+    private static void ValidatePassword(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password) || password.Trim().Length < 8)
+        {
+            throw new InvalidOperationException("Mật khẩu phải có ít nhất 8 ký tự.");
+        }
+    }
+
     private static string NormalizePhone(string phone)
     {
         if (string.IsNullOrWhiteSpace(phone))
         {
-            throw new InvalidOperationException("Số điện thoại là bắt buộc.");
+            throw new InvalidOperationException("Phone number is required.");
         }
 
         var normalized = Regex.Replace(phone.Trim(), @"[\s\-\.\(\)]", string.Empty);
@@ -349,9 +397,10 @@ public class PhoneAuthService : IPhoneAuthService
 
         if (!Regex.IsMatch(normalized, @"^\d{9,15}$"))
         {
-            throw new InvalidOperationException("Số điện thoại không đúng định dạng.");
+            throw new InvalidOperationException("Phone number format is invalid.");
         }
 
         return normalized;
     }
 }
+

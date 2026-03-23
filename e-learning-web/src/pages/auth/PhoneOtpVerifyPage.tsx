@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../store/store';
@@ -8,7 +8,7 @@ import { profileApi } from '../../services/profileApi';
 import { saveAuth } from '../../services/authStorage';
 import { phoneAuthApi } from '../../services/phoneAuthApi';
 
-type PhoneOtpMode = 'register' | 'login';
+type PhoneOtpMode = 'register' | 'forgotPassword';
 
 const PhoneOtpVerifyPage = () => {
   const location = useLocation();
@@ -16,7 +16,7 @@ const PhoneOtpVerifyPage = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const phone: string | undefined = location.state?.phone;
-  const mode: PhoneOtpMode = location.state?.mode === 'register' ? 'register' : 'login';
+  const mode: PhoneOtpMode = location.state?.mode === 'forgotPassword' ? 'forgotPassword' : 'register';
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -26,6 +26,8 @@ const PhoneOtpVerifyPage = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(600);
   const [canResend, setCanResend] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   const syncProfile = async () => {
     try {
@@ -47,7 +49,7 @@ const PhoneOtpVerifyPage = () => {
 
   useEffect(() => {
     if (!phone) {
-      navigate(mode === 'register' ? '/register' : '/login', { replace: true });
+      navigate(mode === 'register' ? '/register' : '/forgot-password', { replace: true });
     }
   }, [phone, mode, navigate]);
 
@@ -151,16 +153,31 @@ const PhoneOtpVerifyPage = () => {
 
     if (!phone) return;
 
+    if (mode === 'forgotPassword') {
+      if (!newPassword.trim() || newPassword.trim().length < 8) {
+        setError('Mật khẩu mới phải có ít nhất 8 ký tự.');
+        return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        setError('Mật khẩu xác nhận không khớp.');
+        return;
+      }
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      const response =
-        mode === 'register'
-          ? await phoneAuthApi.verifyRegisterOtp(phone, otpCode)
-          : await phoneAuthApi.verifyLoginOtp(phone, otpCode);
-
-      await finishLogin(response.accessToken, response.expiresAt);
+      if (mode === 'register') {
+        const response = await phoneAuthApi.verifyRegisterOtp(phone, otpCode);
+        await finishLogin(response.accessToken, response.expiresAt);
+      } else {
+        await phoneAuthApi.verifyForgotPasswordOtp(phone, otpCode, newPassword.trim());
+        setSuccessMessage('Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.');
+        setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 900);
+      }
     } catch (err: any) {
       setError(err?.message || 'OTP không hợp lệ hoặc đã hết hạn.');
     } finally {
@@ -179,7 +196,7 @@ const PhoneOtpVerifyPage = () => {
       if (mode === 'register') {
         await phoneAuthApi.resendRegisterOtp(phone);
       } else {
-        await phoneAuthApi.requestLoginOtp(phone);
+        await phoneAuthApi.resendForgotPasswordOtp(phone);
       }
 
       setCountdown(600);
@@ -206,11 +223,10 @@ const PhoneOtpVerifyPage = () => {
           <span className="material-symbols-outlined text-primary text-2xl">phone_iphone</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-          Xác minh số điện thoại
+          {mode === 'register' ? 'Xác minh số điện thoại' : 'Xác minh OTP quên mật khẩu'}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-sm">
-          Mã OTP đã được gửi tới <span className="font-medium text-gray-900 dark:text-gray-200">{maskPhone(phone)}</span>
-          {' '}qua Zalo.
+          Mã OTP đã được gửi tới <span className="font-medium text-gray-900 dark:text-gray-200">{maskPhone(phone)}</span> qua Zalo.
         </p>
       </div>
 
@@ -246,16 +262,55 @@ const PhoneOtpVerifyPage = () => {
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 disabled={isLoading}
               />
-              {index === 2 && (
-                <div className="flex items-center justify-center text-gray-300 dark:text-gray-600">-</div>
-              )}
+              {index === 2 && <div className="flex items-center justify-center text-gray-300 dark:text-gray-600">-</div>}
             </React.Fragment>
           ))}
         </div>
 
+        {mode === 'forgotPassword' && (
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300" htmlFor="newPassword">
+                Mật khẩu mới
+              </label>
+              <input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-white"
+                placeholder="Tối thiểu 8 ký tự"
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300" htmlFor="confirmNewPassword">
+                Xác nhận mật khẩu mới
+              </label>
+              <input
+                id="confirmNewPassword"
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-white"
+                placeholder="Nhập lại mật khẩu mới"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col items-center gap-2">
-          <div className={`flex items-center gap-2 text-sm font-medium py-2 px-4 rounded-full border ${countdown > 0 ? 'text-gray-500 dark:text-gray-400 bg-background-light dark:bg-gray-800/50 border-transparent dark:border-gray-700' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'}`}>
-            <span className="material-symbols-outlined text-lg" style={{ fontSize: '18px' }}>timer</span>
+          <div
+            className={`flex items-center gap-2 text-sm font-medium py-2 px-4 rounded-full border ${
+              countdown > 0
+                ? 'text-gray-500 dark:text-gray-400 bg-background-light dark:bg-gray-800/50 border-transparent dark:border-gray-700'
+                : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg" style={{ fontSize: '18px' }}>
+              timer
+            </span>
             <span className="font-mono">{formatCountdown()}</span>
           </div>
 
@@ -285,7 +340,7 @@ const PhoneOtpVerifyPage = () => {
               </>
             ) : (
               <>
-                <span>Xác minh và đăng nhập</span>
+                <span>{mode === 'register' ? 'Xác minh và đăng nhập' : 'Xác minh và đặt lại mật khẩu'}</span>
                 <span className="material-symbols-outlined text-lg group-hover:translate-x-0.5 transition-transform">
                   arrow_forward
                 </span>
@@ -295,7 +350,7 @@ const PhoneOtpVerifyPage = () => {
 
           <Link
             className="text-sm text-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors flex items-center justify-center gap-1 group"
-            to={mode === 'register' ? '/register' : '/login'}
+            to={mode === 'register' ? '/register' : '/forgot-password'}
           >
             <span className="material-symbols-outlined text-base group-hover:-translate-x-0.5 transition-transform">
               arrow_back

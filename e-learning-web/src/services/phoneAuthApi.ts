@@ -70,8 +70,8 @@ class PhoneAuthApi {
     return response.json();
   }
 
-  async requestLoginOtp(phone: string): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/phone/request-login-otp`, {
+  async requestForgotPasswordOtp(phone: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/phone/request-forgot-password-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -81,25 +81,41 @@ class PhoneAuthApi {
 
     if (!response.ok) {
       const error = await response.json().catch(() => null);
-      throw new Error(extractErrorMessage(error, 'Request login OTP failed'));
+      throw new Error(extractErrorMessage(error, 'Request forgot-password OTP failed'));
     }
 
     return response.json();
   }
 
-  async verifyLoginOtp(phone: string, otp: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/phone/verify-login-otp`, {
+  async resendForgotPasswordOtp(phone: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/phone/resend-forgot-password-otp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
-      body: JSON.stringify({ phone, otp }),
+      body: JSON.stringify({ phone }),
     });
 
     if (!response.ok) {
       const error = await response.json().catch(() => null);
-      throw new Error(extractErrorMessage(error, 'Verify login OTP failed'));
+      throw new Error(extractErrorMessage(error, 'Resend forgot-password OTP failed'));
+    }
+
+    return response.json();
+  }
+
+  async verifyForgotPasswordOtp(phone: string, otp: string, newPassword: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/phone/verify-forgot-password-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ phone, otp, newPassword }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      throw new Error(extractErrorMessage(error, 'Verify forgot-password OTP failed'));
     }
 
     return response.json();

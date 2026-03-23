@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SKVI.Application.DTOs.Auth;
 using SKVI.Application.Interfaces;
 
@@ -23,7 +23,7 @@ public class PhoneAuthController : ControllerBase
         try
         {
             await _phoneAuthService.RegisterByPhoneAsync(request);
-            return Ok(new { message = "Đăng ký thành công. Vui lòng nhập OTP đã gửi qua Zalo." });
+            return Ok(new { message = "Phone registration successful. Please enter the OTP sent via Zalo." });
         }
         catch (InvalidOperationException ex)
         {
@@ -46,7 +46,7 @@ public class PhoneAuthController : ControllerBase
             {
                 accessToken = response.AccessToken,
                 expiresAt = response.ExpiresAt,
-                message = "Xác minh số điện thoại thành công."
+                message = "Phone number verified successfully."
             });
         }
         catch (UnauthorizedAccessException ex)
@@ -65,7 +65,24 @@ public class PhoneAuthController : ControllerBase
         try
         {
             await _phoneAuthService.ResendPhoneRegistrationOtpAsync(request);
-            return Ok(new { message = "Đã gửi lại OTP qua Zalo." });
+            return Ok(new { message = "OTP has been resent via Zalo." });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+    [HttpPost("request-forgot-password-otp")]
+    public async Task<IActionResult> RequestForgotPasswordOtp([FromBody] PhoneForgotPasswordOtpRequest request)
+    {
+        try
+        {
+            await _phoneAuthService.RequestPhoneForgotPasswordOtpAsync(request);
+            return Ok(new { message = "Đã gửi OTP quên mật khẩu qua Zalo." });
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -77,13 +94,13 @@ public class PhoneAuthController : ControllerBase
         }
     }
 
-    [HttpPost("request-login-otp")]
-    public async Task<IActionResult> RequestLoginOtp([FromBody] PhoneLoginOtpRequest request)
+    [HttpPost("resend-forgot-password-otp")]
+    public async Task<IActionResult> ResendForgotPasswordOtp([FromBody] PhoneForgotPasswordOtpRequest request)
     {
         try
         {
-            await _phoneAuthService.RequestPhoneLoginOtpAsync(request);
-            return Ok(new { message = "OTP đăng nhập đã được gửi qua Zalo." });
+            await _phoneAuthService.ResendPhoneForgotPasswordOtpAsync(request);
+            return Ok(new { message = "Đã gửi lại OTP quên mật khẩu qua Zalo." });
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -95,22 +112,13 @@ public class PhoneAuthController : ControllerBase
         }
     }
 
-    [HttpPost("verify-login-otp")]
-    public async Task<IActionResult> VerifyLoginOtp([FromBody] PhoneLoginOtpVerifyRequest request)
+    [HttpPost("verify-forgot-password-otp")]
+    public async Task<IActionResult> VerifyForgotPasswordOtp([FromBody] PhoneForgotPasswordOtpVerifyRequest request)
     {
         try
         {
-            var ipAddress = GetClientIpAddress();
-            var userAgent = Request.Headers.UserAgent.ToString();
-
-            var response = await _phoneAuthService.VerifyPhoneLoginOtpAsync(request, ipAddress, userAgent);
-            SetRefreshTokenCookie(response.RefreshToken);
-
-            return Ok(new
-            {
-                accessToken = response.AccessToken,
-                expiresAt = response.ExpiresAt
-            });
+            await _phoneAuthService.VerifyPhoneForgotPasswordOtpAsync(request);
+            return Ok(new { message = "Mật khẩu đã được cập nhật thành công." });
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -122,7 +130,7 @@ public class PhoneAuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Phone login OTP verification failed.");
+            _logger.LogError(ex, "Phone forgot-password OTP verification failed.");
             return BadRequest(new { message = "Không thể xác minh OTP ở thời điểm hiện tại." });
         }
     }
@@ -161,3 +169,4 @@ public class PhoneAuthController : ControllerBase
         return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
     }
 }
+

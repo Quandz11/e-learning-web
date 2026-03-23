@@ -18,12 +18,18 @@ public interface IPhoneAuthService
         CancellationToken cancellationToken = default
     );
 
-    Task RequestPhoneLoginOtpAsync(PhoneLoginOtpRequest request, CancellationToken cancellationToken = default);
+    Task RequestPhoneForgotPasswordOtpAsync(
+        PhoneForgotPasswordOtpRequest request,
+        CancellationToken cancellationToken = default
+    );
 
-    Task<AuthResponse> VerifyPhoneLoginOtpAsync(
-        PhoneLoginOtpVerifyRequest request,
-        string ipAddress,
-        string userAgent,
+    Task ResendPhoneForgotPasswordOtpAsync(
+        PhoneForgotPasswordOtpRequest request,
+        CancellationToken cancellationToken = default
+    );
+
+    Task VerifyPhoneForgotPasswordOtpAsync(
+        PhoneForgotPasswordOtpVerifyRequest request,
         CancellationToken cancellationToken = default
     );
 }

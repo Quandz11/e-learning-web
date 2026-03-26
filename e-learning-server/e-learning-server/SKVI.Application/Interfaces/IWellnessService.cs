@@ -12,7 +12,7 @@ public interface IWellnessService
     Task<WellnessCoachReplyDto> AskMoodCoachAsync(Guid userId, Guid planId, WellnessCoachMoodRequest request, CancellationToken cancellationToken = default);
     Task<WellnessMealSuggestionDto> GenerateMealSuggestionAsync(Guid userId, Guid planId, WellnessCoachMealRequest request, CancellationToken cancellationToken = default);
     Task<WellnessWeightProgressDto> GetWeightProgressAsync(Guid userId, Guid planId, CancellationToken cancellationToken = default);
-    Task<WellnessProgressTimelineDto> GetProgressTimelineAsync(Guid userId, Guid planId, int days = 30, CancellationToken cancellationToken = default);
+    Task<WellnessProgressTimelineDto> GetProgressTimelineAsync(Guid userId, Guid planId, int days = 30, bool includeFuture = false, CancellationToken cancellationToken = default);
 
     Task<List<WellnessResourceItemDto>> GetResourcesAsync(CancellationToken cancellationToken = default);
     Task<WellnessResourceItemDto> CreateResourceAsync(Guid actorUserId, WellnessResourceUpsertRequest request, CancellationToken cancellationToken = default);

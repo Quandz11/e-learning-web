@@ -187,6 +187,9 @@ public class WellnessPlanDto
     public string Status { get; set; } = string.Empty;
     public int TotalDays { get; set; }
     public int ElapsedDays { get; set; }
+    public int PreparationDays { get; set; }
+    public int FastingDays { get; set; }
+    public int RefeedDays { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -271,6 +274,9 @@ public class WellnessProgressTimelineItemDto
     public int WorkoutMinutes { get; set; }
     public string WorkoutType { get; set; } = string.Empty;
     public bool HasCheckin { get; set; }
+    public string Phase { get; set; } = string.Empty;
+    public int PhaseDayIndex { get; set; }
+    public int PhaseTotalDays { get; set; }
 }
 
 public class WellnessProgressTimelineDto

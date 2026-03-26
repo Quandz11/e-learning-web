@@ -2439,20 +2439,35 @@
             },
             "timeline": {
                 "title": "Tiến trình theo thời gian",
-                "subtitle": "Theo dõi nước uống, vận động và cân nặng theo từng ngày.",
+                "subtitle": "Theo dõi giai đoạn kế hoạch và các log sức khỏe theo từng ngày.",
                 "range": "Từ {{from}} đến {{to}}",
                 "days": "{{days}} ngày",
                 "loading": "Đang tải dữ liệu tiến trình...",
                 "empty": "Chưa có log trong khoảng thời gian này.",
                 "tooltip": "{{date}} - Nước: {{water}}ml, Vận động: {{workout}} phút",
+                "modes": {
+                    "history": "Quá khứ & hôm nay",
+                    "future": "Tương lai"
+                },
                 "metrics": {
                     "loggedDays": "Ngày đã log",
                     "avgWater": "Nước trung bình",
                     "totalWorkout": "Tổng vận động",
-                    "latestWeight": "Cân nặng gần nhất"
+                    "latestWeight": "Cân nặng gần nhất",
+                    "phase": "Giai đoạn"
+                },
+                "phases": {
+                    "prepare": "Chuẩn bị {{days}} ngày",
+                    "fasting": "Nhịn {{days}} ngày",
+                    "refeed": "Ăn lại {{days}} ngày",
+                    "prepareLabel": "Chuẩn bị",
+                    "fastingLabel": "Nhịn",
+                    "refeedLabel": "Ăn lại",
+                    "dayProgress": "Ngày {{day}}/{{total}}"
                 }
             },
             "form": {
+                "package": "Gói",
                 "startDate": "Ngày bắt đầu",
                 "endDate": "Ngày kết thúc",
                 "fastingHours": "Số giờ nhịn",
@@ -2463,18 +2478,60 @@
                 "timezone": "Múi giờ"
             },
             "actions": {
-                "savePlan": "Lưu lộ trình",
-                "upgrade": "Nâng cấp thanh toán",
-                "saveLog": "Lưu log ngày hôm nay"
+                "savePlan": "L\u01b0u l\u1ed9 tr\u00ecnh",
+                "upgrade": "N\u00e2ng c\u1ea5p thanh to\u00e1n",
+                "saveLog": "L\u01b0u log ng\u00e0y h\u00f4m nay"
+            },
+            "flow": {
+                "title": "Lu\u1ed3ng thao t\u00e1c \u0111\u1ec1 xu\u1ea5t",
+                "subtitle": "Thi\u1ebft l\u1eadp tr\u01b0\u1edbc, check-in m\u1ed7i ng\u00e0y, xem ti\u1ebfn \u0111\u1ed9 r\u1ed3i m\u1edbi d\u00f9ng AI \u0111\u1ec3 t\u1ed1i \u01b0u c\u00e1 nh\u00e2n.",
+                "plan": {
+                    "title": "Thi\u1ebft l\u1eadp l\u1ed9 tr\u00ecnh",
+                    "hint": "Ch\u1ecdn g\u00f3i, th\u1eddi gian v\u00e0 khung gi\u1edd nh\u1ecbn"
+                },
+                "log": {
+                    "title": "Check-in h\u00f4m nay",
+                    "hint": "Ghi n\u01b0\u1edbc, v\u1eadn \u0111\u1ed9ng v\u00e0 t\u00edn hi\u1ec7u c\u01a1 th\u1ec3"
+                },
+                "timeline": {
+                    "title": "Xem ti\u1ebfn \u0111\u1ed9",
+                    "hint": "Theo d\u00f5i giai \u0111o\u1ea1n v\u00e0 s\u1ed1 ng\u00e0y \u0111\u00e3 check-in"
+                },
+                "coach": {
+                    "title": "H\u1ecfi AI coach",
+                    "hint": "Nh\u1eadn h\u01b0\u1edbng d\u1eabn c\u00e1 nh\u00e2n v\u00e0 g\u1ee3i \u00fd b\u1eefa \u0103n"
+                }
             },
             "log": {
-                "logDate": "Ngày log",
-                "ateAt": "Giờ đã ăn",
-                "water": "Nước uống (ml)",
-                "workoutMinutes": "Số phút tập",
-                "workoutType": "Loại bài tập",
-                "currentWeight": "Cân nặng hiện tại (kg)",
-                "notes": "Ghi chú"
+                "logDate": "Ng\u00e0y log",
+                "ateAt": "Gi\u1edd \u0111\u00e3 \u0103n",
+                "water": "N\u01b0\u1edbc u\u1ed1ng (ml)",
+                "waterGoal": "M\u1ee5c ti\u00eau n\u01b0\u1edbc (ml)",
+                "workoutMinutes": "S\u1ed1 ph\u00fat t\u1eadp",
+                "workoutType": "Lo\u1ea1i b\u00e0i t\u1eadp",
+                "currentWeight": "C\u00e2n n\u1eb7ng hi\u1ec7n t\u1ea1i (kg)",
+                "notes": "Ghi ch\u00fa"
+            },
+            "quickStatus": {
+                "good": "Ổn",
+                "hungry": "Đói",
+                "tired": "Mệt",
+                "thirsty": "Khát",
+                "busy": "Bận"
+            },
+            "quick": {
+                "applied": "Đã cập nhật trạng thái nhanh."
+            },
+            "quickStatusNotes": {
+                "good": "Cập nhật nhanh: Hôm nay tôi thấy ổn định.",
+                "hungry": "Cập nhật nhanh: Cảm giác đói đang tăng mạnh.",
+                "tired": "Cập nhật nhanh: Năng lượng thấp, cần lịch nhẹ hơn.",
+                "thirsty": "Cập nhật nhanh: Tôi có dấu hiệu thiếu nước.",
+                "busy": "Cập nhật nhanh: Lịch hôm nay dày, cần tác vụ gọn."
+            },
+            "water": {
+                "add250": "+250ml",
+                "add500": "+500ml"
             },
             "coach": {
                 "title": "AI tư vấn sức khỏe",
@@ -2488,6 +2545,16 @@
                     "sleepHours": "Số giờ ngủ",
                     "studyLoad": "Khối lượng học hôm nay",
                     "notes": "Thông tin bổ sung cho AI coach"
+                },
+                "placeholders": {
+                    "mood": "Ví dụ: cân bằng / mệt",
+                    "energy": "Ví dụ: thấp / trung bình / cao",
+                    "hunger": "Ví dụ: bình thường / cao",
+                    "thirst": "Ví dụ: bình thường / cao",
+                    "stress": "Ví dụ: thấp / vừa / cao",
+                    "sleepHours": "Ví dụ: 7",
+                    "studyLoad": "Ví dụ: học bình thường / học nặng",
+                    "notes": "Mô tả thêm tín hiệu cơ thể hoặc áp lực học hôm nay..."
                 },
                 "options": {
                     "mood": {
@@ -2523,6 +2590,12 @@
                     "goal": "Mục tiêu bữa ăn",
                     "dietaryPreference": "Chế độ ăn ưu tiên (tuỳ chọn)"
                 },
+                "placeholders": {
+                    "ingredients": "Ví dụ: ức gà, bông cải, gạo lứt",
+                    "servings": "Ví dụ: 2",
+                    "goal": "Ví dụ: ngày học cần tập trung",
+                    "dietaryPreference": "Ví dụ: low-carb, ăn chay"
+                },
                 "options": {
                     "goal": {
                         "focusStudy": "Ngày học cần tập trung",
@@ -2538,6 +2611,8 @@
             "sidebar": {
                 "fasting": "NHỊN - ĂN",
                 "water": "Nước",
+                "checkpoint": "Điểm check-in",
+                "completion": "Hoàn thành",
                 "weight": "Cân nặng X đến Y",
                 "weightRange": "{{start}}kg đến {{target}}kg",
                 "currentWeight": "Hiện tại: {{current}}kg"
@@ -2550,7 +2625,16 @@
                 "savePlan": "Đã lưu lộ trình",
                 "saveLog": "Đã cập nhật log",
                 "coachReply": "Đã tạo tư vấn AI",
-                "mealReady": "Đã tạo công thức bữa ăn"
+                "mealReady": "Đã tạo công thức bữa ăn",
+                "waterUpdated": "Đã cộng {{amount}}ml nước."
+            },
+            "status": {
+                "openingCheckout": "\u0110ang m\u1edf checkout...",
+                "redirectingCheckout": "\u0110ang chuy\u1ec3n sang trang thanh to\u00e1n...",
+                "savingPlan": "\u0110ang l\u01b0u l\u1ed9 tr\u00ecnh...",
+                "savingLog": "\u0110ang l\u01b0u log h\u00e0ng ng\u00e0y...",
+                "askingCoach": "\u0110ang g\u1eedi y\u00eau c\u1ea7u AI coach...",
+                "generatingMeal": "\u0110ang t\u1ea1o g\u1ee3i \u00fd b\u1eefa \u0103n..."
             },
             "errors": {
                 "loadDashboard": "Không tải được dashboard wellness",
@@ -2562,7 +2646,8 @@
                 "packageRequired": "Bạn cần mua gói để sử dụng tính năng này.",
                 "moodCoach": "Không thể lấy tư vấn từ AI",
                 "mealCoach": "Không thể tạo công thức bữa ăn",
-                "mealIngredients": "Vui lòng nhập ít nhất một nguyên liệu"
+                "mealIngredients": "Vui lòng nhập ít nhất một nguyên liệu",
+                "moodFieldsRequired": "Vui lòng nhập tâm trạng, năng lượng, độ đói và độ khát trước khi hỏi AI."
             }
         },
         "admin": {

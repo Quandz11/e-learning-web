@@ -62,6 +62,9 @@ export interface WellnessPlan {
   status: string;
   totalDays: number;
   elapsedDays: number;
+  preparationDays: number;
+  fastingDays: number;
+  refeedDays: number;
   createdAt: string;
 }
 
@@ -124,6 +127,9 @@ export interface WellnessProgressTimelineItem {
   workoutMinutes: number;
   workoutType: string;
   hasCheckin: boolean;
+  phase: 'PREPARE' | 'FASTING' | 'REFEED' | string;
+  phaseDayIndex: number;
+  phaseTotalDays: number;
 }
 
 export interface WellnessProgressTimeline {
@@ -269,62 +275,145 @@ export interface WellnessMealSuggestion {
   createdAt: string;
 }
 
+type CacheEntry<T> = {
+  value: T;
+  expiresAt: number;
+};
+
+const DASHBOARD_CACHE_TTL_MS = 30_000;
+const CALENDAR_CACHE_TTL_MS = 30_000;
+const TIMELINE_CACHE_TTL_MS = 30_000;
+
+let dashboardCache: CacheEntry<WellnessDashboard> | null = null;
+const calendarCache = new Map<string, CacheEntry<WellnessCalendarDay[]>>();
+const timelineCache = new Map<string, CacheEntry<WellnessProgressTimeline>>();
+
+const nowMs = () => Date.now();
+
+const getFreshCache = <T>(entry?: CacheEntry<T> | null): T | null => {
+  if (!entry) return null;
+  if (entry.expiresAt <= nowMs()) return null;
+  return entry.value;
+};
+
+const setCache = <T>(ttlMs: number, value: T): CacheEntry<T> => ({
+  value,
+  expiresAt: nowMs() + ttlMs,
+});
+
+const buildTimelineCacheKey = (planId: string, days: number, includeFuture: boolean) =>
+  `${planId}:${days}:${includeFuture ? 'future' : 'history'}`;
+
+const clearWellnessDashboardCache = (planId?: string) => {
+  dashboardCache = null;
+
+  if (!planId) {
+    calendarCache.clear();
+    timelineCache.clear();
+    return;
+  }
+
+  calendarCache.delete(planId);
+  for (const key of timelineCache.keys()) {
+    if (key.startsWith(`${planId}:`)) {
+      timelineCache.delete(key);
+    }
+  }
+};
+
 export const wellnessApi = {
   getCheckoutConfig: async (): Promise<WellnessCheckoutConfig> => {
     return await apiClient<WellnessCheckoutConfig>('/wellness/checkout-config', { method: 'GET' });
   },
 
   getDashboard: async (): Promise<WellnessDashboard> => {
-    return await apiClient<WellnessDashboard>('/wellness/dashboard', { method: 'GET' });
+    const cached = getFreshCache(dashboardCache);
+    if (cached) {
+      return cached;
+    }
+
+    const response = await apiClient<WellnessDashboard>('/wellness/dashboard', { method: 'GET' });
+    dashboardCache = setCache(DASHBOARD_CACHE_TTL_MS, response);
+    return response;
   },
 
   upsertPlan: async (payload: UpsertWellnessPlanPayload): Promise<WellnessPlan> => {
-    return await apiClient<WellnessPlan>('/wellness/plan', {
+    const response = await apiClient<WellnessPlan>('/wellness/plan', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+    clearWellnessDashboardCache(response.id);
+    return response;
   },
 
   updateSchedule: async (planId: string, payload: UpdateWellnessSchedulePayload): Promise<WellnessPlan> => {
-    return await apiClient<WellnessPlan>(`/wellness/plan/${planId}/schedule`, {
+    const response = await apiClient<WellnessPlan>(`/wellness/plan/${planId}/schedule`, {
       method: 'PUT',
       body: JSON.stringify(payload),
     });
+    clearWellnessDashboardCache(planId);
+    return response;
   },
 
   upsertDailyLog: async (planId: string, payload: UpsertWellnessDailyLogPayload): Promise<WellnessDailyLog> => {
-    return await apiClient<WellnessDailyLog>(`/wellness/plan/${planId}/daily-log`, {
+    const response = await apiClient<WellnessDailyLog>(`/wellness/plan/${planId}/daily-log`, {
       method: 'PUT',
       body: JSON.stringify(payload),
     });
+    clearWellnessDashboardCache(planId);
+    return response;
   },
 
   getCalendar: async (planId: string): Promise<WellnessCalendarDay[]> => {
-    return await apiClient<WellnessCalendarDay[]>(`/wellness/plan/${planId}/calendar`, { method: 'GET' });
+    const cached = getFreshCache(calendarCache.get(planId));
+    if (cached) {
+      return cached;
+    }
+
+    const response = await apiClient<WellnessCalendarDay[]>(`/wellness/plan/${planId}/calendar`, { method: 'GET' });
+    calendarCache.set(planId, setCache(CALENDAR_CACHE_TTL_MS, response));
+    return response;
   },
 
   askMoodCoach: async (planId: string, payload: WellnessCoachMoodPayload): Promise<WellnessCoachReply> => {
-    return await apiClient<WellnessCoachReply>(`/wellness/plan/${planId}/coach/mood`, {
+    const response = await apiClient<WellnessCoachReply>(`/wellness/plan/${planId}/coach/mood`, {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+    clearWellnessDashboardCache(planId);
+    return response;
   },
 
   generateMeal: async (planId: string, payload: WellnessCoachMealPayload): Promise<WellnessMealSuggestion> => {
-    return await apiClient<WellnessMealSuggestion>(`/wellness/plan/${planId}/coach/meal`, {
+    const response = await apiClient<WellnessMealSuggestion>(`/wellness/plan/${planId}/coach/meal`, {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+    clearWellnessDashboardCache(planId);
+    return response;
   },
 
   getWeightProgress: async (planId: string): Promise<WellnessWeightProgress> => {
     return await apiClient<WellnessWeightProgress>(`/wellness/plan/${planId}/weight-progress`, { method: 'GET' });
   },
 
-  getProgressTimeline: async (planId: string, days = 30): Promise<WellnessProgressTimeline> => {
-    return await apiClient<WellnessProgressTimeline>(`/wellness/plan/${planId}/progress-timeline?days=${days}`, {
+  getProgressTimeline: async (planId: string, days = 30, includeFuture = false): Promise<WellnessProgressTimeline> => {
+    const cacheKey = buildTimelineCacheKey(planId, days, includeFuture);
+    const cached = getFreshCache(timelineCache.get(cacheKey));
+    if (cached) {
+      return cached;
+    }
+
+    const params = new URLSearchParams();
+    params.set('days', String(days));
+    if (includeFuture) {
+      params.set('includeFuture', 'true');
+    }
+    const response = await apiClient<WellnessProgressTimeline>(`/wellness/plan/${planId}/progress-timeline?${params.toString()}`, {
       method: 'GET',
     });
+    timelineCache.set(cacheKey, setCache(TIMELINE_CACHE_TTL_MS, response));
+    return response;
   },
 
   getAdminSettings: async (): Promise<WellnessAdminSettings> => {

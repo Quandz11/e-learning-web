@@ -201,12 +201,12 @@ public class WellnessController : ControllerBase
     }
 
     [HttpGet("plan/{planId:guid}/progress-timeline")]
-    public async Task<IActionResult> GetProgressTimeline(Guid planId, [FromQuery] int days = 30, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetProgressTimeline(Guid planId, [FromQuery] int days = 30, [FromQuery] bool includeFuture = false, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = GetUserId();
-            var timeline = await _wellnessService.GetProgressTimelineAsync(userId, planId, days, cancellationToken);
+            var timeline = await _wellnessService.GetProgressTimelineAsync(userId, planId, days, includeFuture, cancellationToken);
             return Ok(timeline);
         }
         catch (WellnessAccessException ex)

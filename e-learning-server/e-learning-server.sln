@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36623.8 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "e-learning-server", "e-learning-server\e-learning-server.csproj", "{8D525006-523B-474D-B494-58BF3EE7EEB7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SKVI.Application.Tests", "SKVI.Application.Tests\SKVI.Application.Tests.csproj", "{786B0966-A729-48CB-B943-31BE0F434032}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8D525006-523B-474D-B494-58BF3EE7EEB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D525006-523B-474D-B494-58BF3EE7EEB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D525006-523B-474D-B494-58BF3EE7EEB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{786B0966-A729-48CB-B943-31BE0F434032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{786B0966-A729-48CB-B943-31BE0F434032}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{786B0966-A729-48CB-B943-31BE0F434032}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{786B0966-A729-48CB-B943-31BE0F434032}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

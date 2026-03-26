@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -43,6 +43,50 @@ const timeToMinute = (value: string) => {
   return Math.max(0, Math.min(1439, h * 60 + m));
 };
 const minuteToTime = (value: number) => `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+type WellnessPhase = 'PREPARE' | 'FASTING' | 'REFEED';
+
+const resolvePhase = (phase?: string): WellnessPhase => {
+  const normalized = (phase ?? '').trim().toUpperCase();
+  if (normalized === 'FASTING') return 'FASTING';
+  if (normalized === 'REFEED') return 'REFEED';
+  return 'PREPARE';
+};
+
+const clampRatio = (value: number) => Math.max(0, Math.min(1, value));
+
+const getRefeedColor = (phaseDayIndex: number, phaseTotalDays: number) => {
+  if (phaseTotalDays <= 1) return 'hsl(28 92% 44%)';
+  const ratio = clampRatio((phaseDayIndex - 1) / (phaseTotalDays - 1));
+  const lightness = 42 + ratio * 33;
+  return `hsl(28 92% ${lightness}%)`;
+};
+
+const getPhaseColor = (phase?: string, phaseDayIndex = 1, phaseTotalDays = 1) => {
+  const resolvedPhase = resolvePhase(phase);
+  if (resolvedPhase === 'FASTING') return '#EF4444';
+  if (resolvedPhase === 'REFEED') return getRefeedColor(phaseDayIndex, phaseTotalDays);
+  return '#FACC15';
+};
+
+const getPhaseLabel = (phase: string | undefined, t: (key: string, options?: Record<string, unknown>) => string) => {
+  const resolved = resolvePhase(phase);
+  if (resolved === 'FASTING') return t('wellness.dashboard.timeline.phases.fastingLabel');
+  if (resolved === 'REFEED') return t('wellness.dashboard.timeline.phases.refeedLabel');
+  return t('wellness.dashboard.timeline.phases.prepareLabel');
+};
+
+const getPhaseProgressLabel = (
+  phaseDayIndex: number,
+  phaseTotalDays: number,
+  t: (key: string, options?: Record<string, unknown>) => string,
+) => {
+  return t('wellness.dashboard.timeline.phases.dayProgress', {
+    day: Math.max(1, phaseDayIndex),
+    total: Math.max(1, phaseTotalDays),
+  });
+};
+
+const inputLabelClassName = 'text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500';
 
 const buildCheckoutPath = (packageCode: string) => {
   const params = new URLSearchParams();
@@ -68,6 +112,7 @@ const WellnessCoachDashboard: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [submittingAction, setSubmittingAction] = useState<'plan' | 'log' | null>(null);
   const [checkoutPackage, setCheckoutPackage] = useState<string | null>(null);
   const [dashboard, setDashboard] = useState<WellnessDashboard | null>(null);
   const [calendar, setCalendar] = useState<WellnessCalendarDay[]>([]);
@@ -93,25 +138,27 @@ const WellnessCoachDashboard: React.FC = () => {
   const [notes, setNotes] = useState('');
 
   const [timelineDays, setTimelineDays] = useState(30);
+  const [timelineIncludeFuture, setTimelineIncludeFuture] = useState(false);
   const [timeline, setTimeline] = useState<WellnessProgressTimeline | null>(null);
   const [timelinePlanId, setTimelinePlanId] = useState<string | null>(null);
+  const [timelineQueryKey, setTimelineQueryKey] = useState('');
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [selectedTimelineDate, setSelectedTimelineDate] = useState(today);
 
-  const [mood, setMood] = useState('balanced');
-  const [energy, setEnergy] = useState('medium');
-  const [hunger, setHunger] = useState('normal');
-  const [thirst, setThirst] = useState('normal');
-  const [stress, setStress] = useState('moderate');
-  const [sleepHours, setSleepHours] = useState('7');
-  const [studyLoad, setStudyLoad] = useState('normal');
+  const [mood, setMood] = useState('');
+  const [energy, setEnergy] = useState('');
+  const [hunger, setHunger] = useState('');
+  const [thirst, setThirst] = useState('');
+  const [stress, setStress] = useState('');
+  const [sleepHours, setSleepHours] = useState('');
+  const [studyLoad, setStudyLoad] = useState('');
   const [coachNotes, setCoachNotes] = useState('');
   const [coachReply, setCoachReply] = useState<WellnessCoachReply | null>(null);
   const [coachSubmitting, setCoachSubmitting] = useState(false);
 
-  const [mealIngredients, setMealIngredients] = useState('chicken breast, broccoli, brown rice');
-  const [mealServings, setMealServings] = useState('2');
-  const [mealGoal, setMealGoal] = useState('focus-study-day');
+  const [mealIngredients, setMealIngredients] = useState('');
+  const [mealServings, setMealServings] = useState('');
+  const [mealGoal, setMealGoal] = useState('');
   const [mealDietaryPreference, setMealDietaryPreference] = useState('');
   const [mealSuggestion, setMealSuggestion] = useState<WellnessMealSuggestion | null>(null);
   const [mealSubmitting, setMealSubmitting] = useState(false);
@@ -176,7 +223,6 @@ const WellnessCoachDashboard: React.FC = () => {
   }, [calendar, weekAnchor]);
 
   const timelineItems = timeline?.items ?? [];
-  const maxTimelineWater = useMemo(() => Math.max(1, ...timelineItems.map((item) => item.waterMl)), [timelineItems]);
   const timelineMap = useMemo(() => {
     const map = new Map<string, (typeof timelineItems)[number]>();
     timelineItems.forEach((item) => map.set(toDate(item.logDate), item));
@@ -185,34 +231,78 @@ const WellnessCoachDashboard: React.FC = () => {
   const selectedTimelineItem = timelineMap.get(selectedTimelineDate) || timelineItems[timelineItems.length - 1] || null;
   const checkpointDone = timelineItems.filter((item) => item.hasCheckin).length;
   const completionRate = timelineItems.length > 0 ? Math.round((checkpointDone / timelineItems.length) * 100) : Math.round(planProgress);
+  const phaseDistribution = useMemo(() => {
+    const preparationDays = Math.max(0, Number(plan?.preparationDays ?? 0));
+    const fastingDays = Math.max(0, Number(plan?.fastingDays ?? 0));
+    const refeedDays = Math.max(0, Number(plan?.refeedDays ?? 0));
+    return { preparationDays, fastingDays, refeedDays };
+  }, [plan?.fastingDays, plan?.preparationDays, plan?.refeedDays]);
+  const hasCheckin = Boolean(dashboard?.todayLog) || timelineItems.some((item) => item.hasCheckin);
+  const hasAiSupport = Boolean(coachReply?.reply?.trim() || mealSuggestion?.menu?.trim());
+  const flowSteps = useMemo(() => {
+    return [
+      {
+        id: 'wellness-plan',
+        icon: 'tune',
+        title: t('wellness.dashboard.flow.plan.title'),
+        hint: t('wellness.dashboard.flow.plan.hint'),
+        done: Boolean(plan?.id),
+      },
+      {
+        id: 'wellness-log',
+        icon: 'edit_calendar',
+        title: t('wellness.dashboard.flow.log.title'),
+        hint: t('wellness.dashboard.flow.log.hint'),
+        done: hasCheckin,
+      },
+      {
+        id: 'wellness-timeline',
+        icon: 'insights',
+        title: t('wellness.dashboard.flow.timeline.title'),
+        hint: t('wellness.dashboard.flow.timeline.hint'),
+        done: timelineItems.length > 0,
+      },
+      {
+        id: 'wellness-coach',
+        icon: 'smart_toy',
+        title: t('wellness.dashboard.flow.coach.title'),
+        hint: t('wellness.dashboard.flow.coach.hint'),
+        done: hasAiSupport,
+      },
+    ];
+  }, [hasAiSupport, hasCheckin, plan?.id, t, timelineItems.length]);
 
   const goCheckout = (pkgCode: string) => {
+    const toastId = toast.loading(t('wellness.dashboard.status.openingCheckout', { defaultValue: 'Opening checkout...' }));
     const normalized = normalizePackageCode(pkgCode);
     setPackageType(normalized);
     setCheckoutPackage(normalized);
     try {
       if (!normalized) {
-        toast.error(t('wellness.dashboard.errors.checkoutNotConfigured'));
+        toast.error(t('wellness.dashboard.errors.checkoutNotConfigured'), { id: toastId });
         return;
       }
+      toast.success(t('wellness.dashboard.status.redirectingCheckout', { defaultValue: 'Redirecting to checkout...' }), { id: toastId });
       navigate(buildCheckoutPath(normalized));
     } catch (error: any) {
-      toast.error(msg(error, t('wellness.dashboard.errors.createCheckout')));
+      toast.error(msg(error, t('wellness.dashboard.errors.createCheckout')), { id: toastId });
     } finally {
       setCheckoutPackage(null);
     }
   };
 
-  const loadTimeline = async (planId: string, days: number) => {
+  const loadTimeline = async (planId: string, days: number, includeFuture: boolean) => {
     setTimelineLoading(true);
     try {
-      const data = await wellnessApi.getProgressTimeline(planId, days);
+      const data = await wellnessApi.getProgressTimeline(planId, days, includeFuture);
       setTimeline(data);
       setTimelinePlanId(planId);
+      setTimelineQueryKey(`${planId}:${days}:${includeFuture ? 'future' : 'history'}`);
     } catch (error: any) {
       toast.error(msg(error, t('wellness.dashboard.errors.loadTimeline')));
       setTimeline(null);
       setTimelinePlanId(null);
+      setTimelineQueryKey('');
     } finally {
       setTimelineLoading(false);
     }
@@ -230,8 +320,10 @@ const WellnessCoachDashboard: React.FC = () => {
     setTimezone(nextPlan.timezone || timezone);
   };
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const data = await wellnessApi.getDashboard();
       setDashboard(data);
@@ -239,12 +331,13 @@ const WellnessCoachDashboard: React.FC = () => {
       if (data.plan?.id && data.access?.isUnlocked) {
         const [cal, timelineData] = await Promise.all([
           wellnessApi.getCalendar(data.plan.id),
-          wellnessApi.getProgressTimeline(data.plan.id, timelineDays),
+          wellnessApi.getProgressTimeline(data.plan.id, timelineDays, timelineIncludeFuture),
         ]);
 
         setCalendar(cal);
         setTimeline(timelineData);
         setTimelinePlanId(data.plan.id);
+        setTimelineQueryKey(`${data.plan.id}:${timelineDays}:${timelineIncludeFuture ? 'future' : 'history'}`);
         hydratePlan(data.plan);
 
         const activeDate = data.todayLog ? toDate(data.todayLog.logDate) : today;
@@ -264,13 +357,16 @@ const WellnessCoachDashboard: React.FC = () => {
         setCalendar([]);
         setTimeline(null);
         setTimelinePlanId(null);
+        setTimelineQueryKey('');
         setSelectedTimelineDate(today);
         if (data.plan) hydratePlan(data.plan);
       }
     } catch (error: any) {
       toast.error(msg(error, t('wellness.dashboard.errors.loadDashboard')));
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
@@ -280,9 +376,18 @@ const WellnessCoachDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!canUse || !plan?.id) return;
-    if (timeline && timelinePlanId === plan.id && timeline.requestedDays === timelineDays) return;
-    void loadTimeline(plan.id, timelineDays);
-  }, [canUse, plan?.id, timeline, timelineDays, timelinePlanId]);
+    const expectedKey = `${plan.id}:${timelineDays}:${timelineIncludeFuture ? 'future' : 'history'}`;
+    if (timeline && timelinePlanId === plan.id && timelineQueryKey === expectedKey) return;
+    void loadTimeline(plan.id, timelineDays, timelineIncludeFuture);
+  }, [canUse, plan?.id, timeline, timelineDays, timelineIncludeFuture, timelinePlanId, timelineQueryKey]);
+
+  useEffect(() => {
+    if (!timelineItems.length) return;
+    if (timelineMap.has(selectedTimelineDate)) return;
+    const fallbackDate = toDate(timelineItems[timelineItems.length - 1].logDate);
+    setSelectedTimelineDate(fallbackDate);
+    setLogDate(fallbackDate);
+  }, [selectedTimelineDate, timelineItems, timelineMap]);
 
   useEffect(() => {
     if (checkoutPackages.length === 0) return;
@@ -310,37 +415,52 @@ const WellnessCoachDashboard: React.FC = () => {
 
   const applyQuickStatus = (status: 'good' | 'hungry' | 'tired' | 'thirsty' | 'busy') => {
     if (status === 'good') {
-      setMood('balanced');
-      setEnergy('medium');
-      setHunger('normal');
-      setThirst('normal');
-      setStress('moderate');
-      setStudyLoad('normal');
-      setCoachNotes('Quick update: I feel stable today.');
+      setMood(t('wellness.dashboard.coach.options.mood.balanced'));
+      setEnergy(t('wellness.dashboard.coach.options.level.medium'));
+      setHunger(t('wellness.dashboard.coach.options.level.normal'));
+      setThirst(t('wellness.dashboard.coach.options.level.normal'));
+      setStress(t('wellness.dashboard.coach.options.level.moderate'));
+      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.normal'));
+      setCoachNotes(t('wellness.dashboard.quickStatusNotes.good'));
     } else if (status === 'hungry') {
-      setMood('tired');
-      setHunger('high');
-      setStudyLoad('normal');
-      setCoachNotes('Quick update: Hunger rises strongly now.');
+      setMood(t('wellness.dashboard.coach.options.mood.tired'));
+      setEnergy(t('wellness.dashboard.coach.options.level.medium'));
+      setHunger(t('wellness.dashboard.coach.options.level.high'));
+      setThirst(t('wellness.dashboard.coach.options.level.normal'));
+      setStress(t('wellness.dashboard.coach.options.level.moderate'));
+      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.normal'));
+      setCoachNotes(t('wellness.dashboard.quickStatusNotes.hungry'));
     } else if (status === 'tired') {
-      setMood('tired');
-      setEnergy('low');
-      setStudyLoad('light');
-      setCoachNotes('Quick update: Energy is low and I need a lighter pace.');
+      setMood(t('wellness.dashboard.coach.options.mood.tired'));
+      setEnergy(t('wellness.dashboard.coach.options.level.low'));
+      setHunger(t('wellness.dashboard.coach.options.level.normal'));
+      setThirst(t('wellness.dashboard.coach.options.level.normal'));
+      setStress(t('wellness.dashboard.coach.options.level.moderate'));
+      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.light'));
+      setCoachNotes(t('wellness.dashboard.quickStatusNotes.tired'));
     } else if (status === 'thirsty') {
-      setThirst('high');
-      setCoachNotes('Quick update: I may be dehydrated.');
+      setMood(t('wellness.dashboard.coach.options.mood.balanced'));
+      setEnergy(t('wellness.dashboard.coach.options.level.medium'));
+      setHunger(t('wellness.dashboard.coach.options.level.normal'));
+      setThirst(t('wellness.dashboard.coach.options.level.high'));
+      setStress(t('wellness.dashboard.coach.options.level.moderate'));
+      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.normal'));
+      setCoachNotes(t('wellness.dashboard.quickStatusNotes.thirsty'));
     } else {
-      setMood('stressed');
-      setStress('high');
-      setStudyLoad('heavy');
-      setCoachNotes('Quick update: Busy schedule today, need compact actions.');
+      setMood(t('wellness.dashboard.coach.options.mood.stressed'));
+      setEnergy(t('wellness.dashboard.coach.options.level.medium'));
+      setHunger(t('wellness.dashboard.coach.options.level.normal'));
+      setThirst(t('wellness.dashboard.coach.options.level.normal'));
+      setStress(t('wellness.dashboard.coach.options.level.high'));
+      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.heavy'));
+      setCoachNotes(t('wellness.dashboard.quickStatusNotes.busy'));
     }
     toast.success(t('wellness.dashboard.quick.applied', { defaultValue: 'Quick status updated.' }));
   };
 
   const bumpWater = (amount: number) => {
     setWaterMl((prev) => String(Math.max(0, Number(prev || 0) + amount)));
+    toast.success(t('wellness.dashboard.success.waterUpdated', { amount }));
   };
 
   const savePlan = async (event: React.FormEvent) => {
@@ -356,7 +476,9 @@ const WellnessCoachDashboard: React.FC = () => {
       return;
     }
 
+    setSubmittingAction('plan');
     setSubmitting(true);
+    const toastId = toast.loading(t('wellness.dashboard.status.savingPlan', { defaultValue: 'Saving roadmap...' }));
     try {
       await wellnessApi.upsertPlan({
         packageType: normalizedPackageType,
@@ -369,11 +491,12 @@ const WellnessCoachDashboard: React.FC = () => {
         targetWeightKg: Number(targetWeight),
         timezone,
       });
-      toast.success(t('wellness.dashboard.success.savePlan'));
-      await load();
+      toast.success(t('wellness.dashboard.success.savePlan'), { id: toastId });
+      await load(true);
     } catch (error: any) {
-      toast.error(msg(error, t('wellness.dashboard.errors.savePlan')));
+      toast.error(msg(error, t('wellness.dashboard.errors.savePlan')), { id: toastId });
     } finally {
+      setSubmittingAction(null);
       setSubmitting(false);
     }
   };
@@ -385,7 +508,9 @@ const WellnessCoachDashboard: React.FC = () => {
       return;
     }
 
+    setSubmittingAction('log');
     setSubmitting(true);
+    const toastId = toast.loading(t('wellness.dashboard.status.savingLog', { defaultValue: 'Saving daily log...' }));
     try {
       await wellnessApi.upsertDailyLog(plan.id, {
         logDate: `${logDate}T00:00:00`,
@@ -396,11 +521,12 @@ const WellnessCoachDashboard: React.FC = () => {
         currentWeightKg: currentWeight ? Number(currentWeight) : undefined,
         notes,
       });
-      toast.success(t('wellness.dashboard.success.saveLog'));
-      await load();
+      toast.success(t('wellness.dashboard.success.saveLog'), { id: toastId });
+      await load(true);
     } catch (error: any) {
-      toast.error(msg(error, t('wellness.dashboard.errors.saveLog')));
+      toast.error(msg(error, t('wellness.dashboard.errors.saveLog')), { id: toastId });
     } finally {
+      setSubmittingAction(null);
       setSubmitting(false);
     }
   };
@@ -412,21 +538,36 @@ const WellnessCoachDashboard: React.FC = () => {
       return;
     }
 
+    const moodValue = mood.trim();
+    const energyValue = energy.trim();
+    const hungerValue = hunger.trim();
+    const thirstValue = thirst.trim();
+    const stressValue = stress.trim();
+    const sleepHoursValue = sleepHours.trim();
+    const studyLoadValue = studyLoad.trim();
+    const coachNotesValue = coachNotes.trim();
+
+    if (!moodValue || !energyValue || !hungerValue || !thirstValue) {
+      toast.error(t('wellness.dashboard.errors.moodFieldsRequired'));
+      return;
+    }
+
     setCoachSubmitting(true);
+    const toastId = toast.loading(t('wellness.dashboard.status.askingCoach', { defaultValue: 'Requesting AI coach...' }));
     try {
       const response = await wellnessApi.askMoodCoach(plan.id, {
-        mood,
-        energy,
-        hunger,
-        thirst,
-        stress,
-        sleepHours: sleepHours ? Number(sleepHours) : undefined,
-        notes: [`study_load=${studyLoad}`, coachNotes.trim()].filter(Boolean).join(' | ') || undefined,
+        mood: moodValue,
+        energy: energyValue,
+        hunger: hungerValue,
+        thirst: thirstValue,
+        stress: stressValue,
+        sleepHours: sleepHoursValue ? Number(sleepHoursValue) : undefined,
+        notes: [studyLoadValue ? `study_load=${studyLoadValue}` : '', coachNotesValue].filter(Boolean).join(' | ') || undefined,
       });
       setCoachReply(response);
-      toast.success(t('wellness.dashboard.success.coachReply'));
+      toast.success(t('wellness.dashboard.success.coachReply'), { id: toastId });
     } catch (error: any) {
-      toast.error(msg(error, t('wellness.dashboard.errors.moodCoach')));
+      toast.error(msg(error, t('wellness.dashboard.errors.moodCoach')), { id: toastId });
     } finally {
       setCoachSubmitting(false);
     }
@@ -446,6 +587,7 @@ const WellnessCoachDashboard: React.FC = () => {
     }
 
     setMealSubmitting(true);
+    const toastId = toast.loading(t('wellness.dashboard.status.generatingMeal', { defaultValue: 'Generating meal formula...' }));
     try {
       const response = await wellnessApi.generateMeal(plan.id, {
         ingredients,
@@ -454,9 +596,9 @@ const WellnessCoachDashboard: React.FC = () => {
         dietaryPreference: mealDietaryPreference.trim(),
       });
       setMealSuggestion(response);
-      toast.success(t('wellness.dashboard.success.mealReady'));
+      toast.success(t('wellness.dashboard.success.mealReady'), { id: toastId });
     } catch (error: any) {
-      toast.error(msg(error, t('wellness.dashboard.errors.mealCoach')));
+      toast.error(msg(error, t('wellness.dashboard.errors.mealCoach')), { id: toastId });
     } finally {
       setMealSubmitting(false);
     }
@@ -472,7 +614,7 @@ const WellnessCoachDashboard: React.FC = () => {
   }
 
   return (
-    <section className="grid gap-5 xl:grid-cols-[250px_minmax(0,1fr)_300px]">
+    <section className="grid gap-5 xl:grid-cols-[250px_minmax(0,1fr)_300px] [&_button]:cursor-pointer [&_button:disabled]:cursor-not-allowed">
       <aside className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle xl:sticky xl:top-24 xl:h-[calc(100vh-7rem)] xl:overflow-auto">
         <div className="rounded-2xl border border-slate-100 bg-[linear-gradient(155deg,#f8fafc_0%,#eef6ff_50%,#fff7ed_100%)] p-4">
           <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{t('wellness.dashboard.brand')}</div>
@@ -489,9 +631,22 @@ const WellnessCoachDashboard: React.FC = () => {
         </div>
 
         <div className="grid gap-2">
-          <button type="button" onClick={() => scrollToId('wellness-progress')} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">calendar_month</span>{t('wellness.dashboard.calendar.title')}</button>
-          <button type="button" onClick={() => scrollToId('wellness-timeline')} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">insights</span>{t('wellness.dashboard.timeline.title')}</button>
-          <button type="button" onClick={() => scrollToId('wellness-log')} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">edit_calendar</span>{t('wellness.dashboard.actions.saveLog')}</button>
+          {flowSteps.map((step, index) => (
+            <button
+              key={step.id}
+              type="button"
+              onClick={() => scrollToId(step.id)}
+              className={`inline-flex items-start gap-2 rounded-xl border px-3 py-2 text-left ${step.done ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'}`}
+            >
+              <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-black ${step.done ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                {step.done ? <span className="material-symbols-outlined text-sm leading-none">check</span> : index + 1}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-xs font-semibold text-slate-800">{step.title}</span>
+                <span className="block text-[11px] text-slate-600">{step.hint}</span>
+              </span>
+            </button>
+          ))}
         </div>
 
         <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
@@ -500,7 +655,7 @@ const WellnessCoachDashboard: React.FC = () => {
           <div className="mt-3 grid gap-2">
             {checkoutPackages.map((pkg) => (
               <button key={pkg.code} type="button" onClick={() => goCheckout(pkg.code)} disabled={checkoutPackage !== null} className={`rounded-xl px-3 py-2 text-xs font-semibold text-white ${pkg.code === recommendedLockedPackage ? 'bg-primary' : 'bg-slate-900'} disabled:opacity-60`}>
-                {pkg.name}
+                {checkoutPackage === pkg.code ? t('wellness.dashboard.status.openingCheckout') : pkg.name}
               </button>
             ))}
           </div>
@@ -520,12 +675,38 @@ const WellnessCoachDashboard: React.FC = () => {
 
         {isUnlocked ? (
           <>
-            <div id="wellness-progress" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
+            <div className="rounded-3xl border border-amber-200 bg-amber-50/60 p-5 shadow-dashboard-subtle">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800">
+                <span className="material-symbols-outlined text-sm text-amber-600">route</span>
+                {t('wellness.dashboard.flow.title')}
+              </div>
+              <p className="mt-1 text-xs text-slate-700">{t('wellness.dashboard.flow.subtitle')}</p>
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                {flowSteps.map((step, index) => (
+                  <button
+                    key={step.id}
+                    type="button"
+                    onClick={() => scrollToId(step.id)}
+                    className={`rounded-xl border px-3 py-3 text-left ${step.done ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-white'}`}
+                  >
+                    <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-800">
+                      <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-900 text-[11px] font-black text-white">{index + 1}</span>
+                      <span className="material-symbols-outlined text-sm text-primary">{step.icon}</span>
+                      {step.title}
+                    </div>
+                    <div className="mt-1 text-[11px] text-slate-600">{step.hint}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-5">
+            <div id="wellness-progress" className="order-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
               <div className="flex items-center justify-between">
                 <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">calendar_month</span>{t('wellness.dashboard.calendar.title')}</div>
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => setWeekAnchor((prev) => addDays(prev, -7))} className="grid h-9 w-9 place-items-center rounded-full border border-slate-300"><span className="material-symbols-outlined text-sm">chevron_left</span></button>
-                  <button type="button" onClick={() => setWeekAnchor((prev) => addDays(prev, 7))} className="grid h-9 w-9 place-items-center rounded-full border border-slate-300"><span className="material-symbols-outlined text-sm">chevron_right</span></button>
+                  <button type="button" onClick={() => setWeekAnchor((prev) => addDays(prev, -7))} aria-label={t('wellness.dashboard.calendar.previous')} className="grid h-9 w-9 place-items-center rounded-full border border-slate-300"><span className="material-symbols-outlined text-sm">chevron_left</span></button>
+                  <button type="button" onClick={() => setWeekAnchor((prev) => addDays(prev, 7))} aria-label={t('wellness.dashboard.calendar.next')} className="grid h-9 w-9 place-items-center rounded-full border border-slate-300"><span className="material-symbols-outlined text-sm">chevron_right</span></button>
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-7 gap-2">
@@ -542,7 +723,7 @@ const WellnessCoachDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="order-5 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -558,11 +739,11 @@ const WellnessCoachDashboard: React.FC = () => {
                 <div className="mt-2 flex justify-between text-[11px] text-slate-600"><span>{fastStart}</span><span>{minuteToTime((timeToMinute(fastStart) + fastingHours * 60) % 1440)}</span></div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => applyQuickStatus('good')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">sentiment_satisfied</span>OK</button>
-                  <button type="button" onClick={() => applyQuickStatus('hungry')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">restaurant</span>Hungry</button>
-                  <button type="button" onClick={() => applyQuickStatus('tired')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">bedtime</span>Tired</button>
-                  <button type="button" onClick={() => applyQuickStatus('thirsty')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">local_drink</span>Thirsty</button>
-                  <button type="button" onClick={() => applyQuickStatus('busy')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">work_history</span>Busy</button>
+                  <button type="button" onClick={() => applyQuickStatus('good')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">sentiment_satisfied</span>{t('wellness.dashboard.quickStatus.good')}</button>
+                  <button type="button" onClick={() => applyQuickStatus('hungry')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">restaurant</span>{t('wellness.dashboard.quickStatus.hungry')}</button>
+                  <button type="button" onClick={() => applyQuickStatus('tired')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">bedtime</span>{t('wellness.dashboard.quickStatus.tired')}</button>
+                  <button type="button" onClick={() => applyQuickStatus('thirsty')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">local_drink</span>{t('wellness.dashboard.quickStatus.thirsty')}</button>
+                  <button type="button" onClick={() => applyQuickStatus('busy')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">work_history</span>{t('wellness.dashboard.quickStatus.busy')}</button>
                 </div>
               </div>
 
@@ -571,21 +752,70 @@ const WellnessCoachDashboard: React.FC = () => {
                 <div className="mt-2 text-lg font-black text-slate-900">{waterDone}/{waterGoal} ml</div>
                 <div className="mt-3 h-3 rounded-full bg-slate-100"><div className="h-3 rounded-full bg-gradient-to-r from-cyan-500 to-sky-500" style={{ width: `${waterProgress}%` }} /></div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button type="button" onClick={() => bumpWater(250)} className="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">+250ml</button>
-                  <button type="button" onClick={() => bumpWater(500)} className="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">+500ml</button>
-                  <input type="number" value={waterMl} onChange={(event) => setWaterMl(event.target.value)} className="rounded-xl border border-slate-300 px-3 py-2 text-xs" />
-                  <input type="number" value={waterGoalMl} onChange={(event) => setWaterGoalMl(event.target.value)} className="rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+                  <button type="button" onClick={() => bumpWater(250)} className="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">{t('wellness.dashboard.water.add250')}</button>
+                  <button type="button" onClick={() => bumpWater(500)} className="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">{t('wellness.dashboard.water.add500')}</button>
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.log.water')}</span>
+                    <input type="number" aria-label={t('wellness.dashboard.log.water')} value={waterMl} onChange={(event) => setWaterMl(event.target.value)} className="rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.log.waterGoal')}</span>
+                    <input type="number" aria-label={t('wellness.dashboard.log.waterGoal')} value={waterGoalMl} onChange={(event) => setWaterGoalMl(event.target.value)} className="rounded-xl border border-slate-300 px-3 py-2 text-xs" />
+                  </label>
                 </div>
               </div>
             </div>
 
-            <div id="wellness-timeline" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
+            <div id="wellness-timeline" className="order-1 rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">insights</span>{t('wellness.dashboard.timeline.title')}</div>
                   <p className="mt-1 text-xs text-slate-600">{t('wellness.dashboard.timeline.subtitle')}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-1">
+                      <span className="h-2 w-2 rounded-full bg-amber-400" />
+                      {t('wellness.dashboard.timeline.phases.prepare', { days: phaseDistribution.preparationDays })}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-1">
+                      <span className="h-2 w-2 rounded-full bg-red-500" />
+                      {t('wellness.dashboard.timeline.phases.fasting', { days: phaseDistribution.fastingDays })}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2 py-1">
+                      <span className="h-2 w-2 rounded-full bg-orange-600" />
+                      {t('wellness.dashboard.timeline.phases.refeed', { days: phaseDistribution.refeedDays })}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex gap-2">{TIMELINE_WINDOWS.map((days) => (<button key={days} type="button" onClick={() => setTimelineDays(days)} className={`rounded-full border px-3 py-1 text-xs font-semibold ${timelineDays === days ? 'border-primary bg-primary text-white' : 'border-slate-300 text-slate-700'}`}>{days}d</button>))}</div>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <div className="flex gap-2">
+                    {TIMELINE_WINDOWS.map((days) => (
+                      <button
+                        key={days}
+                        type="button"
+                        onClick={() => setTimelineDays(days)}
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${timelineDays === days ? 'border-primary bg-primary text-white' : 'border-slate-300 text-slate-700'}`}
+                      >
+                        {days}d
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTimelineIncludeFuture(false)}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold ${!timelineIncludeFuture ? 'border-primary bg-primary text-white' : 'border-slate-300 text-slate-700'}`}
+                    >
+                      {t('wellness.dashboard.timeline.modes.history')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTimelineIncludeFuture(true)}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold ${timelineIncludeFuture ? 'border-primary bg-primary text-white' : 'border-slate-300 text-slate-700'}`}
+                    >
+                      {t('wellness.dashboard.timeline.modes.future')}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {timelineLoading ? (
@@ -596,84 +826,193 @@ const WellnessCoachDashboard: React.FC = () => {
                     {timelineItems.map((item, index) => {
                       const iso = toDate(item.logDate);
                       const active = iso === selectedTimelineDate;
+                      const phaseColor = getPhaseColor(item.phase, item.phaseDayIndex, item.phaseTotalDays);
+                      const phaseLabel = getPhaseLabel(item.phase, t);
+                      const phaseProgressLabel = getPhaseProgressLabel(item.phaseDayIndex, item.phaseTotalDays, t);
                       return (
-                        <button key={`${item.logDate}-${index}`} type="button" onClick={() => pickTimelineDate(iso)} className="flex min-w-0 flex-1 flex-col items-center gap-1">
-                          <div className={`w-full max-w-[14px] rounded-t ${active ? 'bg-primary' : item.hasCheckin ? 'bg-cyan-500' : 'bg-slate-300'}`} style={{ height: `${Math.max(8, Math.round((item.waterMl / maxTimelineWater) * 100))}%` }} />
+                        <button
+                          key={`${item.logDate}-${index}`}
+                          type="button"
+                          onClick={() => pickTimelineDate(iso)}
+                          className="flex min-w-0 flex-1 flex-col items-center gap-1"
+                          title={`${phaseLabel} - ${phaseProgressLabel}`}
+                          aria-label={`${phaseLabel} - ${phaseProgressLabel}`}
+                        >
+                          <div
+                            className={`w-full max-w-[14px] rounded-t transition-all ${active ? 'ring-2 ring-primary/80 ring-offset-1' : ''}`}
+                            style={{
+                              height: `${active ? 100 : 84}%`,
+                              backgroundColor: phaseColor,
+                              opacity: item.hasCheckin ? 1 : 0.75,
+                            }}
+                          />
                           <div className="text-[10px] text-slate-500">{new Date(item.logDate).toLocaleDateString(locale, { month: 'numeric', day: 'numeric' })}</div>
+                          <div className="text-[9px] font-semibold text-slate-400">{phaseProgressLabel}</div>
                         </button>
                       );
                     })}
                   </div>
 
                   {selectedTimelineItem && (
-                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-[11px] font-semibold uppercase text-slate-500">Water</div><div className="mt-1 text-lg font-black text-slate-900">{selectedTimelineItem.waterMl} ml</div></div>
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-[11px] font-semibold uppercase text-slate-500">Workout</div><div className="mt-1 text-lg font-black text-slate-900">{selectedTimelineItem.workoutMinutes} min</div></div>
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-[11px] font-semibold uppercase text-slate-500">Weight</div><div className="mt-1 text-lg font-black text-slate-900">{selectedTimelineItem.currentWeightKg ?? '-'} kg</div></div>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-4">
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <div className="text-[11px] font-semibold uppercase text-slate-500">{t('wellness.dashboard.timeline.metrics.phase')}</div>
+                        <div className="mt-1 text-sm font-black text-slate-900">
+                          {getPhaseLabel(selectedTimelineItem.phase, t)} - {getPhaseProgressLabel(selectedTimelineItem.phaseDayIndex, selectedTimelineItem.phaseTotalDays, t)}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-[11px] font-semibold uppercase text-slate-500">{t('wellness.dashboard.log.water')}</div><div className="mt-1 text-lg font-black text-slate-900">{selectedTimelineItem.waterMl} ml</div></div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-[11px] font-semibold uppercase text-slate-500">{t('wellness.dashboard.log.workoutMinutes')}</div><div className="mt-1 text-lg font-black text-slate-900">{selectedTimelineItem.workoutMinutes} min</div></div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><div className="text-[11px] font-semibold uppercase text-slate-500">{t('wellness.dashboard.log.currentWeight')}</div><div className="mt-1 text-lg font-black text-slate-900">{selectedTimelineItem.currentWeightKg ?? '-'} kg</div></div>
                     </div>
                   )}
                 </>
               )}
             </div>
 
-            <form id="wellness-plan" onSubmit={savePlan} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
+            <form id="wellness-plan" onSubmit={savePlan} className="order-2 rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
               <div className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">tune</span>{t('wellness.dashboard.actions.savePlan')}</div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <select value={packageType} onChange={(event) => setPackageType(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">{checkoutPackages.map((pkg) => <option key={pkg.code} value={pkg.code}>{pkg.name}</option>)}</select>
-                <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="number" min={12} max={24} value={fastingHours} onChange={(event) => setFastingHours(Number(event.target.value))} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="number" min={1} max={12} value={eatingHours} onChange={(event) => setEatingHours(Number(event.target.value))} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="time" value={fastStart} onChange={(event) => setFastStart(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="number" step="0.1" value={startWeight} onChange={(event) => setStartWeight(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="number" step="0.1" value={targetWeight} onChange={(event) => setTargetWeight(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input value={timezone} onChange={(event) => setTimezone(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.package')}</span>
+                  <select aria-label={t('wellness.dashboard.form.package')} value={packageType} onChange={(event) => setPackageType(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">{checkoutPackages.map((pkg) => <option key={pkg.code} value={pkg.code}>{pkg.name}</option>)}</select>
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.startDate')}</span>
+                  <input aria-label={t('wellness.dashboard.form.startDate')} type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.endDate')}</span>
+                  <input aria-label={t('wellness.dashboard.form.endDate')} type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.fastingHours')}</span>
+                  <input aria-label={t('wellness.dashboard.form.fastingHours')} type="number" min={12} max={24} value={fastingHours} onChange={(event) => setFastingHours(Number(event.target.value))} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.eatingHours')}</span>
+                  <input aria-label={t('wellness.dashboard.form.eatingHours')} type="number" min={1} max={12} value={eatingHours} onChange={(event) => setEatingHours(Number(event.target.value))} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.fastStart')}</span>
+                  <input aria-label={t('wellness.dashboard.form.fastStart')} type="time" value={fastStart} onChange={(event) => setFastStart(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.startWeight')}</span>
+                  <input aria-label={t('wellness.dashboard.form.startWeight')} type="number" step="0.1" value={startWeight} onChange={(event) => setStartWeight(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.targetWeight')}</span>
+                  <input aria-label={t('wellness.dashboard.form.targetWeight')} type="number" step="0.1" value={targetWeight} onChange={(event) => setTargetWeight(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.form.timezone')}</span>
+                  <input aria-label={t('wellness.dashboard.form.timezone')} value={timezone} onChange={(event) => setTimezone(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
               </div>
-              <button type="submit" disabled={submitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">save</span>{t('wellness.dashboard.actions.savePlan')}</button>
+              <button type="submit" disabled={submitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">{submittingAction === 'plan' ? 'hourglass_top' : 'save'}</span>{submittingAction === 'plan' ? t('wellness.dashboard.status.savingPlan') : t('wellness.dashboard.actions.savePlan')}</button>
             </form>
 
-            <form id="wellness-log" onSubmit={saveLog} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
+            <form id="wellness-log" onSubmit={saveLog} className="order-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
               <div className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">edit_calendar</span>{t('wellness.dashboard.actions.saveLog')}</div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <input type="date" value={logDate} onChange={(event) => setLogDate(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="datetime-local" value={ateAtLocal} onChange={(event) => setAteAtLocal(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="number" value={waterMl} onChange={(event) => setWaterMl(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="number" value={workoutMinutes} onChange={(event) => setWorkoutMinutes(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input value={workoutType} onChange={(event) => setWorkoutType(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <input type="number" step="0.1" value={currentWeight} onChange={(event) => setCurrentWeight(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.log.logDate')}</span>
+                  <input aria-label={t('wellness.dashboard.log.logDate')} type="date" value={logDate} onChange={(event) => setLogDate(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.log.ateAt')}</span>
+                  <input aria-label={t('wellness.dashboard.log.ateAt')} type="datetime-local" value={ateAtLocal} onChange={(event) => setAteAtLocal(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.log.water')}</span>
+                  <input aria-label={t('wellness.dashboard.log.water')} type="number" value={waterMl} onChange={(event) => setWaterMl(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.log.workoutMinutes')}</span>
+                  <input aria-label={t('wellness.dashboard.log.workoutMinutes')} type="number" value={workoutMinutes} onChange={(event) => setWorkoutMinutes(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.log.workoutType')}</span>
+                  <input aria-label={t('wellness.dashboard.log.workoutType')} value={workoutType} onChange={(event) => setWorkoutType(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.log.currentWeight')}</span>
+                  <input aria-label={t('wellness.dashboard.log.currentWeight')} type="number" step="0.1" value={currentWeight} onChange={(event) => setCurrentWeight(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
               </div>
-              <textarea value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-3 min-h-[90px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-              <button type="submit" disabled={submitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">check_circle</span>{t('wellness.dashboard.actions.saveLog')}</button>
+              <label className="mt-3 flex flex-col gap-1">
+                <span className={inputLabelClassName}>{t('wellness.dashboard.log.notes')}</span>
+                <textarea aria-label={t('wellness.dashboard.log.notes')} value={notes} onChange={(event) => setNotes(event.target.value)} className="min-h-[90px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+              </label>
+              <button type="submit" disabled={submitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">{submittingAction === 'log' ? 'hourglass_top' : 'check_circle'}</span>{submittingAction === 'log' ? t('wellness.dashboard.status.savingLog') : t('wellness.dashboard.actions.saveLog')}</button>
             </form>
 
-            <div id="wellness-coach" className="grid gap-5 xl:grid-cols-2">
+            <div id="wellness-coach" className="order-6 grid gap-5 xl:grid-cols-2">
               <form onSubmit={sendMoodCoach} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
                 <div className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">smart_toy</span>{t('wellness.dashboard.coach.title')}</div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <input value={mood} onChange={(event) => setMood(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  <input value={energy} onChange={(event) => setEnergy(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  <input value={hunger} onChange={(event) => setHunger(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  <input value={thirst} onChange={(event) => setThirst(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  <input value={stress} onChange={(event) => setStress(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  <input value={sleepHours} onChange={(event) => setSleepHours(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  <input value={studyLoad} onChange={(event) => setStudyLoad(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm sm:col-span-2" />
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.mood')}</span>
+                    <input aria-label={t('wellness.dashboard.coach.form.mood')} placeholder={t('wellness.dashboard.coach.placeholders.mood')} value={mood} onChange={(event) => setMood(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.energy')}</span>
+                    <input aria-label={t('wellness.dashboard.coach.form.energy')} placeholder={t('wellness.dashboard.coach.placeholders.energy')} value={energy} onChange={(event) => setEnergy(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.hunger')}</span>
+                    <input aria-label={t('wellness.dashboard.coach.form.hunger')} placeholder={t('wellness.dashboard.coach.placeholders.hunger')} value={hunger} onChange={(event) => setHunger(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.thirst')}</span>
+                    <input aria-label={t('wellness.dashboard.coach.form.thirst')} placeholder={t('wellness.dashboard.coach.placeholders.thirst')} value={thirst} onChange={(event) => setThirst(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.stress')}</span>
+                    <input aria-label={t('wellness.dashboard.coach.form.stress')} placeholder={t('wellness.dashboard.coach.placeholders.stress')} value={stress} onChange={(event) => setStress(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.sleepHours')}</span>
+                    <input aria-label={t('wellness.dashboard.coach.form.sleepHours')} placeholder={t('wellness.dashboard.coach.placeholders.sleepHours')} type="number" min={0} max={24} value={sleepHours} onChange={(event) => setSleepHours(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
+                  <label className="flex flex-col gap-1 sm:col-span-2">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.studyLoad')}</span>
+                    <input aria-label={t('wellness.dashboard.coach.form.studyLoad')} placeholder={t('wellness.dashboard.coach.placeholders.studyLoad')} value={studyLoad} onChange={(event) => setStudyLoad(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
                 </div>
-                <textarea value={coachNotes} onChange={(event) => setCoachNotes(event.target.value)} className="mt-3 min-h-[90px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <button type="submit" disabled={coachSubmitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">forum</span>{t('wellness.dashboard.coach.actions.send')}</button>
+                <label className="mt-3 flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.notes')}</span>
+                  <textarea aria-label={t('wellness.dashboard.coach.form.notes')} placeholder={t('wellness.dashboard.coach.placeholders.notes')} value={coachNotes} onChange={(event) => setCoachNotes(event.target.value)} className="min-h-[90px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <button type="submit" disabled={coachSubmitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">{coachSubmitting ? 'hourglass_top' : 'forum'}</span>{coachSubmitting ? t('wellness.dashboard.status.askingCoach') : t('wellness.dashboard.coach.actions.send')}</button>
                 {coachReply && <p className="mt-3 whitespace-pre-line rounded-2xl border border-primary/20 bg-primary/5 p-3 text-sm text-slate-700">{coachReply.reply}</p>}
               </form>
 
               <form onSubmit={generateMealSuggestion} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
                 <div className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-emerald-600">restaurant_menu</span>{t('wellness.dashboard.meal.title')}</div>
-                <textarea value={mealIngredients} onChange={(event) => setMealIngredients(event.target.value)} className="min-h-[90px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                <label className="flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.ingredients')}</span>
+                  <textarea aria-label={t('wellness.dashboard.meal.form.ingredients')} placeholder={t('wellness.dashboard.meal.placeholders.ingredients')} value={mealIngredients} onChange={(event) => setMealIngredients(event.target.value)} className="min-h-[90px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <input type="number" value={mealServings} onChange={(event) => setMealServings(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  <input value={mealGoal} onChange={(event) => setMealGoal(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.servings')}</span>
+                    <input aria-label={t('wellness.dashboard.meal.form.servings')} placeholder={t('wellness.dashboard.meal.placeholders.servings')} type="number" min={1} max={12} value={mealServings} onChange={(event) => setMealServings(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.goal')}</span>
+                    <input aria-label={t('wellness.dashboard.meal.form.goal')} placeholder={t('wellness.dashboard.meal.placeholders.goal')} value={mealGoal} onChange={(event) => setMealGoal(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                  </label>
                 </div>
-                <input value={mealDietaryPreference} onChange={(event) => setMealDietaryPreference(event.target.value)} className="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                <button type="submit" disabled={mealSubmitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">auto_awesome</span>{t('wellness.dashboard.meal.actions.generate')}</button>
+                <label className="mt-3 flex flex-col gap-1">
+                  <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.dietaryPreference')}</span>
+                  <input aria-label={t('wellness.dashboard.meal.form.dietaryPreference')} placeholder={t('wellness.dashboard.meal.placeholders.dietaryPreference')} value={mealDietaryPreference} onChange={(event) => setMealDietaryPreference(event.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
+                </label>
+                <button type="submit" disabled={mealSubmitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">{mealSubmitting ? 'hourglass_top' : 'auto_awesome'}</span>{mealSubmitting ? t('wellness.dashboard.status.generatingMeal') : t('wellness.dashboard.meal.actions.generate')}</button>
                 {mealSuggestion && <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-slate-700"><p className="whitespace-pre-line">{mealSuggestion.menu}</p><p className="mt-2 text-xs">{mealSuggestion.nutritionNotes}</p></div>}
               </form>
+            </div>
             </div>
           </>
         ) : (
@@ -692,10 +1031,10 @@ const WellnessCoachDashboard: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"><span className="material-symbols-outlined rounded-xl bg-cyan-50 p-2 text-cyan-600">schedule</span><div><div className="text-[11px] font-semibold uppercase text-slate-500">{t('wellness.dashboard.sidebar.fasting')}</div><div className="text-lg font-black text-slate-900">{Math.round(fastProgress)}%</div></div></div>
           <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"><span className="material-symbols-outlined rounded-xl bg-sky-50 p-2 text-sky-600">local_drink</span><div><div className="text-[11px] font-semibold uppercase text-slate-500">{t('wellness.dashboard.sidebar.water')}</div><div className="text-lg font-black text-slate-900">{waterDone}/{waterGoal} ml</div></div></div>
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"><span className="material-symbols-outlined rounded-xl bg-emerald-50 p-2 text-emerald-600">task_alt</span><div><div className="text-[11px] font-semibold uppercase text-slate-500">Checkpoint</div><div className="text-lg font-black text-slate-900">{checkpointDone}/{timelineItems.length || 0}</div></div></div>
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"><span className="material-symbols-outlined rounded-xl bg-violet-50 p-2 text-violet-600">query_stats</span><div><div className="text-[11px] font-semibold uppercase text-slate-500">Completion</div><div className="text-lg font-black text-slate-900">{completionRate}%</div></div></div>
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"><span className="material-symbols-outlined rounded-xl bg-emerald-50 p-2 text-emerald-600">task_alt</span><div><div className="text-[11px] font-semibold uppercase text-slate-500">{t('wellness.dashboard.sidebar.checkpoint')}</div><div className="text-lg font-black text-slate-900">{checkpointDone}/{timelineItems.length || 0}</div></div></div>
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"><span className="material-symbols-outlined rounded-xl bg-violet-50 p-2 text-violet-600">query_stats</span><div><div className="text-[11px] font-semibold uppercase text-slate-500">{t('wellness.dashboard.sidebar.completion')}</div><div className="text-lg font-black text-slate-900">{completionRate}%</div></div></div>
         </div>
-        <button type="button" onClick={() => goCheckout(recommendedLockedPackage)} disabled={checkoutPackage !== null} className="inline-flex w-full items-center justify-center gap-1 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"><span className="material-symbols-outlined text-sm">upgrade</span>{t('wellness.dashboard.actions.upgrade')}</button>
+        <button type="button" onClick={() => goCheckout(recommendedLockedPackage)} disabled={checkoutPackage !== null} className="inline-flex w-full items-center justify-center gap-1 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white disabled:opacity-60"><span className="material-symbols-outlined text-sm">{checkoutPackage !== null ? 'hourglass_top' : 'upgrade'}</span>{checkoutPackage !== null ? t('wellness.dashboard.status.openingCheckout') : t('wellness.dashboard.actions.upgrade')}</button>
       </aside>
     </section>
   );

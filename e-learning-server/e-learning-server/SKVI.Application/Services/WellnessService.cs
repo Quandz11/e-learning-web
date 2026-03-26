@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
 using SKVI.Application.DTOs.Wellness;
 using SKVI.Application.Interfaces;
@@ -15,6 +16,7 @@ public class WellnessService : IWellnessService
     private const string PlanStatusActive = "ACTIVE";
     private const string PlanStatusCompleted = "COMPLETED";
     private const string PlanStatusArchived = "ARCHIVED";
+    private static readonly TimeSpan DashboardCacheTtl = TimeSpan.FromSeconds(20);
 
     private static readonly Dictionary<string, string> TimezoneAliases = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -44,6 +46,7 @@ public class WellnessService : IWellnessService
     ];
 
     private readonly ApplicationDbContext _dbContext;
+    private readonly IMemoryCache _memoryCache;
     private readonly IWellnessEncryptionService _encryptionService;
     private readonly IWellnessRateLimiter _rateLimiter;
     private readonly IWellnessAccessService _wellnessAccessService;
@@ -52,6 +55,7 @@ public class WellnessService : IWellnessService
 
     public WellnessService(
         ApplicationDbContext dbContext,
+        IMemoryCache memoryCache,
         IWellnessEncryptionService encryptionService,
         IWellnessRateLimiter rateLimiter,
         IWellnessAccessService wellnessAccessService,
@@ -59,6 +63,7 @@ public class WellnessService : IWellnessService
         ILogger<WellnessService> logger)
     {
         _dbContext = dbContext;
+        _memoryCache = memoryCache;
         _encryptionService = encryptionService;
         _rateLimiter = rateLimiter;
         _wellnessAccessService = wellnessAccessService;
@@ -66,9 +71,21 @@ public class WellnessService : IWellnessService
         _logger = logger;
     }
 
-    public Task<WellnessDashboardDto> GetDashboardAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<WellnessDashboardDto> GetDashboardAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return GetDashboardInternalAsync(userId, cancellationToken);
+        var cacheKey = BuildDashboardCacheKey(userId);
+        if (_memoryCache.TryGetValue<WellnessDashboardDto>(cacheKey, out var cached) && cached != null)
+        {
+            return cached;
+        }
+
+        var dashboard = await GetDashboardInternalAsync(userId, cancellationToken);
+        _memoryCache.Set(cacheKey, dashboard, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = DashboardCacheTtl
+        });
+
+        return dashboard;
     }
 
     private async Task<WellnessDashboardDto> GetDashboardInternalAsync(Guid userId, CancellationToken cancellationToken)
@@ -184,6 +201,8 @@ public class WellnessService : IWellnessService
         {
             throw new InvalidOperationException("End date must be after start date.");
         }
+        WellnessPhasePlanner.ValidateScheduleDuration(startDate, endDate);
+        var phaseBreakdown = WellnessPhasePlanner.BuildPhaseBreakdown(startDate, endDate);
 
         var activePlans = await _dbContext.WellnessPlans
             .Where(p => p.UserId == userId && (p.Status == PlanStatusActive || p.Status == PlanStatusScheduled))
@@ -239,10 +258,14 @@ public class WellnessService : IWellnessService
                 plan.DailyFastStartMinuteOfDay,
                 plan.Timezone,
                 plan.StartWeightKg,
-                plan.TargetWeightKg
+                plan.TargetWeightKg,
+                phaseBreakdown.PreparationDays,
+                phaseBreakdown.FastingDays,
+                phaseBreakdown.RefeedDays
             });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        InvalidateDashboardCache(userId);
 
         return MapPlan(plan, localNowDate);
     }
@@ -254,18 +277,21 @@ public class WellnessService : IWellnessService
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
         await _wellnessAccessService.EnsureAccessAsync(userId, plan.PackageType, cancellationToken);
         var utcNow = DateTime.UtcNow;
+        var nextStartDate = request.StartDate.Date;
+        var nextEndDate = request.EndDate.Date;
+        if (nextEndDate < nextStartDate)
+        {
+            throw new InvalidOperationException("Schedule is invalid.");
+        }
+        WellnessPhasePlanner.ValidateScheduleDuration(nextStartDate, nextEndDate);
+        var phaseBreakdown = WellnessPhasePlanner.BuildPhaseBreakdown(nextStartDate, nextEndDate);
 
-        plan.StartDate = request.StartDate.Date;
-        plan.EndDate = request.EndDate.Date;
+        plan.StartDate = nextStartDate;
+        plan.EndDate = nextEndDate;
         plan.FastingHours = request.FastingHours;
         plan.EatingHours = request.EatingHours;
         plan.DailyFastStartMinuteOfDay = request.DailyFastStartMinuteOfDay;
         plan.UpdatedAt = utcNow;
-
-        if (plan.EndDate < plan.StartDate)
-        {
-            throw new InvalidOperationException("Schedule is invalid.");
-        }
 
         var localNowDate = ConvertUtcToLocal(utcNow, plan.Timezone).Date;
         RefreshPlanStatus(plan, utcNow, localNowDate);
@@ -281,10 +307,14 @@ public class WellnessService : IWellnessService
                 plan.EndDate,
                 plan.FastingHours,
                 plan.EatingHours,
-                plan.DailyFastStartMinuteOfDay
+                plan.DailyFastStartMinuteOfDay,
+                phaseBreakdown.PreparationDays,
+                phaseBreakdown.FastingDays,
+                phaseBreakdown.RefeedDays
             });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        InvalidateDashboardCache(userId);
         return MapPlan(plan, localNowDate);
     }
 
@@ -347,6 +377,7 @@ public class WellnessService : IWellnessService
             });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        InvalidateDashboardCache(userId);
         return MapDailyLog(log, plan.Timezone);
     }
 
@@ -422,6 +453,7 @@ public class WellnessService : IWellnessService
             new { request.Mood, request.Energy, request.Hunger, request.Thirst, request.Stress, request.SleepHours });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        InvalidateDashboardCache(userId);
 
         return new WellnessCoachReplyDto
         {
@@ -478,6 +510,7 @@ public class WellnessService : IWellnessService
             new { request.Servings, request.Goal, request.DietaryPreference, IngredientCount = ingredients.Count });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+        InvalidateDashboardCache(userId);
 
         return new WellnessMealSuggestionDto
         {
@@ -500,6 +533,7 @@ public class WellnessService : IWellnessService
         Guid userId,
         Guid planId,
         int days = 30,
+        bool includeFuture = false,
         CancellationToken cancellationToken = default)
     {
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
@@ -507,16 +541,41 @@ public class WellnessService : IWellnessService
 
         var requestedDays = Math.Clamp(days, 7, 180);
         var localToday = ConvertUtcToLocal(DateTime.UtcNow, plan.Timezone).Date;
-        var fromDate = localToday.AddDays(-(requestedDays - 1));
-        if (fromDate < plan.StartDate.Date)
-        {
-            fromDate = plan.StartDate.Date;
-        }
+        DateTime fromDate;
+        DateTime toDate;
 
-        var toDate = localToday;
-        if (toDate > plan.EndDate.Date)
+        if (includeFuture)
         {
-            toDate = plan.EndDate.Date;
+            fromDate = localToday;
+            if (fromDate < plan.StartDate.Date)
+            {
+                fromDate = plan.StartDate.Date;
+            }
+
+            if (fromDate > plan.EndDate.Date)
+            {
+                fromDate = plan.EndDate.Date;
+            }
+
+            toDate = fromDate.AddDays(requestedDays - 1);
+            if (toDate > plan.EndDate.Date)
+            {
+                toDate = plan.EndDate.Date;
+            }
+        }
+        else
+        {
+            fromDate = localToday.AddDays(-(requestedDays - 1));
+            if (fromDate < plan.StartDate.Date)
+            {
+                fromDate = plan.StartDate.Date;
+            }
+
+            toDate = localToday;
+            if (toDate > plan.EndDate.Date)
+            {
+                toDate = plan.EndDate.Date;
+            }
         }
 
         if (toDate < fromDate)
@@ -529,34 +588,51 @@ public class WellnessService : IWellnessService
             .Where(l => l.PlanId == plan.Id && l.LogDate >= fromDate && l.LogDate <= toDate)
             .OrderBy(l => l.LogDate)
             .ToListAsync(cancellationToken);
+        var phaseBreakdown = WellnessPhasePlanner.BuildPhaseBreakdown(plan.StartDate.Date, plan.EndDate.Date);
+        var logsByDate = logs
+            .GroupBy(log => log.LogDate.Date)
+            .ToDictionary(group => group.Key, group => group.OrderByDescending(log => log.UpdatedAt).First());
 
-        var items = logs.Select(log => new WellnessProgressTimelineItemDto
+        var items = new List<WellnessProgressTimelineItemDto>();
+        for (var date = fromDate; date <= toDate; date = date.AddDays(1))
         {
-            LogDate = log.LogDate,
-            CurrentWeightKg = log.CurrentWeightKg,
-            WaterMl = log.WaterMl,
-            WorkoutMinutes = log.WorkoutMinutes,
-            WorkoutType = log.WorkoutType,
-            HasCheckin = log.WaterMl > 0
+            logsByDate.TryGetValue(date, out var log);
+            var hasCheckin = log != null && (
+                log.WaterMl > 0
                 || log.WorkoutMinutes > 0
                 || log.CurrentWeightKg.HasValue
-                || !string.IsNullOrWhiteSpace(log.WorkoutType)
-        }).ToList();
+                || !string.IsNullOrWhiteSpace(log.WorkoutType));
+
+            var phase = WellnessPhasePlanner.ResolvePhaseForDate(date, plan.StartDate.Date, phaseBreakdown);
+            items.Add(new WellnessProgressTimelineItemDto
+            {
+                LogDate = date,
+                CurrentWeightKg = log?.CurrentWeightKg,
+                WaterMl = log?.WaterMl ?? 0,
+                WorkoutMinutes = log?.WorkoutMinutes ?? 0,
+                WorkoutType = log?.WorkoutType ?? string.Empty,
+                HasCheckin = hasCheckin,
+                Phase = phase.Phase,
+                PhaseDayIndex = phase.DayIndex,
+                PhaseTotalDays = phase.TotalDays
+            });
+        }
 
         var latestWeight = items
             .Where(i => i.CurrentWeightKg.HasValue)
             .Select(i => i.CurrentWeightKg)
             .LastOrDefault();
+        var loggedItems = items.Where(i => i.HasCheckin).ToList();
 
         return new WellnessProgressTimelineDto
         {
             FromDate = fromDate,
             ToDate = toDate,
             RequestedDays = requestedDays,
-            LoggedDays = items.Count,
+            LoggedDays = loggedItems.Count,
             LatestWeightKg = latestWeight ?? plan.LatestWeightKg,
-            AverageWaterMl = items.Count == 0 ? 0 : (int)Math.Round(items.Average(i => i.WaterMl)),
-            TotalWorkoutMinutes = items.Sum(i => i.WorkoutMinutes),
+            AverageWaterMl = loggedItems.Count == 0 ? 0 : (int)Math.Round(loggedItems.Average(i => i.WaterMl)),
+            TotalWorkoutMinutes = loggedItems.Sum(i => i.WorkoutMinutes),
             Items = items
         };
     }
@@ -1104,7 +1180,8 @@ public class WellnessService : IWellnessService
 
     private static WellnessPlanDto MapPlan(WellnessPlan plan, DateTime localDate)
     {
-        var totalDays = Math.Max(1, (plan.EndDate.Date - plan.StartDate.Date).Days + 1);
+        var phaseBreakdown = WellnessPhasePlanner.BuildPhaseBreakdown(plan.StartDate.Date, plan.EndDate.Date);
+        var totalDays = phaseBreakdown.TotalDays;
         var elapsed = Math.Clamp((localDate - plan.StartDate.Date).Days + 1, 0, totalDays);
 
         return new WellnessPlanDto
@@ -1123,8 +1200,21 @@ public class WellnessService : IWellnessService
             Status = plan.Status,
             TotalDays = totalDays,
             ElapsedDays = elapsed,
+            PreparationDays = phaseBreakdown.PreparationDays,
+            FastingDays = phaseBreakdown.FastingDays,
+            RefeedDays = phaseBreakdown.RefeedDays,
             CreatedAt = plan.CreatedAt
         };
+    }
+
+    private static string BuildDashboardCacheKey(Guid userId)
+    {
+        return $"wellness:dashboard:{userId:N}";
+    }
+
+    private void InvalidateDashboardCache(Guid userId)
+    {
+        _memoryCache.Remove(BuildDashboardCacheKey(userId));
     }
 
     private WellnessDailyLogDto MapDailyLog(WellnessDailyLog log, string timezone)

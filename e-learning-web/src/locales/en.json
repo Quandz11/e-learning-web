@@ -2435,20 +2435,35 @@
             },
             "timeline": {
                 "title": "Progress timeline",
-                "subtitle": "Track hydration, workouts, and weight changes over time.",
+                "subtitle": "Track your phase schedule and daily health logs over time.",
                 "range": "From {{from}} to {{to}}",
                 "days": "{{days}} days",
                 "loading": "Loading timeline...",
                 "empty": "No logs yet in this range.",
                 "tooltip": "{{date}} - Water: {{water}}ml, Workout: {{workout}} min",
+                "modes": {
+                    "history": "Past & today",
+                    "future": "Future"
+                },
                 "metrics": {
                     "loggedDays": "Logged days",
                     "avgWater": "Avg water",
                     "totalWorkout": "Workout total",
-                    "latestWeight": "Latest weight"
+                    "latestWeight": "Latest weight",
+                    "phase": "Phase"
+                },
+                "phases": {
+                    "prepare": "Prepare {{days}} day(s)",
+                    "fasting": "Fasting {{days}} day(s)",
+                    "refeed": "Refeed {{days}} day(s)",
+                    "prepareLabel": "Prepare",
+                    "fastingLabel": "Fasting",
+                    "refeedLabel": "Refeed",
+                    "dayProgress": "Day {{day}}/{{total}}"
                 }
             },
             "form": {
+                "package": "Package",
                 "startDate": "Start date",
                 "endDate": "End date",
                 "fastingHours": "Fasting hours",
@@ -2463,14 +2478,56 @@
                 "upgrade": "Upgrade checkout",
                 "saveLog": "Save today's log"
             },
+            "flow": {
+                "title": "Recommended workflow",
+                "subtitle": "Complete setup first, check in daily, review timeline, then ask AI for personalized optimization.",
+                "plan": {
+                    "title": "Set up roadmap",
+                    "hint": "Choose package, timeline, and fasting schedule"
+                },
+                "log": {
+                    "title": "Check in today",
+                    "hint": "Log water, workout, and body signals"
+                },
+                "timeline": {
+                    "title": "Review progress",
+                    "hint": "Track phase progress and completed check-ins"
+                },
+                "coach": {
+                    "title": "Ask AI coach",
+                    "hint": "Get personalized guidance and meal support"
+                }
+            },
             "log": {
                 "logDate": "Log date",
                 "ateAt": "Ate at",
                 "water": "Water (ml)",
+                "waterGoal": "Water goal (ml)",
                 "workoutMinutes": "Workout minutes",
                 "workoutType": "Workout type",
                 "currentWeight": "Current weight (kg)",
                 "notes": "Notes"
+            },
+            "quickStatus": {
+                "good": "OK",
+                "hungry": "Hungry",
+                "tired": "Tired",
+                "thirsty": "Thirsty",
+                "busy": "Busy"
+            },
+            "quick": {
+                "applied": "Quick status updated."
+            },
+            "quickStatusNotes": {
+                "good": "Quick update: I feel stable today.",
+                "hungry": "Quick update: Hunger rises strongly now.",
+                "tired": "Quick update: Energy is low and I need a lighter pace.",
+                "thirsty": "Quick update: I may be dehydrated.",
+                "busy": "Quick update: Busy schedule today, need compact actions."
+            },
+            "water": {
+                "add250": "+250ml",
+                "add500": "+500ml"
             },
             "coach": {
                 "title": "AI health advisor",
@@ -2484,6 +2541,16 @@
                     "sleepHours": "Sleep hours",
                     "studyLoad": "Study load today",
                     "notes": "Extra context for AI coach"
+                },
+                "placeholders": {
+                    "mood": "e.g. balanced / tired",
+                    "energy": "e.g. low / medium / high",
+                    "hunger": "e.g. normal / high",
+                    "thirst": "e.g. normal / high",
+                    "stress": "e.g. low / moderate / high",
+                    "sleepHours": "e.g. 7",
+                    "studyLoad": "e.g. normal study / heavy study",
+                    "notes": "Describe your body signals or study pressure today..."
                 },
                 "options": {
                     "mood": {
@@ -2519,6 +2586,12 @@
                     "goal": "Meal goal",
                     "dietaryPreference": "Dietary preference (optional)"
                 },
+                "placeholders": {
+                    "ingredients": "e.g. chicken breast, broccoli, brown rice",
+                    "servings": "e.g. 2",
+                    "goal": "e.g. focus-study-day",
+                    "dietaryPreference": "e.g. low-carb, vegetarian"
+                },
                 "options": {
                     "goal": {
                         "focusStudy": "Focus study day",
@@ -2534,6 +2607,8 @@
             "sidebar": {
                 "fasting": "FASTING - EATING",
                 "water": "Water",
+                "checkpoint": "Checkpoint",
+                "completion": "Completion",
                 "weight": "Weight X to Y",
                 "weightRange": "{{start}}kg to {{target}}kg",
                 "currentWeight": "Current: {{current}}kg"
@@ -2546,7 +2621,16 @@
                 "savePlan": "Roadmap saved",
                 "saveLog": "Daily log updated",
                 "coachReply": "AI advice generated",
-                "mealReady": "Meal formula generated"
+                "mealReady": "Meal formula generated",
+                "waterUpdated": "Added {{amount}}ml water."
+            },
+            "status": {
+                "openingCheckout": "Opening checkout...",
+                "redirectingCheckout": "Redirecting to checkout...",
+                "savingPlan": "Saving roadmap...",
+                "savingLog": "Saving daily log...",
+                "askingCoach": "Requesting AI coach...",
+                "generatingMeal": "Generating meal formula..."
             },
             "errors": {
                 "loadDashboard": "Unable to load wellness dashboard",
@@ -2558,7 +2642,8 @@
                 "packageRequired": "You need to purchase a package to use this feature.",
                 "moodCoach": "Unable to get AI advisor response",
                 "mealCoach": "Unable to generate meal formula",
-                "mealIngredients": "Enter at least one ingredient"
+                "mealIngredients": "Enter at least one ingredient",
+                "moodFieldsRequired": "Enter mood, energy, hunger, and thirst before requesting AI advice."
             }
         },
         "admin": {

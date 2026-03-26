@@ -79,6 +79,7 @@ import Challenge10DayPage from './pages/Challenge10DayPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import ContactUsPage from './pages/ContactUsPage';
 import MissionVisionPage from './pages/MissionVisionPage';
+import { Toaster } from 'react-hot-toast';
 
 // Removed RootRedirect to allow all users to access the HomePage at '/'
 
@@ -736,6 +737,16 @@ function App() {
     <ToastProvider>
       <NotificationProvider>
         <RouterProvider router={router} />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3200,
+            style: {
+              borderRadius: '12px',
+              fontSize: '13px',
+            },
+          }}
+        />
         <ToastContainer />
       </NotificationProvider>
     </ToastProvider>

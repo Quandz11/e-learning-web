@@ -115,9 +115,14 @@ public class AuthService : IAuthService
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
         }
 
-        var normalizedPhone = NormalizePhone(identifier);
+        var phoneCandidates = BuildPhoneCandidates(identifier);
+        if (phoneCandidates.Count == 0)
+        {
+            return null;
+        }
+
         var users = await _context.Users
-            .Where(u => u.Phone == normalizedPhone && !u.IsDeleted)
+            .Where(u => u.Phone != null && phoneCandidates.Contains(u.Phone) && !u.IsDeleted)
             .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
 
@@ -162,6 +167,41 @@ public class AuthService : IAuthService
         return normalized;
     }
 
+    private static List<string> BuildPhoneCandidates(string identifier)
+    {
+        if (string.IsNullOrWhiteSpace(identifier))
+        {
+            return new List<string>();
+        }
+
+        var cleaned = Regex.Replace(identifier.Trim(), @"[\s\-\.\(\)]", string.Empty);
+        if (string.IsNullOrWhiteSpace(cleaned))
+        {
+            return new List<string>();
+        }
+
+        var candidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            cleaned
+        };
+
+        var noPlus = cleaned.StartsWith("+", StringComparison.Ordinal) ? cleaned[1..] : cleaned;
+        candidates.Add(noPlus);
+
+        if (noPlus.StartsWith("0", StringComparison.Ordinal) && noPlus.Length > 1)
+        {
+            candidates.Add("84" + noPlus[1..]);
+        }
+
+        if (noPlus.StartsWith("84", StringComparison.Ordinal) && noPlus.Length > 2)
+        {
+            candidates.Add("0" + noPlus[2..]);
+            candidates.Add("+" + noPlus);
+        }
+
+        return candidates.Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
     public async Task RegisterAsync(RegisterRequest request)
     {
         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
@@ -170,6 +210,11 @@ public class AuthService : IAuthService
         }
 
         var otp = Random.Shared.Next(100000, 999999).ToString();
+        var normalizedPhone = string.IsNullOrWhiteSpace(request.Phone) ? null : NormalizePhone(request.Phone);
+        if (!string.IsNullOrWhiteSpace(normalizedPhone) && !Regex.IsMatch(normalizedPhone, @"^\d{9,15}$"))
+        {
+            throw new InvalidOperationException("Phone number format is invalid.");
+        }
 
         var user = new User
         {
@@ -177,7 +222,7 @@ public class AuthService : IAuthService
             Email = request.Email,
             PasswordHash = _passwordHasher.HashPassword(request.Password),
             FullName = request.FullName,
-            Phone = request.Phone,
+            Phone = normalizedPhone,
             Role = "STUDENT", // Default role
             Status = "PENDING",
             IsEmailVerified = false,

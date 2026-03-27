@@ -315,9 +315,31 @@ public class PhoneAuthService : IPhoneAuthService
 
     private async Task<User?> GetUniqueUserByPhoneAsync(string normalizedPhone, CancellationToken cancellationToken)
     {
+        var phoneCandidates = BuildPhoneCandidates(normalizedPhone)
+            .Select(candidate => candidate.StartsWith("+", StringComparison.Ordinal) ? candidate[1..] : candidate)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (phoneCandidates.Count == 0)
+        {
+            return null;
+        }
+
         var users = await _context.Users
-            .Where(u => u.Phone == normalizedPhone && !u.IsDeleted)
-            .OrderByDescending(u => u.CreatedAt)
+            .Where(u => u.Phone != null && !u.IsDeleted)
+            .Select(u => new
+            {
+                User = u,
+                PhoneClean = u.Phone!
+                    .Replace(" ", string.Empty)
+                    .Replace("-", string.Empty)
+                    .Replace(".", string.Empty)
+                    .Replace("(", string.Empty)
+                    .Replace(")", string.Empty)
+                    .Replace("+", string.Empty)
+            })
+            .Where(entry => phoneCandidates.Contains(entry.PhoneClean))
+            .OrderByDescending(entry => entry.User.CreatedAt)
+            .Select(entry => entry.User)
             .ToListAsync(cancellationToken);
 
         if (users.Count <= 1)
@@ -326,6 +348,41 @@ public class PhoneAuthService : IPhoneAuthService
         }
 
         throw new InvalidOperationException("Phone number is linked to multiple accounts. Please contact support.");
+    }
+
+    private static List<string> BuildPhoneCandidates(string identifier)
+    {
+        if (string.IsNullOrWhiteSpace(identifier))
+        {
+            return new List<string>();
+        }
+
+        var cleaned = Regex.Replace(identifier.Trim(), @"[\s\-\.\(\)]", string.Empty);
+        if (string.IsNullOrWhiteSpace(cleaned))
+        {
+            return new List<string>();
+        }
+
+        var candidates = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            cleaned
+        };
+
+        var noPlus = cleaned.StartsWith("+", StringComparison.Ordinal) ? cleaned[1..] : cleaned;
+        candidates.Add(noPlus);
+
+        if (noPlus.StartsWith("0", StringComparison.Ordinal) && noPlus.Length > 1)
+        {
+            candidates.Add("84" + noPlus[1..]);
+        }
+
+        if (noPlus.StartsWith("84", StringComparison.Ordinal) && noPlus.Length > 2)
+        {
+            candidates.Add("0" + noPlus[2..]);
+            candidates.Add("+" + noPlus);
+        }
+
+        return candidates.Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     private async Task<AuthResponse> GenerateTokensForUserAsync(

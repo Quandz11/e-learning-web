@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "W0gaHFEortU=",
+  "dgSpecHash": "1901AD6eXnc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Quan\\Documents\\elearning\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
+  "projectFilePath": "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Quan\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

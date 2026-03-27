@@ -132,6 +132,7 @@ public class PhoneAuthService : IPhoneAuthService
         ValidateOtp(user, request.Otp);
 
         user.IsPhoneVerified = true;
+        user.IsEmailVerified = true;
         user.Status = "ACTIVE";
         user.OtpCode = null;
         user.OtpExpiration = null;

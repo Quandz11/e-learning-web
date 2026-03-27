@@ -275,6 +275,7 @@ public class AuthService : IAuthService
 
         // Verify Success
         user.IsEmailVerified = true;
+        user.IsPhoneVerified = true;
         user.Status = "ACTIVE";
         user.OtpCode = null;
         user.OtpExpiration = null;

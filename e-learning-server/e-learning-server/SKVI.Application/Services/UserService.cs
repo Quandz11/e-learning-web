@@ -79,6 +79,7 @@ public class UserService : IUserService
         ValidateRoleAndStatus(request.Role, request.Status);
 
         var email = request.Email.Trim().ToLower();
+        var normalizedStatus = request.Status.ToUpper();
         var exists = await _dbContext.Users.AnyAsync(u => u.Email.ToLower() == email && !u.IsDeleted, cancellationToken);
         if (exists)
         {
@@ -93,10 +94,10 @@ public class UserService : IUserService
             FullName = request.FullName?.Trim(),
             Phone = request.Phone?.Trim(),
             Role = request.Role.ToUpper(),
-            Status = request.Status.ToUpper(),
+            Status = normalizedStatus,
             AvatarUrl = request.AvatarUrl,
-            IsEmailVerified = true, // Admin creation implies verification
-            IsPhoneVerified = true,
+            IsEmailVerified = normalizedStatus == "ACTIVE",
+            IsPhoneVerified = normalizedStatus == "ACTIVE",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             IsDeleted = false
@@ -122,6 +123,11 @@ public class UserService : IUserService
         user.Phone = request.Phone?.Trim();
         user.Role = request.Role.ToUpper();
         user.Status = request.Status.ToUpper();
+        if (user.Status == "ACTIVE")
+        {
+            user.IsEmailVerified = true;
+            user.IsPhoneVerified = true;
+        }
         user.AvatarUrl = request.AvatarUrl;
         user.UpdatedAt = DateTime.UtcNow;
 

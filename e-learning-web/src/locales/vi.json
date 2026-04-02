@@ -1297,7 +1297,8 @@
                 "pricing": "Bảng giá",
                 "ambassador": "Đại sứ sức khỏe",
                 "missionVision": "Sứ mệnh & tầm nhìn",
-                "policy": "Chính sách"
+                "policy": "Chính sách",
+                "courseCenter": "Trung tâm khóa học"
             },
             "cartTitle": "Giỏ hàng",
             "logout": "Đăng xuất",
@@ -1306,7 +1307,7 @@
             "userMenu": {
                 "profile": "Hồ sơ",
                 "settings": "Cài đặt",
-                "learningPlan": "Lộ trình học của tôi"
+                "learningPlan": "Kế hoạch học của tôi"
             }
         },
         "hero": {
@@ -1508,6 +1509,56 @@
             },
             "copyrightLine": "© {{year}} Nhịn Ăn Chữa Lành. Tất cả các quyền được bảo hộ. Thiết kế bởi Nhinanchualanh.vn.",
             "medicalNotice": "*Lưu ý: Các thông tin trên website mang tính chất chia sẻ kiến thức và kinh nghiệm cá nhân. Chúng tôi không đưa ra lời khuyên y tế thay thế cho bác sĩ chuyên khoa. Vui lòng tham vấn ý kiến chuyên gia trước khi bắt đầu bất kỳ liệu trình nhịn ăn chuyên sâu nào.*"
+        },
+        "courseCenter": {
+            "title": "Chọn đúng gói theo thời gian, mục tiêu và mức đồng hành bạn đang cần",
+            "subtitle": "Từ trải nghiệm nhẹ nhàng, tự học, làm theo cho người bận rộn đến huấn luyện sát sao, mỗi gói giúp bạn bắt đầu đúng chỗ và nâng cấp đúng lúc.",
+            "choose": "Chọn gói này",
+            "cards": {
+                "0": {
+                    "tag": "MUỐN THỬ NHẸ NHÀNG",
+                    "title": "Gói Khởi Động 3 Ngày",
+                    "description": "Dành cho người mới muốn bắt đầu nhẹ nhàng và làm quen với cách làm.",
+                    "price": "99.000đ"
+                },
+                "1": {
+                    "tag": "DÀNH CHO NGƯỜI BẬN RỘN",
+                    "badge": "PHỔ BIẾN",
+                    "title": "Gói Nhịn Ăn Cho Người Bận Rộn",
+                    "description": "Không cần học quá nhiều lý thuyết, chỉ cần làm theo hướng dẫn hằng ngày.",
+                    "price": "999.000đ"
+                },
+                "2": {
+                    "tag": "MUỐN HIỂU SÂU VÀ CÓ NGƯỜI KÈM",
+                    "title": "Gói Nhịn Full Toàn Tập",
+                    "description": "Tài liệu đầy đủ kèm Zoom cùng chuyên gia, phù hợp cho người muốn đi bài bản.",
+                    "price": "1.990.000đ"
+                }
+            },
+            "guides": {
+                "0": {
+                    "title": "Bạn mới bắt đầu?",
+                    "description": "Chọn gói Khởi Động 3 Ngày để trải nghiệm trước và làm quen từng bước."
+                },
+                "1": {
+                    "title": "Bạn rất bận?",
+                    "description": "Chọn gói Người Bận Rộn để làm theo nhắc nhở nhanh, không phải học dàn trải."
+                },
+                "2": {
+                    "title": "Bạn muốn có người kèm sát?",
+                    "description": "Chọn gói Full Toàn Tập hoặc gói chuyên sâu để được đồng hành rõ ràng hơn."
+                },
+                "3": {
+                    "title": "Bạn muốn thay đổi sâu?",
+                    "description": "Chọn gói chuyển hóa để đi vào mục tiêu chuyên sâu và cá nhân hóa hơn."
+                }
+            },
+            "cta": {
+                "title": "Chưa biết chọn gói nào?",
+                "subtitle": "Đội ngũ sẽ giúp bạn chọn gói phù hợp với mục tiêu, quỹ thời gian và thể trạng hiện tại.",
+                "primary": "Xem trung tâm khóa học",
+                "hotline": "Hotline: 0977 698 753"
+            }
         }
     },
     "pricingPage": {
@@ -1518,7 +1569,7 @@
         "wellnessUpgrade": {
             "badge": "Nâng cấp wellness",
             "title": "Kích hoạt lộ trình wellness cá nhân hóa",
-            "description": "Gói wellness được mua riêng với khóa học. Sau khi thanh toán, AI sẽ dựa trên hồ sơ cá nhân để gợi ý điều chỉnh lộ trình, bữa ăn và cải thiện tiến độ theo thời gian.",
+            "description": "Gói wellness được mua riêng với khóa học. Sau khi thanh toán, hệ thống sẽ dựa trên hồ sơ cá nhân để gợi ý điều chỉnh kế hoạch, bữa ăn và cải thiện tiến độ theo thời gian.",
             "cta": "Nâng cấp wellness ngay",
             "chooseCta": "Chọn gói wellness",
             "defaultPackageLabel": "Chọn gói từ dashboard wellness"
@@ -2245,20 +2296,20 @@
         }
     },
     "aiCoach": {
-        "title": "Coach AI",
+        "title": "Huấn luyện viên",
         "streak": "{{count}} ngày giữ nhịp",
-        "startHint": "Khởi tạo lộ trình cho riêng bạn",
+        "startHint": "Bắt đầu lập kế hoạch cho bạn",
         "navigation": {
             "openPage": "Trang riêng"
         },
         "page": {
             "eyebrow": "Huấn luyện cá nhân",
-            "title": "Lộ trình học của tôi",
-            "subtitle": "Theo dõi công việc hôm nay, check-in sau buổi học và để AI điều chỉnh kế hoạch ngày mai theo tiến độ thực tế.",
+            "title": "Kế hoạch học của tôi",
+            "subtitle": "Theo dõi việc hôm nay, ghi nhật ký sau buổi học và để huấn luyện viên gợi ý kế hoạch ngày mai theo tiến độ thực tế.",
             "backToCourses": "Quay lại khóa học của tôi",
-            "planBadge": "Lộ trình thích nghi theo ngày",
-            "onboardingBadge": "AI dựng kế hoạch từ mục tiêu thật của bạn",
-            "onboardingDescription": "Hệ thống kết hợp mục tiêu, năng lực hiện tại, khóa học đang có và tín hiệu hằng ngày để tạo nhịp học gọn hơn có AI đồng hành.",
+            "planBadge": "Kế hoạch theo ngày",
+            "onboardingBadge": "Lập kế hoạch từ mục tiêu thật của bạn",
+            "onboardingDescription": "Hệ thống kết hợp mục tiêu, năng lực hiện tại, khóa học đang có và tín hiệu hằng ngày để lên kế hoạch học gọn hơn.",
             "goalLabel": "Kết quả mong muốn",
             "currentLevelLabel": "Kiến thức hiện tại",
             "motivationLabel": "Động lực chính",
@@ -2266,33 +2317,33 @@
             "studyWindowLabel": "Khung học ưu tiên",
             "priorityCourseLabel": "Khóa học ưu tiên",
             "constraintsLabel": "Ràng buộc hoặc điểm nghẽn",
-            "onboardingNote": "AI không tự bịa lộ trình. Hệ thống chỉ điều chỉnh trong phạm vi khóa học thật, quỹ thời gian thật và phản hồi bạn gửi lại mỗi ngày.",
-            "aiLaneTitle": "Luồng planner AI",
+            "onboardingNote": "Hệ thống không tự bịa kế hoạch. Mọi gợi ý chỉ nằm trong phạm vi khóa học thật, quỹ thời gian thật và phản hồi bạn gửi mỗi ngày.",
+            "aiLaneTitle": "Luồng kế hoạch",
             "aiLaneHeadline": "Một nhịp học sắc gọn và tự thích nghi.",
-            "aiLaneDescription": "Bạn chỉ nhìn thấy đúng phần cần làm trong ngày. Sau check-in, AI đọc lại tiến độ và điểm nghẽn để điều chỉnh ngày mai.",
-            "loadingDescription": "AI đang gom tiến độ, task và tín hiệu hỗ trợ để dựng planner cho bạn.",
-            "goalFallback": "AI đang giữ nhịp cho mục tiêu này và điều chỉnh ngày mai từ phản hồi hôm nay của bạn.",
+            "aiLaneDescription": "Bạn chỉ thấy đúng phần cần làm trong ngày. Sau nhật ký, hệ thống đọc lại tiến độ và điểm nghẽn để chỉnh ngày mai.",
+            "loadingDescription": "Đang gom tiến độ, việc cần làm và tín hiệu hỗ trợ để dựng kế hoạch cho bạn.",
+            "goalFallback": "Hệ thống đang giữ nhịp mục tiêu này và chỉnh ngày mai từ phản hồi hôm nay của bạn.",
             "todayPill": "Hôm nay",
             "futureStateTitle": "Ngày này sẽ mở khi đến lượt.",
-            "futureStateDescription": "Planner chỉ show đúng lượng việc cần xử lý trong hôm nay. Hoàn thành hôm nay và gửi check-in để mở ngày tiếp theo.",
+            "futureStateDescription": "Kế hoạch chỉ hiện đúng lượng việc cần làm trong hôm nay. Hoàn thành hôm nay và gửi nhật ký để mở ngày tiếp theo.",
             "backToToday": "Quay lại hôm nay",
             "generalTrack": "Lộ trình tổng quát",
             "todayHeadline": "Hôm nay, {{date}}",
             "completedBadge": "Đã hoàn thành",
             "startFocusTask": "Bắt đầu task trọng tâm",
-            "emptyDayDescription": "Tiếp tục dùng check-in cuối ngày để AI giữ nhịp và điều chỉnh ngày mai.",
+            "emptyDayDescription": "Tiếp tục dùng nhật ký cuối ngày để giữ nhịp và điều chỉnh ngày mai.",
             "taskRailEyebrow": "Nhịp trong ngày",
             "taskRailTitle": "Các điểm chạm còn lại hôm nay",
             "feedbackLogged": "Đã có phản hồi",
             "reviewTask": "Xem lại",
             "updateTask": "Cập nhật",
             "openLesson": "Mở bài học",
-            "noMoreItems": "Hôm nay không còn bước phụ. Hãy dùng check-in và AI coach để khóa ngày học gọn gẽ.",
+            "noMoreItems": "Hôm nay không còn bước phụ. Hãy dùng nhật ký và huấn luyện viên để chốt ngày học gọn gàng.",
             "sidebarTitle": "Thống kê",
             "sidebarHeadline": "Nhịp học hôm nay",
             "coachLaneEyebrow": "Luồng coach",
-            "coachLaneTitle": "AI đang bám cùng bạn",
-            "coachFallback": "Coach đọc phản hồi task, tâm trạng và quỹ thời gian ngày mai để giữ kế hoạch luôn thực tế.",
+            "coachLaneTitle": "Huấn luyện viên đang đồng hành",
+            "coachFallback": "Huấn luyện viên đọc phản hồi công việc, tâm trạng và quỹ thời gian ngày mai để kế hoạch luôn thực tế.",
             "chatPreviewTitle": "Trao đổi gần nhất",
             "chatPreviewEmpty": "Chưa có hội thoại nào. Chọn quick status hoặc hỏi thẳng coach.",
             "checkInHeadline": "Chốt ngày học để định hình ngày mai",
@@ -2300,9 +2351,9 @@
             "latestCoachAdvice": "Ghi chú coach gần nhất",
             "previewCards": {
                 "today": "Luồng hôm nay",
-                "checkIn": "Check-in cuối ngày",
+                "checkIn": "Nhật ký cuối ngày",
                 "yes": "Đã bật",
-                "coach": "Coach AI",
+                "coach": "Huấn luyện viên",
                 "live": "Theo sát"
             },
             "metrics": {
@@ -2323,7 +2374,7 @@
                 "quiz": "Quiz và nhớ lại",
                 "practice": "Khối thực hành",
                 "read": "Đọc trọng tâm",
-                "default": "Task AI đề xuất"
+                "default": "Task gợi ý"
             },
             "quickStatus": {
                 "overloaded": "Tôi đang hơi quá tải",
@@ -2340,7 +2391,7 @@
         },
         "states": {
             "onlyStudents": "Tính năng này chỉ dành cho tài khoản học viên.",
-            "disabled": "AI coach hiện đang tắt. Vui lòng thử lại sau hoặc liên hệ quản trị viên.",
+            "disabled": "Huấn luyện viên hiện đang tắt. Vui lòng thử lại sau hoặc liên hệ quản trị viên.",
             "packageLockedTitle": "Cần kích hoạt gói",
             "packageRequired": "Bạn cần mua gói để kích hoạt lộ trình học cá nhân hóa.",
             "requiredPackages": "Gói cần có: {{packages}}",
@@ -2348,18 +2399,18 @@
         },
         "tabs": {
             "today": "Hôm nay",
-            "checkIn": "Check-in",
+            "checkIn": "Nhật ký",
             "coach": "Coach"
         },
         "onboarding": {
-            "title": "Tạo lộ trình cá nhân",
+            "title": "Lập kế hoạch cá nhân",
             "goalPlaceholder": "Mục tiêu bạn muốn đạt",
             "currentKnowledgePlaceholder": "Kiến thức hiện tại",
             "motivationPlaceholder": "Động lực chính của bạn",
             "minutesPerDay": "{{count}} phút/ngày",
             "primaryCoursePlaceholder": "Chọn khóa học ưu tiên",
             "constraintsPlaceholder": "Ràng buộc hoặc điều bạn đang gặp khó",
-            "submit": "Bắt đầu lộ trình"
+            "submit": "Bắt đầu kế hoạch"
         },
         "preferredStudyTimeOptions": {
             "morning": "Buổi sáng",
@@ -2389,10 +2440,10 @@
             "tomorrowMinutesPlaceholder": "Phút rảnh ngày mai",
             "notesPlaceholder": "Bạn đang vướng gì, điều gì làm bạn chậm lại, hoặc cần coach lưu ý gì?",
             "needSupport": "Tôi muốn đội ngũ hỗ trợ theo dõi sát hơn",
-            "submit": "Lưu check-in"
+            "submit": "Lưu nhật ký"
         },
         "chat": {
-            "placeholder": "Hỏi coach AI...",
+            "placeholder": "Hỏi huấn luyện viên...",
             "send": "Gửi"
         },
         "toasts": {
@@ -2400,8 +2451,8 @@
             "planCreateFailed": "Không thể tạo lộ trình.",
             "taskUpdated": "Đã cập nhật task.",
             "taskUpdateFailed": "Không thể cập nhật task.",
-            "checkInSaved": "Đã lưu check-in.",
-            "checkInFailed": "Không thể lưu check-in.",
+            "checkInSaved": "Đã lưu nhật ký.",
+            "checkInFailed": "Không thể lưu nhật ký.",
             "chatFailed": "Không thể gửi tin nhắn cho coach."
         }
     },
@@ -2411,7 +2462,7 @@
             "brand": "Wellness",
             "viewProfile": "Xem hồ sơ",
             "header": {
-                "title": "Lộ trình nhịn ăn cá nhân hóa",
+                "title": "Kế hoạch nhịn ăn cá nhân",
                 "subtitle": "Layout 3 cột theo font và màu hệ thống."
             },
             "upgrade": {
@@ -2478,39 +2529,39 @@
                 "timezone": "Múi giờ"
             },
             "actions": {
-                "savePlan": "L\u01b0u l\u1ed9 tr\u00ecnh",
-                "upgrade": "N\u00e2ng c\u1ea5p thanh to\u00e1n",
-                "saveLog": "L\u01b0u log ng\u00e0y h\u00f4m nay"
+                "savePlan": "Lưu lộ trình",
+                "upgrade": "Nâng cấp thanh toán",
+                "saveLog": "Lưu log ngày hôm nay"
             },
             "flow": {
-                "title": "Lu\u1ed3ng thao t\u00e1c \u0111\u1ec1 xu\u1ea5t",
-                "subtitle": "Thi\u1ebft l\u1eadp tr\u01b0\u1edbc, check-in m\u1ed7i ng\u00e0y, xem ti\u1ebfn \u0111\u1ed9 r\u1ed3i m\u1edbi d\u00f9ng AI \u0111\u1ec3 t\u1ed1i \u01b0u c\u00e1 nh\u00e2n.",
+                "title": "Luồng thao tác đề xuất",
+                "subtitle": "Lập kế hoạch trước, ghi nhật ký mỗi ngày rồi xem tiến độ để điều chỉnh nhịp phù hợp.",
                 "plan": {
-                    "title": "Thi\u1ebft l\u1eadp l\u1ed9 tr\u00ecnh",
-                    "hint": "Ch\u1ecdn g\u00f3i, th\u1eddi gian v\u00e0 khung gi\u1edd nh\u1ecbn"
+                    "title": "Lập kế hoạch",
+                    "hint": "Chọn gói, thời gian và khung giờ nhịn"
                 },
                 "log": {
-                    "title": "Check-in h\u00f4m nay",
-                    "hint": "Ghi n\u01b0\u1edbc, v\u1eadn \u0111\u1ed9ng v\u00e0 t\u00edn hi\u1ec7u c\u01a1 th\u1ec3"
+                    "title": "Nhật ký hôm nay",
+                    "hint": "Ghi nước uống, vận động và tín hiệu cơ thể"
                 },
                 "timeline": {
-                    "title": "Xem ti\u1ebfn \u0111\u1ed9",
-                    "hint": "Theo d\u00f5i giai \u0111o\u1ea1n v\u00e0 s\u1ed1 ng\u00e0y \u0111\u00e3 check-in"
+                    "title": "Xem tiến độ",
+                    "hint": "Theo dõi giai đoạn và số ngày đã nhật ký"
                 },
                 "coach": {
-                    "title": "H\u1ecfi AI coach",
-                    "hint": "Nh\u1eadn h\u01b0\u1edbng d\u1eabn c\u00e1 nh\u00e2n v\u00e0 g\u1ee3i \u00fd b\u1eefa \u0103n"
+                    "title": "Hỏi huấn luyện viên",
+                    "hint": "Nhận hướng dẫn cá nhân và gợi ý bữa ăn"
                 }
             },
             "log": {
-                "logDate": "Ng\u00e0y log",
-                "ateAt": "Gi\u1edd \u0111\u00e3 \u0103n",
-                "water": "N\u01b0\u1edbc u\u1ed1ng (ml)",
-                "waterGoal": "M\u1ee5c ti\u00eau n\u01b0\u1edbc (ml)",
-                "workoutMinutes": "S\u1ed1 ph\u00fat t\u1eadp",
-                "workoutType": "Lo\u1ea1i b\u00e0i t\u1eadp",
-                "currentWeight": "C\u00e2n n\u1eb7ng hi\u1ec7n t\u1ea1i (kg)",
-                "notes": "Ghi ch\u00fa"
+                "logDate": "Ngày log",
+                "ateAt": "Giờ đã ăn",
+                "water": "Nước uống (ml)",
+                "waterGoal": "Mục tiêu nước (ml)",
+                "workoutMinutes": "Số phút tập",
+                "workoutType": "Loại bài tập",
+                "currentWeight": "Cân nặng hiện tại (kg)",
+                "notes": "Ghi chú"
             },
             "quickStatus": {
                 "good": "Ổn",
@@ -2520,7 +2571,35 @@
                 "busy": "Bận"
             },
             "quick": {
-                "applied": "Đã cập nhật trạng thái nhanh."
+                "applied": "Đã cập nhật trạng thái nhanh vào ghi chú nhật ký."
+            },
+            "quickGuidance": {
+                "title": "Gợi ý nhanh",
+                "good": {
+                    "headline": "Bạn đang ổn, cứ giữ nhịp này.",
+                    "fix": "Tiếp tục uống nước đúng nhịp và duy trì bữa ăn nhẹ cân bằng để giữ năng lượng ổn định.",
+                    "encourage": "Bạn đang làm rất tốt, chỉ cần đều đặn thêm một chút là thấy tiến bộ rõ rệt."
+                },
+                "hungry": {
+                    "headline": "Đói tăng là tín hiệu cơ thể cần nạp thông minh.",
+                    "fix": "Uống 300-500ml nước trước, sau đó chọn bữa nhỏ giàu đạm và chất xơ để no lâu mà không quá tải.",
+                    "encourage": "Cơn đói này chỉ là một chặng ngắn, xử lý đúng là bạn vượt qua rất nhẹ."
+                },
+                "tired": {
+                    "headline": "Mệt là lúc giảm cường độ, không phải bỏ cuộc.",
+                    "fix": "Tạm nghỉ 10-15 phút, hít thở sâu, đi bộ nhẹ hoặc giãn cơ rồi quay lại với nhiệm vụ ngắn hơn.",
+                    "encourage": "Bạn không cần hoàn hảo mỗi ngày, chỉ cần tiến lên một bước nhỏ là đủ."
+                },
+                "thirsty": {
+                    "headline": "Cơ thể đang nhắc bạn bù nước ngay.",
+                    "fix": "Bổ sung 400-600ml nước trong 30 phút tới, hạn chế cà phê đậm và đặt nhắc uống nước theo giờ.",
+                    "encourage": "Nạp đủ nước là cách nhanh nhất để lấy lại sự tỉnh táo, bạn làm được ngay bây giờ."
+                },
+                "busy": {
+                    "headline": "Lịch dày thì ưu tiên việc nhỏ nhưng quan trọng.",
+                    "fix": "Chọn 1-2 việc chính trong 25 phút, chuẩn bị sẵn nước và đồ ăn nhẹ để không bị tụt năng lượng.",
+                    "encourage": "Dù bận, bạn vẫn đang kiểm soát ngày của mình rất tốt."
+                }
             },
             "quickStatusNotes": {
                 "good": "Cập nhật nhanh: Hôm nay tôi thấy ổn định.",
@@ -2534,7 +2613,7 @@
                 "add500": "+500ml"
             },
             "coach": {
-                "title": "AI tư vấn sức khỏe",
+                "title": "Trợ giúp/Tư vấn",
                 "subtitle": "Gợi ý dựa trên tâm trạng, tín hiệu cơ thể và cường độ học trong ngày.",
                 "form": {
                     "mood": "Tâm trạng",
@@ -2544,7 +2623,7 @@
                     "stress": "Mức căng thẳng",
                     "sleepHours": "Số giờ ngủ",
                     "studyLoad": "Khối lượng học hôm nay",
-                    "notes": "Thông tin bổ sung cho AI coach"
+                    "notes": "Thông tin bổ sung cho huấn luyện viên"
                 },
                 "placeholders": {
                     "mood": "Ví dụ: cân bằng / mệt",
@@ -2577,13 +2656,13 @@
                     }
                 },
                 "actions": {
-                    "send": "Nhận tư vấn AI"
+                    "send": "Nhận tư vấn"
                 },
-                "replyTitle": "Khuyến nghị từ AI"
+                "replyTitle": "Khuyến nghị từ chuyên gia"
             },
             "meal": {
-                "title": "AI công thức bữa ăn",
-                "subtitle": "Tạo gợi ý bữa ăn theo mục tiêu sức khỏe và nhịp học của bạn.",
+                "title": "Trợ giúp bữa ăn",
+                "subtitle": "Gợi ý bữa ăn theo mục tiêu sức khỏe và nhịp học của bạn.",
                 "form": {
                     "ingredients": "Nguyên liệu (cách nhau bởi dấu phẩy hoặc xuống dòng)",
                     "servings": "Số khẩu phần",
@@ -2604,14 +2683,14 @@
                     }
                 },
                 "actions": {
-                    "generate": "Tạo công thức"
+                    "generate": "Gợi ý thực đơn"
                 },
-                "resultTitle": "Thực đơn đề xuất"
+                "resultTitle": "Thực đơn gợi ý"
             },
             "sidebar": {
                 "fasting": "NHỊN - ĂN",
                 "water": "Nước",
-                "checkpoint": "Điểm check-in",
+                "checkpoint": "Điểm nhật ký",
                 "completion": "Hoàn thành",
                 "weight": "Cân nặng X đến Y",
                 "weightRange": "{{start}}kg đến {{target}}kg",
@@ -2624,17 +2703,17 @@
             "success": {
                 "savePlan": "Đã lưu lộ trình",
                 "saveLog": "Đã cập nhật log",
-                "coachReply": "Đã tạo tư vấn AI",
+                "coachReply": "Đã có phản hồi từ huấn luyện viên",
                 "mealReady": "Đã tạo công thức bữa ăn",
                 "waterUpdated": "Đã cộng {{amount}}ml nước."
             },
             "status": {
-                "openingCheckout": "\u0110ang m\u1edf checkout...",
-                "redirectingCheckout": "\u0110ang chuy\u1ec3n sang trang thanh to\u00e1n...",
-                "savingPlan": "\u0110ang l\u01b0u l\u1ed9 tr\u00ecnh...",
-                "savingLog": "\u0110ang l\u01b0u log h\u00e0ng ng\u00e0y...",
-                "askingCoach": "\u0110ang g\u1eedi y\u00eau c\u1ea7u AI coach...",
-                "generatingMeal": "\u0110ang t\u1ea1o g\u1ee3i \u00fd b\u1eefa \u0103n..."
+                "openingCheckout": "Đang mở checkout...",
+                "redirectingCheckout": "Đang chuyển sang trang thanh toán...",
+                "savingPlan": "Đang lưu lộ trình...",
+                "savingLog": "Đang lưu log hàng ngày...",
+                "askingCoach": "Đang gửi yêu cầu huấn luyện viên...",
+                "generatingMeal": "Đang tạo gợi ý bữa ăn..."
             },
             "errors": {
                 "loadDashboard": "Không tải được dashboard wellness",
@@ -2644,10 +2723,10 @@
                 "checkoutNotConfigured": "Chưa có gói wellness khả dụng để checkout.",
                 "createCheckout": "Không thể tạo checkout",
                 "packageRequired": "Bạn cần mua gói để sử dụng tính năng này.",
-                "moodCoach": "Không thể lấy tư vấn từ AI",
+                "moodCoach": "Không thể lấy tư vấn lúc này",
                 "mealCoach": "Không thể tạo công thức bữa ăn",
                 "mealIngredients": "Vui lòng nhập ít nhất một nguyên liệu",
-                "moodFieldsRequired": "Vui lòng nhập tâm trạng, năng lượng, độ đói và độ khát trước khi hỏi AI."
+                "moodFieldsRequired": "Vui lòng nhập đủ thông tin trước khi gửi yêu cầu tư vấn."
             }
         },
         "admin": {

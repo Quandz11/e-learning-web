@@ -72,6 +72,7 @@ const UserHeader: React.FC = () => {
         { label: t('home.header.nav.pricing', { defaultValue: 'Bảng giá' }), to: '/pricing' },
         { label: t('home.header.nav.policy', { defaultValue: 'Chính sách' }), to: '/privacy-policy' },
     ];
+    const courseCenterItem: NavLinkItem = { label: t('home.header.nav.courseCenter', { defaultValue: 'Trung tâm khóa học' }), to: '/courses' };
 
     const renderDesktopMenuItem = (item: NavLinkItem, className: string, key: string) => {
         if (item.to) {
@@ -165,6 +166,11 @@ const UserHeader: React.FC = () => {
                         >
                             {t('home.header.nav.home')}
                         </Link>
+                        {renderDesktopMenuItem(
+                            courseCenterItem,
+                            'text-[#0c1c1d] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium',
+                            'course-center-desktop',
+                        )}
                         {renderDesktopDropdown(
                             t('home.header.nav.training', { defaultValue: 'Đào tạo' }),
                             trainingItems,
@@ -265,6 +271,11 @@ const UserHeader: React.FC = () => {
                         >
                             {t('home.header.nav.home')}
                         </Link>
+                        {renderMobileMenuItem(
+                            courseCenterItem,
+                            'block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-primary/10',
+                            'course-center-mobile',
+                        )}
 
                         <p className="px-3 pt-2 text-[11px] font-bold uppercase tracking-wide text-primary">
                             {t('home.header.nav.training', { defaultValue: 'Đào tạo' })}

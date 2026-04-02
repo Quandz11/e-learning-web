@@ -47,7 +47,7 @@ const AdminAiSettingsPage: React.FC = () => {
                 ...data
             });
         } catch (error: any) {
-            toast.error(error.message || 'Lỗi khi tải cấu hình AI');
+            toast.error(error.message || 'Lỗi khi tải cấu hình chuyên gia');
         } finally {
             setLoading(false);
         }
@@ -62,9 +62,9 @@ const AdminAiSettingsPage: React.FC = () => {
         try {
             setSaving(true);
             await aiSettingsApi.updateSettings(settings);
-            toast.success('Đã lưu cấu hình AI thành công');
+            toast.success('Đã lưu cấu hình chuyên gia thành công');
         } catch (error: any) {
-            toast.error(error.message || 'Lỗi khi lưu cấu hình AI');
+            toast.error(error.message || 'Lỗi khi lưu cấu hình chuyên gia');
         } finally {
             setSaving(false);
         }
@@ -92,13 +92,13 @@ const AdminAiSettingsPage: React.FC = () => {
                     <div>
                         <div className="mb-2 flex items-center gap-2 text-sm text-gray-500">
                             <span className="material-symbols-outlined text-[16px]">smart_toy</span>
-                            <span>AI Coach</span>
+                            <span>Huấn luyện viên</span>
                             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
                             <span className="font-medium text-gray-900 dark:text-gray-100">Cấu hình hệ thống</span>
                         </div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Cấu hình Gemini API</h1>
                         <p className="mt-1 text-sm text-gray-500">
-                            Dùng model Gemini 2.5 còn hỗ trợ để chatbot và lộ trình cá nhân hóa hoạt động ổn định.
+                            Dùng model Gemini 2.5 còn hỗ trợ để phần trợ giúp trò chuyện và kế hoạch cá nhân hoạt động ổn định.
                         </p>
                     </div>
                 </div>
@@ -130,7 +130,7 @@ const AdminAiSettingsPage: React.FC = () => {
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label className="mb-2 block text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    AI Model Name
+                                    Tên model
                                 </label>
                                 <select
                                     value={settings?.modelName || DEFAULT_AI_SETTINGS.modelName}
@@ -184,10 +184,10 @@ const AdminAiSettingsPage: React.FC = () => {
                                 onChange={(event) => setSettings((prev) => ({ ...(prev || DEFAULT_AI_SETTINGS), systemPrompt: event.target.value }))}
                                 rows={5}
                                 className="w-full resize-none rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 leading-relaxed text-gray-900 transition-all focus:border-transparent focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                                placeholder="Bạn là một AI coach thân thiện, theo dõi tiến độ học và đưa ra lời khuyên kịp thời..."
+                                placeholder="Bạn là một huấn luyện viên thân thiện, theo dõi tiến độ học và đưa ra lời khuyên kịp thời..."
                             />
                             <p className="mt-2 text-xs text-gray-500">
-                                Prompt này định hướng cách AI phản hồi khi chat, nhắc việc, tư vấn và điều chỉnh lộ trình học.
+                                Prompt này định hướng cách hệ thống phản hồi khi chat, nhắc việc, tư vấn và điều chỉnh kế hoạch học.
                             </p>
                         </div>
                     </div>

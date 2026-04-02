@@ -414,7 +414,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
             DEFAULT: {
                 icon: 'track_changes',
                 badge: 'from-violet-500/15 to-fuchsia-500/10 text-violet-700 dark:text-violet-300',
-                label: t('aiCoach.page.taskTypes.default', { defaultValue: 'AI suggested task' })
+                label: t('aiCoach.page.taskTypes.default', { defaultValue: 'Suggested task' })
             }
         }),
         [t]
@@ -571,7 +571,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                 <div className="border-b border-slate-100 bg-[radial-gradient(circle_at_top_left,_rgba(244,114,182,0.16),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(56,189,248,0.18),_transparent_30%),linear-gradient(180deg,_rgba(255,255,255,0.9),_rgba(255,255,255,0.72))] px-6 py-8 dark:border-slate-800 dark:bg-[radial-gradient(circle_at_top_left,_rgba(244,114,182,0.12),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(56,189,248,0.14),_transparent_30%),linear-gradient(180deg,_rgba(15,23,42,0.92),_rgba(15,23,42,0.78))] sm:px-8">
                     <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/70 px-4 py-2 text-sm font-semibold text-primary shadow-sm dark:bg-slate-900/70">
                         <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-                        {t('aiCoach.page.onboardingBadge', { defaultValue: 'AI builds from your real goal' })}
+                        {t('aiCoach.page.onboardingBadge', { defaultValue: 'Plan built from your real goal' })}
                     </div>
                     <h2 className="mt-5 text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
                         {t('aiCoach.onboarding.title')}
@@ -579,7 +579,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                     <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300">
                         {t('aiCoach.page.onboardingDescription', {
                             defaultValue:
-                                'The system combines your goal, current level, enrolled courses and daily signals to build a cleaner rhythm with AI support.'
+                                'The system combines your goal, current level, enrolled courses and daily signals to build a cleaner rhythm.'
                         })}
                     </p>
                 </div>
@@ -713,7 +713,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                         <div className="max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300">
                             {t('aiCoach.page.onboardingNote', {
                                 defaultValue:
-                                    'AI does not invent the plan. It only adjusts inside your real courses, your actual time budget and the signals you send back each day.'
+                                    'The system does not invent the plan. It only adjusts inside your real courses, your actual time budget and the signals you send back each day.'
                             })}
                         </div>
                         <button
@@ -742,7 +742,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                             icon: 'monitor_heart'
                         },
                         {
-                            label: t('aiCoach.page.previewCards.coach', { defaultValue: 'Coach AI' }),
+                            label: t('aiCoach.page.previewCards.coach', { defaultValue: 'Coach' }),
                             value: t('aiCoach.page.previewCards.live', { defaultValue: 'Always on' }),
                             icon: 'smart_toy'
                         }
@@ -772,7 +772,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                 'hourglass_top',
                 t('common.loading', { defaultValue: 'Loading...' }),
                 t('aiCoach.page.loadingDescription', {
-                    defaultValue: 'AI is collecting progress, tasks and support signals to build your planner.'
+                    defaultValue: 'Collecting progress, tasks and support signals to build your planner.'
                 })
             );
         }
@@ -821,7 +821,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                                 <p className="mt-3 max-w-3xl break-words text-sm leading-7 text-slate-600 dark:text-slate-300">
                                     {guidanceMessage ||
                                         t('aiCoach.page.goalFallback', {
-                                            defaultValue: 'AI keeps this goal on track and adjusts tomorrow from your daily feedback.'
+                                            defaultValue: 'The system keeps this goal on track and adjusts tomorrow from your daily feedback.'
                                         })}
                                 </p>
                             </div>
@@ -1009,7 +1009,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                                     <h3 className="mt-5 text-2xl font-semibold text-slate-900 dark:text-white">{t('aiCoach.tasks.empty')}</h3>
                                     <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300">
                                         {t('aiCoach.page.emptyDayDescription', {
-                                            defaultValue: 'Keep using end-of-day check-in so AI can keep the rhythm and adjust tomorrow.'
+                                            defaultValue: 'Keep using your daily log so the plan can keep rhythm and adjust tomorrow.'
                                         })}
                                     </p>
                                 </section>
@@ -1088,7 +1088,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                                 ) : featuredTask ? null : (
                                     <div className="rounded-[28px] border border-dashed border-slate-300 bg-white/75 px-6 py-8 text-sm leading-7 text-slate-600 dark:border-slate-700 dark:bg-slate-900/75 dark:text-slate-300">
                                         {t('aiCoach.page.noMoreItems', {
-                                            defaultValue: 'No extra steps are left today. Use check-in and the AI coach to close the day cleanly.'
+                                            defaultValue: 'No extra steps are left today. Use your daily log and coach support to close the day cleanly.'
                                         })}
                                     </div>
                                 )}
@@ -1165,7 +1165,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                                         {t('aiCoach.page.coachLaneEyebrow', { defaultValue: 'Coach lane' })}
                                     </div>
                                     <p className="mt-2 break-words text-2xl font-semibold text-white">
-                                        {t('aiCoach.page.coachLaneTitle', { defaultValue: 'AI in the loop' })}
+                                        {t('aiCoach.page.coachLaneTitle', { defaultValue: 'Coach support in the loop' })}
                                     </p>
                                 </div>
                                 <button

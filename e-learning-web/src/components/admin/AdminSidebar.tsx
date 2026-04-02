@@ -299,7 +299,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
                 }`}
             >
               <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">smart_toy</span>
-              <span className="text-sm font-medium">Cấu hình AI</span>
+              <span className="text-sm font-medium">Cấu hình huấn luyện viên</span>
             </Link>
             <Link
               to="/admin/wellness-settings"

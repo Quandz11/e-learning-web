@@ -64,7 +64,7 @@ const AiChatWidget: React.FC = () => {
                 <button
                     onClick={() => setIsOpen(true)}
                     className="fixed bottom-40 right-4 z-[70] flex items-center justify-center rounded-full bg-primary p-4 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:bg-primary/90 sm:bottom-44 sm:right-6"
-                    aria-label="Open AI plan"
+                    aria-label="Open study plan"
                 >
                     <span className="material-symbols-outlined text-3xl">event_note</span>
                 </button>

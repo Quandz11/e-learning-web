@@ -8,7 +8,6 @@ import {
   wellnessApi,
   type WellnessCalendarDay,
   type WellnessCheckoutPackage,
-  type WellnessCoachReply,
   type WellnessDashboard,
   type WellnessMealSuggestion,
   type WellnessProgressTimeline,
@@ -44,6 +43,7 @@ const timeToMinute = (value: string) => {
 };
 const minuteToTime = (value: number) => `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
 type WellnessPhase = 'PREPARE' | 'FASTING' | 'REFEED';
+type QuickStatus = 'good' | 'hungry' | 'tired' | 'thirsty' | 'busy';
 
 const resolvePhase = (phase?: string): WellnessPhase => {
   const normalized = (phase ?? '').trim().toUpperCase();
@@ -136,6 +136,7 @@ const WellnessCoachDashboard: React.FC = () => {
   const [workoutType, setWorkoutType] = useState(() => t('wellness.dashboard.defaults.workoutType'));
   const [currentWeight, setCurrentWeight] = useState('');
   const [notes, setNotes] = useState('');
+  const [selectedQuickStatus, setSelectedQuickStatus] = useState<QuickStatus | null>(null);
 
   const [timelineDays, setTimelineDays] = useState(30);
   const [timelineIncludeFuture, setTimelineIncludeFuture] = useState(false);
@@ -144,17 +145,6 @@ const WellnessCoachDashboard: React.FC = () => {
   const [timelineQueryKey, setTimelineQueryKey] = useState('');
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [selectedTimelineDate, setSelectedTimelineDate] = useState(today);
-
-  const [mood, setMood] = useState('');
-  const [energy, setEnergy] = useState('');
-  const [hunger, setHunger] = useState('');
-  const [thirst, setThirst] = useState('');
-  const [stress, setStress] = useState('');
-  const [sleepHours, setSleepHours] = useState('');
-  const [studyLoad, setStudyLoad] = useState('');
-  const [coachNotes, setCoachNotes] = useState('');
-  const [coachReply, setCoachReply] = useState<WellnessCoachReply | null>(null);
-  const [coachSubmitting, setCoachSubmitting] = useState(false);
 
   const [mealIngredients, setMealIngredients] = useState('');
   const [mealServings, setMealServings] = useState('');
@@ -238,7 +228,6 @@ const WellnessCoachDashboard: React.FC = () => {
     return { preparationDays, fastingDays, refeedDays };
   }, [plan?.fastingDays, plan?.preparationDays, plan?.refeedDays]);
   const hasCheckin = Boolean(dashboard?.todayLog) || timelineItems.some((item) => item.hasCheckin);
-  const hasAiSupport = Boolean(coachReply?.reply?.trim() || mealSuggestion?.menu?.trim());
   const flowSteps = useMemo(() => {
     return [
       {
@@ -262,15 +251,34 @@ const WellnessCoachDashboard: React.FC = () => {
         hint: t('wellness.dashboard.flow.timeline.hint'),
         done: timelineItems.length > 0,
       },
-      {
-        id: 'wellness-coach',
-        icon: 'smart_toy',
-        title: t('wellness.dashboard.flow.coach.title'),
-        hint: t('wellness.dashboard.flow.coach.hint'),
-        done: hasAiSupport,
-      },
     ];
-  }, [hasAiSupport, hasCheckin, plan?.id, t, timelineItems.length]);
+  }, [hasCheckin, plan?.id, t, timelineItems.length]);
+
+  const quickStatusGuidance = useMemo(
+    () => ({
+      good: {
+        icon: 'sentiment_satisfied',
+        iconClassName: 'text-emerald-600',
+      },
+      hungry: {
+        icon: 'restaurant',
+        iconClassName: 'text-amber-600',
+      },
+      tired: {
+        icon: 'bedtime',
+        iconClassName: 'text-indigo-600',
+      },
+      thirsty: {
+        icon: 'local_drink',
+        iconClassName: 'text-cyan-600',
+      },
+      busy: {
+        icon: 'work_history',
+        iconClassName: 'text-slate-600',
+      },
+    }),
+    [],
+  );
 
   const goCheckout = (pkgCode: string) => {
     const toastId = toast.loading(t('wellness.dashboard.status.openingCheckout', { defaultValue: 'Opening checkout...' }));
@@ -413,48 +421,9 @@ const WellnessCoachDashboard: React.FC = () => {
     setCurrentWeight(item.currentWeightKg ? String(item.currentWeightKg) : '');
   };
 
-  const applyQuickStatus = (status: 'good' | 'hungry' | 'tired' | 'thirsty' | 'busy') => {
-    if (status === 'good') {
-      setMood(t('wellness.dashboard.coach.options.mood.balanced'));
-      setEnergy(t('wellness.dashboard.coach.options.level.medium'));
-      setHunger(t('wellness.dashboard.coach.options.level.normal'));
-      setThirst(t('wellness.dashboard.coach.options.level.normal'));
-      setStress(t('wellness.dashboard.coach.options.level.moderate'));
-      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.normal'));
-      setCoachNotes(t('wellness.dashboard.quickStatusNotes.good'));
-    } else if (status === 'hungry') {
-      setMood(t('wellness.dashboard.coach.options.mood.tired'));
-      setEnergy(t('wellness.dashboard.coach.options.level.medium'));
-      setHunger(t('wellness.dashboard.coach.options.level.high'));
-      setThirst(t('wellness.dashboard.coach.options.level.normal'));
-      setStress(t('wellness.dashboard.coach.options.level.moderate'));
-      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.normal'));
-      setCoachNotes(t('wellness.dashboard.quickStatusNotes.hungry'));
-    } else if (status === 'tired') {
-      setMood(t('wellness.dashboard.coach.options.mood.tired'));
-      setEnergy(t('wellness.dashboard.coach.options.level.low'));
-      setHunger(t('wellness.dashboard.coach.options.level.normal'));
-      setThirst(t('wellness.dashboard.coach.options.level.normal'));
-      setStress(t('wellness.dashboard.coach.options.level.moderate'));
-      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.light'));
-      setCoachNotes(t('wellness.dashboard.quickStatusNotes.tired'));
-    } else if (status === 'thirsty') {
-      setMood(t('wellness.dashboard.coach.options.mood.balanced'));
-      setEnergy(t('wellness.dashboard.coach.options.level.medium'));
-      setHunger(t('wellness.dashboard.coach.options.level.normal'));
-      setThirst(t('wellness.dashboard.coach.options.level.high'));
-      setStress(t('wellness.dashboard.coach.options.level.moderate'));
-      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.normal'));
-      setCoachNotes(t('wellness.dashboard.quickStatusNotes.thirsty'));
-    } else {
-      setMood(t('wellness.dashboard.coach.options.mood.stressed'));
-      setEnergy(t('wellness.dashboard.coach.options.level.medium'));
-      setHunger(t('wellness.dashboard.coach.options.level.normal'));
-      setThirst(t('wellness.dashboard.coach.options.level.normal'));
-      setStress(t('wellness.dashboard.coach.options.level.high'));
-      setStudyLoad(t('wellness.dashboard.coach.options.studyLoad.heavy'));
-      setCoachNotes(t('wellness.dashboard.quickStatusNotes.busy'));
-    }
+  const applyQuickStatus = (status: QuickStatus) => {
+    setSelectedQuickStatus(status);
+    setNotes(t(`wellness.dashboard.quickStatusNotes.${status}`));
     toast.success(t('wellness.dashboard.quick.applied', { defaultValue: 'Quick status updated.' }));
   };
 
@@ -528,48 +497,6 @@ const WellnessCoachDashboard: React.FC = () => {
     } finally {
       setSubmittingAction(null);
       setSubmitting(false);
-    }
-  };
-
-  const sendMoodCoach = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!canUse || !plan?.id) {
-      toast.error(accessMessage || t('wellness.dashboard.errors.packageRequired'));
-      return;
-    }
-
-    const moodValue = mood.trim();
-    const energyValue = energy.trim();
-    const hungerValue = hunger.trim();
-    const thirstValue = thirst.trim();
-    const stressValue = stress.trim();
-    const sleepHoursValue = sleepHours.trim();
-    const studyLoadValue = studyLoad.trim();
-    const coachNotesValue = coachNotes.trim();
-
-    if (!moodValue || !energyValue || !hungerValue || !thirstValue) {
-      toast.error(t('wellness.dashboard.errors.moodFieldsRequired'));
-      return;
-    }
-
-    setCoachSubmitting(true);
-    const toastId = toast.loading(t('wellness.dashboard.status.askingCoach', { defaultValue: 'Requesting AI coach...' }));
-    try {
-      const response = await wellnessApi.askMoodCoach(plan.id, {
-        mood: moodValue,
-        energy: energyValue,
-        hunger: hungerValue,
-        thirst: thirstValue,
-        stress: stressValue,
-        sleepHours: sleepHoursValue ? Number(sleepHoursValue) : undefined,
-        notes: [studyLoadValue ? `study_load=${studyLoadValue}` : '', coachNotesValue].filter(Boolean).join(' | ') || undefined,
-      });
-      setCoachReply(response);
-      toast.success(t('wellness.dashboard.success.coachReply'), { id: toastId });
-    } catch (error: any) {
-      toast.error(msg(error, t('wellness.dashboard.errors.moodCoach')), { id: toastId });
-    } finally {
-      setCoachSubmitting(false);
     }
   };
 
@@ -669,7 +596,7 @@ const WellnessCoachDashboard: React.FC = () => {
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary"><span className="material-symbols-outlined text-sm">auto_awesome</span>{t('wellness.dashboard.header.title')}</div>
               <p className="mt-2 text-sm text-slate-700">{t('wellness.dashboard.header.subtitle')}</p>
             </div>
-            <button type="button" onClick={() => scrollToId('wellness-coach')} className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">smart_toy</span>{t('wellness.dashboard.coach.title')}</button>
+            <button type="button" onClick={() => scrollToId('wellness-meal')} className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">restaurant_menu</span>{t('wellness.dashboard.meal.title')}</button>
           </div>
         </div>
 
@@ -745,6 +672,19 @@ const WellnessCoachDashboard: React.FC = () => {
                   <button type="button" onClick={() => applyQuickStatus('thirsty')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">local_drink</span>{t('wellness.dashboard.quickStatus.thirsty')}</button>
                   <button type="button" onClick={() => applyQuickStatus('busy')} className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"><span className="material-symbols-outlined text-sm">work_history</span>{t('wellness.dashboard.quickStatus.busy')}</button>
                 </div>
+                {selectedQuickStatus && (
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                    <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                      <span className={`material-symbols-outlined text-base ${quickStatusGuidance[selectedQuickStatus].iconClassName}`}>{quickStatusGuidance[selectedQuickStatus].icon}</span>
+                      {t('wellness.dashboard.quickGuidance.title')}
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-slate-900">{t(`wellness.dashboard.quickGuidance.${selectedQuickStatus}.headline`)}</div>
+                    <div className="mt-1 text-xs text-slate-700">{t(`wellness.dashboard.quickGuidance.${selectedQuickStatus}.fix`)}</div>
+                    <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">
+                      {t(`wellness.dashboard.quickGuidance.${selectedQuickStatus}.encourage`)}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
@@ -948,47 +888,7 @@ const WellnessCoachDashboard: React.FC = () => {
               <button type="submit" disabled={submitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">{submittingAction === 'log' ? 'hourglass_top' : 'check_circle'}</span>{submittingAction === 'log' ? t('wellness.dashboard.status.savingLog') : t('wellness.dashboard.actions.saveLog')}</button>
             </form>
 
-            <div id="wellness-coach" className="order-6 grid gap-5 xl:grid-cols-2">
-              <form onSubmit={sendMoodCoach} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
-                <div className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-primary">smart_toy</span>{t('wellness.dashboard.coach.title')}</div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.mood')}</span>
-                    <input aria-label={t('wellness.dashboard.coach.form.mood')} placeholder={t('wellness.dashboard.coach.placeholders.mood')} value={mood} onChange={(event) => setMood(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.energy')}</span>
-                    <input aria-label={t('wellness.dashboard.coach.form.energy')} placeholder={t('wellness.dashboard.coach.placeholders.energy')} value={energy} onChange={(event) => setEnergy(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.hunger')}</span>
-                    <input aria-label={t('wellness.dashboard.coach.form.hunger')} placeholder={t('wellness.dashboard.coach.placeholders.hunger')} value={hunger} onChange={(event) => setHunger(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.thirst')}</span>
-                    <input aria-label={t('wellness.dashboard.coach.form.thirst')} placeholder={t('wellness.dashboard.coach.placeholders.thirst')} value={thirst} onChange={(event) => setThirst(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.stress')}</span>
-                    <input aria-label={t('wellness.dashboard.coach.form.stress')} placeholder={t('wellness.dashboard.coach.placeholders.stress')} value={stress} onChange={(event) => setStress(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.sleepHours')}</span>
-                    <input aria-label={t('wellness.dashboard.coach.form.sleepHours')} placeholder={t('wellness.dashboard.coach.placeholders.sleepHours')} type="number" min={0} max={24} value={sleepHours} onChange={(event) => setSleepHours(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                  <label className="flex flex-col gap-1 sm:col-span-2">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.studyLoad')}</span>
-                    <input aria-label={t('wellness.dashboard.coach.form.studyLoad')} placeholder={t('wellness.dashboard.coach.placeholders.studyLoad')} value={studyLoad} onChange={(event) => setStudyLoad(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                </div>
-                <label className="mt-3 flex flex-col gap-1">
-                  <span className={inputLabelClassName}>{t('wellness.dashboard.coach.form.notes')}</span>
-                  <textarea aria-label={t('wellness.dashboard.coach.form.notes')} placeholder={t('wellness.dashboard.coach.placeholders.notes')} value={coachNotes} onChange={(event) => setCoachNotes(event.target.value)} className="min-h-[90px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                </label>
-                <button type="submit" disabled={coachSubmitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">{coachSubmitting ? 'hourglass_top' : 'forum'}</span>{coachSubmitting ? t('wellness.dashboard.status.askingCoach') : t('wellness.dashboard.coach.actions.send')}</button>
-                {coachReply && <p className="mt-3 whitespace-pre-line rounded-2xl border border-primary/20 bg-primary/5 p-3 text-sm text-slate-700">{coachReply.reply}</p>}
-              </form>
-
+            <div id="wellness-meal" className="order-6">
               <form onSubmit={generateMealSuggestion} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-dashboard-subtle">
                 <div className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-700"><span className="material-symbols-outlined text-sm text-emerald-600">restaurant_menu</span>{t('wellness.dashboard.meal.title')}</div>
                 <label className="flex flex-col gap-1">

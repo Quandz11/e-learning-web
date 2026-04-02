@@ -1292,7 +1292,8 @@
                 "pricing": "Pricing",
                 "ambassador": "Health Ambassador",
                 "missionVision": "Mission & Vision",
-                "policy": "Policies"
+                "policy": "Policies",
+                "courseCenter": "Course Center"
             },
             "cartTitle": "Cart",
             "logout": "Logout",
@@ -1301,7 +1302,7 @@
             "userMenu": {
                 "profile": "Profile",
                 "settings": "Settings",
-                "learningPlan": "My Learning Plan"
+                "learningPlan": "My study plan"
             }
         },
         "hero": {
@@ -1503,6 +1504,56 @@
             },
             "copyrightLine": "© {{year}} Nhin An Chua Lanh. All rights reserved. Designed by [Design agency name].",
             "medicalNotice": "*Note: Information on this website is for knowledge sharing and personal experience only. It does not replace professional medical advice. Please consult qualified professionals before starting any intensive fasting protocol.*"
+        },
+        "courseCenter": {
+            "title": "Pick the right package for your time, goals, and support level",
+            "subtitle": "From a light starter path to guided coaching, each package helps you begin at the right place and level up at the right time.",
+            "choose": "Choose this package",
+            "cards": {
+                "0": {
+                    "tag": "WANT A LIGHT START",
+                    "title": "3-Day Starter Package",
+                    "description": "For beginners who want to start gently and get used to the method.",
+                    "price": "99,000 VND"
+                },
+                "1": {
+                    "tag": "FOR BUSY PEOPLE",
+                    "badge": "POPULAR",
+                    "title": "Busy Lifestyle Package",
+                    "description": "No need to study too much theory. Just follow the daily guidance.",
+                    "price": "999,000 VND"
+                },
+                "2": {
+                    "tag": "WANT DEEPER GUIDANCE",
+                    "title": "Full Program Package",
+                    "description": "Complete materials with expert sessions for people who want a structured path.",
+                    "price": "1,990,000 VND"
+                }
+            },
+            "guides": {
+                "0": {
+                    "title": "New to this?",
+                    "description": "Start with the 3-Day Starter package to try it first."
+                },
+                "1": {
+                    "title": "Very busy?",
+                    "description": "Choose the Busy package so you can follow quick reminders without overload."
+                },
+                "2": {
+                    "title": "Need close guidance?",
+                    "description": "Choose the Full Program or an advanced package for closer support."
+                },
+                "3": {
+                    "title": "Want deeper change?",
+                    "description": "Choose a transformation package for deeper and more personalized goals."
+                }
+            },
+            "cta": {
+                "title": "Not sure which package to pick?",
+                "subtitle": "Our team can help you choose based on your goal, available time, and current condition.",
+                "primary": "Open course center",
+                "hotline": "Hotline: 0977 698 753"
+            }
         }
     },
     "pricingPage": {
@@ -1513,7 +1564,7 @@
         "wellnessUpgrade": {
             "badge": "Wellness Upgrade",
             "title": "Activate your personalized wellness roadmap",
-            "description": "Wellness packages are purchased separately from courses. After payment, AI uses personal profile data to suggest roadmap adjustments, meal plans, and progress improvements over time.",
+            "description": "Wellness packages are purchased separately from courses. After payment, the system uses your profile data to suggest plan adjustments, meal ideas, and progress improvements over time.",
             "cta": "Upgrade wellness now",
             "chooseCta": "Choose wellness package",
             "defaultPackageLabel": "Select a package from wellness dashboard"
@@ -2240,20 +2291,20 @@
         }
     },
     "aiCoach": {
-        "title": "AI Coach",
+        "title": "Coach",
         "streak": "{{count}} day streak",
-        "startHint": "Create a plan tailored to you",
+        "startHint": "Start planning your study path",
         "navigation": {
             "openPage": "Full page"
         },
         "page": {
             "eyebrow": "Personal coaching",
-            "title": "My learning plan",
-            "subtitle": "Track today’s work, check in after studying, and let the AI coach adjust tomorrow’s plan to your real progress.",
+            "title": "My study plan",
+            "subtitle": "Track today’s tasks, write your daily log after studying, and let your coach adjust tomorrow’s plan.",
             "backToCourses": "Back to my courses",
-            "planBadge": "Adaptive daily plan",
-            "onboardingBadge": "AI builds from your real goal",
-            "onboardingDescription": "The system combines your goal, current level, enrolled courses and daily signals to build a cleaner rhythm with AI support.",
+            "planBadge": "Daily study plan",
+            "onboardingBadge": "Plan built from your real goal",
+            "onboardingDescription": "The system uses your goals, current level, enrolled courses, and daily signals to build a practical plan.",
             "goalLabel": "Desired outcome",
             "currentLevelLabel": "Current knowledge",
             "motivationLabel": "Main motivation",
@@ -2261,33 +2312,33 @@
             "studyWindowLabel": "Preferred study window",
             "priorityCourseLabel": "Priority course",
             "constraintsLabel": "Constraints or blockers",
-            "onboardingNote": "AI does not invent the plan. It only adjusts inside your real courses, your actual time budget and the signals you send back each day.",
-            "aiLaneTitle": "AI planner lane",
+            "onboardingNote": "The system does not invent plans. It adjusts only within your real courses, real time budget, and your daily feedback.",
+            "aiLaneTitle": "Planning lane",
             "aiLaneHeadline": "A sharper rhythm that adapts itself.",
-            "aiLaneDescription": "You only see the work that matters today. After check-in, AI reads progress and blockers, then adjusts tomorrow.",
-            "loadingDescription": "AI is collecting progress, tasks and support signals to build your planner.",
-            "goalFallback": "AI keeps this goal on track and adjusts tomorrow from your daily feedback.",
+            "aiLaneDescription": "You only see what matters today. After your daily log, the system adjusts tomorrow.",
+            "loadingDescription": "Collecting progress, tasks, and support signals to build your plan.",
+            "goalFallback": "The system is keeping your goal on track and adjusting tomorrow from today’s feedback.",
             "todayPill": "Today",
             "futureStateTitle": "This day will unlock when it is due.",
-            "futureStateDescription": "The planner only shows the amount of work that matters today. Finish today and submit check-in to unlock the next day.",
+            "futureStateDescription": "The plan shows only what matters today. Finish today and submit your daily log to unlock the next day.",
             "backToToday": "Back to today",
             "generalTrack": "General track",
             "todayHeadline": "Today, {{date}}",
             "completedBadge": "Completed",
             "startFocusTask": "Start focus task",
-            "emptyDayDescription": "Keep using end-of-day check-in so AI can keep the rhythm and adjust tomorrow.",
+            "emptyDayDescription": "Keep writing your daily log so tomorrow can be adjusted better.",
             "taskRailEyebrow": "Daily flow",
             "taskRailTitle": "Remaining touchpoints today",
             "feedbackLogged": "Feedback logged",
             "reviewTask": "Review",
             "updateTask": "Update",
             "openLesson": "Open lesson",
-            "noMoreItems": "No extra steps are left today. Use check-in and the AI coach to close the day cleanly.",
+            "noMoreItems": "No extra tasks left today. Use your daily log and coach support to close the day cleanly.",
             "sidebarTitle": "Statistics",
             "sidebarHeadline": "Today pulse",
             "coachLaneEyebrow": "Coach lane",
-            "coachLaneTitle": "AI in the loop",
-            "coachFallback": "The coach reads task feedback, mood and tomorrow capacity to keep your plan realistic.",
+            "coachLaneTitle": "Coach support in the loop",
+            "coachFallback": "Your coach reads task feedback, mood, and tomorrow capacity to keep the plan realistic.",
             "chatPreviewTitle": "Latest conversation",
             "chatPreviewEmpty": "No conversation yet. Use a quick status or ask the coach directly.",
             "checkInHeadline": "Close the day and shape tomorrow",
@@ -2295,9 +2346,9 @@
             "latestCoachAdvice": "Latest coach note",
             "previewCards": {
                 "today": "Today lane",
-                "checkIn": "End-of-day check-in",
+                "checkIn": "Daily log",
                 "yes": "Enabled",
-                "coach": "Coach AI",
+                "coach": "Coach",
                 "live": "Always on"
             },
             "metrics": {
@@ -2318,7 +2369,7 @@
                 "quiz": "Quiz and recall",
                 "practice": "Practice block",
                 "read": "Reading focus",
-                "default": "AI suggested task"
+                "default": "Suggested task"
             },
             "quickStatus": {
                 "overloaded": "I feel overloaded",
@@ -2335,7 +2386,7 @@
         },
         "states": {
             "onlyStudents": "This feature is available for student accounts only.",
-            "disabled": "The AI coach is currently disabled. Please try again later or contact an administrator.",
+            "disabled": "Coach support is currently unavailable. Please try again later or contact an administrator.",
             "packageLockedTitle": "Package required",
             "packageRequired": "You need to purchase a package to activate the personalized roadmap.",
             "requiredPackages": "Required package: {{packages}}",
@@ -2343,18 +2394,18 @@
         },
         "tabs": {
             "today": "Today",
-            "checkIn": "Check-in",
+            "checkIn": "Daily log",
             "coach": "Coach"
         },
         "onboarding": {
-            "title": "Create a personalized plan",
+            "title": "Create your personal plan",
             "goalPlaceholder": "What outcome do you want to reach?",
             "currentKnowledgePlaceholder": "Your current knowledge",
             "motivationPlaceholder": "Your main motivation",
             "minutesPerDay": "{{count}} min/day",
             "primaryCoursePlaceholder": "Choose a priority course",
             "constraintsPlaceholder": "Constraints or current blockers",
-            "submit": "Start plan"
+            "submit": "Start planning"
         },
         "preferredStudyTimeOptions": {
             "morning": "Morning",
@@ -2384,10 +2435,10 @@
             "tomorrowMinutesPlaceholder": "Free minutes tomorrow",
             "notesPlaceholder": "What is blocking you, what slowed you down, or what should the coach watch closely?",
             "needSupport": "I want the support team to follow me more closely",
-            "submit": "Save check-in"
+            "submit": "Save daily log"
         },
         "chat": {
-            "placeholder": "Ask the AI coach...",
+            "placeholder": "Ask your coach...",
             "send": "Send"
         },
         "toasts": {
@@ -2395,8 +2446,8 @@
             "planCreateFailed": "Unable to create plan.",
             "taskUpdated": "Task updated.",
             "taskUpdateFailed": "Unable to update task.",
-            "checkInSaved": "Check-in saved.",
-            "checkInFailed": "Unable to save check-in.",
+            "checkInSaved": "Daily log saved.",
+            "checkInFailed": "Unable to save daily log.",
             "chatFailed": "Unable to message the coach."
         }
     },
@@ -2406,7 +2457,7 @@
             "brand": "Wellness",
             "viewProfile": "View profile",
             "header": {
-                "title": "Personalized fasting roadmap",
+                "title": "Personal wellness plan",
                 "subtitle": "3-column layout with system font and color palette."
             },
             "upgrade": {
@@ -2480,13 +2531,13 @@
             },
             "flow": {
                 "title": "Recommended workflow",
-                "subtitle": "Complete setup first, check in daily, review timeline, then ask AI for personalized optimization.",
+                "subtitle": "Set your plan first, write daily logs, then review your progress and adjust your rhythm.",
                 "plan": {
-                    "title": "Set up roadmap",
+                    "title": "Set plan",
                     "hint": "Choose package, timeline, and fasting schedule"
                 },
                 "log": {
-                    "title": "Check in today",
+                    "title": "Daily log today",
                     "hint": "Log water, workout, and body signals"
                 },
                 "timeline": {
@@ -2494,7 +2545,7 @@
                     "hint": "Track phase progress and completed check-ins"
                 },
                 "coach": {
-                    "title": "Ask AI coach",
+                    "title": "Ask your coach",
                     "hint": "Get personalized guidance and meal support"
                 }
             },
@@ -2516,7 +2567,35 @@
                 "busy": "Busy"
             },
             "quick": {
-                "applied": "Quick status updated."
+                "applied": "Quick status saved into your daily notes."
+            },
+            "quickGuidance": {
+                "title": "Quick guidance",
+                "good": {
+                    "headline": "You are doing well. Keep this rhythm.",
+                    "fix": "Stay consistent with hydration and balanced light meals to keep your energy stable.",
+                    "encourage": "You are on the right track, and small consistency will create visible progress."
+                },
+                "hungry": {
+                    "headline": "Strong hunger means your body needs a smart refill.",
+                    "fix": "Drink 300-500ml water first, then choose a small protein-and-fiber meal to stay full longer.",
+                    "encourage": "This hunger wave is temporary, and you can handle it calmly."
+                },
+                "tired": {
+                    "headline": "Tired means lower intensity, not giving up.",
+                    "fix": "Take a 10-15 minute reset, breathe deeply, do a short walk or stretch, then return with a smaller task.",
+                    "encourage": "You do not need a perfect day, just one steady next step."
+                },
+                "thirsty": {
+                    "headline": "Your body is asking for hydration now.",
+                    "fix": "Drink 400-600ml water within the next 30 minutes, reduce strong coffee, and set hourly water reminders.",
+                    "encourage": "Hydration is the fastest way to regain clarity, and you can do it right now."
+                },
+                "busy": {
+                    "headline": "When the schedule is packed, focus on small priorities.",
+                    "fix": "Pick 1-2 key tasks for a 25-minute block, and prepare water plus a quick snack to avoid energy drops.",
+                    "encourage": "Even on busy days, you are still in control of your progress."
+                }
             },
             "quickStatusNotes": {
                 "good": "Quick update: I feel stable today.",
@@ -2530,7 +2609,7 @@
                 "add500": "+500ml"
             },
             "coach": {
-                "title": "AI health advisor",
+                "title": "Support / Guidance",
                 "subtitle": "Advice adapts to your mood, body signals, and current study load.",
                 "form": {
                     "mood": "Mood",
@@ -2540,7 +2619,7 @@
                     "stress": "Stress",
                     "sleepHours": "Sleep hours",
                     "studyLoad": "Study load today",
-                    "notes": "Extra context for AI coach"
+                    "notes": "Extra context for your coach"
                 },
                 "placeholders": {
                     "mood": "e.g. balanced / tired",
@@ -2573,13 +2652,13 @@
                     }
                 },
                 "actions": {
-                    "send": "Get AI advice"
+                    "send": "Get guidance"
                 },
-                "replyTitle": "AI recommendation"
+                "replyTitle": "Coach recommendation"
             },
             "meal": {
-                "title": "AI meal formula",
-                "subtitle": "Generate meal formulas aligned with your health target and study rhythm.",
+                "title": "Meal helper",
+                "subtitle": "Get meal suggestions based on your health goal and learning rhythm.",
                 "form": {
                     "ingredients": "Ingredients (comma or new line separated)",
                     "servings": "Servings",
@@ -2600,9 +2679,9 @@
                     }
                 },
                 "actions": {
-                    "generate": "Generate meal"
+                    "generate": "Get meal suggestion"
                 },
-                "resultTitle": "Suggested menu"
+                "resultTitle": "Meal suggestion"
             },
             "sidebar": {
                 "fasting": "FASTING - EATING",
@@ -2620,7 +2699,7 @@
             "success": {
                 "savePlan": "Roadmap saved",
                 "saveLog": "Daily log updated",
-                "coachReply": "AI advice generated",
+                "coachReply": "Coach response received",
                 "mealReady": "Meal formula generated",
                 "waterUpdated": "Added {{amount}}ml water."
             },
@@ -2629,7 +2708,7 @@
                 "redirectingCheckout": "Redirecting to checkout...",
                 "savingPlan": "Saving roadmap...",
                 "savingLog": "Saving daily log...",
-                "askingCoach": "Requesting AI coach...",
+                "askingCoach": "Sending request to coach...",
                 "generatingMeal": "Generating meal formula..."
             },
             "errors": {
@@ -2640,10 +2719,10 @@
                 "checkoutNotConfigured": "No wellness package is available for checkout.",
                 "createCheckout": "Unable to create checkout",
                 "packageRequired": "You need to purchase a package to use this feature.",
-                "moodCoach": "Unable to get AI advisor response",
+                "moodCoach": "Unable to get guidance right now",
                 "mealCoach": "Unable to generate meal formula",
                 "mealIngredients": "Enter at least one ingredient",
-                "moodFieldsRequired": "Enter mood, energy, hunger, and thirst before requesting AI advice."
+                "moodFieldsRequired": "Please fill required fields before sending your guidance request."
             }
         },
         "admin": {

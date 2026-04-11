@@ -1,5 +1,6 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../store/store';
 import { loginSuccess, updateUser } from '../../store/authSlice';
@@ -11,6 +12,7 @@ import { phoneAuthApi } from '../../services/phoneAuthApi';
 type PhoneOtpMode = 'register' | 'forgotPassword';
 
 const PhoneOtpVerifyPage = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -123,7 +125,7 @@ const PhoneOtpVerifyPage = () => {
   const finishLogin = async (accessToken: string, expiresAt: string) => {
     const user = authApi.decodeToken(accessToken);
     if (!user) {
-      throw new Error('Không thể đọc thông tin phiên đăng nhập.');
+      throw new Error(t('auth.errors.sessionReadFailed'));
     }
 
     authApi.setAccessToken(accessToken);
@@ -147,7 +149,7 @@ const PhoneOtpVerifyPage = () => {
     const otpCode = otp.join('');
 
     if (otpCode.length !== 6) {
-      setError('Vui lòng nhập mã OTP gồm 6 chữ số.');
+      setError(t('auth.errors.otpInvalid'));
       return;
     }
 
@@ -155,11 +157,11 @@ const PhoneOtpVerifyPage = () => {
 
     if (mode === 'forgotPassword') {
       if (!newPassword.trim() || newPassword.trim().length < 8) {
-        setError('Mật khẩu mới phải có ít nhất 8 ký tự.');
+        setError(t('auth.errors.passwordLength'));
         return;
       }
       if (newPassword !== confirmNewPassword) {
-        setError('Mật khẩu xác nhận không khớp.');
+        setError(t('auth.errors.confirmPasswordMismatch'));
         return;
       }
     }
@@ -173,13 +175,13 @@ const PhoneOtpVerifyPage = () => {
         await finishLogin(response.accessToken, response.expiresAt);
       } else {
         await phoneAuthApi.verifyForgotPasswordOtp(phone, otpCode, newPassword.trim());
-        setSuccessMessage('Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.');
+        setSuccessMessage(t('auth.passwordResetSuccess'));
         setTimeout(() => {
           navigate('/login', { replace: true });
         }, 900);
       }
     } catch (err: any) {
-      setError(err?.message || 'OTP không hợp lệ hoặc đã hết hạn.');
+      setError(err?.message || t('auth.errors.otpVerificationFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -203,10 +205,10 @@ const PhoneOtpVerifyPage = () => {
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
-      setSuccessMessage('Đã gửi lại OTP qua Zalo.');
+      setSuccessMessage(t('auth.phoneOtpResent'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
-      setError(err?.message || 'Không thể gửi lại OTP.');
+      setError(err?.message || t('auth.errors.resendFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -223,10 +225,10 @@ const PhoneOtpVerifyPage = () => {
           <span className="material-symbols-outlined text-primary text-2xl">phone_iphone</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-          {mode === 'register' ? 'Xác minh số điện thoại' : 'Xác minh OTP quên mật khẩu'}
+          {mode === 'register' ? t('auth.phoneVerifyTitle') : t('auth.phoneVerifyForgotTitle')}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-base leading-relaxed max-w-sm">
-          Mã OTP đã được gửi tới <span className="font-medium text-gray-900 dark:text-gray-200">{maskPhone(phone)}</span> qua Zalo.
+          {t('auth.phoneOtpSentTo', { phone: maskPhone(phone) })}
         </p>
       </div>
 
@@ -271,7 +273,7 @@ const PhoneOtpVerifyPage = () => {
           <div className="space-y-3">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300" htmlFor="newPassword">
-                Mật khẩu mới
+                {t('auth.newPassword')}
               </label>
               <input
                 id="newPassword"
@@ -279,13 +281,13 @@ const PhoneOtpVerifyPage = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-white"
-                placeholder="Tối thiểu 8 ký tự"
+                placeholder={t('auth.passwordHint')}
                 disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300" htmlFor="confirmNewPassword">
-                Xác nhận mật khẩu mới
+                {t('auth.confirmNewPassword')}
               </label>
               <input
                 id="confirmNewPassword"
@@ -293,7 +295,7 @@ const PhoneOtpVerifyPage = () => {
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                 className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-white"
-                placeholder="Nhập lại mật khẩu mới"
+                placeholder={t('auth.confirmPasswordPlaceholder')}
                 disabled={isLoading}
               />
             </div>
@@ -315,14 +317,14 @@ const PhoneOtpVerifyPage = () => {
           </div>
 
           <div className="text-sm">
-            <span className="text-gray-400 dark:text-gray-500">Chưa nhận được mã?</span>
+            <span className="text-gray-400 dark:text-gray-500">{t('auth.didntReceiveCode')}</span>
             <button
               className="font-semibold text-primary dark:text-primary-400 hover:text-primary/80 dark:hover:text-primary-300 ml-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               type="button"
               onClick={handleResendOtp}
               disabled={!canResend || isLoading}
             >
-              Gửi lại
+              {t('auth.resend')}
             </button>
           </div>
         </div>
@@ -336,11 +338,11 @@ const PhoneOtpVerifyPage = () => {
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Đang xác minh...</span>
+                <span>{t('auth.verifying')}</span>
               </>
             ) : (
               <>
-                <span>{mode === 'register' ? 'Xác minh và đăng nhập' : 'Xác minh và đặt lại mật khẩu'}</span>
+                <span>{mode === 'register' ? t('auth.phoneVerifyAndLogin') : t('auth.phoneVerifyAndReset')}</span>
                 <span className="material-symbols-outlined text-lg group-hover:translate-x-0.5 transition-transform">
                   arrow_forward
                 </span>
@@ -355,7 +357,7 @@ const PhoneOtpVerifyPage = () => {
             <span className="material-symbols-outlined text-base group-hover:-translate-x-0.5 transition-transform">
               arrow_back
             </span>
-            Quay lại
+            {t('auth.backToLogin')}
           </Link>
         </div>
       </form>

@@ -72,7 +72,9 @@
             "registrationFailed": "Đăng ký thất bại. Vui lòng thử lại.",
             "otpInvalid": "Vui lòng nhập mã OTP gồm 6 chữ số",
             "otpVerificationFailed": "Mã OTP không hợp lệ hoặc đã hết hạn",
-            "resendFailed": "Gửi lại mã OTP thất bại. Vui lòng thử lại."
+            "resendFailed": "Gửi lại mã OTP thất bại. Vui lòng thử lại.",
+            "phoneRegistrationFailed": "Không thể đăng ký bằng số điện thoại. Vui lòng thử lại.",
+            "sessionReadFailed": "Không thể đọc thông tin phiên đăng nhập."
         },
         "twoFactor": {
             "title": "Xác thực 2 yếu tố",
@@ -81,7 +83,19 @@
             "verify": "Xác minh",
             "verifying": "Đang xác minh...",
             "backToLogin": "Quay lại Đăng nhập"
-        }
+        },
+        "phoneRegisterTitle": "Đăng ký bằng số điện thoại",
+        "phoneRegisterDesc": "Hệ thống sẽ gửi OTP qua Zalo để xác minh.",
+        "phoneContinue": "Tiếp tục",
+        "phoneVerifyTitle": "Xác minh số điện thoại",
+        "phoneVerifyForgotTitle": "Xác minh OTP quên mật khẩu",
+        "phoneOtpSentTo": "Mã OTP đã được gửi tới {{phone}} qua Zalo.",
+        "phoneOtpResent": "Đã gửi lại OTP qua Zalo.",
+        "phoneVerifyAndLogin": "Xác minh và đăng nhập",
+        "phoneVerifyAndReset": "Xác minh và đặt lại mật khẩu",
+        "passwordResetSuccess": "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.",
+        "newPassword": "Mật khẩu mới",
+        "confirmNewPassword": "Xác nhận mật khẩu mới"
     },
     "hero": {
         "title": "Mở khóa tiềm năng của bạn qua từng bài học.",
@@ -1298,7 +1312,8 @@
                 "ambassador": "Đại sứ sức khỏe",
                 "missionVision": "Sứ mệnh & tầm nhìn",
                 "policy": "Chính sách",
-                "courseCenter": "Trung tâm khóa học"
+                "courseCenter": "Trung tâm khóa học",
+                "scienceCenter": "Trung Tâm Khoa Học"
             },
             "cartTitle": "Giỏ hàng",
             "logout": "Đăng xuất",
@@ -2387,6 +2402,36 @@
                 "confused": "Tôi đang kẹt ở phần hiện tại. Hãy giải thích ngắn gọn tôi nên làm gì tiếp theo.",
                 "strong": "Hôm nay tôi đang vào nhịp tốt. Hãy đề xuất thử thách hợp lý cho ngày mai.",
                 "focus": "Tôi cần tập trung hơn cho buổi học tới. Hãy cho tôi một nghi thức bắt đầu thật ngắn."
+            },
+            "meal": {
+                "title": "Thực đơn thông minh",
+                "subtitle": "Gợi ý bữa ăn theo mục tiêu sức khỏe và nhịp học của bạn.",
+                "form": {
+                    "ingredients": "Nguyên liệu có sẵn",
+                    "servings": "Khẩu phần",
+                    "goal": "Mục tiêu ăn",
+                    "dietaryPreference": "Chế độ kiêng khem (Tùy chọn)"
+                },
+                "placeholders": {
+                    "ingredients": "VD: Gà, Bông cải xanh, Trứng...",
+                    "servings": "VD: 2",
+                    "goal": "VD: Tăng cơ",
+                    "dietaryPreference": "VD: Không ăn cay, Keto..."
+                },
+                "options": {
+                    "goal": {
+                        "focusStudy": "Ngày học cần tập trung",
+                        "fatLoss": "Giảm mỡ",
+                        "recovery": "Phục hồi"
+                    }
+                },
+                "actions": {
+                    "generate": "Trợ lý lên thực đơn"
+                },
+                "result": {
+                    "title": "Thực đơn đề xuất:",
+                    "notes": "Lưu ý dinh dưỡng:"
+                }
             }
         },
         "states": {
@@ -2773,6 +2818,128 @@
                 "saveFailed": "Không thể lưu cấu hình wellness",
                 "invalidPackageData": "Vui lòng xử lý mã gói trùng và các dòng dữ liệu không hợp lệ trước khi lưu."
             }
+        }
+    },
+    "planner": {
+        "loading": "Đang tải kế hoạch...",
+        "calendar": {
+            "thisWeek": "Tuần này",
+            "mon": "T2",
+            "tue": "T3",
+            "wed": "T4",
+            "thu": "T5",
+            "fri": "T6",
+            "sat": "T7",
+            "sun": "CN"
+        },
+        "hero": {
+            "congrats": "Tuyệt vời!",
+            "allDoneMessage": "Bạn đã hoàn thành tất cả nhiệm vụ hôm nay. Cứ giữ đà thế nhé!",
+            "streak": "{{count}} ngày liên tiếp",
+            "tasksCompleted": "đã hoàn thành",
+            "todayPlan": "Kế hoạch hôm nay",
+            "progress": "Tiến độ",
+            "noTasksTitle": "Hôm nay không có lịch học",
+            "noTasksDesc": "Lộ trình của bạn hôm nay trống. Hãy dành thời gian nghỉ ngơi hoặc ôn tập tự do nhé!",
+            "setupStudyTitle": "Kích hoạt lộ trình cá nhân hóa",
+            "setupStudyDesc": "Bạn chưa thiết lập Lộ trình học tập. Tạo lộ trình ngay để hệ thống tự động phân bổ bài học mỗi ngày nhé.",
+            "setupStudyBtn": "Tạo lộ trình ngay"
+        },
+        "study": {
+            "title": "Bài học hôm nay",
+            "noTasks": "Chưa có bài học nào được lên lịch cho hôm nay.",
+            "completed": "hoàn thành",
+            "minutes": "phút",
+            "startLearning": "Bắt đầu học",
+            "done": "Đã hoàn thành",
+            "markDone": "Đánh dấu hoàn thành"
+        },
+        "fasting": {
+            "title": "Lịch nhịn ăn",
+            "eatingWindow": "Cửa sổ ăn uống",
+            "fastingWindow": "Đang nhịn ăn",
+            "eatingRemaining": "Thời gian ăn còn lại",
+            "fastingRemaining": "Thời gian nhịn còn lại"
+        },
+        "water": {
+            "title": "Uống nước",
+            "goal": "Mục tiêu: {{amount}}ml",
+            "goalReached": "Đã đạt mục tiêu hôm nay!"
+        },
+        "tips": {
+            "title": "Mẹo hôm nay",
+            "sleep": "Ngủ đủ 8 tiếng",
+            "fatBurning": "Đốt mỡ hiệu quả",
+            "hydration": "Giữ nước cơ thể"
+        },
+        "dailyStatus": {
+            "title": "Hôm nay bạn cảm thấy thế nào?",
+            "subtitle": "Chọn 1 trạng thái",
+            "thankYou": "Cảm ơn bạn đã chia sẻ!"
+        },
+        "moods": {
+            "thirsty": "Tôi đang khát nước",
+            "hungry": "Tôi đang đói",
+            "stomachWeird": "Dạ dày tôi hơi khó chịu",
+            "noProgress": "Tôi cảm thấy không thấy tiến bộ",
+            "tired": "Tôi cảm thấy mệt mỏi",
+            "motivated": "Tôi cảm thấy có động lực tập luyện",
+            "cravings": "Tôi bị thèm ăn nặng",
+            "sleepTrouble": "Tôi khó ngủ",
+            "great": "Tôi cảm thấy tuyệt vời. Cơ thể đang thay đổi tích cực!"
+        },
+        "stats": {
+            "title": "Thống kê",
+            "tasks": "Bài học",
+            "water": "Nước uống",
+            "fasting": "Nhịn ăn",
+            "streakDays": "ngày liên tiếp",
+            "coachTitle": "Chuyên gia dinh dưỡng",
+            "coachDesc": "Hỏi bất cứ điều gì"
+        },
+        "onboarding": {
+            "title": "Thiết lập kế hoạch cá nhân",
+            "subtitle": "Trả lời vài câu hỏi để tự động tạo lộ trình cá nhân hóa phù hợp nhất cho bạn.",
+            "step1Title": "Mục tiêu của bạn",
+            "step1Desc": "Hãy cho chúng tôi biết bạn muốn đạt được gì.",
+            "step2Title": "Trình độ hiện tại",
+            "step2Desc": "Giúp chúng tôi hiểu bạn đang ở đâu.",
+            "step3Title": "Thời gian mỗi ngày",
+            "step3Desc": "Bạn có thể dành bao nhiêu thời gian?",
+            "step4Title": "Sẵn sàng bắt đầu!",
+            "step4Desc": "Thêm bất kỳ lưu ý đặc biệt nào.",
+            "goalLabel": "Mục tiêu",
+            "goalPlaceholder": "Ví dụ: Tôi muốn hiểu sâu về phương pháp nhịn ăn gián đoạn...",
+            "knowledgeLabel": "Trình độ hiện tại",
+            "knowledgePlaceholder": "Bạn đã biết gì về chủ đề này?",
+            "motivationLabel": "Động lực",
+            "motivationPlaceholder": "Điều gì thúc đẩy bạn?",
+            "timeLabel": "Thời gian mỗi ngày",
+            "minutes": "phút",
+            "preferredTimeLabel": "Thời gian ưa thích",
+            "timeMorning": "Buổi sáng",
+            "timeAfternoon": "Buổi chiều",
+            "timeEvening": "Buổi tối",
+            "timeFlexible": "Linh hoạt",
+            "constraintsLabel": "Lưu ý đặc biệt",
+            "constraintsPlaceholder": "Ví dụ: Tôi bận vào cuối tuần, tôi muốn tập trung phần lý thuyết trước...",
+            "constraintsHint": "Không bắt buộc — bạn có thể bỏ qua.",
+            "back": "Quay lại",
+            "next": "Tiếp theo",
+            "creating": "Đang tạo lộ trình...",
+            "createPlan": "Tạo lộ trình cá nhân hóa",
+            "errors": {
+                "goalRequired": "Vui lòng nhập mục tiêu của bạn.",
+                "knowledgeRequired": "Vui lòng mô tả trình độ hiện tại.",
+                "timeMinimum": "Thời gian tối thiểu là 5 phút."
+            }
+        },
+        "toast": {
+            "planCreated": "Kế hoạch đã được tạo thành công!",
+            "planCreateFailed": "Không thể tạo kế hoạch. Vui lòng thử lại.",
+            "taskCompleted": "Đã hoàn thành bài học!",
+            "taskCompleteFailed": "Không thể hoàn thành bài học.",
+            "moodSubmitted": "Cảm ơn bạn đã chia sẻ!"
         }
     }
 }

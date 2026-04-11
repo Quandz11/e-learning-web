@@ -121,7 +121,8 @@ export const aiWidgetApi = {
 
     getDashboard: async (): Promise<StudyPlanDashboard> => {
         const plan = await aiWidgetApi.getActivePlan();
-        if (!plan) {
+        // Handle case where apiClient returns {} for 204 No Content
+        if (!plan || !plan.id) {
             return {
                 plan: null,
                 todayTasks: [],
@@ -149,7 +150,9 @@ export const aiWidgetApi = {
     },
 
     getActivePlan: async (): Promise<UserStudyPlan | null> => {
-        return await apiClient<UserStudyPlan | null>('/ai/plan/active', { method: 'GET' });
+        const result = await apiClient<UserStudyPlan | null>('/ai/plan/active', { method: 'GET' });
+        if (result && !result.id) return null;
+        return result;
     },
 
     getTodayTasks: async (planId: string): Promise<DailyStudyTask[]> => {

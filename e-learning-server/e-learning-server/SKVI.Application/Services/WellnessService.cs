@@ -944,24 +944,24 @@ public class WellnessService : IWellnessService
             Environment.NewLine,
             [
                 "You are a nutrition coach for intermittent fasting users.",
-                "Respond in Vietnamese with clear recipe and quantities.",
+                "Respond in Vietnamese with full diacritics (Unicode), never remove accents.",
                 "No markdown table. Keep under 180 words.",
                 $"Plan package: {plan.PackageType}",
                 $"Ingredients: {ingredients}",
                 $"Servings: {request.Servings}",
                 $"Goal: {request.Goal}",
                 $"DietaryPreference: {request.DietaryPreference}",
-                "Provide sections: Mon an de xuat, Dinh luong nguyen lieu, Cach che bien nhanh, Ghi chu dinh duong."
+                "Provide sections exactly: Món ăn đề xuất, Định lượng nguyên liệu, Cách chế biến nhanh, Ghi chú dinh dưỡng."
             ]);
     }
 
     private static string BuildMealFallback(string ingredients, int servings, string goal, string dietaryPreference)
     {
         return
-            $"Mon an de xuat: Bowl ap chao voi {ingredients}. " +
-            $"Dinh luong: chia cho {servings} khau phan, uu tien 1/2 rau, 1/4 dam, 1/4 tinh bot cham. " +
-            $"Cach che bien nhanh: hap/luoc + ap chao 10-12 phut, han che chien ngap dau. " +
-            $"Ghi chu: Dieu chinh gia vi nhe, theo muc tieu {goal}, che do {dietaryPreference}.";
+            $"Món ăn đề xuất: Bowl áp chảo với {ingredients}. " +
+            $"Định lượng: chia cho {servings} khẩu phần, ưu tiên 1/2 rau, 1/4 đạm, 1/4 tinh bột chậm. " +
+            $"Cách chế biến nhanh: hấp/luộc + áp chảo 10-12 phút, hạn chế chiên ngập dầu. " +
+            $"Ghi chú: điều chỉnh gia vị nhẹ, theo mục tiêu {goal}, chế độ {dietaryPreference}.";
     }
 
     private static string BuildNutritionNotes(string goal, string dietaryPreference)

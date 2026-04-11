@@ -72,7 +72,9 @@
             "registrationFailed": "Registration failed. Please try again.",
             "otpInvalid": "Please enter a 6-digit code",
             "otpVerificationFailed": "Invalid or expired OTP code",
-            "resendFailed": "Failed to resend code. Please try again."
+            "resendFailed": "Failed to resend code. Please try again.",
+            "phoneRegistrationFailed": "Unable to register with phone number. Please try again.",
+            "sessionReadFailed": "Unable to read session information."
         },
         "twoFactor": {
             "title": "Two-Factor Authentication",
@@ -81,7 +83,19 @@
             "verify": "Verify",
             "verifying": "Verifying...",
             "backToLogin": "Back to Login"
-        }
+        },
+        "phoneRegisterTitle": "Register with phone number",
+        "phoneRegisterDesc": "We will send an OTP via Zalo to verify your identity.",
+        "phoneContinue": "Continue",
+        "phoneVerifyTitle": "Verify phone number",
+        "phoneVerifyForgotTitle": "Verify forgot password OTP",
+        "phoneOtpSentTo": "OTP has been sent to {{phone}} via Zalo.",
+        "phoneOtpResent": "OTP has been resent via Zalo.",
+        "phoneVerifyAndLogin": "Verify and log in",
+        "phoneVerifyAndReset": "Verify and reset password",
+        "passwordResetSuccess": "Password reset successful. Please log in again.",
+        "newPassword": "New password",
+        "confirmNewPassword": "Confirm new password"
     },
     "hero": {
         "title": "Unlock your potential with every lesson.",
@@ -1293,7 +1307,8 @@
                 "ambassador": "Health Ambassador",
                 "missionVision": "Mission & Vision",
                 "policy": "Policies",
-                "courseCenter": "Course Center"
+                "courseCenter": "Course Center",
+                "scienceCenter": "Science Center"
             },
             "cartTitle": "Cart",
             "logout": "Logout",
@@ -2471,13 +2486,19 @@
                 "PLAN_30_DAYS": "30-day package"
             },
             "locked": {
-                "badge": "Package required",
-                "title": "Unlock personalized roadmap",
-                "subtitle": "You need to purchase a package to activate this feature.",
-                "required": "Required package: {{packages}}",
-                "current": "Current active package: {{package}}",
-                "openPricing": "Upgrade now",
-                "openCheckout": "Open wellness checkout"
+                "badge": "LOCKED",
+                "title": "Restricted Feature",
+                "desc": "Please view the upgrade packages in the left menu to activate the Wellness assistant.",
+                "required": "Requires: {{packages}}",
+                "current": "Current package: {{package}}"
+            },
+            "setup": {
+                "title": "Wellness Plan",
+                "summary": "Fasting schedule {{fastingHours}}:{{eatingHours}} • From {{startDate}} to {{endDate}}",
+                "configTitle": "Wellness Plan Configuration",
+                "hint": "Please configure your package details to start tracking calculations.",
+                "package": "Tracking Package",
+                "selectPlaceholder": "-- Select --"
             },
             "calendar": {
                 "title": "Weekly calendar",
@@ -2485,7 +2506,7 @@
                 "next": "Next"
             },
             "timeline": {
-                "title": "Progress timeline",
+                "title": "Today's Checkpoints",
                 "subtitle": "Track your phase schedule and daily health logs over time.",
                 "range": "From {{from}} to {{to}}",
                 "days": "{{days}} days",
@@ -2525,9 +2546,9 @@
                 "timezone": "Timezone"
             },
             "actions": {
-                "savePlan": "Save roadmap",
-                "upgrade": "Upgrade checkout",
-                "saveLog": "Save today's log"
+                "upgrade": "Upgrade Package",
+                "savePlan": "Save Plan",
+                "saveLog": "Save Log"
             },
             "flow": {
                 "title": "Recommended workflow",
@@ -2657,19 +2678,19 @@
                 "replyTitle": "Coach recommendation"
             },
             "meal": {
-                "title": "Meal helper",
+                "title": "Smart Menu",
                 "subtitle": "Get meal suggestions based on your health goal and learning rhythm.",
                 "form": {
-                    "ingredients": "Ingredients (comma or new line separated)",
+                    "ingredients": "Available Ingredients",
                     "servings": "Servings",
-                    "goal": "Meal goal",
-                    "dietaryPreference": "Dietary preference (optional)"
+                    "goal": "Eating Goal",
+                    "dietaryPreference": "Dietary Preference (Optional)"
                 },
                 "placeholders": {
-                    "ingredients": "e.g. chicken breast, broccoli, brown rice",
-                    "servings": "e.g. 2",
-                    "goal": "e.g. focus-study-day",
-                    "dietaryPreference": "e.g. low-carb, vegetarian"
+                    "ingredients": "Ex: Chicken, Broccoli, Eggs...",
+                    "servings": "Ex: 2",
+                    "goal": "Ex: Muscle gain",
+                    "dietaryPreference": "Ex: No spicy food, Keto..."
                 },
                 "options": {
                     "goal": {
@@ -2679,9 +2700,12 @@
                     }
                 },
                 "actions": {
-                    "generate": "Get meal suggestion"
+                    "generate": "Generate Menu"
                 },
-                "resultTitle": "Meal suggestion"
+                "result": {
+                    "title": "Suggested Menu:",
+                    "notes": "Nutrition notes:"
+                }
             },
             "sidebar": {
                 "fasting": "FASTING - EATING",
@@ -2769,6 +2793,128 @@
                 "saveFailed": "Unable to save wellness settings",
                 "invalidPackageData": "Please fix duplicate package codes and invalid package rows before saving."
             }
+        }
+    },
+    "planner": {
+        "loading": "Loading your plan...",
+        "calendar": {
+            "thisWeek": "This week",
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat",
+            "sun": "Sun"
+        },
+        "hero": {
+            "congrats": "Congratulations!",
+            "allDoneMessage": "You've completed all tasks for today. Keep up the great work!",
+            "streak": "{{count}}-day streak",
+            "tasksCompleted": "completed",
+            "todayPlan": "Today's Plan",
+            "progress": "Progress",
+            "noTasksTitle": "No tasks for today",
+            "noTasksDesc": "Your roadmap is clear for today. Take some time to rest or review freely!",
+            "setupStudyTitle": "Activate Personalized Roadmap",
+            "setupStudyDesc": "You haven't set up a Study Plan yet. Create one now so the system can automatically assign daily lessons.",
+            "setupStudyBtn": "Create Roadmap Now"
+        },
+        "study": {
+            "title": "Today's Lessons",
+            "noTasks": "No lessons scheduled for today.",
+            "completed": "completed",
+            "minutes": "min",
+            "startLearning": "Start Learning",
+            "done": "Completed",
+            "markDone": "Mark as done"
+        },
+        "fasting": {
+            "title": "Fasting Schedule",
+            "eatingWindow": "Eating window",
+            "fastingWindow": "Fasting",
+            "eatingRemaining": "Eating time remaining",
+            "fastingRemaining": "Fasting time remaining"
+        },
+        "water": {
+            "title": "Water Intake",
+            "goal": "Goal: {{amount}}ml",
+            "goalReached": "Daily goal reached!"
+        },
+        "tips": {
+            "title": "Today's Tips",
+            "sleep": "Sleep 8 hours",
+            "fatBurning": "Fat burning mode",
+            "hydration": "Stay hydrated"
+        },
+        "dailyStatus": {
+            "title": "How are you feeling today?",
+            "subtitle": "Pick one",
+            "thankYou": "Thanks for sharing!"
+        },
+        "moods": {
+            "thirsty": "I'm feeling thirsty",
+            "hungry": "I'm feeling hungry",
+            "stomachWeird": "My stomach feels weird",
+            "noProgress": "I feel like I don't see any progress",
+            "tired": "I'm feeling tired",
+            "motivated": "I feel motivated to exercise",
+            "cravings": "I have the worst cravings",
+            "sleepTrouble": "I have trouble falling asleep",
+            "great": "I feel great. My body is changing for the better!"
+        },
+        "stats": {
+            "title": "Statistics",
+            "tasks": "Lessons",
+            "water": "Water",
+            "fasting": "Fasting",
+            "streakDays": "day streak",
+            "coachTitle": "Nutrition Expert",
+            "coachDesc": "Ask anything"
+        },
+        "onboarding": {
+            "title": "Set up your personal plan",
+            "subtitle": "Answer a few questions so the system can create the best personalized roadmap for you.",
+            "step1Title": "Your Goal",
+            "step1Desc": "Tell us what you want to achieve.",
+            "step2Title": "Current Level",
+            "step2Desc": "Help us understand where you are.",
+            "step3Title": "Daily Time",
+            "step3Desc": "How much time can you dedicate?",
+            "step4Title": "Ready to go!",
+            "step4Desc": "Add any special notes.",
+            "goalLabel": "Goal",
+            "goalPlaceholder": "e.g. I want to deeply understand intermittent fasting...",
+            "knowledgeLabel": "Current knowledge",
+            "knowledgePlaceholder": "What do you already know about this topic?",
+            "motivationLabel": "Motivation",
+            "motivationPlaceholder": "What drives you?",
+            "timeLabel": "Time per day",
+            "minutes": "min",
+            "preferredTimeLabel": "Preferred time",
+            "timeMorning": "Morning",
+            "timeAfternoon": "Afternoon",
+            "timeEvening": "Evening",
+            "timeFlexible": "Flexible",
+            "constraintsLabel": "Special notes",
+            "constraintsPlaceholder": "e.g. I'm busy on weekends, I want to focus on theory first...",
+            "constraintsHint": "Optional \u2014 you can skip this.",
+            "back": "Back",
+            "next": "Next",
+            "creating": "Creating plan...",
+            "createPlan": "Create AI Plan",
+            "errors": {
+                "goalRequired": "Please enter your goal.",
+                "knowledgeRequired": "Please describe your current level.",
+                "timeMinimum": "Minimum time is 5 minutes."
+            }
+        },
+        "toast": {
+            "planCreated": "Plan created successfully!",
+            "planCreateFailed": "Unable to create plan. Please try again.",
+            "taskCompleted": "Lesson completed!",
+            "taskCompleteFailed": "Unable to complete lesson.",
+            "moodSubmitted": "Thanks for sharing!"
         }
     }
 }

@@ -72,7 +72,7 @@ const UserHeader: React.FC = () => {
         { label: t('home.header.nav.pricing', { defaultValue: 'Bảng giá' }), to: '/pricing' },
         { label: t('home.header.nav.policy', { defaultValue: 'Chính sách' }), to: '/privacy-policy' },
     ];
-    const courseCenterItem: NavLinkItem = { label: t('home.header.nav.courseCenter', { defaultValue: 'Trung tâm khóa học' }), to: '/courses' };
+    const courseCenterItem: NavLinkItem = { label: t('home.header.nav.scienceCenter', { defaultValue: 'Trung Tâm Khoa Học' }), to: '/my-learning-plan' };
 
     const renderDesktopMenuItem = (item: NavLinkItem, className: string, key: string) => {
         if (item.to) {

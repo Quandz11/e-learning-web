@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { phoneAuthApi } from '../../services/phoneAuthApi';
 
 const PhoneRegisterPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const referralCodeFromUrl = searchParams.get('ref')?.trim().toUpperCase() || '';
@@ -20,12 +22,12 @@ const PhoneRegisterPage = () => {
   };
 
   const validate = (): string | null => {
-    if (!fullName.trim()) return 'Vui lòng nhập họ tên.';
-    if (!phone.trim()) return 'Vui lòng nhập số điện thoại.';
+    if (!fullName.trim()) return t('auth.errors.fullNameRequired');
+    if (!phone.trim()) return t('auth.errors.phoneRequired');
 
     const normalized = normalizePhone(phone);
     if (!/^\d{9,15}$/.test(normalized)) {
-      return 'Số điện thoại không đúng định dạng.';
+      return t('auth.errors.phoneInvalid');
     }
 
     return null;
@@ -56,7 +58,7 @@ const PhoneRegisterPage = () => {
         },
       });
     } catch (err: any) {
-      setError(err?.message || 'Không thể đăng ký bằng số điện thoại.');
+      setError(err?.message || t('auth.errors.phoneRegistrationFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -66,10 +68,10 @@ const PhoneRegisterPage = () => {
     <>
       <div className="text-center sm:text-left space-y-2">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-          Đăng ký bằng số điện thoại
+          {t('auth.phoneRegisterTitle')}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-base">
-          Hệ thống sẽ gửi OTP qua Zalo để xác minh.
+          {t('auth.phoneRegisterDesc')}
         </p>
       </div>
 
@@ -81,10 +83,10 @@ const PhoneRegisterPage = () => {
 
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200">Họ và tên</label>
+          <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200">{t('auth.fullName')}</label>
           <input
             className="w-full h-12 px-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary text-gray-900 dark:text-white"
-            placeholder="Nhập họ và tên"
+            placeholder={t('auth.fullNamePlaceholder')}
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -93,10 +95,10 @@ const PhoneRegisterPage = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200">Số điện thoại</label>
+          <label className="block text-sm font-semibold text-gray-900 dark:text-gray-200">{t('auth.phone')}</label>
           <input
             className="w-full h-12 px-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary text-gray-900 dark:text-white"
-            placeholder="Ví dụ: 0987654321"
+            placeholder={t('auth.phonePlaceholder')}
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -109,14 +111,14 @@ const PhoneRegisterPage = () => {
           type="submit"
           disabled={isLoading}
         >
-          {isLoading ? 'Đang gửi OTP...' : 'Tiếp tục'}
+          {isLoading ? t('auth.sendingOtp') : t('auth.phoneContinue')}
         </button>
       </form>
 
       <p className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4">
-        Đã có tài khoản?{' '}
-        <Link className="font-bold text-primary hover:text-primary/80 hover:underline" to="/login-phone">
-          Đăng nhập bằng số điện thoại
+        {t('auth.alreadyHaveAccount')}{' '}
+        <Link className="font-bold text-primary hover:text-primary/80 hover:underline" to="/login">
+          {t('auth.logIn')}
         </Link>
       </p>
     </>

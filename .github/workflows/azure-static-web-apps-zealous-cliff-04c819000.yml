@@ -4,16 +4,25 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'e-learning-web/**'
+      - '.github/workflows/azure-static-web-apps-zealous-cliff-04c819000.yml'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+    paths:
+      - 'e-learning-web/**'
+      - '.github/workflows/azure-static-web-apps-zealous-cliff-04c819000.yml'
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    env:
+      VITE_API_URL: https://skvi-e-learning-api-service.azurewebsites.net/api
     steps:
       - uses: actions/checkout@v3
         with:
@@ -28,9 +37,10 @@ jobs:
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "./e-learning-web" # App source code path
+          app_location: "/e-learning-web" # App source code path
           api_location: "" # Api source code path - optional
-          output_location: "build" # Built app content directory - optional
+          output_location: "dist" # Built app content directory - optional
+          app_build_command: "npm install && VITE_API_URL=https://skvi-e-learning-api-service.azurewebsites.net/api npm run build"
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:

@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     env:
-      VITE_API_URL: https://skvi-e-learning-api-service.azurewebsites.net/api
+      VITE_API_URL: https://skvi-e-learning-api-service-arh3g4dsbxh5cna7.southeastasia-01.azurewebsites.net/api
     steps:
       - uses: actions/checkout@v3
         with:

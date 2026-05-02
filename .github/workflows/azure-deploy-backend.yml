@@ -11,9 +11,9 @@ on:
 
 env:
   AZURE_RESOURCE_GROUP: rg-elearning
-  ACR_NAME: skvielearningacr2
-  ACR_LOGIN_SERVER: skvielearningacr2.azurecr.io
-  WEBAPP_NAME: skvi-e-learning-api
+  ACR_NAME: skvielearningacr
+  ACR_LOGIN_SERVER: skvielearningacr.azurecr.io
+  WEBAPP_NAME: skvi-e-learning-api-service
 
 
 jobs:

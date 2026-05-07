@@ -80,6 +80,13 @@ builder.Services.AddSingleton<IGuestConversationService, GuestConversationServic
 // Background Services
 builder.Services.AddHostedService<SKVI.Infrastructure.BackgroundServices.GuestConversationCleanupService>();
 
+// Ngăn background service crash (VD: HangfireServer) kéo chết toàn bộ app
+// Đặc biệt quan trọng khi Hangfire DB schema chưa được tạo trên Azure SQL
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
+
 // Hangfire Configuration
 try
 {

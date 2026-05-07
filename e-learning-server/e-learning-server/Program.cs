@@ -81,23 +81,39 @@ builder.Services.AddSingleton<IGuestConversationService, GuestConversationServic
 builder.Services.AddHostedService<SKVI.Infrastructure.BackgroundServices.GuestConversationCleanupService>();
 
 // Hangfire Configuration
-builder.Services.AddHangfire(configuration => configuration
-    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-    .UseSimpleAssemblyNameTypeSerializer()
-    .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
-    {
-        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-        QueuePollInterval = TimeSpan.Zero,
-        UseRecommendedIsolationLevel = true
-    }));
+try
+{
+    builder.Services.AddHangfire(configuration => configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+        {
+            CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+            SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+            QueuePollInterval = TimeSpan.Zero,
+            UseRecommendedIsolationLevel = true,
+            PrepareSchemaIfNecessary = true    // auto-create Hangfire tables if missing
+        }));
 
-// Add the processing server as IHostedService
-builder.Services.AddHangfireServer();
+    // Add the processing server as IHostedService
+    builder.Services.AddHangfireServer();
+}
+catch (Exception ex)
+{
+    // Log but don't crash startup — Hangfire is non-critical for API availability
+    Console.Error.WriteLine($"[Hangfire] Failed to configure: {ex.Message}");
+}
 
 // Application Insights for logging and telemetry
-builder.Services.AddApplicationInsightsTelemetry();
+try
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"[AppInsights] Failed to configure: {ex.Message}");
+}
 
 // Video Security Service (for signed URLs)
 builder.Services.AddScoped<IVideoSecurityService>(sp =>
@@ -318,11 +334,18 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Cấu hình Hangfire Dashboard
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
+// Cấu hình Hangfire Dashboard (chỉ active nếu Hangfire đã được đăng ký thành công)
+try
 {
-    Authorization = new[] { new HangfireAuthorizationFilter() }
-});
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = new[] { new HangfireAuthorizationFilter() }
+    });
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"[Hangfire] Dashboard unavailable: {ex.Message}");
+}
 
 app.MapControllers();
 app.MapHub<SKVI.Infrastructure.Hubs.ChatHub>("/hubs/chat");

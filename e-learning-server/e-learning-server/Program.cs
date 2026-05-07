@@ -87,30 +87,24 @@ builder.Services.Configure<HostOptions>(options =>
     options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
 });
 
-// Hangfire Configuration
-try
-{
-    builder.Services.AddHangfire(configuration => configuration
-        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-        .UseSimpleAssemblyNameTypeSerializer()
-        .UseRecommendedSerializerSettings()
-        .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
-        {
-            CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-            SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-            QueuePollInterval = TimeSpan.Zero,
-            UseRecommendedIsolationLevel = true,
-            PrepareSchemaIfNecessary = true    // auto-create Hangfire tables if missing
-        }));
+// Hangfire Configuration — dùng schema 'dbo' để tránh lỗi CREATE SCHEMA trên Azure SQL
+// Azure SQL user có quyền CREATE TABLE trong dbo nhưng không có quyền CREATE SCHEMA mới
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+    {
+        SchemaName = "dbo",                    // Dùng schema dbo có sẵn, không cần tạo schema HangFire mới
+        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+        QueuePollInterval = TimeSpan.Zero,
+        UseRecommendedIsolationLevel = true,
+        PrepareSchemaIfNecessary = true        // Tự tạo các bảng Hangfire nếu chưa có
+    }));
 
-    // Add the processing server as IHostedService
-    builder.Services.AddHangfireServer();
-}
-catch (Exception ex)
-{
-    // Log but don't crash startup — Hangfire is non-critical for API availability
-    Console.Error.WriteLine($"[Hangfire] Failed to configure: {ex.Message}");
-}
+// Add the processing server as IHostedService
+builder.Services.AddHangfireServer();
 
 // Application Insights for logging and telemetry
 try

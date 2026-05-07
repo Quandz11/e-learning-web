@@ -106,14 +106,16 @@ builder.Services.AddHangfire(configuration => configuration
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
 
-// Application Insights for logging and telemetry
-try
+// Application Insights — chỉ bật khi có connection string (tránh crash trên môi trường không cấu hình)
+// APPLICATIONINSIGHTS_CONNECTION_STRING phải được set trong Azure App Settings
+var appInsightsConnStr = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
+    ?? builder.Configuration["ApplicationInsights:ConnectionString"];
+if (!string.IsNullOrEmpty(appInsightsConnStr))
 {
-    builder.Services.AddApplicationInsightsTelemetry();
-}
-catch (Exception ex)
-{
-    Console.Error.WriteLine($"[AppInsights] Failed to configure: {ex.Message}");
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        options.ConnectionString = appInsightsConnStr;
+    });
 }
 
 // Video Security Service (for signed URLs)

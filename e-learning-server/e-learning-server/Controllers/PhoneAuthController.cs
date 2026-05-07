@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SKVI.Application.DTOs.Auth;
 using SKVI.Application.Interfaces;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace e_learning_server.Controllers;
 
 [Route("api/auth/phone")]
 [ApiController]
+[EnableRateLimiting("AuthRateLimit")]
 public class PhoneAuthController : ControllerBase
 {
     private readonly IPhoneAuthService _phoneAuthService;

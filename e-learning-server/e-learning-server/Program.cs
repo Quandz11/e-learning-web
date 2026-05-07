@@ -1,6 +1,9 @@
 using System.Text;
 using e_learning_server.Controllers;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // Database Context
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configuration
@@ -76,6 +79,25 @@ builder.Services.AddSingleton<IGuestConversationService, GuestConversationServic
 
 // Background Services
 builder.Services.AddHostedService<SKVI.Infrastructure.BackgroundServices.GuestConversationCleanupService>();
+
+// Hangfire Configuration
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+    {
+        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+        QueuePollInterval = TimeSpan.Zero,
+        UseRecommendedIsolationLevel = true
+    }));
+
+// Add the processing server as IHostedService
+builder.Services.AddHangfireServer();
+
+// Application Insights for logging and telemetry
+builder.Services.AddApplicationInsightsTelemetry();
 
 // Video Security Service (for signed URLs)
 builder.Services.AddScoped<IVideoSecurityService>(sp =>
@@ -223,6 +245,24 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Rate Limiter
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("AuthRateLimit", opt =>
+    {
+        opt.Window = TimeSpan.FromSeconds(10);
+        opt.PermitLimit = 5; // 5 requests per 10 seconds per IP/User
+        opt.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;
+    });
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -274,8 +314,15 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Cấu hình Hangfire Dashboard
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() }
+});
 
 app.MapControllers();
 app.MapHub<SKVI.Infrastructure.Hubs.ChatHub>("/hubs/chat");

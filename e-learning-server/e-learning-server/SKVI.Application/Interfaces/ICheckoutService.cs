@@ -11,4 +11,7 @@ public interface ICheckoutService
     Task<OrderStatusResponse?> GetOrderStatusByCodeAsync(Guid userId, int orderCode, bool refreshFromProvider, CancellationToken cancellationToken = default);
     Task HandlePayOSWebhookAsync(PayOSWebhookRequest request, CancellationToken cancellationToken = default);
     Task ConfirmWebhookUrlAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Invoked by Hangfire to complete order processing in the background.</summary>
+    Task CompleteOrderInBackgroundAsync(Guid orderId);
 }

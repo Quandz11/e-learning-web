@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -447,7 +448,10 @@ public class CheckoutService : ICheckoutService
                 order.Status = OrderStatusPaid;
                 order.PaidAt ??= DateTime.UtcNow;
                 await _context.SaveChangesAsync(cancellationToken);
-                await CompletePaidOrderAsync(order.Id, cancellationToken);
+
+                // Enqueue heavy post-payment work (enrollment + commission) as a background job
+                // so the webhook endpoint can respond to PayOS immediately.
+                BackgroundJob.Enqueue<ICheckoutService>(svc => svc.CompleteOrderInBackgroundAsync(order.Id));
                 return;
             }
         }
@@ -559,6 +563,13 @@ public class CheckoutService : ICheckoutService
 
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Called by Hangfire as a background job after payment is confirmed.
+    /// Must be public so Hangfire can serialize and invoke it.
+    /// </summary>
+    public async Task CompleteOrderInBackgroundAsync(Guid orderId)
+        => await CompletePaidOrderAsync(orderId, CancellationToken.None);
 
     private async Task CompletePaidOrderAsync(Guid orderId, CancellationToken cancellationToken)
     {

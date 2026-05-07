@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using SKVI.Application.DTOs.Auth;
 using SKVI.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace e_learning_server.Controllers;
 
 [Route("api/auth")]
 [ApiController]
+[EnableRateLimiting("AuthRateLimit")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;

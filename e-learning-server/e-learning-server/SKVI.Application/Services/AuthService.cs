@@ -6,6 +6,7 @@ using SKVI.Infrastructure;
 using SKVI.Infrastructure.Security; // For JwtSettings access if needed directly, but mostly config in Program.cs
 using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
+using Hangfire;
 
 namespace SKVI.Application.Services;
 
@@ -244,7 +245,7 @@ public class AuthService : IAuthService
         string subject = "Verify your account - SKVI E-Learning";
         string body = $"<h3>Welcome to SKVI!</h3><p>Your verification code is: <strong>{otp}</strong></p><p>This code expires in 10 minutes.</p>";
         
-        await _emailService.SendEmailAsync(user.Email, subject, body);
+        await Task.Run(() => BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body)));
         
 
     }
@@ -311,7 +312,7 @@ public class AuthService : IAuthService
         string subject = "Resend Verification Code - SKVI E-Learning";
         string body = $"<h3>Validation Code</h3><p>Your new verification code is: <strong>{otp}</strong></p>";
         
-        await _emailService.SendEmailAsync(user.Email, subject, body);
+        BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body));
 
     }
 

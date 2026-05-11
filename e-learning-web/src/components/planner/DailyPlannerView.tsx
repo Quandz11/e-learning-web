@@ -117,6 +117,8 @@ const DailyPlannerView: React.FC = () => {
             onComplete={handleOnboardingComplete} 
             isSubmitting={isSubmitting} 
             isPaidFeature={planner.checkoutConfig?.isPersonalizedRoadmapPaid} 
+            isUnlocked={planner.wellnessAccess?.isUnlocked}
+            packages={planner.checkoutConfig?.packages}
           />
         ) : (
           <OnboardingWizard onComplete={handleOnboardingComplete} isSubmitting={isSubmitting} />

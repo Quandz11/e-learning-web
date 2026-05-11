@@ -185,6 +185,14 @@ public class WellnessService : IWellnessService
 
         var selectedPackage = accessEvaluation.CheckoutConfig.Packages
             .FirstOrDefault(p => string.Equals(p.Code, packageType, StringComparison.OrdinalIgnoreCase));
+        
+        // If free mode and no package found, default to a sensible duration
+        if (selectedPackage == null && !accessEvaluation.CheckoutConfig.IsPersonalizedRoadmapPaid)
+        {
+            selectedPackage = accessEvaluation.CheckoutConfig.Packages.FirstOrDefault() 
+                ?? new WellnessCheckoutPackageDto { Code = "FREE", DurationDays = 30 };
+        }
+
         if (selectedPackage == null)
         {
             throw new InvalidOperationException("Selected package is not configured.");
@@ -1036,18 +1044,23 @@ public class WellnessService : IWellnessService
 
     private WellnessFastingStatusDto BuildFastingStatus(WellnessPlan plan, DateTime localNow)
     {
-        var startToday = localNow.Date.AddMinutes(plan.DailyFastStartMinuteOfDay);
+        var cycleDurationHours = plan.FastingHours + plan.EatingHours;
+        if (cycleDurationHours <= 0) cycleDurationHours = 24;
+
+        var planStartLocal = plan.StartDate.Date.AddMinutes(plan.DailyFastStartMinuteOfDay);
         DateTime fastingStart;
         DateTime fastingEnd;
 
-        if (localNow >= startToday)
+        if (localNow < planStartLocal)
         {
-            fastingStart = startToday;
-            fastingEnd = startToday.AddHours(plan.FastingHours);
+            fastingStart = planStartLocal;
+            fastingEnd = planStartLocal.AddHours(plan.FastingHours);
         }
         else
         {
-            fastingStart = startToday.AddDays(-1);
+            var totalElapsedHours = (localNow - planStartLocal).TotalHours;
+            var cycleIndex = (int)Math.Floor(totalElapsedHours / cycleDurationHours);
+            fastingStart = planStartLocal.AddHours(cycleIndex * cycleDurationHours);
             fastingEnd = fastingStart.AddHours(plan.FastingHours);
         }
 
@@ -1264,19 +1277,28 @@ public class WellnessService : IWellnessService
 
     private static void ValidateFastingHours(int fastingHours, int eatingHours)
     {
-        if (fastingHours < 12 || fastingHours > 24)
+        if (fastingHours < 0 || eatingHours < 0)
         {
-            throw new InvalidOperationException("Fasting hours must be between 12 and 24.");
+            throw new InvalidOperationException("Hours must be non-negative.");
         }
 
-        if (eatingHours < 1 || eatingHours > 12)
+        // Support up to 21 days (504 hours)
+        if (fastingHours > 504)
         {
-            throw new InvalidOperationException("Eating hours must be between 1 and 12.");
+            throw new InvalidOperationException("Fasting hours cannot exceed 21 days.");
         }
 
-        if (fastingHours + eatingHours != 24)
+        // Relax eating hours check: allow 0 for OMAD or extended fasts
+        if (eatingHours > 12)
         {
-            throw new InvalidOperationException("Fasting and eating windows must total 24 hours.");
+            throw new InvalidOperationException("Eating window cannot exceed 12 hours.");
+        }
+
+        // For regular Intermittent Fasting (fasting < 24), we enforce the 24h cycle
+        // If fasting is 24 or more, it's an extended fast and doesn't follow a daily cycle
+        if (fastingHours < 24 && (fastingHours + eatingHours) != 24)
+        {
+            throw new InvalidOperationException("Standard intermittent fasting cycle must be exactly 24 hours.");
         }
     }
 

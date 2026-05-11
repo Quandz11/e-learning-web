@@ -91,8 +91,8 @@ export function useDailyPlanner() {
       const checkoutConfig = wellnessData?.checkoutConfig ?? null;
 
       const hasAnyPlan = !!studyPlan || !!wellnessPlan;
-      // Tránh ép người dùng có gói Wellness phải tạo AI Study Plan
-      const needsOnboarding = !hasAnyPlan && !wellnessAccess?.isUnlocked;
+      // Nếu chưa có bất kỳ kế hoạch nào, luôn yêu cầu onboarding
+      const needsOnboarding = !hasAnyPlan;
 
       const stats = computeStats(todayTasks, todayLog, studyPlan, fastingStatus);
 
@@ -158,11 +158,31 @@ export function useDailyPlanner() {
         : data.fastingDuration === '10d' ? 240 
         : data.fastingDuration === '21d' ? 504 : 24;
       
+      // Resolve package code
+      let packageType = data.wellnessPackageCode || '';
+      
+      if (!packageType) {
+        // Fallback 1: Use first available package from config if in free mode
+        if (state.checkoutConfig?.packages && state.checkoutConfig.packages.length > 0) {
+          packageType = state.checkoutConfig.packages[0].code;
+        } 
+        // Fallback 2: Hardcoded defaults
+        else {
+          packageType = data.wellnessGoal === 'chronic_disease' ? 'PLAN_30_DAYS' : 'TRIAL_3_DAYS';
+        }
+      }
+
       const payload: UpsertWellnessPlanPayload = {
-        packageType: data.wellnessGoal === 'chronic_disease' ? 'DISEASE_IMPROVE' : 'WEIGHT_LOSS',
+        packageType,
         startDate: data.fastingStartDate || new Date().toISOString().split('T')[0],
         fastingHours: fastingHours,
-        eatingHours: fastingHours >= 24 ? 4 : 8, // Simplified default
+        // Linh hoạt hơn: 
+        // - Với IF (< 24h): Tổng luôn là 24h.
+        // - Với OMAD (24h): Nhịn 23h, Ăn 1h (tổng 24h).
+        // - Với Extended (>= 24h): Nhịn X giờ, Ăn 1-4 giờ (chu kỳ cuốn chiếu).
+        eatingHours: fastingHours < 24 ? (24 - fastingHours) 
+                   : fastingHours === 24 ? 1 
+                   : 4, // Mặc định 4h xả cho các ca nhịn dài ngày
         dailyFastStartMinuteOfDay: 1200, // 20:00 default
         startWeightKg: 0,
         targetWeightKg: 0,

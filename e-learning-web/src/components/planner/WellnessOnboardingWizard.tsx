@@ -8,6 +8,8 @@ interface WellnessOnboardingWizardProps {
   onComplete: (data: OnboardingFormData) => Promise<void>;
   isSubmitting?: boolean;
   isPaidFeature?: boolean;
+  isUnlocked?: boolean;
+  packages?: WellnessCheckoutPackage[];
 }
 
 const STEPS: OnboardingStep[] = [1, 2, 3, 4];
@@ -15,7 +17,9 @@ const STEPS: OnboardingStep[] = [1, 2, 3, 4];
 const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({ 
   onComplete, 
   isSubmitting,
-  isPaidFeature = true 
+  isPaidFeature = false,
+  isUnlocked = false,
+  packages = []
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -26,8 +30,16 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
     wellnessGoal: 'weight_loss',
     fastingDuration: '24h',
     fastingStartDate: new Date().toISOString().split('T')[0],
+    wellnessPackageCode: packages.length > 0 ? packages[0].code : '',
   });
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-select first package if list updates and nothing selected
+  React.useEffect(() => {
+    if (packages.length > 0 && !formData.wellnessPackageCode) {
+      setFormData(prev => ({ ...prev, wellnessPackageCode: packages[0].code }));
+    }
+  }, [packages, formData.wellnessPackageCode]);
 
   const updateField = <K extends keyof OnboardingFormData>(key: K, value: OnboardingFormData[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -54,6 +66,12 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
           return false;
         }
         return true;
+      case 4:
+        if (isPaidFeature && !formData.wellnessPackageCode) {
+          setError(isVi ? 'Vui lòng chọn gói dịch vụ' : 'Please select a package');
+          return false;
+        }
+        return true;
       default:
         return true;
     }
@@ -75,13 +93,17 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
   const handleSubmit = async () => {
     if (!validateStep()) return;
     
-    if (isPaidFeature) {
-      // Redirect to checkout with the personalized roadmap package
+    if (isPaidFeature && !isUnlocked) {
+      // Redirect to checkout with the selected wellness package
       const params = new URLSearchParams();
-      params.set('wellnessPackage', 'PERSONALIZED');
+      const selectedPackage = formData.wellnessPackageCode || (packages.length > 0 ? packages[0].code : 'PERSONALIZED');
+      params.set('wellnessPackage', selectedPackage);
       
       // Store onboarding choices in sessionStorage so we can apply them after payment
-      sessionStorage.setItem('pending_wellness_onboarding', JSON.stringify(formData));
+      sessionStorage.setItem('pending_wellness_onboarding', JSON.stringify({
+        ...formData,
+        wellnessPackageCode: selectedPackage
+      }));
       
       navigate(`/checkout?${params.toString()}`);
       return;
@@ -264,17 +286,41 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
              </p>
              
              {isPaidFeature && (
-               <div className="mt-6 rounded-2xl bg-slate-50 p-4 text-left dark:bg-slate-800/50">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-slate-700">
-                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{isVi ? 'Gói chọn' : 'Selected'}</span>
-                     <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        {FASTING_DURATION_PRESETS.find(p => p.value === formData.fastingDuration)?.label}
-                     </span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between">
-                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{isVi ? 'Bắt đầu' : 'Starts'}</span>
-                     <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{formData.fastingStartDate}</span>
-                  </div>
+               <div className="mt-6 space-y-3 text-left">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-2">
+                    {isVi ? 'Chọn gói dịch vụ' : 'Select Package'}
+                  </h4>
+                  {packages.length > 0 ? (
+                    <div className="grid gap-3">
+                      {packages.map(pkg => (
+                        <button
+                          key={pkg.code}
+                          onClick={() => updateField('wellnessPackageCode', pkg.code)}
+                          className={`flex flex-col rounded-2xl border-2 p-4 transition-all ${
+                            formData.wellnessPackageCode === pkg.code
+                              ? 'border-cyan-500 bg-cyan-50 dark:border-cyan-400 dark:bg-cyan-900/20'
+                              : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-700 dark:bg-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-900 dark:text-white">{pkg.name}</span>
+                            <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">
+                              {new Intl.NumberFormat(isVi ? 'vi-VN' : 'en-US', { style: 'currency', currency: 'VND' }).format(pkg.priceVnd)}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{pkg.description}</p>
+                          <div className="mt-2 flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                            <span className="material-symbols-outlined text-[14px]">timer</span>
+                            {pkg.durationDays} {isVi ? 'ngày' : 'days'}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl bg-slate-100 p-4 text-center dark:bg-slate-800">
+                       <p className="text-xs text-slate-500">{isVi ? 'Đang tải danh sách gói...' : 'Loading packages...'}</p>
+                    </div>
+                  )}
                </div>
              )}
           </div>

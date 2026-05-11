@@ -27,6 +27,7 @@ export interface OnboardingFormData {
   wellnessGoal?: 'weight_loss' | 'chronic_disease';
   fastingDuration?: '24h' | '36h' | '72h' | '5d' | '10d' | '21d';
   fastingStartDate?: string;
+  wellnessPackageCode?: string;
 
   // Study (Legacy/Optional)
   goal?: string;

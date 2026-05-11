@@ -93,7 +93,10 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
   const handleSubmit = async () => {
     if (!validateStep()) return;
     
+    console.log('[WellnessWizard] Submitting onboarding:', formData, { isPaidFeature, isUnlocked });
+
     if (isPaidFeature && !isUnlocked) {
+      console.log('[WellnessWizard] Paid feature active and not unlocked, redirecting to checkout');
       // Redirect to checkout with the selected wellness package
       const params = new URLSearchParams();
       const selectedPackage = formData.wellnessPackageCode || (packages.length > 0 ? packages[0].code : 'PERSONALIZED');
@@ -109,6 +112,7 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
       return;
     }
 
+    console.log('[WellnessWizard] Proceeding with onComplete');
     try {
       await onComplete(formData);
     } catch (err: any) {
@@ -285,8 +289,25 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
                       : 'We are ready to create your personalized roadmap. Let\'s start your health improvement journey now.')}
              </p>
              
-             {isPaidFeature && (
-               <div className="mt-6 space-y-3 text-left">
+              <div className="mt-6 space-y-3 text-left">
+                {!isPaidFeature ? (
+                  <div className="rounded-2xl border-2 border-emerald-500/20 bg-emerald-50/50 p-6 text-center dark:bg-emerald-500/5">
+                    <div className="mb-3 flex justify-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        <span className="material-symbols-outlined text-2xl">verified</span>
+                      </div>
+                    </div>
+                    <h4 className="text-sm font-bold text-emerald-800 dark:text-emerald-400">
+                      {isVi ? 'Gói miễn phí đang hoạt động' : 'Free Plan Active'}
+                    </h4>
+                    <p className="mt-1 text-xs text-emerald-600/70 dark:text-emerald-500/70">
+                      {isVi 
+                        ? 'Bạn có thể sử dụng tất cả tính năng lộ trình cá nhân hóa hoàn toàn miễn phí.' 
+                        : 'You can use all personalized roadmap features for free.'}
+                    </p>
+                  </div>
+                ) : (
+                  <>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-2">
                     {isVi ? 'Chọn gói dịch vụ' : 'Select Package'}
                   </h4>
@@ -321,9 +342,10 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
                        <p className="text-xs text-slate-500">{isVi ? 'Đang tải danh sách gói...' : 'Loading packages...'}</p>
                     </div>
                   )}
-               </div>
-             )}
-          </div>
+                  </>
+                )}
+              </div>
+            </div>
         )}
       </div>
 

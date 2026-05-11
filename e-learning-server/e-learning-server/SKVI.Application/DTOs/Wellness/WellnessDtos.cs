@@ -13,10 +13,10 @@ public class UpsertWellnessPlanRequest
 
     public DateTime? EndDate { get; set; }
 
-    [Range(12, 24)]
+    [Range(12, 504)]
     public int FastingHours { get; set; } = 16;
 
-    [Range(1, 12)]
+    [Range(0, 12)]
     public int EatingHours { get; set; } = 8;
 
     [Range(0, 1439)]
@@ -40,10 +40,10 @@ public class UpdateWellnessScheduleRequest
     [Required]
     public DateTime EndDate { get; set; }
 
-    [Range(12, 24)]
+    [Range(12, 504)]
     public int FastingHours { get; set; } = 16;
 
-    [Range(1, 12)]
+    [Range(0, 12)]
     public int EatingHours { get; set; } = 8;
 
     [Range(0, 1439)]

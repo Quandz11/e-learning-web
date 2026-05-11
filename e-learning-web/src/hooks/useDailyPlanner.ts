@@ -130,12 +130,12 @@ export function useDailyPlanner() {
       }
 
       const payload: InitializeStudyPlanPayload = {
-        goal: data.goal,
-        currentKnowledge: data.currentKnowledge,
-        motivation: data.motivation,
-        timeBudgetMinutesPerDay: data.timeBudgetMinutesPerDay,
-        preferredStudyTime: data.preferredStudyTime,
-        constraints: data.constraints,
+        goal: data.goal ?? '',
+        currentKnowledge: data.currentKnowledge ?? '',
+        motivation: data.motivation ?? '',
+        timeBudgetMinutesPerDay: data.timeBudgetMinutesPerDay ?? 30,
+        preferredStudyTime: data.preferredStudyTime ?? 'flexible',
+        constraints: data.constraints ?? '',
         primaryCourseId: data.primaryCourseId,
       };
 

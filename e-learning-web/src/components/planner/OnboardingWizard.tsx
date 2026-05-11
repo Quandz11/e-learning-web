@@ -31,19 +31,19 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete, isSubmi
   const validateStep = (): boolean => {
     switch (currentStep) {
       case 1:
-        if (!formData.goal.trim()) {
+        if (!formData.goal?.trim()) {
           setError(t('planner.onboarding.errors.goalRequired'));
           return false;
         }
         return true;
       case 2:
-        if (!formData.currentKnowledge.trim()) {
+        if (!formData.currentKnowledge?.trim()) {
           setError(t('planner.onboarding.errors.knowledgeRequired'));
           return false;
         }
         return true;
       case 3:
-        if (formData.timeBudgetMinutesPerDay < 5) {
+        if ((formData.timeBudgetMinutesPerDay ?? 0) < 5) {
           setError(t('planner.onboarding.errors.timeMinimum'));
           return false;
         }

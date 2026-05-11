@@ -91,7 +91,7 @@ const AdminAiSettingsPage: React.FC = () => {
                 <div className="mb-6 flex items-center justify-between">
                     <div>
                         <div className="mb-2 flex items-center gap-2 text-sm text-gray-500">
-                            <span className="material-symbols-outlined text-[16px]">smart_toy</span>
+                            <span className="material-symbols-outlined text-[16px]">person</span>
                             <span>Huấn luyện viên</span>
                             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
                             <span className="font-medium text-gray-900 dark:text-gray-100">Cấu hình hệ thống</span>

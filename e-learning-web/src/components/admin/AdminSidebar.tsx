@@ -298,7 +298,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isMobileOpen = false, onClo
                 : 'text-slate-600 hover:bg-slate-100 hover:text-dashboard-primary dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-dashboard-primary-300'
                 }`}
             >
-              <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">smart_toy</span>
+              <span className="material-symbols-outlined text-[22px] transition-transform group-hover:scale-110">person</span>
               <span className="text-sm font-medium">Cấu hình huấn luyện viên</span>
             </Link>
             <Link

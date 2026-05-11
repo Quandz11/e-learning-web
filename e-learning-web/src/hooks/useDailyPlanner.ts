@@ -124,6 +124,11 @@ export function useDailyPlanner() {
   /** Initialize study plan (onboarding) */
   const initStudyPlan = useCallback(
     async (data: OnboardingFormData) => {
+      // If it's a wellness-only setup (has wellness fields but no goal)
+      if (data.wellnessGoal && !data.goal) {
+        return await initWellnessPlan(data);
+      }
+
       const payload: InitializeStudyPlanPayload = {
         goal: data.goal,
         currentKnowledge: data.currentKnowledge,
@@ -136,6 +141,35 @@ export function useDailyPlanner() {
 
       const plan = await aiWidgetApi.initPlan(payload);
       // Reload everything after plan creation
+      await bootstrap();
+      return plan;
+    },
+    [bootstrap]
+  );
+
+  /** Initialize wellness plan (simplified onboarding) */
+  const initWellnessPlan = useCallback(
+    async (data: OnboardingFormData) => {
+      // Find duration hours
+      const fastingHours = data.fastingDuration === '24h' ? 24 
+        : data.fastingDuration === '36h' ? 36 
+        : data.fastingDuration === '72h' ? 72 
+        : data.fastingDuration === '5d' ? 120 
+        : data.fastingDuration === '10d' ? 240 
+        : data.fastingDuration === '21d' ? 504 : 24;
+      
+      const payload: UpsertWellnessPlanPayload = {
+        packageType: data.wellnessGoal === 'chronic_disease' ? 'DISEASE_IMPROVE' : 'WEIGHT_LOSS',
+        startDate: data.fastingStartDate || new Date().toISOString().split('T')[0],
+        fastingHours: fastingHours,
+        eatingHours: fastingHours >= 24 ? 4 : 8, // Simplified default
+        dailyFastStartMinuteOfDay: 1200, // 20:00 default
+        startWeightKg: 0,
+        targetWeightKg: 0,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      };
+
+      const plan = await wellnessApi.upsertPlan(payload);
       await bootstrap();
       return plan;
     },
@@ -250,7 +284,8 @@ export function useDailyPlanner() {
       askMoodCoach,
       generateMeal,
       selectDate,
+      initWellnessPlan,
     }),
-    [state, bootstrap, initStudyPlan, saveWellnessPlan, submitTask, submitCheckIn, logWater, askMoodCoach, generateMeal, selectDate]
+    [state, bootstrap, initStudyPlan, saveWellnessPlan, submitTask, submitCheckIn, logWater, askMoodCoach, generateMeal, selectDate, initWellnessPlan]
   );
 }

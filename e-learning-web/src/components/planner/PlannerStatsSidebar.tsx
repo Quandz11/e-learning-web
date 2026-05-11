@@ -104,7 +104,7 @@ const PlannerStatsSidebar: React.FC<PlannerStatsSidebarProps> = ({ stats }) => {
       <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700/60 dark:bg-slate-800/80">
         <div className="flex items-center gap-3 mb-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/20">
-            <span className="material-symbols-outlined text-white text-xl">smart_toy</span>
+            <span className="material-symbols-outlined text-white text-xl">person</span>
           </div>
           <div>
             <h4 className="text-sm font-bold text-slate-900 dark:text-white">{t('planner.stats.coachTitle')}</h4>

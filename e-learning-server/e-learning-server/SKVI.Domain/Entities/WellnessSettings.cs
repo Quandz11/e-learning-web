@@ -13,5 +13,7 @@ public class WellnessSettings
     [MaxLength(128)]
     public string CtaPath { get; set; } = "/pricing";
 
+    public bool IsPersonalizedRoadmapPaid { get; set; } = true;
+
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

@@ -74,7 +74,9 @@ const LearningPage: React.FC = () => {
                 setCourse(courseData);
 
                 // Access check: course must be free or user must be authenticated
-                if (!courseData.isFree && !isAuthenticated) {
+                const isFreeCourse = courseData.isFree === true;
+                if (!isFreeCourse && !isAuthenticated) {
+                    console.log('Redirecting to login: Course is not free and user not authenticated', { isFreeCourse, isAuthenticated });
                     navigate('/login', { state: { from: `/courses/${id}/learn` } });
                     return;
                 }

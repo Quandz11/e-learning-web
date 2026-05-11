@@ -31,63 +31,74 @@ const PlannerDailyStatusCard: React.FC<PlannerDailyStatusCardProps> = ({ onSubmi
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        {MOOD_OPTIONS.map((mood) => {
-          const isSelected = selectedMood === mood.id;
-          return (
+      {!submitted ? (
+        <div className="space-y-1.5">
+          {MOOD_OPTIONS.map((mood) => (
             <button
               key={mood.id}
               onClick={() => handleSelect(mood.id)}
-              disabled={submitted || isSubmitting}
-              className={`
-                flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-300
-                ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/30 scale-[1.02] -translate-y-0.5 border-transparent'
-                    : submitted
-                      ? 'opacity-30 cursor-not-allowed bg-slate-50 dark:bg-slate-800 border-transparent grayscale'
-                      : 'bg-slate-50 hover:bg-slate-100 hover:scale-[1.01] dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-100 dark:border-slate-700'
-                }
-              `}
+              disabled={isSubmitting}
+              className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-300 bg-slate-50 hover:bg-slate-100 hover:scale-[1.01] dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-100 dark:border-slate-700"
             >
-              <span className={`text-2xl flex-shrink-0 transition-transform ${isSelected ? 'scale-110 drop-shadow-md' : ''}`}>{mood.emoji}</span>
-              <span className={`text-[13px] font-bold ${isSelected ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+              <span className="text-2xl flex-shrink-0">{mood.emoji}</span>
+              <span className="text-[13px] font-bold text-slate-700 dark:text-slate-300">
                 {t(mood.labelKey)}
               </span>
-              {isSelected && (
-                <span className="ml-auto material-symbols-outlined text-white text-[20px] drop-shadow-md animate-in zoom-in spin-in-12">check_circle</span>
-              )}
+              <span className="ml-auto material-symbols-outlined text-slate-300 dark:text-slate-600 text-[20px]">chevron_right</span>
             </button>
-          );
-        })}
-      </div>
-
-      {submitted && selectedMood && (
-        <div className={`mt-5 overflow-hidden rounded-2xl border ${
-          selectedMood === 'emergency' 
-            ? 'border-orange-200 bg-orange-50/50 dark:border-orange-500/30 dark:bg-orange-500/10' 
-            : 'border-purple-100 bg-purple-50/50 dark:border-purple-500/30 dark:bg-purple-500/10'
-        } p-4 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-500`}>
-          <div className="flex gap-3">
-            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-              selectedMood === 'emergency' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'
-            }`}>
-              <span className="material-symbols-outlined text-lg">smart_toy</span>
+          ))}
+        </div>
+      ) : (
+        <div className="animate-in fade-in zoom-in-95 duration-500">
+          <div className={`overflow-hidden rounded-2xl border ${
+            selectedMood === 'emergency' 
+              ? 'border-orange-200 bg-orange-50/50 dark:border-orange-500/30 dark:bg-orange-500/10' 
+              : 'border-purple-100 bg-purple-50/50 dark:border-purple-500/30 dark:bg-purple-500/10'
+          } p-6 backdrop-blur-sm relative`}>
+            {/* Background Decorative Icon */}
+            <div className="absolute -right-4 -bottom-4 opacity-[0.03] dark:opacity-[0.05]">
+              <span className="material-symbols-outlined text-8xl">person</span>
             </div>
-            <div className="space-y-1">
-              <p className={`text-[10px] font-bold uppercase tracking-wider ${
-                selectedMood === 'emergency' ? 'text-orange-500' : 'text-purple-500'
+
+            <div className="flex flex-col gap-4 items-center text-center">
+              <div className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-inner ${
+                selectedMood === 'emergency' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'
               }`}>
-                Coach Advice
-              </p>
-              <p className="text-[13px] leading-relaxed text-slate-700 dark:text-slate-300">
-                {t(`planner.moodResponses.${selectedMood}`)}
-              </p>
+                <span className="material-symbols-outlined text-3xl">person</span>
+              </div>
+
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-center gap-2">
+                  <p className={`text-xs font-bold uppercase tracking-[0.2em] ${
+                    selectedMood === 'emergency' ? 'text-orange-500' : 'text-purple-500'
+                  }`}>
+                    Coach Advice
+                  </p>
+                  <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                  <p className="text-xs font-medium text-slate-500">
+                    {MOOD_OPTIONS.find(m => m.id === selectedMood)?.emoji} {t(`planner.moods.${selectedMood}`)}
+                  </p>
+                </div>
+                
+                <h4 className="text-[15px] font-bold text-slate-900 dark:text-white leading-relaxed">
+                  {t(`planner.moodResponses.${selectedMood}`)}
+                </h4>
+              </div>
+
+              <button 
+                onClick={() => setSubmitted(false)}
+                className="mt-2 text-[11px] font-bold text-slate-400 hover:text-purple-500 transition-colors uppercase tracking-wider flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-sm">refresh</span>
+                {t('common.change') || 'Thay đổi trạng thái'}
+              </button>
             </div>
           </div>
         </div>
       )}
     </div>
+
 
   );
 };

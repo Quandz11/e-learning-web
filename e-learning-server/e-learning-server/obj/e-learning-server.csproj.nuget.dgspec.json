@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj": {}
+    "c:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj": {
+    "c:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
+        "projectUniqueName": "c:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
         "projectName": "e-learning-server",
-        "projectPath": "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
+        "projectPath": "c:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
         "packagesPath": "C:\\Users\\Quan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\obj\\",
+        "outputPath": "c:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

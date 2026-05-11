@@ -30,6 +30,21 @@ public class WellnessAccessService : IWellnessAccessService
         CancellationToken cancellationToken = default)
     {
         var checkoutConfig = await _wellnessSettingsService.GetCheckoutConfigAsync(cancellationToken);
+        if (!checkoutConfig.IsPersonalizedRoadmapPaid)
+        {
+            return new WellnessAccessEvaluationDto
+            {
+                CheckoutConfig = checkoutConfig,
+                Access = new WellnessAccessDto
+                {
+                    IsUnlocked = true,
+                    AllowedPackages = checkoutConfig.Packages.Select(p => NormalizePackageCode(p.Code)).ToList(),
+                    RequiredPackages = [],
+                    CtaPath = checkoutConfig.CtaPath,
+                    Message = "Wellness features are currently free."
+                }
+            };
+        }
         var activeCatalog = checkoutConfig.Packages
             .OrderBy(p => p.SortOrder)
             .ThenBy(p => p.DurationDays)

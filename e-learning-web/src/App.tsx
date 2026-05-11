@@ -265,11 +265,7 @@ function App() {
             },
             {
               path: 'courses/:id/learn',
-              element: (
-                <ProtectedRoute>
-                  <LearningPage />
-                </ProtectedRoute>
-              ),
+              element: <LearningPage />,
             },
             {
               path: 'admin/courses/:id',

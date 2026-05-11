@@ -304,6 +304,7 @@ public class WellnessCheckoutConfigDto
 {
     public List<WellnessCheckoutPackageDto> Packages { get; set; } = [];
     public string CtaPath { get; set; } = "/pricing";
+    public bool IsPersonalizedRoadmapPaid { get; set; }
 }
 
 public class WellnessCheckoutPackageDto

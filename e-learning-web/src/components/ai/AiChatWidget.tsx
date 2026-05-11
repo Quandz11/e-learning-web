@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import type { RootState } from '../../store/store';
 import { aiWidgetApi } from '../../services/aiWidgetApi';
 import AiCoachDashboard from './AiCoachDashboard';
 
 const AiChatWidget: React.FC = () => {
+    const { t } = useTranslation();
     const location = useLocation();
     const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
     const isStudent = user?.role?.toUpperCase() === 'STUDENT';
@@ -63,10 +65,11 @@ const AiChatWidget: React.FC = () => {
             {!isOpen && !isChatOpen && (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="fixed bottom-40 right-4 z-[70] flex items-center justify-center rounded-full bg-primary p-4 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:bg-primary/90 sm:bottom-44 sm:right-6"
+                    className="fixed bottom-40 right-4 z-[70] flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-3 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:bg-primary/90 sm:bottom-44 sm:right-6"
                     aria-label="Open study plan"
                 >
-                    <span className="material-symbols-outlined text-3xl">event_note</span>
+                    <span className="material-symbols-outlined text-2xl">person</span>
+                    <span className="text-sm font-semibold">{t('chat.aiSupport', { defaultValue: 'Hỗ trợ AI' })}</span>
                 </button>
             )}
         </>

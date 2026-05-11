@@ -279,6 +279,9 @@
             "revenue": "Doanh thu",
             "settings": "Cài đặt",
             "chat": "Quản lý Chat",
+            "buttonLabel": "Hỗ trợ",
+            "aiSupport": "Hỗ trợ AI",
+            "buttonAriaLabel": "Chat hỗ trợ",
             "notifications": "Thông báo",
             "articles": "Bài viết",
             "referrals": "Mã giới thiệu",
@@ -1868,6 +1871,9 @@
         }
     },
     "chat": {
+        "buttonLabel": "Hỗ trợ",
+        "aiSupport": "Hỗ trợ AI",
+        "buttonAriaLabel": "Mở chat hỗ trợ",
         "button": {
             "open": "Chat với Hỗ trợ",
             "unread": "{{count}} tin chưa đọc"

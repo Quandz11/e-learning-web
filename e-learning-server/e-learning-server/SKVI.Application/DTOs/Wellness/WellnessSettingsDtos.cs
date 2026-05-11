@@ -7,6 +7,7 @@ public class WellnessAdminSettingsDto
     public Guid Id { get; set; }
     public List<WellnessPackageAdminDto> Packages { get; set; } = [];
     public string CtaPath { get; set; } = "/pricing";
+    public bool IsPersonalizedRoadmapPaid { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
 
@@ -17,6 +18,8 @@ public class UpdateWellnessAdminSettingsRequest
 
     [MaxLength(128)]
     public string CtaPath { get; set; } = "/pricing";
+
+    public bool IsPersonalizedRoadmapPaid { get; set; } = true;
 }
 
 public class WellnessPackageAdminDto

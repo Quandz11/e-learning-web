@@ -23,13 +23,19 @@ export type OnboardingStep = 1 | 2 | 3 | 4;
 
 /** Onboarding wizard form data */
 export interface OnboardingFormData {
-  goal: string;
-  currentKnowledge: string;
-  motivation: string;
-  timeBudgetMinutesPerDay: number;
-  preferredStudyTime: 'morning' | 'afternoon' | 'evening' | 'flexible';
+  // Wellness (New Simplified)
+  wellnessGoal?: 'weight_loss' | 'chronic_disease';
+  fastingDuration?: '24h' | '36h' | '72h' | '5d' | '10d' | '21d';
+  fastingStartDate?: string;
+
+  // Study (Legacy/Optional)
+  goal?: string;
+  currentKnowledge?: string;
+  motivation?: string;
+  timeBudgetMinutesPerDay?: number;
+  preferredStudyTime?: 'morning' | 'afternoon' | 'evening' | 'flexible';
   primaryCourseId?: string;
-  constraints: string;
+  constraints?: string;
 }
 
 /** Mood option for daily status check-in */
@@ -109,4 +115,32 @@ export const STUDY_TIME_PRESETS = [
   { value: 'afternoon' as const, labelKey: 'planner.onboarding.timeAfternoon', icon: '☀️' },
   { value: 'evening' as const, labelKey: 'planner.onboarding.timeEvening', icon: '🌙' },
   { value: 'flexible' as const, labelKey: 'planner.onboarding.timeFlexible', icon: '🔄' },
+];
+
+/** Wellness goal presets */
+export const WELLNESS_GOAL_PRESETS = [
+  { 
+    value: 'weight_loss' as const, 
+    labelKey: 'planner.wellness.goals.weightLoss', 
+    icon: '⚖️', 
+    titleVi: 'Giảm cân',
+    descVi: 'Tập trung vào việc giảm mỡ thừa và cải thiện vóc dáng.'
+  },
+  { 
+    value: 'chronic_disease' as const, 
+    labelKey: 'planner.wellness.goals.chronicDisease', 
+    icon: '🏥', 
+    titleVi: 'Cải thiện bệnh mãn tính',
+    descVi: 'Hỗ trợ cải thiện các vấn đề sức khỏe lâu dài thông qua nhịn ăn.'
+  },
+];
+
+/** Fasting duration presets */
+export const FASTING_DURATION_PRESETS = [
+  { value: '24h' as const, label: '24h', hours: 24, annotationVi: 'Giảm cân' },
+  { value: '36h' as const, label: '36h', hours: 36, annotationVi: 'Giảm cân' },
+  { value: '72h' as const, label: '72h', hours: 72, annotationVi: 'Cải thiện bệnh mãn tính' },
+  { value: '5d' as const, label: '5 ngày', hours: 120, annotationVi: 'Cải thiện bệnh mãn tính' },
+  { value: '10d' as const, label: '10 ngày', hours: 240, annotationVi: 'Cải thiện bệnh mãn tính' },
+  { value: '21d' as const, label: '21 ngày', hours: 504, annotationVi: 'Cải thiện bệnh mãn tính' },
 ];

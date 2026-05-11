@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../../components/admin/AdminLayout';
@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS: WellnessAdminSettings = {
   id: '',
   packages: [],
   ctaPath: FIXED_WELLNESS_CHECKOUT_PATH,
+  isPersonalizedRoadmapPaid: true,
 };
 
 const createDraftPackage = (index: number): WellnessPackageAdmin => ({
@@ -181,6 +182,7 @@ const AdminWellnessSettingsPage: React.FC = () => {
       const updated = await wellnessApi.updateAdminSettings({
         ctaPath: FIXED_WELLNESS_CHECKOUT_PATH,
         packages: normalizedPackages,
+        isPersonalizedRoadmapPaid: settings.isPersonalizedRoadmapPaid,
       });
 
       setSettings({
@@ -241,6 +243,23 @@ const AdminWellnessSettingsPage: React.FC = () => {
                 <span className="material-symbols-outlined text-[16px] text-cyan-600">route</span>
                 <span className="font-semibold">{t('wellness.admin.overview.checkout', { defaultValue: 'Checkout CTA' })}:</span>
                 <span className="truncate font-mono">{FIXED_WELLNESS_CHECKOUT_PATH}</span>
+              </div>
+
+              <div className="mt-4 flex items-center gap-4">
+                <label className="relative inline-flex cursor-pointer items-center">
+                  <input
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={settings.isPersonalizedRoadmapPaid}
+                    onChange={(e) => setSettings(prev => ({ ...prev, isPersonalizedRoadmapPaid: e.target.checked }))}
+                  />
+                  <div className="peer h-6 w-11 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-cyan-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-cyan-800"></div>
+                  <span className="ml-3 text-sm font-medium text-slate-700">
+                    {settings.isPersonalizedRoadmapPaid 
+                      ? t('wellness.admin.accessMode.paid', { defaultValue: 'Paid features (Requires package)' }) 
+                      : t('wellness.admin.accessMode.free', { defaultValue: 'Free features (Everyone access)' })}
+                  </span>
+                </label>
               </div>
             </div>
 

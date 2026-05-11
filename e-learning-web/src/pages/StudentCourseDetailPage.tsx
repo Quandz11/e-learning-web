@@ -226,7 +226,7 @@ const StudentCourseDetailPage: React.FC = () => {
     };
 
     const handleOpenLessonPart = (partId?: string) => {
-        if (!isEnrolled || !id || !partId) return;
+        if ((!isEnrolled && !course?.isFree) || !id || !partId) return;
         navigate(`/courses/${id}/learn?partId=${encodeURIComponent(partId)}`);
     };
 
@@ -401,7 +401,7 @@ const StudentCourseDetailPage: React.FC = () => {
                                             {isExpanded && (
                                                 <div className="px-4 pb-4 space-y-2 bg-gray-50 dark:bg-gray-900/50">
                                                     {lesson.parts?.map((part, pIdx) => {
-                                                        const canOpenPart = isEnrolled && Boolean(part.id);
+                                                        const canOpenPart = (isEnrolled || course.isFree) && Boolean(part.id);
 
                                                         return (
                                                         <button
@@ -422,7 +422,7 @@ const StudentCourseDetailPage: React.FC = () => {
                                                                     <span className="text-xs text-gray-500">{Math.round((part.videoDuration || 0) / 60)} min</span>
                                                                 )}
                                                                 <span className="material-symbols-outlined text-gray-400 text-sm">
-                                                                    {canOpenPart ? 'play_arrow' : 'lock'}
+                                                                    {canOpenPart ? 'play_arrow' : (isEnrolled ? 'play_arrow' : 'lock')}
                                                                 </span>
                                                             </div>
                                                         </button>

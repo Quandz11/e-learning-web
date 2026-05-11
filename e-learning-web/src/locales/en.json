@@ -279,6 +279,9 @@
             "revenue": "Revenue",
             "settings": "Settings",
             "chat": "Chat Management",
+            "buttonLabel": "Support",
+            "aiSupport": "AI Support",
+            "buttonAriaLabel": "Support Chat",
             "notifications": "Notifications",
             "articles": "Articles",
             "referrals": "Referral Codes",
@@ -1863,6 +1866,8 @@
         }
     },
     "chat": {
+        "buttonLabel": "Support",
+        "buttonAriaLabel": "Open support chat",
         "button": {
             "open": "Chat with Support",
             "unread": "{{count}} unread"

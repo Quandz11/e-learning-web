@@ -46,7 +46,8 @@ public class WellnessSettingsService : IWellnessSettingsService
         return new WellnessCheckoutConfigDto
         {
             Packages = packages,
-            CtaPath = NormalizeCtaPath(settings.CtaPath)
+            CtaPath = NormalizeCtaPath(settings.CtaPath),
+            IsPersonalizedRoadmapPaid = settings.IsPersonalizedRoadmapPaid
         };
     }
 
@@ -66,6 +67,7 @@ public class WellnessSettingsService : IWellnessSettingsService
         {
             Id = settings.Id,
             CtaPath = NormalizeCtaPath(settings.CtaPath),
+            IsPersonalizedRoadmapPaid = settings.IsPersonalizedRoadmapPaid,
             UpdatedAt = settings.UpdatedAt,
             Packages = packages.Select(MapAdminPackage).ToList()
         };
@@ -125,6 +127,7 @@ public class WellnessSettingsService : IWellnessSettingsService
         }
 
         settings.CtaPath = NormalizeCtaPath(request.CtaPath);
+        settings.IsPersonalizedRoadmapPaid = request.IsPersonalizedRoadmapPaid;
         settings.UpdatedAt = now;
 
         _dbContext.AuditLogs.Add(new AuditLog

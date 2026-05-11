@@ -744,7 +744,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                         {
                             label: t('aiCoach.page.previewCards.coach', { defaultValue: 'Coach' }),
                             value: t('aiCoach.page.previewCards.live', { defaultValue: 'Always on' }),
-                            icon: 'smart_toy'
+                            icon: 'person'
                         }
                     ].map((item) => (
                         <div key={item.label} className="rounded-[28px] border border-white/70 bg-white/85 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/85">
@@ -782,7 +782,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
         }
 
         if (!isEnabled) {
-            return renderInfoState('smart_toy', t('aiCoach.states.disabled'));
+            return renderInfoState('person', t('aiCoach.states.disabled'));
         }
 
         if (!isUnlocked) {
@@ -1394,7 +1394,7 @@ const AiCoachDashboard: React.FC<AiCoachDashboardProps> = ({ mode = 'page', onCl
                     <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
                             <div className="inline-flex items-center gap-2 rounded-full bg-white/75 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm dark:bg-slate-900/75">
-                                <span className="material-symbols-outlined text-[16px]">smart_toy</span>
+                                <span className="material-symbols-outlined text-[16px]">person</span>
                                 {t('aiCoach.title')}
                             </div>
                             <h3 className="mt-3 break-words text-xl font-semibold text-slate-900 dark:text-white">

@@ -164,6 +164,7 @@ export interface WellnessCheckoutPackage {
 export interface WellnessCheckoutConfig {
   packages: WellnessCheckoutPackage[];
   ctaPath: string;
+  isPersonalizedRoadmapPaid: boolean;
 }
 
 export interface WellnessAccessState {
@@ -199,6 +200,7 @@ export interface WellnessAdminSettings {
   id: string;
   packages: WellnessPackageAdmin[];
   ctaPath: string;
+  isPersonalizedRoadmapPaid: boolean;
   updatedAt?: string;
 }
 
@@ -229,6 +231,7 @@ export interface WellnessPackageUpsertPayload {
 export interface UpdateWellnessAdminSettingsPayload {
   packages: WellnessPackageUpsertPayload[];
   ctaPath: string;
+  isPersonalizedRoadmapPaid: boolean;
 }
 
 export interface WellnessUserPackage {

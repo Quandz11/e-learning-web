@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import type { OnboardingFormData, OnboardingStep } from '../../types/planner';
+import type { OnboardingFormData, OnboardingStep, WellnessCheckoutPackage } from '../../types/planner';
 import { WELLNESS_GOAL_PRESETS, FASTING_DURATION_PRESETS } from '../../types/planner';
 
 interface WellnessOnboardingWizardProps {

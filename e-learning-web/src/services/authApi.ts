@@ -1,57 +1,28 @@
 import { apiClient } from './apiClient';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
-
-// Store access token in memory for Authorization header
-let accessToken: string | null = null;
+import { tokenService } from './tokenService';
+import { authUtils } from './authUtils';
+import type { AuthResponse, User } from './authUtils';
 
 export interface LoginRequest {
   email: string;
   password: string;
 }
 
-export interface AuthResponse {
-  accessToken: string;
-  expiresAt: string;
-  requiresTwoFactor?: boolean;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  fullName: string;
-  role: string;
-  avatarUrl?: string;
-  phone?: string;
-}
-
 class AuthApi {
-  // Set access token in memory when user logs in
   setAccessToken(token: string | null): void {
-    accessToken = token;
+    tokenService.setAccessToken(token);
   }
 
-  // Get access token from memory
   getAccessToken(): string | null {
-    return accessToken;
+    return tokenService.getAccessToken();
   }
 
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    // We use apiClient here for consistency, but login usually doesn't need 401 handling
+    return apiClient('/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Important: send cookies (refreshToken)
       body: JSON.stringify(credentials),
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Login failed');
-    }
-
-    return response.json();
   }
 
   async register(data: {
@@ -61,73 +32,28 @@ class AuthApi {
     phone?: string;
     referralCode?: string;
   }): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    return apiClient('/auth/register', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Registration failed');
-    }
-
-    return response.json();
   }
 
   async verifyOtp(email: string, otp: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+    return apiClient('/auth/verify-otp', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
       body: JSON.stringify({ email, otp }),
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'OTP verification failed');
-    }
-
-    return response.json();
   }
 
   async resendOtp(email: string): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+    return apiClient('/auth/resend-otp', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ email }),
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Resend OTP failed');
-    }
-
-    return response.json();
   }
 
   async refreshToken(): Promise<AuthResponse> {
-
-
-    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-
-      throw new Error('Token refresh failed');
-    }
-
-    const data = await response.json();
-
-    return data;
+    return authUtils.refreshToken();
   }
 
   // 2FA Methods
@@ -152,75 +78,30 @@ class AuthApi {
   }
 
   async loginVerifyTwoFactor(code: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/2fa/login-verify`, {
+    return apiClient('/auth/2fa/login-verify', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}` // PreAuth token
-      },
       body: JSON.stringify({ code }),
-      credentials: 'include',
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Invalid code');
-    }
-    return response.json();
   }
 
   async logout(): Promise<void> {
     try {
-
-      await fetch(`${API_BASE_URL}/auth/logout`, {
+      await apiClient('/auth/logout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
       });
-
     } finally {
-      // Clear access token from memory only (prevent XSS)
       this.setAccessToken(null);
     }
   }
 
-  // Get current user from token (decode JWT)
   decodeToken(token: string): User | null {
-    try {
-      const payload = token.split('.')[1];
-      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map(function (c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-          })
-          .join('')
-      );
-      const decoded = JSON.parse(jsonPayload);
-
-      const role = decoded.role || decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-      return {
-        id: decoded.sub,
-        email: decoded.email,
-        fullName: decoded.fullName || '',
-        role: role,
-        avatarUrl: decoded.avatarUrl,
-      };
-    } catch (error) {
-
-      return null;
-    }
+    return authUtils.decodeToken(token);
   }
 
   isTokenExpired(expiresAt: string): boolean {
-    const isExpired = new Date(expiresAt) <= new Date();
-    if (isExpired) {
-
-    } else {
-
-    }
-    return isExpired;
+    return authUtils.isTokenExpired(expiresAt);
   }
 }
 
 export const authApi = new AuthApi();
+export type { AuthResponse, User };

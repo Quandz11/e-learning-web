@@ -1168,6 +1168,7 @@
         "instructor": "Giảng viên",
         "unknownInstructor": "Giảng viên",
         "enrollFree": "Đăng ký miễn phí",
+        "learnNow": "Vào học ngay",
         "enrollPremium": "Mua ngay",
         "enrolling": "Đang đăng ký...",
         "startLearning": "Bắt đầu học",
@@ -1250,6 +1251,8 @@
         "curriculum": "Nội dung khóa học",
         "courseContent": "Nội dung khóa học",
         "noVideo": "Video chưa sẵn sàng",
+        "guestModeInfo": "Bạn đang xem ở chế độ khách. Đăng nhập để lưu tiến độ học tập.",
+        "loginToTrackProgress": "Vui lòng đăng nhập để lưu tiến độ học tập.",
         "noPdf": "Tài liệu chưa sẵn sàng",
         "loadError": "Tải khóa học thất bại",
         "enrollmentExpired": "Quyền truy cập khóa học của bạn đã hết hạn.",
@@ -2878,15 +2881,24 @@
             "thankYou": "Cảm ơn bạn đã chia sẻ!"
         },
         "moods": {
-            "thirsty": "Tôi đang khát nước",
-            "hungry": "Tôi đang đói",
-            "stomachWeird": "Dạ dày tôi hơi khó chịu",
-            "noProgress": "Tôi cảm thấy không thấy tiến bộ",
-            "tired": "Tôi cảm thấy mệt mỏi",
-            "motivated": "Tôi cảm thấy có động lực tập luyện",
-            "cravings": "Tôi bị thèm ăn nặng",
-            "sleepTrouble": "Tôi khó ngủ",
-            "great": "Tôi cảm thấy tuyệt vời. Cơ thể đang thay đổi tích cực!"
+            "hungry": "Đói",
+            "thirsty": "Khát",
+            "emergency": "Mệt / Chóng mặt",
+            "irritated": "Bực bội / Cáu gắt",
+            "cravings": "Thèm ăn / Thèm đường",
+            "stomachDiscomfort": "Đau dạ dày",
+            "insomnia": "Mất ngủ",
+            "fine": "Ổn"
+        },
+        "moodResponses": {
+            "hungry": "Cơn đói giả sẽ qua sau 10p. Uống 200ml nước ấm hoặc trà xanh không đường.",
+            "thirsty": "Cơ thể bạn đang bị nhầm lẫn. Uống ngay 1 ly nước lọc, bạn sẽ thấy tỉnh táo.",
+            "emergency": "DẤU HIỆU CẦN XỬ LÝ NGAY: Hãy uống ngay 1 ly nước muối loãng hoặc ăn một miếng trái cây ngọt (nếu đang ở giờ nhịn). Dừng lộ trình nếu triệu chứng nặng hơn.",
+            "irritated": "Cố lên! Bạn đang ở ngưỡng đốt mỡ. Hormon mệt mỏi có thể tăng. Hãy tập thở theo video 1 phút này.",
+            "cravings": "Đây là thói quen cũ. Hãy chuyển hướng chú ý bằng cách: Đi dạo, đọc sách, hoặc xem một video hài ngắn.",
+            "stomachDiscomfort": "Ăn một bữa nhẹ (cháo mỏng, thức ăn mềm) và tạm dừng khung giờ nhịn hôm nay. Lắng nghe cơ thể là quan trọng nhất.",
+            "insomnia": "Hãy thử ngâm chân bằng nước ấm trước khi ngủ. Tránh xa điện thoại 1 tiếng trước khi đi ngủ.",
+            "fine": "Tuyệt vời! Bạn đang làm rất tốt. Hãy duy trì sự kỷ luật này nhé."
         },
         "stats": {
             "title": "Thống kê",

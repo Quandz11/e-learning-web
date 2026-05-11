@@ -210,7 +210,7 @@ export default function AdminChatPage() {
 
         try {
             setLoading(true);
-            const data = await adminChatApi.getAllConversations(accessToken);
+            const data = await adminChatApi.getAllConversations();
             console.log('[AdminChat] Loaded conversations:', data);
 
             // Merge lists
@@ -236,22 +236,22 @@ export default function AdminChatPage() {
 
         try {
             if (conversation.type === 'guest' && conversation.guestId) {
-                const msgs = await adminChatApi.getGuestMessages(conversation.guestId, accessToken);
+                const msgs = await adminChatApi.getGuestMessages(conversation.guestId);
                 setMessages(msgs);
 
                 // Mark as read
-                await adminChatApi.markGuestAsRead(conversation.guestId, accessToken);
+                await adminChatApi.markGuestAsRead(conversation.guestId);
                 // Also send real-time signal so guest sees we read it immediately
                 chatSignalR.markGuestAsRead(conversation.guestId);
 
                 loadConversations(); // Refresh to update unread count
             } else if (conversation.type === 'authenticated') {
-                const msgs = await adminChatApi.getConversationMessages(conversation.id, accessToken);
+                const msgs = await adminChatApi.getConversationMessages(conversation.id);
                 setMessages(msgs);
 
                 // Mark as read backend
                 // Calling API to mark read (which should also trigger SignalR event to user)
-                await adminChatApi.markConversationAsRead(conversation.id, accessToken);
+                await adminChatApi.markConversationAsRead(conversation.id);
 
                 loadConversations();
             }
@@ -472,7 +472,7 @@ export default function AdminChatPage() {
                                             <button
                                                 onClick={() => {
                                                     if (selectedConversation.guestId && accessToken) {
-                                                        adminChatApi.closeGuestConversation(selectedConversation.guestId, accessToken);
+                                                    adminChatApi.closeGuestConversation(selectedConversation.guestId);
                                                         setSelectedConversation(null);
                                                         loadConversations();
                                                     }

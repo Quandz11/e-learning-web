@@ -62,13 +62,33 @@ const PlannerDailyStatusCard: React.FC<PlannerDailyStatusCardProps> = ({ onSubmi
         })}
       </div>
 
-      {submitted && (
-        <div className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-purple-600 dark:text-purple-400">
-          <span className="material-symbols-outlined text-sm">favorite</span>
-          {t('planner.dailyStatus.thankYou')}
+      {submitted && selectedMood && (
+        <div className={`mt-5 overflow-hidden rounded-2xl border ${
+          selectedMood === 'emergency' 
+            ? 'border-orange-200 bg-orange-50/50 dark:border-orange-500/30 dark:bg-orange-500/10' 
+            : 'border-purple-100 bg-purple-50/50 dark:border-purple-500/30 dark:bg-purple-500/10'
+        } p-4 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-500`}>
+          <div className="flex gap-3">
+            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+              selectedMood === 'emergency' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'
+            }`}>
+              <span className="material-symbols-outlined text-lg">smart_toy</span>
+            </div>
+            <div className="space-y-1">
+              <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                selectedMood === 'emergency' ? 'text-orange-500' : 'text-purple-500'
+              }`}>
+                Coach Advice
+              </p>
+              <p className="text-[13px] leading-relaxed text-slate-700 dark:text-slate-300">
+                {t(`planner.moodResponses.${selectedMood}`)}
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>
+
   );
 };
 

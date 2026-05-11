@@ -1,6 +1,4 @@
-import { authApi } from '../authApi';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
+import { apiClient } from '../apiClient';
 
 export interface ConversationResponse {
     id: string;
@@ -45,126 +43,44 @@ export interface SendMessageDto {
     content: string;
 }
 
-const getAuthHeaders = () => {
-    const token = authApi.getAccessToken();
-
-    if (!token) {
-        throw new Error('Missing access token for authenticated chat request');
-    }
-
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
-
 export const chatApi = {
     getConversations: async (): Promise<ConversationResponse[]> => {
-        const response = await fetch(`${API_BASE_URL}/chat/conversations`, {
-            headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch conversations');
-        }
-
-        return response.json();
+        return apiClient('/chat/conversations');
     },
 
     getConversation: async (id: string): Promise<ConversationResponse> => {
-        const response = await fetch(`${API_BASE_URL}/chat/conversations/${id}`, {
-            headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch conversation');
-        }
-
-        return response.json();
+        return apiClient(`/chat/conversations/${id}`);
     },
 
     createConversation: async (dto: CreateConversationDto): Promise<ConversationResponse> => {
-        const response = await fetch(`${API_BASE_URL}/chat/conversations`, {
+        return apiClient('/chat/conversations', {
             method: 'POST',
-            headers: getAuthHeaders(),
             body: JSON.stringify(dto),
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to create conversation');
-        }
-
-        return response.json();
     },
 
     getMessages: async (conversationId: string): Promise<MessageResponse[]> => {
-        const response = await fetch(
-            `${API_BASE_URL}/chat/conversations/${conversationId}/messages`,
-            {
-                headers: getAuthHeaders(),
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch messages');
-        }
-
-        return response.json();
+        return apiClient(`/chat/conversations/${conversationId}/messages`);
     },
 
     sendMessage: async (dto: SendMessageDto): Promise<MessageResponse> => {
-        const response = await fetch(`${API_BASE_URL}/chat/messages`, {
+        return apiClient('/chat/messages', {
             method: 'POST',
-            headers: getAuthHeaders(),
             body: JSON.stringify(dto),
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to send message');
-        }
-
-        return response.json();
     },
 
     markAsRead: async (conversationId: string): Promise<void> => {
-        const response = await fetch(
-            `${API_BASE_URL}/chat/conversations/${conversationId}/read`,
-            {
-                method: 'PUT',
-                headers: getAuthHeaders(),
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error('Failed to mark as read');
-        }
+        return apiClient(`/chat/conversations/${conversationId}/read`, {
+            method: 'PUT',
+        });
     },
 
     getUnreadCount: async (): Promise<number> => {
-        const response = await fetch(`${API_BASE_URL}/chat/unread-count`, {
-            headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch unread count');
-        }
-
-        return response.json();
+        return apiClient('/chat/unread-count');
     },
 
     getSupportUser: async (): Promise<SupportUserResponse> => {
-        const response = await fetch(`${API_BASE_URL}/chat/support-user`, {
-            headers: getAuthHeaders(),
-        });
-
-        if (response.status === 404) {
-            throw new Error('No support user available');
-        }
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch support user');
-        }
-
-        return response.json();
+        return apiClient('/chat/support-user');
     },
 };

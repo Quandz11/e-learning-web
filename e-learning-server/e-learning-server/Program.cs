@@ -13,6 +13,7 @@ using SKVI.Infrastructure;
 using SKVI.Infrastructure.Security;
 using SKVI.Infrastructure.Services;
 using SKVI.Infrastructure.VideoStreaming;
+using SKVI.Infrastructure.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -314,6 +315,8 @@ app.UseSwaggerUI(options =>
 
 // CORS must come before UseHttpsRedirection
 app.UseCors("StrictPolicy");
+
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.UseHttpsRedirection();
 

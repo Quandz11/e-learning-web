@@ -170,13 +170,13 @@ Bắt buộc trả về đúng định dạng JSON strict sau, không markdown, 
         private class GeminiTaskResponseDto 
         { 
             public int DayOffset { get; set; } 
-            public string Content { get; set; } 
+            public string Content { get; set; } = default!;
         }
 
         private class GeminiNextTaskResponseDto
         {
-            public string Advice { get; set; }
-            public List<GeminiTaskResponseDto> NextTasks { get; set; }
+            public string Advice { get; set; } = default!;
+            public List<GeminiTaskResponseDto> NextTasks { get; set; } = default!;
         }
     }
 }

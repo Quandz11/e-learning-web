@@ -1,6 +1,9 @@
-import { authApi } from './authApi';
+import { ApiError } from '../types/apiErrors';
+export { ApiError };
+import { tokenService } from './tokenService';
+import { authUtils } from './authUtils';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://skvi-api.azurewebsites.net/api';
 
 interface RequestConfig extends RequestInit {
     _retry?: boolean;
@@ -35,7 +38,7 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
             headers.set('Content-Type', 'application/json');
         }
 
-        const token = authApi.getAccessToken();
+        const token = tokenService.getAccessToken();
         if (token) {
             headers.set('Authorization', `Bearer ${token}`);
         }
@@ -52,19 +55,25 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
     }
 
     try {
-        let response = await fetch(url, config);
+        const response = await fetch(url, config);
 
         // 401 Interceptor
         if (response.status === 401 && !config._retry) {
             if (isRefreshing) {
                 // If already refreshing, queue this request
                 try {
-                    await new Promise<string>((resolve, reject) => {
+                    const newToken = await new Promise<string>((resolve, reject) => {
                         failedQueue.push({ resolve, reject });
                     });
                     // Retry with new token
-                    config.headers = getHeaders(); // Re-fetch headers to get new token
-                    return apiClient<T>(endpoint, options);
+                    const retryOptions = {
+                        ...options,
+                        headers: {
+                            ...options.headers,
+                            'Authorization': `Bearer ${newToken}`
+                        }
+                    };
+                    return apiClient<T>(endpoint, retryOptions);
                 } catch (err) {
                     throw err;
                 }
@@ -74,15 +83,15 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
             isRefreshing = true;
 
             try {
-                const refreshData = await authApi.refreshToken();
-                authApi.setAccessToken(refreshData.accessToken);
+                const refreshData = await authUtils.refreshToken();
+                tokenService.setAccessToken(refreshData.accessToken);
                 processQueue(null, refreshData.accessToken);
 
                 // Retry original request
                 return apiClient<T>(endpoint, { ...options, _retry: true });
             } catch (refreshError) {
                 processQueue(refreshError, null);
-                authApi.setAccessToken(null);
+                tokenService.clearToken();
                 throw refreshError;
             } finally {
                 isRefreshing = false;
@@ -95,7 +104,6 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
             let errors: Record<string, string[]> | undefined;
 
             try {
-                // Clone response because json() consumes it
                 const errorData = await response.clone().json();
                 errorMessage = errorData.message || errorMessage;
                 errorCode = errorData.code;
@@ -107,8 +115,6 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
                 } catch (e2) { }
             }
 
-            // Import ApiError dynamically to avoid circular dependency
-            const { ApiError } = await import('../types/apiErrors');
             throw new ApiError(errorMessage, response.status, errors, errorCode);
         }
 
@@ -121,13 +127,10 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
         if (contentType && contentType.indexOf('application/json') !== -1) {
             return await response.json();
         }
-        // Fallback for text/blob if needed, but for now assuming JSON mostly
-        // If strict JSON is required we can keep it as is.
-        // However, some endpoints return text strings.
+
         try {
             return await response.json();
         } catch (e) {
-            // If json parse fails, maybe it's just text
             return (await response.text()) as unknown as T;
         }
     } catch (error) {

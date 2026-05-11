@@ -201,16 +201,24 @@ const StudentCourseDetailPage: React.FC = () => {
         if (isEnrolled) return t('courseDetail.startLearning');
         if (hasExpiredEnrollment) {
             return course.isFree
-                ? t('courseDetail.accessExpired', { defaultValue: 'Access expired' })
+                ? t('courseDetail.learnNow')
                 : t('courseDetail.enrollPremium');
         }
-        return course.isFree ? t('courseDetail.enrollFree') : t('courseDetail.enrollPremium');
+        return course.isFree ? t('courseDetail.learnNow') : t('courseDetail.enrollPremium');
     };
 
     const handleButtonClick = () => {
         if (isEnrolled) {
             navigate(`/courses/${id}/learn`);
-        } else if (hasExpiredEnrollment && course?.isFree) {
+        } else if (course?.isFree) {
+            if (!isAuthenticated) {
+                // Guest mode
+                navigate(`/courses/${id}/learn`);
+            } else {
+                // Logged in but not enrolled -> Enroll them to save progress
+                handleEnroll();
+            }
+        } else if (hasExpiredEnrollment) {
             alert(t('courseDetail.accessExpired', { defaultValue: 'Your access to this course has expired.' }));
         } else {
             handleEnroll();

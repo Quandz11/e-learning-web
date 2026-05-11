@@ -88,53 +88,37 @@ export const courseApi = {
     formData.append('file', file);
     if (title) formData.append('title', title);
 
-    try {
-      return apiClient('/videos/upload', {
-        method: 'POST',
-        body: formData,
-      });
-    } catch (err) {
-      throw new Error('Failed to upload video');
-    }
+    return apiClient('/videos/upload', {
+      method: 'POST',
+      body: formData,
+    });
   },
 
   async uploadVideoThumbnail(videoId: string, file: File): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
 
-    try {
-      return apiClient(`/videos/${videoId}/thumbnail`, {
-        method: 'POST',
-        body: formData,
-      });
-    } catch (err) {
-      throw new Error('Failed to upload video thumbnail');
-    }
+    return apiClient(`/videos/${videoId}/thumbnail`, {
+      method: 'POST',
+      body: formData,
+    });
   },
 
   async uploadThumbnail(file: File): Promise<UploadThumbnailResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
-    try {
-      return apiClient('/courses/thumbnail', {
-        method: 'POST',
-        body: formData,
-      });
-    } catch {
-      throw new Error('Failed to upload thumbnail');
-    }
+    return apiClient('/courses/thumbnail', {
+      method: 'POST',
+      body: formData,
+    });
   },
 
 
   async syncVideoDuration(videoId: string): Promise<{ duration: number }> {
-    try {
-      return apiClient(`/videos/${videoId}/sync-duration`, {
-        method: 'POST',
-      });
-    } catch {
-      throw new Error('Failed to sync video duration');
-    }
+    return apiClient(`/videos/${videoId}/sync-duration`, {
+      method: 'POST',
+    });
   },
 
   async getEnrolledStudents(id: string): Promise<StudentResponse[]> {

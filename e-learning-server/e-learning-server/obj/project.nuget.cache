@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "FBY+zySv7KQ=",
+  "dgSpecHash": "oZIc8hmjCYE=",
   "success": true,
   "projectFilePath": "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
   "expectedPackageFiles": [
@@ -8,13 +8,13 @@
     "C:\\Users\\Quan\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\azure.monitor.opentelemetry.exporter\\1.7.0\\azure.monitor.opentelemetry.exporter.1.7.0.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
-    "C:\\Users\\Quan\\.nuget\\packages\\bouncycastle.cryptography\\2.6.1\\bouncycastle.cryptography.2.6.1.nupkg.sha512",
+    "C:\\Users\\Quan\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\hangfire.aspnetcore\\1.8.23\\hangfire.aspnetcore.1.8.23.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\hangfire.core\\1.8.23\\hangfire.core.1.8.23.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\hangfire.netcore\\1.8.23\\hangfire.netcore.1.8.23.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\hangfire.sqlserver\\1.8.23\\hangfire.sqlserver.1.8.23.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
-    "C:\\Users\\Quan\\.nuget\\packages\\mailkit\\4.14.1\\mailkit.4.14.1.nupkg.sha512",
+    "C:\\Users\\Quan\\.nuget\\packages\\mailkit\\4.16.0\\mailkit.4.16.0.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\microsoft.applicationinsights\\3.1.0\\microsoft.applicationinsights.3.1.0.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\microsoft.applicationinsights.aspnetcore\\3.1.0\\microsoft.applicationinsights.aspnetcore.3.1.0.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.0\\microsoft.aspnetcore.authentication.jwtbearer.8.0.0.nupkg.sha512",
@@ -63,7 +63,7 @@
     "C:\\Users\\Quan\\.nuget\\packages\\microsoft.sqlserver.server\\1.0.0\\microsoft.sqlserver.server.1.0.0.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.22.1\\microsoft.visualstudio.azure.containers.tools.targets.1.22.1.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
-    "C:\\Users\\Quan\\.nuget\\packages\\mimekit\\4.14.0\\mimekit.4.14.0.nupkg.sha512",
+    "C:\\Users\\Quan\\.nuget\\packages\\mimekit\\4.16.0\\mimekit.4.16.0.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\newtonsoft.json\\11.0.1\\newtonsoft.json.11.0.1.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\opentelemetry\\1.15.1\\opentelemetry.1.15.1.nupkg.sha512",
@@ -113,18 +113,5 @@
     "C:\\Users\\Quan\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
     "C:\\Users\\Quan\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "message": "Package 'MailKit' 4.14.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-9j88-vvj5-vhgr",
-      "projectPath": "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\Users\\Quan\\Documents\\e-learning-web\\e-learning-server\\e-learning-server\\e-learning-server.csproj",
-      "libraryId": "MailKit",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    }
-  ]
+  "logs": []
 }

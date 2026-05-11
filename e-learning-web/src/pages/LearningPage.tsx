@@ -64,24 +64,31 @@ const LearningPage: React.FC = () => {
     const currentPart = allParts[currentPartIndex];
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            navigate('/login');
-            return;
-        }
-
         const fetchData = async () => {
             if (!id) return;
 
             try {
                 setLoading(true);
                 setIsEnrollmentExpired(false);
-                const [courseData, progressData] = await Promise.all([
-                    courseApi.getById(id),
-                    enrollmentApi.getCourseProgress(id)
-                ]);
-
+                const courseData = await courseApi.getById(id);
                 setCourse(courseData);
-                setProgress(progressData);
+
+                // Access check: course must be free or user must be authenticated
+                if (!courseData.isFree && !isAuthenticated) {
+                    navigate('/login', { state: { from: `/courses/${id}/learn` } });
+                    return;
+                }
+
+                let progressData = null;
+                if (isAuthenticated) {
+                    try {
+                        progressData = await enrollmentApi.getCourseProgress(id);
+                        setProgress(progressData);
+                    } catch (progressErr: any) {
+                        // For free courses, progress might not exist if they just started
+                        if (!courseData.isFree) throw progressErr;
+                    }
+                }
 
                 // Expand all lessons by default
                 if (courseData.lessons) {
@@ -153,11 +160,11 @@ const LearningPage: React.FC = () => {
 
     // Auto-save progress every 10 seconds
     useEffect(() => {
-        if (!id || !currentPart || !videoRef.current || currentPart.type !== 'Video') return;
+        if (!id || !currentPart || !videoRef.current || currentPart.type !== 'Video' || !isAuthenticated) return;
 
         progressSaveInterval.current = window.setInterval(async () => {
             const video = videoRef.current;
-            if (video && !video.paused && id && currentPart?.id) {
+            if (video && !video.paused && id && currentPart?.id && isAuthenticated) {
                 try {
                     await enrollmentApi.updateLessonProgress(id, currentPart.id, Math.floor(video.currentTime));
                 } catch (err) {
@@ -181,15 +188,20 @@ const LearningPage: React.FC = () => {
 
     // Update last accessed
     useEffect(() => {
-        if (!id) return;
+        if (!id || !isAuthenticated) return;
         enrollmentApi.updateLastAccessed(id);
         return () => {
-            if (id) enrollmentApi.updateLastAccessed(id);
+            if (id && isAuthenticated) enrollmentApi.updateLastAccessed(id);
         };
-    }, [id]);
+    }, [id, isAuthenticated]);
 
     const handleMarkComplete = async () => {
         if (!id || !currentPart?.id || isMarkingComplete) return;
+
+        if (!isAuthenticated) {
+            alert(t('learn.loginToTrackProgress'));
+            return;
+        }
 
         try {
             setIsMarkingComplete(true);
@@ -457,6 +469,15 @@ const LearningPage: React.FC = () => {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col bg-white overflow-hidden min-h-0">
+                {/* Guest Mode Info */}
+                {!isAuthenticated && (
+                    <div className="bg-amber-50 border-b border-amber-100 px-4 py-2 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-amber-500 text-[18px]">info</span>
+                        <p className="text-xs text-amber-700 font-medium">
+                            {t('learn.guestModeInfo')}
+                        </p>
+                    </div>
+                )}
                 <div className="lg:hidden border-b border-gray-200 bg-white px-3 py-2 flex items-center justify-between gap-2">
                     <button
                         onClick={() => setIsCurriculumOpen(true)}

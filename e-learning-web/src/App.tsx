@@ -1,87 +1,97 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
-import { useEffect, useState, useMemo } from 'react';
-import AdminLayout from './components/admin/AdminLayout';
+import { lazy, Suspense, useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from './store/store';
-import AuthLayout from './components/layout/AuthLayout';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
-import OtpVerifyPage from './pages/auth/OtpVerifyPage';
-import PhoneOtpVerifyPage from './pages/auth/PhoneOtpVerifyPage';
-import AdminDashboardPage from './pages/admin/dashboard/AdminDashboardPage';
-import CoursesPage from './pages/admin/course/CoursesPage';
-import LessonsPage from './pages/admin/lesson/LessonsPage';
-import LessonDetailPage from './pages/admin/lesson/LessonDetailPage';
-import LessonPartDetailPage from './pages/admin/lesson/LessonPartDetailPage';
-import ProtectedRoute from './components/ProtectedRoute';
 import { setAuthState, updateUser } from './store/authSlice';
 import { authApi } from './services/authApi';
 import { loadAuth, saveAuth, clearAuth } from './services/authStorage';
-import HomePage from './pages/HomePage';
-import UsersPage from './pages/admin/user/UsersPage';
-import UserDetailPage from './pages/admin/user/UserDetailPage';
-import CourseDetailPage from './pages/admin/course/CourseDetailPage';
-import AdminSettingsPage from './pages/admin/settings/AdminSettingsPage';
-import InstructorsPage from './pages/admin/instructor/InstructorsPage';
-import InstructorDetailPage from './pages/admin/instructor/InstructorDetailPage';
-import AdminChatPage from './pages/admin/chat/AdminChatPage';
-import ProfilePage from './pages/ProfilePage';
-import StudentCoursesPage from './pages/CoursesPage';
-import StudentCourseDetailPage from './pages/StudentCourseDetailPage';
-import LearningPage from './pages/LearningPage';
-import RootLayout from './components/layout/RootLayout';
 import { profileApi } from './services/profileApi';
-import { ToastProvider } from './contexts/ToastContext';
-import ToastContainer from './components/ui/Toast/ToastContainer';
-import { NotificationProvider } from './context/NotificationContext';
-import AdminNotificationPage from './pages/admin/notification/AdminNotificationPage';
-import ArticlesPage from './pages/ArticlesPage';
-import ArticleDetailPage from './pages/ArticleDetailPage';
-import AdminArticlesPage from './pages/admin/article/AdminArticlesPage';
-import AdminCategoriesPage from './pages/admin/article/AdminCategoriesPage';
-import ArticleEditorPage from './pages/admin/article/ArticleEditorPage';
+
+// Layouts
+import AdminLayout from './components/admin/AdminLayout';
+import AuthLayout from './components/layout/AuthLayout';
+import RootLayout from './components/layout/RootLayout';
 import UserLayout from './components/layout/UserLayout';
-import AdminQuizPage from './pages/admin/quiz/AdminQuizPage';
-import AdminQuizEditorPage from './pages/admin/quiz/AdminQuizEditorPage';
-import AdminQuizSubmissionsPage from './pages/admin/quiz/AdminQuizSubmissionsPage';
-import AdminTestimonialsPage from './pages/admin/testimonials/AdminTestimonialsPage';
-import AdminTestimonialEditorPage from './pages/admin/testimonials/AdminTestimonialEditorPage';
-import TestimonialsPage from './pages/TestimonialsPage';
-import AdminLessonCategoriesPage from './pages/admin/categories/AdminCategoriesPage';
-import AdminLessonCategoryEditorPage from './pages/admin/categories/AdminCategoryEditorPage';
-import AdminWhyChooseUsPage from './pages/admin/why-choose-us/AdminWhyChooseUsPage';
-import AdminWhyChooseUsEditorPage from './pages/admin/why-choose-us/AdminWhyChooseUsEditorPage';
-import AdminAiSettingsPage from './pages/admin/ai/AdminAiSettingsPage';
-import AdminWellnessSettingsPage from './pages/admin/wellness/AdminWellnessSettingsPage';
-import ForumPage from './pages/ForumPage';
-import ForumCategoryPage from './pages/ForumCategoryPage';
-import ForumThreadPage from './pages/ForumThreadPage';
-import NewThreadPage from './pages/NewThreadPage';
-import AdminForumCategoriesPage from './pages/admin/forum/AdminForumCategoriesPage';
-import MyCoursesPage from './pages/MyCoursesPage';
-import MyLearningPlanPage from './pages/MyLearningPlanPage';
-import AdminHomeSectionPage from './pages/admin/home-section/AdminHomeSectionPage';
-import CheckoutPage from './pages/CheckoutPage';
-import PaymentResultPage from './pages/PaymentResultPage';
-import OrderHistoryPage from './pages/OrderHistoryPage';
-import AdminReferralsPage from './pages/admin/referrals/AdminReferralsPage';
-import AdminUserReferralsPage from './pages/admin/referrals/AdminUserReferralsPage.tsx';
-import AdminAgentsPage from './pages/admin/agents/AdminAgentsPage';
-import AdminLeadRegistrationsPage from './pages/admin/leads/AdminLeadRegistrationsPage';
-import CareDashboardPage from './pages/care/CareDashboardPage';
-import AgentDashboardPage from './pages/agent/AgentDashboardPage';
-import LecturerDashboardPage from './pages/lecturer/LecturerDashboardPage';
+
+// Core
+import ProtectedRoute from './components/ProtectedRoute';
 import RouteErrorFallback from './components/common/RouteErrorFallback';
-import PricingPage from './pages/PricingPage';
-import AmbassadorPage from './pages/AmbassadorPage';
-import Challenge10DayPage from './pages/Challenge10DayPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import ContactUsPage from './pages/ContactUsPage';
-import MissionVisionPage from './pages/MissionVisionPage';
+import ToastContainer from './components/ui/Toast/ToastContainer';
+import { ToastProvider } from './contexts/ToastContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { Toaster } from 'react-hot-toast';
 
-// Removed RootRedirect to allow all users to access the HomePage at '/'
+// Lazy Loaded Pages - Auth
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
+const OtpVerifyPage = lazy(() => import('./pages/auth/OtpVerifyPage'));
+const PhoneOtpVerifyPage = lazy(() => import('./pages/auth/PhoneOtpVerifyPage'));
+
+// Lazy Loaded Pages - Admin
+const AdminDashboardPage = lazy(() => import('./pages/admin/dashboard/AdminDashboardPage'));
+const CoursesPage = lazy(() => import('./pages/admin/course/CoursesPage'));
+const LessonsPage = lazy(() => import('./pages/admin/lesson/LessonsPage'));
+const LessonDetailPage = lazy(() => import('./pages/admin/lesson/LessonDetailPage'));
+const LessonPartDetailPage = lazy(() => import('./pages/admin/lesson/LessonPartDetailPage'));
+const UsersPage = lazy(() => import('./pages/admin/user/UsersPage'));
+const UserDetailPage = lazy(() => import('./pages/admin/user/UserDetailPage'));
+const CourseDetailPage = lazy(() => import('./pages/admin/course/CourseDetailPage'));
+const AdminSettingsPage = lazy(() => import('./pages/admin/settings/AdminSettingsPage'));
+const InstructorsPage = lazy(() => import('./pages/admin/instructor/InstructorsPage'));
+const InstructorDetailPage = lazy(() => import('./pages/admin/instructor/InstructorDetailPage'));
+const AdminChatPage = lazy(() => import('./pages/admin/chat/AdminChatPage'));
+const AdminNotificationPage = lazy(() => import('./pages/admin/notification/AdminNotificationPage'));
+const AdminArticlesPage = lazy(() => import('./pages/admin/article/AdminArticlesPage'));
+const AdminCategoriesPage = lazy(() => import('./pages/admin/article/AdminCategoriesPage'));
+const ArticleEditorPage = lazy(() => import('./pages/admin/article/ArticleEditorPage'));
+const AdminQuizPage = lazy(() => import('./pages/admin/quiz/AdminQuizPage'));
+const AdminQuizEditorPage = lazy(() => import('./pages/admin/quiz/AdminQuizEditorPage'));
+const AdminQuizSubmissionsPage = lazy(() => import('./pages/admin/quiz/AdminQuizSubmissionsPage'));
+const AdminTestimonialsPage = lazy(() => import('./pages/admin/testimonials/AdminTestimonialsPage'));
+const AdminTestimonialEditorPage = lazy(() => import('./pages/admin/testimonials/AdminTestimonialEditorPage'));
+const AdminLessonCategoriesPage = lazy(() => import('./pages/admin/categories/AdminCategoriesPage'));
+const AdminLessonCategoryEditorPage = lazy(() => import('./pages/admin/categories/AdminCategoryEditorPage'));
+const AdminWhyChooseUsPage = lazy(() => import('./pages/admin/why-choose-us/AdminWhyChooseUsPage'));
+const AdminWhyChooseUsEditorPage = lazy(() => import('./pages/admin/why-choose-us/AdminWhyChooseUsEditorPage'));
+const AdminAiSettingsPage = lazy(() => import('./pages/admin/ai/AdminAiSettingsPage'));
+const AdminWellnessSettingsPage = lazy(() => import('./pages/admin/wellness/AdminWellnessSettingsPage'));
+const AdminForumCategoriesPage = lazy(() => import('./pages/admin/forum/AdminForumCategoriesPage'));
+const AdminHomeSectionPage = lazy(() => import('./pages/admin/home-section/AdminHomeSectionPage'));
+const AdminReferralsPage = lazy(() => import('./pages/admin/referrals/AdminReferralsPage'));
+const AdminUserReferralsPage = lazy(() => import('./pages/admin/referrals/AdminUserReferralsPage.tsx'));
+const AdminAgentsPage = lazy(() => import('./pages/admin/agents/AdminAgentsPage'));
+const AdminLeadRegistrationsPage = lazy(() => import('./pages/admin/leads/AdminLeadRegistrationsPage'));
+
+// Lazy Loaded Pages - Student/User
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const StudentCoursesPage = lazy(() => import('./pages/CoursesPage'));
+const StudentCourseDetailPage = lazy(() => import('./pages/StudentCourseDetailPage'));
+const LearningPage = lazy(() => import('./pages/LearningPage'));
+const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
+const ArticleDetailPage = lazy(() => import('./pages/ArticleDetailPage'));
+const TestimonialsPage = lazy(() => import('./pages/TestimonialsPage'));
+const ForumPage = lazy(() => import('./pages/ForumPage'));
+const ForumCategoryPage = lazy(() => import('./pages/ForumCategoryPage'));
+const ForumThreadPage = lazy(() => import('./pages/ForumThreadPage'));
+const NewThreadPage = lazy(() => import('./pages/NewThreadPage'));
+const MyCoursesPage = lazy(() => import('./pages/MyCoursesPage'));
+const MyLearningPlanPage = lazy(() => import('./pages/MyLearningPlanPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'));
+const OrderHistoryPage = lazy(() => import('./pages/OrderHistoryPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const AmbassadorPage = lazy(() => import('./pages/AmbassadorPage'));
+const Challenge10DayPage = lazy(() => import('./pages/Challenge10DayPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const ContactUsPage = lazy(() => import('./pages/ContactUsPage'));
+const MissionVisionPage = lazy(() => import('./pages/MissionVisionPage'));
+
+// Dashboards
+const CareDashboardPage = lazy(() => import('./pages/care/CareDashboardPage'));
+const AgentDashboardPage = lazy(() => import('./pages/agent/AgentDashboardPage'));
+const LecturerDashboardPage = lazy(() => import('./pages/lecturer/LecturerDashboardPage'));
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -366,14 +376,6 @@ function App() {
               ),
             },
             {
-              path: 'admin/users/:id',
-              element: (
-                <ProtectedRoute requiredRole="ADMIN">
-                  <UserDetailPage />
-                </ProtectedRoute>
-              ),
-            },
-            {
               path: 'admin/profile',
               element: (
                 <ProtectedRoute requiredRole="ADMIN">
@@ -431,8 +433,6 @@ function App() {
                 </ProtectedRoute>
               ),
             },
-
-            // ... (in routes)
             {
               path: 'admin/quizzes/:id/submissions',
               element: (
@@ -593,7 +593,6 @@ function App() {
                 </ProtectedRoute>
               ),
             },
-            // Care Dashboard Routes
             {
               path: 'care/dashboard',
               element: (
@@ -602,7 +601,6 @@ function App() {
                 </ProtectedRoute>
               ),
             },
-            // Agent Dashboard Routes
             {
               path: 'agent/dashboard',
               element: (
@@ -611,7 +609,6 @@ function App() {
                 </ProtectedRoute>
               ),
             },
-            // Lecturer Dashboard Routes
             {
               path: 'lecturer/dashboard',
               element: (
@@ -629,7 +626,6 @@ function App() {
   // On app load, always try to refresh token using HTTP-only cookie
   useEffect(() => {
     const initAuth = async () => {
-      // 1) Try to restore from localStorage quickly (non-expired access token)
       const cached = loadAuth();
       if (cached && !authApi.isTokenExpired(cached.expiresAt)) {
         authApi.setAccessToken(cached.accessToken);
@@ -691,7 +687,7 @@ function App() {
 
   // Proactive silent refresh
   useEffect(() => {
-    const REFRESH_INTERVAL = 13 * 60 * 1000; // 13 minutes
+    const REFRESH_INTERVAL = 13 * 60 * 1000;
     let refreshTimer: ReturnType<typeof setInterval>;
 
     const startRefreshTimer = () => {
@@ -699,15 +695,10 @@ function App() {
         const token = authApi.getAccessToken();
         if (token) {
           try {
-            console.log('Proactive token refresh...');
             const response = await authApi.refreshToken();
             authApi.setAccessToken(response.accessToken);
-            // Optionally update Redux if needed, though memory token is most critical for api calls
           } catch (error) {
             console.error('Proactive refresh failed', error);
-            // If proactive refresh fails, we might let the interceptor handle it next time
-            // or clear auth if it's a hard failure (like 401 on refresh).
-            // For now, allow interceptor to catch it later.
           }
         }
       }, REFRESH_INTERVAL);
@@ -733,10 +724,18 @@ function App() {
     );
   }
 
+  const loadingFallback = (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+    </div>
+  );
+
   return (
     <ToastProvider>
       <NotificationProvider>
-        <RouterProvider router={router} />
+        <Suspense fallback={loadingFallback}>
+          <RouterProvider router={router} />
+        </Suspense>
         <Toaster
           position="top-right"
           toastOptions={{

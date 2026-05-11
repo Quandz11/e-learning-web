@@ -21,6 +21,6 @@ namespace SKVI.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("UserId")]
-        public virtual User User { get; set; }
+        public virtual User User { get; set; } = default!;
     }
 }

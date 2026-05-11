@@ -92,16 +92,16 @@ export interface CalendarDay {
 
 /** Predefined mood options for DailyStatusCard */
 export const MOOD_OPTIONS: MoodOption[] = [
-  { id: 'thirsty', emoji: '💧', labelKey: 'planner.moods.thirsty' },
   { id: 'hungry', emoji: '😋', labelKey: 'planner.moods.hungry' },
-  { id: 'stomach', emoji: '😬', labelKey: 'planner.moods.stomachWeird' },
-  { id: 'noProgress', emoji: '😤', labelKey: 'planner.moods.noProgress' },
-  { id: 'tired', emoji: '😴', labelKey: 'planner.moods.tired' },
-  { id: 'motivated', emoji: '💪', labelKey: 'planner.moods.motivated' },
+  { id: 'thirsty', emoji: '💧', labelKey: 'planner.moods.thirsty' },
+  { id: 'emergency', emoji: '⚠️', labelKey: 'planner.moods.emergency' },
+  { id: 'irritated', emoji: '😤', labelKey: 'planner.moods.irritated' },
   { id: 'cravings', emoji: '🍫', labelKey: 'planner.moods.cravings' },
-  { id: 'sleepTrouble', emoji: '😫', labelKey: 'planner.moods.sleepTrouble' },
-  { id: 'great', emoji: '✨', labelKey: 'planner.moods.great' },
+  { id: 'stomachDiscomfort', emoji: '😬', labelKey: 'planner.moods.stomachDiscomfort' },
+  { id: 'insomnia', emoji: '😫', labelKey: 'planner.moods.insomnia' },
+  { id: 'fine', emoji: '✨', labelKey: 'planner.moods.fine' },
 ];
+
 
 /** Study time presets for onboarding */
 export const STUDY_TIME_PRESETS = [

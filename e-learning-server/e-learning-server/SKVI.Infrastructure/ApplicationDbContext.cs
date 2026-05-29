@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     // Auth & User
     public DbSet<User> Users { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
     public DbSet<UserReferral> UserReferrals { get; set; }
     public DbSet<ReferralTransaction> ReferralTransactions { get; set; }
 
@@ -120,6 +121,27 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(u => u.ReferredByUserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<UserDeviceToken>()
+            .HasIndex(t => new { t.UserId, t.DeviceId })
+            .IsUnique();
+
+        modelBuilder.Entity<UserDeviceToken>()
+            .HasIndex(t => t.Token);
+
+        modelBuilder.Entity<UserDeviceToken>()
+            .Property(t => t.Platform)
+            .HasMaxLength(32);
+
+        modelBuilder.Entity<UserDeviceToken>()
+            .Property(t => t.DeviceId)
+            .HasMaxLength(128);
+
+        modelBuilder.Entity<UserDeviceToken>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<UserReferral>()
             .HasIndex(r => r.ReferralCode)

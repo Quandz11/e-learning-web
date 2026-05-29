@@ -50,6 +50,7 @@ public class NotificationService : INotificationService
             };
 
             await _hubContext.Clients.Group($"user-{userId}").SendAsync("ReceiveNotification", dto);
+            await LogPushTargetsAsync(new[] { userId }, title);
             _logger.LogInformation("Sent notification {NotificationId} to user {UserId}", notification.Id, userId);
         }
         catch (Exception ex)
@@ -99,6 +100,7 @@ public class NotificationService : INotificationService
             };
 
             await _hubContext.Clients.Group($"role-{role}").SendAsync("ReceiveNotification", broadcastDto);
+            await LogPushTargetsAsync(users, title);
             _logger.LogInformation("Sent notification to {Count} users in role {Role}", users.Count, role);
         }
         catch (Exception ex)
@@ -139,6 +141,7 @@ public class NotificationService : INotificationService
             };
 
             await _hubContext.Clients.Group("all-users").SendAsync("ReceiveNotification", broadcastDto);
+            await LogPushTargetsAsync(users, title);
             _logger.LogInformation("Sent notification to all {Count} users", users.Count);
         }
         catch (Exception ex)
@@ -195,6 +198,92 @@ public class NotificationService : INotificationService
                 note.IsRead = true;
             }
             await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task RegisterDeviceTokenAsync(Guid userId, RegisterDeviceTokenRequest request)
+    {
+        var deviceId = request.DeviceId.Trim();
+        var token = request.Token.Trim();
+        var platform = request.Platform.Trim().ToUpperInvariant();
+
+        if (string.IsNullOrWhiteSpace(deviceId) ||
+            string.IsNullOrWhiteSpace(token) ||
+            string.IsNullOrWhiteSpace(platform))
+        {
+            throw new ArgumentException("DeviceId, token, and platform are required.");
+        }
+
+        var now = DateTime.UtcNow;
+        var existing = await _context.UserDeviceTokens
+            .FirstOrDefaultAsync(t => t.UserId == userId && t.DeviceId == deviceId);
+
+        if (existing == null)
+        {
+            _context.UserDeviceTokens.Add(new UserDeviceToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                DeviceId = deviceId,
+                Token = token,
+                Platform = platform,
+                AppVersion = request.AppVersion,
+                IsActive = true,
+                CreatedAt = now,
+                UpdatedAt = now,
+                LastSeenAt = now
+            });
+        }
+        else
+        {
+            existing.Token = token;
+            existing.Platform = platform;
+            existing.AppVersion = request.AppVersion;
+            existing.IsActive = true;
+            existing.UpdatedAt = now;
+            existing.LastSeenAt = now;
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UnregisterDeviceTokenAsync(Guid userId, string deviceId)
+    {
+        var normalizedDeviceId = deviceId.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedDeviceId))
+        {
+            return;
+        }
+
+        var token = await _context.UserDeviceTokens
+            .FirstOrDefaultAsync(t => t.UserId == userId && t.DeviceId == normalizedDeviceId);
+        if (token == null)
+        {
+            return;
+        }
+
+        token.IsActive = false;
+        token.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+    }
+
+    private async Task LogPushTargetsAsync(IEnumerable<Guid> userIds, string title)
+    {
+        var ids = userIds.Distinct().ToList();
+        if (!ids.Any())
+        {
+            return;
+        }
+
+        var activeTokenCount = await _context.UserDeviceTokens
+            .CountAsync(t => ids.Contains(t.UserId) && t.IsActive);
+
+        if (activeTokenCount > 0)
+        {
+            _logger.LogInformation(
+                "Push notification queued for {DeviceCount} active devices. Title={Title}",
+                activeTokenCount,
+                title);
         }
     }
 }

@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "REPLACE_WITH_APPLE_TEAM_ID.vn.nhinanchualanh.eLearningMobile"
+        ],
+        "components": [
+          {
+            "/": "/payment/result/*"
+          },
+          {
+            "/": "/payment-result*"
+          }
+        ]
+      }
+    ]
+  }
+}

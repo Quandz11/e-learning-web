@@ -195,3 +195,4 @@ C:\Users\Quan\Documents\e-learning-web\e-learning-server\e-learning-server\obj\D
 C:\Users\Quan\Documents\e-learning-web\e-learning-server\e-learning-server\obj\Debug\net8.0\e-learning-server.pdb
 C:\Users\Quan\Documents\e-learning-web\e-learning-server\e-learning-server\obj\Debug\net8.0\e-learning-server.genruntimeconfig.cache
 C:\Users\Quan\Documents\e-learning-web\e-learning-server\e-learning-server\obj\Debug\net8.0\ref\e-learning-server.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\e-learning-server\bin\Debug\net8.0\e-learning-server.staticwebassets.runtime.json

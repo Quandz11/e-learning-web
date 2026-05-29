@@ -228,8 +228,8 @@ public class CheckoutService : ICheckoutService
         var amountInt = ConvertVndAmount(payableAmount);
         var payOSOrderCode = order.PayOSOrderCode ?? throw new InvalidOperationException("PayOS order code was not generated.");
         var description = BuildPayOSDescription(payOSOrderCode);
-        var cancelUrl = _payOSSettings.CancelUrl;
-        var returnUrl = _payOSSettings.ReturnUrl;
+        var cancelUrl = ResolveCallbackUrl(request.CancelUrl, _payOSSettings.CancelUrl, nameof(request.CancelUrl));
+        var returnUrl = ResolveCallbackUrl(request.ReturnUrl, _payOSSettings.ReturnUrl, nameof(request.ReturnUrl));
         var expiredAtUnix = (int)new DateTimeOffset(order.ExpiresAt ?? now.AddMinutes(15)).ToUnixTimeSeconds();
 
         List<PayOSItemRequest> payOSItems;
@@ -930,6 +930,21 @@ public class CheckoutService : ICheckoutService
         }
 
         return code;
+    }
+
+    private static string ResolveCallbackUrl(string? overrideUrl, string fallbackUrl, string propertyName)
+    {
+        if (string.IsNullOrWhiteSpace(overrideUrl))
+        {
+            return fallbackUrl;
+        }
+
+        if (!Uri.TryCreate(overrideUrl, UriKind.Absolute, out var uri))
+        {
+            throw new ArgumentException($"{propertyName} must be an absolute URL.");
+        }
+
+        return uri.ToString();
     }
 
     private static int ConvertVndAmount(decimal amount)

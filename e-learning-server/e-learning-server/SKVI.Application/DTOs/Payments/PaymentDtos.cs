@@ -7,6 +7,8 @@ public class CheckoutRequest
     public List<string> CourseIds { get; set; } = new();
     public string? WellnessPackageCode { get; set; }
     public string? ReferralCode { get; set; }
+    public string? ReturnUrl { get; set; }
+    public string? CancelUrl { get; set; }
 }
 
 public class ReferralPreviewResponse

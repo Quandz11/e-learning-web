@@ -1,9 +1,9 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SKVI.Application.DTOs.Auth;
 using SKVI.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.RateLimiting;
-using System.Security.Claims;
 
 namespace e_learning_server.Controllers;
 
@@ -14,13 +14,11 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ILogger<AuthController> _logger;
-    private readonly IWebHostEnvironment _environment;
 
-    public AuthController(IAuthService authService, ILogger<AuthController> logger, IWebHostEnvironment environment)
+    public AuthController(IAuthService authService, ILogger<AuthController> logger)
     {
         _authService = authService;
         _logger = logger;
-        _environment = environment;
     }
 
     [HttpPost("login")]
@@ -30,22 +28,21 @@ public class AuthController : ControllerBase
         {
             var ipAddress = GetClientIpAddress();
             var userAgent = Request.Headers.UserAgent.ToString();
-            
             var response = await _authService.LoginAsync(request, ipAddress, userAgent);
-            
+
             SetRefreshTokenCookie(response.RefreshToken);
-            
-            Console.WriteLine($"[AuthController] ✅ Login successful for {request.Email}, refresh token set in HttpOnly Cookie");
-            return Ok(new { 
-                accessToken = response.AccessToken, 
+
+            return Ok(new
+            {
+                accessToken = response.AccessToken,
+                refreshToken = response.RefreshToken,
                 expiresAt = response.ExpiresAt,
-                requiresTwoFactor = response.RequiresTwoFactor 
+                requiresTwoFactor = response.RequiresTwoFactor
             });
         }
         catch (UnauthorizedAccessException ex)
         {
-            Console.WriteLine($"[AuthController] ❌ Login failed: {ex.Message}");
-            return Unauthorized(new { message = ex.Message });
+            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_LOGIN_FAILED", ex.Message);
         }
     }
 
@@ -55,12 +52,11 @@ public class AuthController : ControllerBase
         try
         {
             await _authService.RegisterAsync(request);
-            // OTP Sent
             return Ok(new { message = "Registration successful. Please verify your email." });
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_REGISTER_INVALID", ex.Message);
         }
     }
 
@@ -69,15 +65,20 @@ public class AuthController : ControllerBase
     {
         try
         {
-             var response = await _authService.VerifyOtpAsync(request);
-             
-             SetRefreshTokenCookie(response.RefreshToken);
-             
-             return Ok(new { response.AccessToken, response.ExpiresAt, message = "Account verified." });
+            var response = await _authService.VerifyOtpAsync(request);
+            SetRefreshTokenCookie(response.RefreshToken);
+
+            return Ok(new
+            {
+                accessToken = response.AccessToken,
+                refreshToken = response.RefreshToken,
+                expiresAt = response.ExpiresAt,
+                message = "Account verified."
+            });
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_OTP_INVALID", ex.Message);
         }
     }
 
@@ -86,64 +87,65 @@ public class AuthController : ControllerBase
     {
         try
         {
-             await _authService.ResendOtpAsync(request);
-             return Ok(new { message = "OTP resent successfully." });
+            await _authService.ResendOtpAsync(request);
+            return Ok(new { message = "OTP resent successfully." });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_RESEND_OTP_FAILED", ex.Message);
         }
     }
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh()
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest? request)
     {
-        var refreshToken = Request.Cookies["refreshToken"];
-        
-        Console.WriteLine($"[AuthController] 🔄 Refresh endpoint called");
-        Console.WriteLine($"[AuthController] Cookie refreshToken present: {!string.IsNullOrEmpty(refreshToken)}");
-        
-        if (string.IsNullOrEmpty(refreshToken))
+        var refreshToken = request?.RefreshToken;
+        if (string.IsNullOrWhiteSpace(refreshToken))
         {
-            Console.WriteLine($"[AuthController] ❌ Refresh token is missing from cookies");
-            return Unauthorized(new { message = "Refresh token is missing." });
+            refreshToken = Request.Cookies["refreshToken"];
+        }
+
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_REFRESH_TOKEN_MISSING", "Refresh token is missing.");
         }
 
         try
         {
             var ipAddress = GetClientIpAddress();
             var userAgent = Request.Headers.UserAgent.ToString();
-
             var response = await _authService.RefreshTokenAsync(refreshToken, ipAddress, userAgent);
-            
+
             SetRefreshTokenCookie(response.RefreshToken);
-            
-            Console.WriteLine($"[AuthController] ✅ Token refreshed successfully");
-            
-            return Ok(new { 
-                accessToken = response.AccessToken, 
-                expiresAt = response.ExpiresAt 
+
+            return Ok(new
+            {
+                accessToken = response.AccessToken,
+                refreshToken = response.RefreshToken,
+                expiresAt = response.ExpiresAt
             });
         }
         catch (UnauthorizedAccessException ex)
         {
-            Console.WriteLine($"[AuthController] ❌ Refresh failed: {ex.Message}");
-            return Unauthorized(new { message = ex.Message });
+            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_REFRESH_FAILED", ex.Message);
         }
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest? request)
     {
-        var refreshToken = Request.Cookies["refreshToken"];
-        
-        if (!string.IsNullOrEmpty(refreshToken))
+        var refreshToken = request?.RefreshToken;
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            refreshToken = Request.Cookies["refreshToken"];
+        }
+
+        if (!string.IsNullOrWhiteSpace(refreshToken))
         {
             await _authService.LogoutAsync(refreshToken);
         }
 
         Response.Cookies.Delete("refreshToken");
-        
         return Ok(new { message = "Logged out successfully." });
     }
 
@@ -154,14 +156,17 @@ public class AuthController : ControllerBase
         try
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+            }
 
             var (secret, qrCodeUri) = await _authService.GenerateTwoFactorSetupAsync(Guid.Parse(userId));
             return Ok(new { secret, qrCodeUri });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_2FA_SETUP_FAILED", ex.Message);
         }
     }
 
@@ -172,20 +177,24 @@ public class AuthController : ControllerBase
         try
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+            }
 
             var response = await _authService.EnableTwoFactorAsync(Guid.Parse(userId), request.Secret, request.Code);
-            
             SetRefreshTokenCookie(response.RefreshToken);
-            
-            return Ok(new { 
-                accessToken = response.AccessToken, 
-                expiresAt = response.ExpiresAt 
+
+            return Ok(new
+            {
+                accessToken = response.AccessToken,
+                refreshToken = response.RefreshToken,
+                expiresAt = response.ExpiresAt
             });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_2FA_ENABLE_FAILED", ex.Message);
         }
     }
 
@@ -196,14 +205,17 @@ public class AuthController : ControllerBase
         try
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+            }
 
             await _authService.DisableTwoFactorAsync(Guid.Parse(userId), request.Password);
             return Ok(new { message = "2FA disabled successfully." });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_2FA_DISABLE_FAILED", ex.Message);
         }
     }
 
@@ -212,66 +224,28 @@ public class AuthController : ControllerBase
     {
         try
         {
-            // The user should be authenticated via the PreAuth token here?
-            // Actually, if we use [Authorize], the PreAuth token must work.
-            // If the PreAuth token is valid JWT, [Authorize] works.
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+            }
 
             var response = await _authService.VerifyTwoFactorLoginAsync(Guid.Parse(userId), request.Code);
-            
             SetRefreshTokenCookie(response.RefreshToken);
-            
-            return Ok(new { 
-                accessToken = response.AccessToken, 
-                expiresAt = response.ExpiresAt 
+
+            return Ok(new
+            {
+                accessToken = response.AccessToken,
+                refreshToken = response.RefreshToken,
+                expiresAt = response.ExpiresAt
             });
         }
         catch (Exception ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_2FA_VERIFY_FAILED", ex.Message);
         }
     }
 
-    private void SetRefreshTokenCookie(string refreshToken)
-    {
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Expires = DateTime.UtcNow.AddDays(7),
-            SameSite = SameSiteMode.None, // Allow cross-origin (frontend and backend on different domains)
-            Secure = true // HTTPS required (must be true when SameSite=None)
-        };
-        
-        Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
-    }
-
-    private string GetClientIpAddress()
-    {
-        // Check for X-Forwarded-For header (proxy/load balancer)
-        var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(forwardedFor))
-        {
-            // X-Forwarded-For can contain multiple IPs, take the first one
-            var ips = forwardedFor.Split(',');
-            if (ips.Length > 0)
-            {
-                return ips[0].Trim();
-            }
-        }
-
-        // Check for X-Real-IP header
-        var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(realIp))
-        {
-            return realIp;
-        }
-
-        // Fallback to RemoteIpAddress
-        return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
-    }
-
-    // Session Management Endpoints
     [Authorize]
     [HttpGet("sessions")]
     public async Task<IActionResult> GetActiveSessions()
@@ -279,17 +253,19 @@ public class AuthController : ControllerBase
         try
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+            }
 
             var currentRefreshToken = Request.Cookies["refreshToken"];
             var sessions = await _authService.GetActiveSessionsAsync(Guid.Parse(userId), currentRefreshToken);
-            
             return Ok(sessions);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting active sessions");
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_GET_SESSIONS_FAILED", ex.Message);
         }
     }
 
@@ -300,20 +276,22 @@ public class AuthController : ControllerBase
         try
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+            }
 
             await _authService.RevokeSessionAsync(Guid.Parse(userId), request.SessionId);
-            
             return Ok(new { message = "Session revoked successfully" });
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(new { message = ex.Message });
+            return ApiError(StatusCodes.Status404NotFound, "AUTH_SESSION_NOT_FOUND", ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error revoking session");
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_REVOKE_SESSION_FAILED", ex.Message);
         }
     }
 
@@ -324,17 +302,58 @@ public class AuthController : ControllerBase
         try
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+            }
 
             var currentRefreshToken = Request.Cookies["refreshToken"];
             await _authService.RevokeAllSessionsAsync(Guid.Parse(userId), currentRefreshToken);
-            
             return Ok(new { message = "All other sessions revoked successfully" });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error revoking all sessions");
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_REVOKE_ALL_SESSIONS_FAILED", ex.Message);
         }
+    }
+
+    private void SetRefreshTokenCookie(string refreshToken)
+    {
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Expires = DateTime.UtcNow.AddDays(7),
+            SameSite = SameSiteMode.None,
+            Secure = true
+        };
+
+        Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+    }
+
+    private string GetClientIpAddress()
+    {
+        var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(forwardedFor))
+        {
+            var ips = forwardedFor.Split(',');
+            if (ips.Length > 0)
+            {
+                return ips[0].Trim();
+            }
+        }
+
+        var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(realIp))
+        {
+            return realIp;
+        }
+
+        return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+    }
+
+    private IActionResult ApiError(int statusCode, string code, string message, object? errors = null)
+    {
+        return StatusCode(statusCode, new { code, message, errors });
     }
 }

@@ -25,7 +25,7 @@ public class PaymentsController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(code))
         {
-            return BadRequest(new { message = "Referral code is required." });
+            return ApiError(StatusCodes.Status400BadRequest, "PAYMENT_REFERRAL_CODE_REQUIRED", "Referral code is required.");
         }
 
         try
@@ -33,7 +33,7 @@ public class PaymentsController : ControllerBase
             var result = await _checkoutService.PreviewReferralAsync(code, cancellationToken);
             if (result == null)
             {
-                return NotFound(new { message = "Invalid referral code." });
+                return ApiError(StatusCodes.Status404NotFound, "PAYMENT_REFERRAL_NOT_FOUND", "Invalid referral code.");
             }
 
             return Ok(result);
@@ -41,7 +41,7 @@ public class PaymentsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error previewing referral code {ReferralCode}", code);
-            return StatusCode(500, new { message = "Failed to preview referral code" });
+            return ApiError(StatusCodes.Status500InternalServerError, "PAYMENT_REFERRAL_PREVIEW_FAILED", "Failed to preview referral code.");
         }
     }
 
@@ -57,20 +57,20 @@ public class PaymentsController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return ApiError(StatusCodes.Status401Unauthorized, "PAYMENT_UNAUTHORIZED", ex.Message);
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "PAYMENT_INVALID_REQUEST", ex.Message);
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "PAYMENT_OPERATION_INVALID", ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating checkout");
-            return StatusCode(500, new { message = "Failed to create checkout" });
+            return ApiError(StatusCodes.Status500InternalServerError, "PAYMENT_CHECKOUT_FAILED", "Failed to create checkout.");
         }
     }
 
@@ -86,22 +86,25 @@ public class PaymentsController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return ApiError(StatusCodes.Status401Unauthorized, "PAYMENT_UNAUTHORIZED", ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error fetching user orders");
-            return StatusCode(500, new { message = "Failed to fetch orders" });
+            return ApiError(StatusCodes.Status500InternalServerError, "PAYMENT_GET_ORDERS_FAILED", "Failed to fetch orders.");
         }
     }
 
     [HttpGet("orders/{orderId}")]
     [Authorize]
-    public async Task<IActionResult> GetOrderStatus(string orderId, [FromQuery] bool refresh = true, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetOrderStatus(
+        string orderId,
+        [FromQuery] bool refresh = true,
+        CancellationToken cancellationToken = default)
     {
         if (!Guid.TryParse(orderId, out var orderGuid))
         {
-            return BadRequest(new { message = "Invalid order id" });
+            return ApiError(StatusCodes.Status400BadRequest, "PAYMENT_INVALID_ORDER_ID", "Invalid order id.");
         }
 
         try
@@ -110,25 +113,28 @@ public class PaymentsController : ControllerBase
             var result = await _checkoutService.GetOrderStatusAsync(userId, orderGuid, refresh, cancellationToken);
             if (result == null)
             {
-                return NotFound(new { message = "Order not found" });
+                return ApiError(StatusCodes.Status404NotFound, "PAYMENT_ORDER_NOT_FOUND", "Order not found.");
             }
 
             return Ok(result);
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return ApiError(StatusCodes.Status401Unauthorized, "PAYMENT_UNAUTHORIZED", ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting order status for {OrderId}", orderId);
-            return StatusCode(500, new { message = "Failed to fetch order status" });
+            return ApiError(StatusCodes.Status500InternalServerError, "PAYMENT_GET_ORDER_STATUS_FAILED", "Failed to fetch order status.");
         }
     }
 
     [HttpGet("orders/by-code/{orderCode:int}")]
     [Authorize]
-    public async Task<IActionResult> GetOrderStatusByCode(int orderCode, [FromQuery] bool refresh = true, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetOrderStatusByCode(
+        int orderCode,
+        [FromQuery] bool refresh = true,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -136,19 +142,19 @@ public class PaymentsController : ControllerBase
             var result = await _checkoutService.GetOrderStatusByCodeAsync(userId, orderCode, refresh, cancellationToken);
             if (result == null)
             {
-                return NotFound(new { message = "Order not found" });
+                return ApiError(StatusCodes.Status404NotFound, "PAYMENT_ORDER_NOT_FOUND", "Order not found.");
             }
 
             return Ok(result);
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return ApiError(StatusCodes.Status401Unauthorized, "PAYMENT_UNAUTHORIZED", ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting order status for orderCode {OrderCode}", orderCode);
-            return StatusCode(500, new { message = "Failed to fetch order status" });
+            return ApiError(StatusCodes.Status500InternalServerError, "PAYMENT_GET_ORDER_STATUS_FAILED", "Failed to fetch order status.");
         }
     }
 
@@ -164,7 +170,6 @@ public class PaymentsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error handling PayOS webhook");
-            // Return 200 so PayOS does not continuously retry due to transient parsing issues.
             return Ok(new { message = "Webhook ignored" });
         }
     }
@@ -180,12 +185,12 @@ public class PaymentsController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return ApiError(StatusCodes.Status400BadRequest, "PAYMENT_WEBHOOK_CONFIRM_INVALID", ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error confirming PayOS webhook URL");
-            return StatusCode(500, new { message = "Failed to confirm PayOS webhook" });
+            return ApiError(StatusCodes.Status500InternalServerError, "PAYMENT_WEBHOOK_CONFIRM_FAILED", "Failed to confirm PayOS webhook.");
         }
     }
 
@@ -198,5 +203,10 @@ public class PaymentsController : ControllerBase
         }
 
         return userId;
+    }
+
+    private IActionResult ApiError(int statusCode, string code, string message, object? errors = null)
+    {
+        return StatusCode(statusCode, new { code, message, errors });
     }
 }

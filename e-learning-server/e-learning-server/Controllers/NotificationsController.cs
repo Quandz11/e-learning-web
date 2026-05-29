@@ -79,4 +79,24 @@ public class NotificationsController : ControllerBase
         await _notificationService.MarkAllAsReadAsync(Guid.Parse(userId));
         return NoContent();
     }
+
+    [HttpPost("device-tokens")]
+    public async Task<IActionResult> RegisterDeviceToken([FromBody] RegisterDeviceTokenRequest request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        await _notificationService.RegisterDeviceTokenAsync(Guid.Parse(userId), request);
+        return NoContent();
+    }
+
+    [HttpDelete("device-tokens/{deviceId}")]
+    public async Task<IActionResult> UnregisterDeviceToken(string deviceId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        await _notificationService.UnregisterDeviceTokenAsync(Guid.Parse(userId), deviceId);
+        return NoContent();
+    }
 }

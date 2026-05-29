@@ -11,4 +11,6 @@ public interface INotificationService
     Task<int> GetUnreadCountAsync(Guid userId);
     Task MarkAsReadAsync(Guid notificationId, Guid userId);
     Task MarkAllAsReadAsync(Guid userId);
+    Task RegisterDeviceTokenAsync(Guid userId, RegisterDeviceTokenRequest request);
+    Task UnregisterDeviceTokenAsync(Guid userId, string deviceId);
 }

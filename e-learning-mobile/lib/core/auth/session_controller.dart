@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/repositories/auth_repository.dart';
 import '../../features/auth/data/models/auth_requests.dart';
+import '../../features/auth/data/models/auth_user_model.dart';
 import '../telemetry/app_logger.dart';
 import 'session_state.dart';
 import 'token_store.dart';
@@ -69,6 +70,15 @@ class SessionController extends StateNotifier<SessionState> {
       final auth = await authRepository.login(
         LoginRequestModel(email: email, password: password),
       );
+
+      // Save token immediately so AuthInterceptor can attach it
+      // to the subsequent getProfile() request.
+      final tempTokens = authRepository.buildSession(
+        auth,
+        const AuthUserModel(id: '', email: '', fullName: '', role: 'STUDENT'),
+      ).tokens;
+      await tokenStore.save(tempTokens);
+
       final user = await authRepository.getProfile();
       final session = authRepository.buildSession(auth, user);
 

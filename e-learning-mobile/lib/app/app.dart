@@ -17,7 +17,9 @@ class App extends ConsumerWidget {
     return RealtimeSyncScope(
       child: MaterialApp.router(
         title: 'SKVI Learning',
-        theme: AppTheme.light,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
         debugShowCheckedModeBanner: false,
         routerConfig: router,
         locale: locale,

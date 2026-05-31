@@ -17,7 +17,7 @@ class EnvLoader {
     return AppEnv(
       apiBaseUrl: dotenv.get(
         'API_BASE_URL',
-        fallback: 'https://localhost:7145/api',
+        fallback: 'https://skvi-e-learning-api-service-arh3g4dsbxh5cna7.southeastasia-01.azurewebsites.net/api',
       ),
       flavor: dotenv.get('APP_FLAVOR', fallback: flavor.value),
       paymentReturnUrl: dotenv.get('PAYMENT_RETURN_URL', fallback: ''),
@@ -28,7 +28,7 @@ class EnvLoader {
 
 final appEnvProvider = Provider<AppEnv>(
   (_) => const AppEnv(
-    apiBaseUrl: 'https://localhost:7145/api',
+    apiBaseUrl: 'https://skvi-e-learning-api-service-arh3g4dsbxh5cna7.southeastasia-01.azurewebsites.net/api',
     flavor: 'dev',
     paymentReturnUrl: '',
     paymentCancelUrl: '',

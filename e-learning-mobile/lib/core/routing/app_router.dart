@@ -2,12 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/home_page.dart';
+import '../../app/main_shell.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/chat_notification/presentation/pages/chat_notification_page.dart';
 import '../../features/forum/presentation/pages/forum_page.dart';
+import '../../features/learning/presentation/pages/course_detail_page.dart';
 import '../../features/learning/presentation/pages/courses_page.dart';
+import '../../features/learning/presentation/pages/learning_player_page.dart';
 import '../../features/learning/presentation/pages/my_courses_page.dart';
 import '../../features/payment/presentation/pages/checkout_page.dart';
 import '../../features/payment/presentation/pages/orders_page.dart';
@@ -16,7 +19,7 @@ import '../../features/referral/presentation/pages/referral_page.dart';
 import '../../features/wellness_ai/presentation/pages/wellness_ai_page.dart';
 import '../auth/session_controller.dart';
 import '../auth/session_state.dart';
-import '../../shared/constants/app_roles.dart';
+
 import 'deep_link_mapper.dart';
 import 'route_paths.dart';
 
@@ -41,19 +44,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         orElse: () => false,
       );
 
-      if (isAuthResolving) {
-        return null;
-      }
+      if (isAuthResolving) return null;
 
       final isAuthed = auth.maybeWhen(
         authenticated: (_) => true,
         orElse: () => false,
       );
-      final isStudent = auth.maybeWhen(
-        authenticated: (session) =>
-            session.user.role.toUpperCase() == AppRoles.student,
-        orElse: () => false,
-      );
+
       final isAuthRoute =
           state.matchedLocation == RoutePaths.login ||
           state.matchedLocation == RoutePaths.register;
@@ -78,38 +75,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             }
           } catch (_) {}
         }
-
         return RoutePaths.home;
-      }
-
-      if (isAuthed &&
-          !isStudent &&
-          state.matchedLocation != RoutePaths.profile) {
-        return RoutePaths.profile;
       }
 
       return null;
     },
     routes: [
+      // ── Auth routes (no shell) ───────────────────────────────────────
       GoRoute(path: RoutePaths.login, builder: (_, __) => const LoginPage()),
       GoRoute(
         path: RoutePaths.register,
         builder: (_, __) => const RegisterPage(),
       ),
-      GoRoute(path: RoutePaths.home, builder: (_, __) => const HomePage()),
-      GoRoute(
-        path: RoutePaths.courses,
-        builder: (_, __) => const CoursesPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.myCourses,
-        builder: (_, __) => const MyCoursesPage(),
-      ),
+
+      // ── Full-screen routes without bottom nav ────────────────────────
       GoRoute(
         path: RoutePaths.checkout,
         builder: (_, __) => const CheckoutPage(),
       ),
-      GoRoute(path: RoutePaths.orders, builder: (_, __) => const OrdersPage()),
       GoRoute(
         path: RoutePaths.paymentResult,
         builder: (_, state) {
@@ -120,22 +103,96 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return PaymentResultPage(orderId: orderId, orderCode: orderCode);
         },
       ),
-      GoRoute(path: RoutePaths.forum, builder: (_, __) => const ForumPage()),
       GoRoute(
-        path: RoutePaths.referral,
-        builder: (_, __) => const ReferralPage(),
+        path: RoutePaths.learningPlayer,
+        builder: (_, state) {
+          final id = state.pathParameters['id']!;
+          return LearningPlayerPage(courseId: id);
+        },
       ),
-      GoRoute(
-        path: RoutePaths.wellnessAi,
-        builder: (_, __) => const WellnessAiPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.chatNotification,
-        builder: (_, __) => const ChatNotificationPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.profile,
-        builder: (_, __) => const ProfilePage(),
+
+      // ── Main shell with bottom navigation ────────────────────────────
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            MainShell(navigationShell: navigationShell),
+        branches: [
+          // Tab 0 — Trang chủ
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.home,
+                builder: (_, __) => const HomePage(),
+              ),
+            ],
+          ),
+
+          // Tab 1 — Khóa học
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.courses,
+                builder: (_, __) => const CoursesPage(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (_, state) {
+                      final id = state.pathParameters['id']!;
+                      return CourseDetailPage(courseId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Tab 2 — Diễn đàn
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.forum,
+                builder: (_, __) => const ForumPage(),
+              ),
+            ],
+          ),
+
+          // Tab 3 — Sức Khỏe
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.wellnessAi,
+                builder: (_, __) => const WellnessAiPage(),
+              ),
+            ],
+          ),
+
+          // Tab 4 — Tôi
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.profile,
+                builder: (_, __) => const ProfilePage(),
+                routes: [
+                  GoRoute(
+                    path: 'my-courses',
+                    builder: (_, __) => const MyCoursesPage(),
+                  ),
+                  GoRoute(
+                    path: 'orders',
+                    builder: (_, __) => const OrdersPage(),
+                  ),
+                  GoRoute(
+                    path: 'referral',
+                    builder: (_, __) => const ReferralPage(),
+                  ),
+                  GoRoute(
+                    path: 'chat-notification',
+                    builder: (_, __) => const ChatNotificationPage(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

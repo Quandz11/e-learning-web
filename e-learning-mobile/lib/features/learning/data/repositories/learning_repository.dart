@@ -51,7 +51,7 @@ class LearningRepository {
     required String lessonPartId,
     required int watchedDuration,
   }) async {
-    await _apiClient.post<Map<String, dynamic>>(
+    await _apiClient.post<dynamic>(
       '/enrollments/$courseId/lessons/$lessonPartId/progress',
       data: {'watchedDuration': watchedDuration},
     );
@@ -61,8 +61,28 @@ class LearningRepository {
     required String courseId,
     required String lessonPartId,
   }) async {
-    await _apiClient.post<Map<String, dynamic>>(
+    await _apiClient.post<dynamic>(
       '/enrollments/$courseId/lessons/$lessonPartId/complete',
     );
   }
 }
+
+final coursesProvider = FutureProvider.autoDispose<List<CourseSummaryModel>>((ref) {
+  final repository = ref.watch(learningRepositoryProvider);
+  return repository.getCourses();
+});
+
+final myCoursesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+  final repository = ref.watch(learningRepositoryProvider);
+  return repository.getMyCourses();
+});
+
+final courseDetailProvider = FutureProvider.family.autoDispose<CourseDetailModel, String>((ref, courseId) {
+  final repository = ref.watch(learningRepositoryProvider);
+  return repository.getCourseDetail(courseId);
+});
+
+final courseProgressProvider = FutureProvider.family.autoDispose<EnrollmentProgressModel, String>((ref, courseId) {
+  final repository = ref.watch(learningRepositoryProvider);
+  return repository.getProgress(courseId);
+});

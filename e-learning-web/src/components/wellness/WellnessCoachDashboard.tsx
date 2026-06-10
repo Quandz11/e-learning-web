@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import type { RootState } from '../../store/store';
+import { extractErrorMessage } from '../../utils/errorHandler';
 import {
   wellnessApi,
   type WellnessCalendarDay,
@@ -23,7 +24,7 @@ const toIso = (value: string | Date) => new Date(value).toISOString().slice(0, 1
 const normalizePackageCode = (value?: string | null) => (value ?? '').trim().toUpperCase();
 const toPackageLabel = (code: string) => normalizePackageCode(code).replace(/_/g, ' ');
 const clampPercent = (value: number) => Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
-const msg = (error: any, fallback: string) => error?.message || error?.response?.data?.message || fallback;
+const msg = (error: unknown, fallback: string) => extractErrorMessage(error) || fallback;
 const addDays = (date: Date, n: number) => {
   const x = new Date(date);
   x.setDate(x.getDate() + n);
@@ -147,9 +148,6 @@ const WellnessCoachDashboard: React.FC = () => {
   const [selectedTimelineDate, setSelectedTimelineDate] = useState(today);
 
   const [mealIngredients, setMealIngredients] = useState('');
-  const [mealServings, setMealServings] = useState('');
-  const [mealGoal, setMealGoal] = useState('');
-  const [mealDietaryPreference, setMealDietaryPreference] = useState('');
   const [mealSuggestion, setMealSuggestion] = useState<WellnessMealSuggestion | null>(null);
   const [mealSubmitting, setMealSubmitting] = useState(false);
 
@@ -292,7 +290,7 @@ const WellnessCoachDashboard: React.FC = () => {
       }
       toast.success(t('wellness.dashboard.status.redirectingCheckout', { defaultValue: 'Redirecting to checkout...' }), { id: toastId });
       navigate(buildCheckoutPath(normalized));
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(msg(error, t('wellness.dashboard.errors.createCheckout')), { id: toastId });
     } finally {
       setCheckoutPackage(null);
@@ -306,7 +304,7 @@ const WellnessCoachDashboard: React.FC = () => {
       setTimeline(data);
       setTimelinePlanId(planId);
       setTimelineQueryKey(`${planId}:${days}:${includeFuture ? 'future' : 'history'}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(msg(error, t('wellness.dashboard.errors.loadTimeline')));
       setTimeline(null);
       setTimelinePlanId(null);
@@ -369,7 +367,7 @@ const WellnessCoachDashboard: React.FC = () => {
         setSelectedTimelineDate(today);
         if (data.plan) hydratePlan(data.plan);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(msg(error, t('wellness.dashboard.errors.loadDashboard')));
     } finally {
       if (!silent) {
@@ -462,7 +460,7 @@ const WellnessCoachDashboard: React.FC = () => {
       });
       toast.success(t('wellness.dashboard.success.savePlan'), { id: toastId });
       await load(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(msg(error, t('wellness.dashboard.errors.savePlan')), { id: toastId });
     } finally {
       setSubmittingAction(null);
@@ -492,7 +490,7 @@ const WellnessCoachDashboard: React.FC = () => {
       });
       toast.success(t('wellness.dashboard.success.saveLog'), { id: toastId });
       await load(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(msg(error, t('wellness.dashboard.errors.saveLog')), { id: toastId });
     } finally {
       setSubmittingAction(null);
@@ -518,13 +516,13 @@ const WellnessCoachDashboard: React.FC = () => {
     try {
       const response = await wellnessApi.generateMeal(plan.id, {
         ingredients,
-        servings: Math.max(1, Number(mealServings || 1)),
-        goal: mealGoal,
-        dietaryPreference: mealDietaryPreference.trim(),
+        servings: 1,
+        goal: 'LOW_CARB_STANDARD',
+        dietaryPreference: 'LOW_CARB',
       });
       setMealSuggestion(response);
       toast.success(t('wellness.dashboard.success.mealReady'), { id: toastId });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(msg(error, t('wellness.dashboard.errors.mealCoach')), { id: toastId });
     } finally {
       setMealSubmitting(false);
@@ -894,20 +892,6 @@ const WellnessCoachDashboard: React.FC = () => {
                 <label className="flex flex-col gap-1">
                   <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.ingredients')}</span>
                   <textarea aria-label={t('wellness.dashboard.meal.form.ingredients')} placeholder={t('wellness.dashboard.meal.placeholders.ingredients')} value={mealIngredients} onChange={(event) => setMealIngredients(event.target.value)} className="min-h-[90px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                </label>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.servings')}</span>
-                    <input aria-label={t('wellness.dashboard.meal.form.servings')} placeholder={t('wellness.dashboard.meal.placeholders.servings')} type="number" min={1} max={12} value={mealServings} onChange={(event) => setMealServings(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.goal')}</span>
-                    <input aria-label={t('wellness.dashboard.meal.form.goal')} placeholder={t('wellness.dashboard.meal.placeholders.goal')} value={mealGoal} onChange={(event) => setMealGoal(event.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                  </label>
-                </div>
-                <label className="mt-3 flex flex-col gap-1">
-                  <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.dietaryPreference')}</span>
-                  <input aria-label={t('wellness.dashboard.meal.form.dietaryPreference')} placeholder={t('wellness.dashboard.meal.placeholders.dietaryPreference')} value={mealDietaryPreference} onChange={(event) => setMealDietaryPreference(event.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
                 </label>
                 <button type="submit" disabled={mealSubmitting} className="mt-3 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white"><span className="material-symbols-outlined text-sm">{mealSubmitting ? 'hourglass_top' : 'auto_awesome'}</span>{mealSubmitting ? t('wellness.dashboard.status.generatingMeal') : t('wellness.dashboard.meal.actions.generate')}</button>
                 {mealSuggestion && <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-slate-700"><p className="whitespace-pre-line">{mealSuggestion.menu}</p><p className="mt-2 text-xs">{mealSuggestion.nutritionNotes}</p></div>}

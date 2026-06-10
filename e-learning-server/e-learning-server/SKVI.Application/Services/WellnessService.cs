@@ -12,6 +12,10 @@ namespace SKVI.Application.Services;
 
 public class WellnessService : IWellnessService
 {
+    private const int FixedMealServings = 1;
+    private const string FixedMealGoal = "LOW_CARB_STANDARD";
+    private const string FixedMealDietaryPreference = "LOW_CARB";
+
     private const string PlanStatusScheduled = "SCHEDULED";
     private const string PlanStatusActive = "ACTIVE";
     private const string PlanStatusCompleted = "COMPLETED";
@@ -493,16 +497,24 @@ public class WellnessService : IWellnessService
             throw new InvalidOperationException("At least one ingredient is required.");
         }
 
+        var normalizedMealRequest = new WellnessCoachMealRequest
+        {
+            Ingredients = ingredients,
+            Servings = FixedMealServings,
+            Goal = FixedMealGoal,
+            DietaryPreference = FixedMealDietaryPreference
+        };
+
         var ingredientText = string.Join(", ", ingredients);
-        var fallbackMenu = BuildMealFallback(ingredientText, request.Servings, request.Goal, request.DietaryPreference);
-        var aiMenu = await ExecuteAiPromptAsync(BuildMealPrompt(plan, ingredientText, request), fallbackMenu);
-        var nutritionNotes = BuildNutritionNotes(request.Goal, request.DietaryPreference);
+        var fallbackMenu = BuildMealFallback(ingredientText);
+        var aiMenu = await ExecuteAiPromptAsync(BuildMealPrompt(plan, ingredientText, normalizedMealRequest), fallbackMenu);
+        var nutritionNotes = BuildNutritionNotes();
 
         var suggestion = new WellnessMealSuggestion
         {
             PlanId = plan.Id,
             IngredientsEncrypted = _encryptionService.Encrypt(ingredientText),
-            Servings = request.Servings,
+            Servings = normalizedMealRequest.Servings,
             SuggestedMenuEncrypted = _encryptionService.Encrypt(aiMenu),
             NutritionNotesEncrypted = _encryptionService.Encrypt(nutritionNotes),
             CreatedAt = DateTime.UtcNow
@@ -515,7 +527,13 @@ public class WellnessService : IWellnessService
             "WELLNESS_MEAL_GENERATE",
             nameof(WellnessMealSuggestion),
             suggestion.Id,
-            new { request.Servings, request.Goal, request.DietaryPreference, IngredientCount = ingredients.Count });
+            new
+            {
+                suggestion.Servings,
+                DietaryPreference = FixedMealDietaryPreference,
+                MealMode = FixedMealGoal,
+                IngredientCount = ingredients.Count
+            });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         InvalidateDashboardCache(userId);
@@ -957,24 +975,31 @@ public class WellnessService : IWellnessService
                 $"Plan package: {plan.PackageType}",
                 $"Ingredients: {ingredients}",
                 $"Servings: {request.Servings}",
-                $"Goal: {request.Goal}",
                 $"DietaryPreference: {request.DietaryPreference}",
+                "Fixed nutrition mode: low-carb, ưu tiên đạm sạch, rau xanh, chất béo tốt; hạn chế tinh bột nhanh.",
                 "Provide sections exactly: Món ăn đề xuất, Định lượng nguyên liệu, Cách chế biến nhanh, Ghi chú dinh dưỡng."
             ]);
     }
 
-    private static string BuildMealFallback(string ingredients, int servings, string goal, string dietaryPreference)
+    private static string BuildMealFallback(string ingredients)
     {
+        var servings = FixedMealServings;
+        const string goal = "ít tinh bột cân bằng";
+        const string dietaryPreference = "ít tinh bột";
+
         return
             $"Món ăn đề xuất: Bowl áp chảo với {ingredients}. " +
-            $"Định lượng: chia cho {servings} khẩu phần, ưu tiên 1/2 rau, 1/4 đạm, 1/4 tinh bột chậm. " +
+            $"Định lượng: chia cho {servings} khẩu phần, ưu tiên 1/2 rau xanh, 1/2 đạm sạch, thêm chất béo tốt vừa đủ và hạn chế tinh bột nhanh. " +
             $"Cách chế biến nhanh: hấp/luộc + áp chảo 10-12 phút, hạn chế chiên ngập dầu. " +
-            $"Ghi chú: điều chỉnh gia vị nhẹ, theo mục tiêu {goal}, chế độ {dietaryPreference}.";
+            $"Ghi chú: điều chỉnh gia vị nhẹ, ưu tiên {goal} theo chế độ {dietaryPreference}.";
     }
 
-    private static string BuildNutritionNotes(string goal, string dietaryPreference)
+    private static string BuildNutritionNotes()
     {
-        return $"Tập trung đủ đạm, đủ chất xơ và bù nước. Ưu tiên thực phẩm ít chế biến. Goal={goal}; Preference={dietaryPreference}.";
+        const string goal = "ít tinh bột cân bằng";
+        const string dietaryPreference = "ít tinh bột";
+
+        return $"Tập trung đủ đạm, đủ chất xơ và bù nước. Ưu tiên thực phẩm ít chế biến, hạn chế tinh bột nhanh và đường tinh luyện. Định hướng: {goal}, chế độ {dietaryPreference}.";
     }
 
     private static string BuildInsightPrompt(WellnessPlan plan, WellnessDailyLog? todayLog, WellnessFastingStatusDto fastingStatus)

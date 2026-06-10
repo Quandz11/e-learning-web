@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDailyPlanner } from '../../../hooks/useDailyPlanner';
 import { toast } from 'react-hot-toast';
+import { extractErrorMessage } from '../../../utils/errorHandler';
 
 const inputLabelClassName = 'text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500 mb-1.5 block';
 
@@ -10,9 +11,6 @@ const PlannerMealCard: React.FC = () => {
   const planner = useDailyPlanner();
 
   const [mealIngredients, setMealIngredients] = useState('');
-  const [mealServings, setMealServings] = useState('');
-  const [mealGoal, setMealGoal] = useState('');
-  const [mealDietaryPreference, setMealDietaryPreference] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const generateMealSuggestion = async (event: React.FormEvent) => {
@@ -30,13 +28,13 @@ const PlannerMealCard: React.FC = () => {
     try {
       await planner.generateMeal({
         ingredients,
-        servings: Math.max(1, Number(mealServings || 1)),
-        goal: mealGoal,
-        dietaryPreference: mealDietaryPreference.trim(),
+        servings: 1,
+        goal: 'LOW_CARB_STANDARD',
+        dietaryPreference: 'LOW_CARB',
       });
       toast.success(t('wellness.dashboard.success.mealReady', { defaultValue: 'Thực đơn đã sẵn sàng!' }), { id: toastId });
-    } catch (error: any) {
-      toast.error(error?.message || t('common.error'), { id: toastId });
+    } catch (error: unknown) {
+      toast.error(extractErrorMessage(error) || t('common.error'), { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
@@ -52,55 +50,21 @@ const PlannerMealCard: React.FC = () => {
         </div>
         {t('wellness.dashboard.meal.title', { defaultValue: 'Thực đơn thông minh' })}
       </div>
-      
+
       <form onSubmit={generateMealSuggestion} className="space-y-4">
         <label className="block">
           <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.ingredients', { defaultValue: 'Nguyên liệu có sẵn' })}</span>
-          <textarea 
-            placeholder={t('wellness.dashboard.meal.placeholders.ingredients', { defaultValue: 'VD: Gà, Bông cải xanh, Trứng...' })} 
-            value={mealIngredients} 
-            onChange={(e) => setMealIngredients(e.target.value)} 
-            className="min-h-[80px] w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-400 dark:border-slate-700 dark:bg-slate-900/50 dark:focus:bg-slate-900" 
+          <textarea
+            placeholder={t('wellness.dashboard.meal.placeholders.ingredients', { defaultValue: 'VD: Gà, bông cải xanh, trứng...' })}
+            value={mealIngredients}
+            onChange={(e) => setMealIngredients(e.target.value)}
+            className="min-h-[80px] w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-400 dark:border-slate-700 dark:bg-slate-900/50 dark:focus:bg-slate-900"
           />
         </label>
-        
-        <div className="grid grid-cols-2 gap-3">
-          <label className="block">
-            <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.servings', { defaultValue: 'Khẩu phần' })}</span>
-            <input 
-              type="number" 
-              min={1} 
-              max={12} 
-              placeholder={t('wellness.dashboard.meal.placeholders.servings', { defaultValue: 'VD: 2' })} 
-              value={mealServings} 
-              onChange={(e) => setMealServings(e.target.value)} 
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-400 dark:border-slate-700 dark:bg-slate-900/50" 
-            />
-          </label>
-          <label className="block">
-            <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.goal', { defaultValue: 'Mục tiêu ăn' })}</span>
-            <input 
-              placeholder={t('wellness.dashboard.meal.placeholders.goal', { defaultValue: 'VD: Tăng cơ' })} 
-              value={mealGoal} 
-              onChange={(e) => setMealGoal(e.target.value)} 
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-400 dark:border-slate-700 dark:bg-slate-900/50" 
-            />
-          </label>
-        </div>
-        
-        <label className="block">
-          <span className={inputLabelClassName}>{t('wellness.dashboard.meal.form.dietaryPreference', { defaultValue: 'Chế độ kiêng khem (Tùy chọn)' })}</span>
-          <input 
-            placeholder={t('wellness.dashboard.meal.placeholders.dietaryPreference', { defaultValue: 'VD: Không ăn cay, Keto...' })} 
-            value={mealDietaryPreference} 
-            onChange={(e) => setMealDietaryPreference(e.target.value)} 
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors focus:border-orange-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-400 dark:border-slate-700 dark:bg-slate-900/50" 
-          />
-        </label>
-        
-        <button 
-          type="submit" 
-          disabled={isSubmitting || !planner.wellnessPlan} 
+
+        <button
+          type="submit"
+          disabled={isSubmitting || !planner.wellnessPlan}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white shadow-md shadow-slate-900/20 transition-all hover:bg-slate-800 focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600"
         >
           {isSubmitting ? (
@@ -119,13 +83,13 @@ const PlannerMealCard: React.FC = () => {
 
       {suggestion && (
         <div className="mt-5 rounded-2xl border border-orange-200 bg-orange-50/50 p-4 dark:border-orange-900/50 dark:bg-orange-900/20">
-          <div className="text-[13px] font-bold text-orange-900 dark:text-orange-300 mb-2">{t('wellness.dashboard.meal.result.title', { defaultValue: 'Thực đơn đề xuất:' })}</div>
-          <div className="text-[13px] leading-relaxed text-orange-900/80 dark:text-orange-200/80 whitespace-pre-line">
+          <div className="mb-2 text-[13px] font-bold text-orange-900 dark:text-orange-300">{t('wellness.dashboard.meal.result.title', { defaultValue: 'Thực đơn đề xuất:' })}</div>
+          <div className="whitespace-pre-line text-[13px] leading-relaxed text-orange-900/80 dark:text-orange-200/80">
             {suggestion.menu}
           </div>
-          <div className="mt-4 pt-3 border-t border-orange-200/50 dark:border-orange-800/50">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-orange-600/70 dark:text-orange-400/70 mb-1 block">{t('wellness.dashboard.meal.result.notes', { defaultValue: 'Lưu ý dinh dưỡng:' })}</span>
-            <span className="text-[12px] text-orange-900/70 dark:text-orange-200/70 italic">{suggestion.nutritionNotes}</span>
+          <div className="mt-4 border-t border-orange-200/50 pt-3 dark:border-orange-800/50">
+            <span className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-orange-600/70 dark:text-orange-400/70">{t('wellness.dashboard.meal.result.notes', { defaultValue: 'Lưu ý dinh dưỡng:' })}</span>
+            <span className="text-[12px] italic text-orange-900/70 dark:text-orange-200/70">{suggestion.nutritionNotes}</span>
           </div>
         </div>
       )}

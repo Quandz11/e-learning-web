@@ -2687,25 +2687,12 @@
             },
             "meal": {
                 "title": "Smart Menu",
-                "subtitle": "Get meal suggestions based on your health goal and learning rhythm.",
+                "subtitle": "Get menu suggestions from the ingredients you already have.",
                 "form": {
-                    "ingredients": "Available Ingredients",
-                    "servings": "Servings",
-                    "goal": "Eating Goal",
-                    "dietaryPreference": "Dietary Preference (Optional)"
+                    "ingredients": "Available Ingredients"
                 },
                 "placeholders": {
-                    "ingredients": "Ex: Chicken, Broccoli, Eggs...",
-                    "servings": "Ex: 2",
-                    "goal": "Ex: Muscle gain",
-                    "dietaryPreference": "Ex: No spicy food, Keto..."
-                },
-                "options": {
-                    "goal": {
-                        "focusStudy": "Focus study day",
-                        "fatLoss": "Fat loss",
-                        "recovery": "Recovery day"
-                    }
+                    "ingredients": "Ex: Chicken, broccoli, eggs..."
                 },
                 "actions": {
                     "generate": "Generate Menu"

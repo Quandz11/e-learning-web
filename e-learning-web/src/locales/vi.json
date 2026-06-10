@@ -2414,25 +2414,12 @@
             },
             "meal": {
                 "title": "Thực đơn thông minh",
-                "subtitle": "Gợi ý bữa ăn theo mục tiêu sức khỏe và nhịp học của bạn.",
+                "subtitle": "Gợi ý thực đơn từ nguyên liệu sẵn có của bạn.",
                 "form": {
-                    "ingredients": "Nguyên liệu có sẵn",
-                    "servings": "Khẩu phần",
-                    "goal": "Mục tiêu ăn",
-                    "dietaryPreference": "Chế độ kiêng khem (Tùy chọn)"
+                    "ingredients": "Nguyên liệu có sẵn"
                 },
                 "placeholders": {
-                    "ingredients": "VD: Gà, Bông cải xanh, Trứng...",
-                    "servings": "VD: 2",
-                    "goal": "VD: Tăng cơ",
-                    "dietaryPreference": "VD: Không ăn cay, Keto..."
-                },
-                "options": {
-                    "goal": {
-                        "focusStudy": "Ngày học cần tập trung",
-                        "fatLoss": "Giảm mỡ",
-                        "recovery": "Phục hồi"
-                    }
+                    "ingredients": "VD: Gà, bông cải xanh, trứng..."
                 },
                 "actions": {
                     "generate": "Trợ lý lên thực đơn"

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDailyPlanner } from '../../hooks/useDailyPlanner';
 import { toast } from 'react-hot-toast';
+import { extractErrorMessage } from '../../utils/errorHandler';
 
 const inputLabelClassName = 'text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500 mb-1.5 block dark:text-slate-400';
 const inputClassName = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400 dark:border-slate-700 dark:bg-slate-900/50 dark:focus:border-emerald-500 dark:focus:ring-emerald-500 dark:text-white';
@@ -39,7 +40,33 @@ const PlannerPlanSetupCard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(!plan); // Expanded by default if no plan exists
 
-  const availablePackages = checkoutConfig?.packages || [];
+  const availablePackages = useMemo(() => {
+    const catalog = checkoutConfig?.packages || [];
+    const allowedCodes = new Set((access?.allowedPackages ?? []).map((code) => code.trim().toUpperCase()));
+
+    if (allowedCodes.size === 0) {
+      return catalog;
+    }
+
+    const allowedOnly = catalog.filter((pkg) => allowedCodes.has(pkg.code.trim().toUpperCase()));
+    return allowedOnly.length > 0 ? allowedOnly : catalog;
+  }, [access?.allowedPackages, checkoutConfig?.packages]);
+
+  useEffect(() => {
+    if (availablePackages.length === 0) {
+      return;
+    }
+
+    const normalizedSelected = packageType.trim().toUpperCase();
+    const hasSelected = availablePackages.some((pkg) => pkg.code.trim().toUpperCase() === normalizedSelected);
+    if (hasSelected) {
+      return;
+    }
+
+    const preferredCode = (access?.currentPackage || plan?.packageType || availablePackages[0].code).trim().toUpperCase();
+    const preferredPackage = availablePackages.find((pkg) => pkg.code.trim().toUpperCase() === preferredCode);
+    setPackageType(preferredPackage?.code || availablePackages[0].code);
+  }, [access?.currentPackage, availablePackages, packageType, plan?.packageType]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,8 +90,8 @@ const PlannerPlanSetupCard: React.FC = () => {
       });
       toast.success(t('wellness.dashboard.success.savePlan', { defaultValue: 'Cập nhật lịch trình thành công!' }), { id: toastId });
       if (plan) setIsExpanded(false);
-    } catch (error: any) {
-      toast.error(error?.message || t('common.error'), { id: toastId });
+    } catch (error: unknown) {
+      toast.error(extractErrorMessage(error) || t('common.error'), { id: toastId });
     } finally {
       setIsSubmitting(false);
     }

@@ -162,8 +162,12 @@ export function useDailyPlanner() {
       let packageType = data.wellnessPackageCode || '';
 
       if (!packageType) {
+        const currentOwnedPackage = (state.wellnessAccess?.currentPackage || '').trim().toUpperCase();
+        if (currentOwnedPackage) {
+          packageType = currentOwnedPackage;
+        }
         // Fallback 1: Use first available package from config if in free mode
-        if (state.checkoutConfig?.packages && state.checkoutConfig.packages.length > 0) {
+        else if (state.checkoutConfig?.packages && state.checkoutConfig.packages.length > 0) {
           packageType = state.checkoutConfig.packages[0].code;
         }
         // Fallback 2: Hardcoded defaults

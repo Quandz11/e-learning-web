@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -25,6 +25,26 @@ const DailyPlannerView: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [forceOnboarding, setForceOnboarding] = useState(false);
   const [onboardingType, setOnboardingType] = useState<'study' | 'wellness'>('wellness');
+  const wellnessPackagesForOnboarding = useMemo(() => {
+    const packages = planner.checkoutConfig?.packages ?? [];
+    const allowedCodes = new Set((planner.wellnessAccess?.allowedPackages ?? []).map((code) => code.trim().toUpperCase()));
+
+    if (allowedCodes.size === 0) {
+      return packages;
+    }
+
+    const preferredCode = (planner.wellnessAccess?.currentPackage ?? '').trim().toUpperCase();
+    const filtered = packages.filter((pkg) => allowedCodes.has(pkg.code.trim().toUpperCase()));
+    if (filtered.length <= 1 || !preferredCode) {
+      return filtered;
+    }
+
+    return [...filtered].sort((left, right) => {
+      const leftPreferred = left.code.trim().toUpperCase() === preferredCode ? -1 : 0;
+      const rightPreferred = right.code.trim().toUpperCase() === preferredCode ? -1 : 0;
+      return leftPreferred - rightPreferred;
+    });
+  }, [planner.checkoutConfig?.packages, planner.wellnessAccess?.allowedPackages, planner.wellnessAccess?.currentPackage]);
 
   /** Handle onboarding completion */
   const handleOnboardingComplete = async (data: OnboardingFormData) => {
@@ -118,7 +138,7 @@ const DailyPlannerView: React.FC = () => {
             isSubmitting={isSubmitting} 
             isPaidFeature={planner.checkoutConfig?.isPersonalizedRoadmapPaid} 
             isUnlocked={planner.wellnessAccess?.isUnlocked}
-            packages={planner.checkoutConfig?.packages}
+            packages={wellnessPackagesForOnboarding}
           />
         ) : (
           <OnboardingWizard onComplete={handleOnboardingComplete} isSubmitting={isSubmitting} />

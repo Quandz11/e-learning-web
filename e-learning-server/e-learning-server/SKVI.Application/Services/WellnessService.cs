@@ -97,7 +97,7 @@ public class WellnessService : IWellnessService
 
         var accessEvaluation = await _wellnessAccessService.EvaluateAccessAsync(
             userId,
-            plan?.PackageType,
+            null,
             cancellationToken);
         var access = accessEvaluation.Access;
 
@@ -283,7 +283,7 @@ public class WellnessService : IWellnessService
         ValidateFastingHours(request.FastingHours, request.EatingHours);
 
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
-        await _wellnessAccessService.EnsureAccessAsync(userId, plan.PackageType, cancellationToken);
+        await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
         var utcNow = DateTime.UtcNow;
         var nextStartDate = request.StartDate.Date;
         var nextEndDate = request.EndDate.Date;
@@ -329,7 +329,7 @@ public class WellnessService : IWellnessService
     public async Task<WellnessDailyLogDto> UpsertDailyLogAsync(Guid userId, Guid planId, UpsertWellnessDailyLogRequest request, CancellationToken cancellationToken = default)
     {
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
-        await _wellnessAccessService.EnsureAccessAsync(userId, plan.PackageType, cancellationToken);
+        await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
         var localLogDate = request.LogDate.Date;
 
         if (localLogDate < plan.StartDate.Date || localLogDate > plan.EndDate.Date)
@@ -392,7 +392,7 @@ public class WellnessService : IWellnessService
     public async Task<List<WellnessCalendarDayDto>> GetCalendarAsync(Guid userId, Guid planId, CancellationToken cancellationToken = default)
     {
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
-        await _wellnessAccessService.EnsureAccessAsync(userId, plan.PackageType, cancellationToken);
+        await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
         var localToday = ConvertUtcToLocal(DateTime.UtcNow, plan.Timezone).Date;
 
         var loggedDates = await _dbContext.WellnessDailyLogs
@@ -422,7 +422,7 @@ public class WellnessService : IWellnessService
     public async Task<WellnessCoachReplyDto> AskMoodCoachAsync(Guid userId, Guid planId, WellnessCoachMoodRequest request, CancellationToken cancellationToken = default)
     {
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
-        await _wellnessAccessService.EnsureAccessAsync(userId, plan.PackageType, cancellationToken);
+        await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
 
         if (!_rateLimiter.TryConsume(userId, $"wellness:mood:{plan.Id:N}", 20, TimeSpan.FromHours(1), out var retryAfter))
         {
@@ -473,7 +473,7 @@ public class WellnessService : IWellnessService
     public async Task<WellnessMealSuggestionDto> GenerateMealSuggestionAsync(Guid userId, Guid planId, WellnessCoachMealRequest request, CancellationToken cancellationToken = default)
     {
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
-        await _wellnessAccessService.EnsureAccessAsync(userId, plan.PackageType, cancellationToken);
+        await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
 
         if (!_rateLimiter.TryConsume(userId, $"wellness:meal:{plan.Id:N}", 10, TimeSpan.FromHours(1), out var retryAfter))
         {
@@ -533,7 +533,7 @@ public class WellnessService : IWellnessService
     public async Task<WellnessWeightProgressDto> GetWeightProgressAsync(Guid userId, Guid planId, CancellationToken cancellationToken = default)
     {
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
-        await _wellnessAccessService.EnsureAccessAsync(userId, plan.PackageType, cancellationToken);
+        await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
         return BuildWeightProgress(plan, plan.LatestWeightKg);
     }
 
@@ -545,7 +545,7 @@ public class WellnessService : IWellnessService
         CancellationToken cancellationToken = default)
     {
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
-        await _wellnessAccessService.EnsureAccessAsync(userId, plan.PackageType, cancellationToken);
+        await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
 
         var requestedDays = Math.Clamp(days, 7, 180);
         var localToday = ConvertUtcToLocal(DateTime.UtcNow, plan.Timezone).Date;
@@ -1223,6 +1223,24 @@ public class WellnessService : IWellnessService
     private static string BuildDashboardCacheKey(Guid userId)
     {
         return $"wellness:dashboard:{userId:N}";
+    }
+
+    private async Task EnsureAnyWellnessAccessAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var evaluation = await _wellnessAccessService.EvaluateAccessAsync(userId, null, cancellationToken);
+        if (evaluation.Access.IsUnlocked)
+        {
+            return;
+        }
+
+        var code = string.IsNullOrWhiteSpace(evaluation.Access.ReasonCode)
+            ? "WELLNESS_PACKAGE_REQUIRED"
+            : evaluation.Access.ReasonCode;
+        var message = string.IsNullOrWhiteSpace(evaluation.Access.Message)
+            ? "You need to purchase a wellness package to activate this feature."
+            : evaluation.Access.Message;
+
+        throw new WellnessAccessException(code, message);
     }
 
     private void InvalidateDashboardCache(Guid userId)

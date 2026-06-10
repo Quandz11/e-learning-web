@@ -33,12 +33,12 @@ const PlannerStatsSidebar: React.FC<PlannerStatsSidebarProps> = ({ stats }) => {
                 {stats.tasksCompleted}/{stats.tasksTotal}
               </span>
             </div>
-            {/* <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+            <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-500"
                 style={{ width: `${taskPercent}%` }}
               />
-            </div> */}
+            </div>
           </div>
 
           {/* Water */}
@@ -54,12 +54,12 @@ const PlannerStatsSidebar: React.FC<PlannerStatsSidebarProps> = ({ stats }) => {
                 {stats.waterMl}ml
               </span>
             </div>
-            {/* <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+            <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500"
                 style={{ width: `${waterPercent}%` }}
               />
-            </div> */}
+            </div>
           </div>
 
           {/* Fasting progress */}
@@ -76,12 +76,12 @@ const PlannerStatsSidebar: React.FC<PlannerStatsSidebarProps> = ({ stats }) => {
                   {stats.fastingProgressPercent}%
                 </span>
               </div>
-              {/* <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+              <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-orange-400 to-amber-500 transition-all duration-500"
                   style={{ width: `${stats.fastingProgressPercent}%` }}
                 />
-              </div> */}
+              </div>
             </div>
           )}
         </div>

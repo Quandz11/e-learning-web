@@ -20,6 +20,7 @@ import ToastContainer from './components/ui/Toast/ToastContainer';
 import { ToastProvider } from './contexts/ToastContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { Toaster } from 'react-hot-toast';
+import WellnessAccessRoute from './components/wellness/WellnessAccessRoute';
 
 // Lazy Loaded Pages - Auth
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -78,6 +79,7 @@ const ForumThreadPage = lazy(() => import('./pages/ForumThreadPage'));
 const NewThreadPage = lazy(() => import('./pages/NewThreadPage'));
 const MyCoursesPage = lazy(() => import('./pages/MyCoursesPage'));
 const MyLearningPlanPage = lazy(() => import('./pages/MyLearningPlanPage'));
+const WellnessUpgradePage = lazy(() => import('./pages/WellnessUpgradePage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'));
 const OrderHistoryPage = lazy(() => import('./pages/OrderHistoryPage'));
@@ -201,7 +203,17 @@ function App() {
                   path: 'my-learning-plan',
                   element: (
                     <ProtectedRoute>
-                      <MyLearningPlanPage />
+                      <WellnessAccessRoute>
+                        <MyLearningPlanPage />
+                      </WellnessAccessRoute>
+                    </ProtectedRoute>
+                  ),
+                },
+                {
+                  path: 'wellness-upgrade',
+                  element: (
+                    <ProtectedRoute>
+                      <WellnessUpgradePage />
                     </ProtectedRoute>
                   ),
                 },

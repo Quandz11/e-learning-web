@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { paymentApi, type OrderStatusResponse } from '../services/paymentApi';
 import { paymentCart } from '../services/paymentCart';
+import { extractErrorMessage } from '../utils/errorHandler';
 
 const PaymentResultPage: React.FC = () => {
   const location = useLocation();
@@ -17,6 +18,12 @@ const PaymentResultPage: React.FC = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const orderId = searchParams.get('orderId') || '';
   const orderCode = Number(searchParams.get('orderCode') || 0);
+  const returnTo = searchParams.get('returnTo') || '';
+  const primaryActionPath = returnTo || '/my-courses';
+  const primaryActionLabel = returnTo
+    ? t('payments.result.actions.goToLearningPlan', { defaultValue: 'Vào lộ trình của tôi' })
+    : t('payments.result.actions.myCourses');
+  const primaryActionIcon = returnTo ? 'dashboard' : 'menu_book';
 
   const formatCurrency = (value: number) => `${value.toLocaleString(locale)} ${t('payments.common.currency')}`;
   const formatStatus = (status?: string | null) => {
@@ -82,8 +89,8 @@ const PaymentResultPage: React.FC = () => {
       if (result.isPaid) {
         paymentCart.removeMany(result.items.map((item) => item.courseId));
       }
-    } catch (err: any) {
-      setError(err.message || t('payments.result.errors.loadFailed'));
+    } catch (err: unknown) {
+      setError(extractErrorMessage(err) || t('payments.result.errors.loadFailed'));
     } finally {
       setLoading(false);
       setChecking(false);
@@ -199,11 +206,11 @@ const PaymentResultPage: React.FC = () => {
                   </Link>
 
                   <Link
-                    to="/my-courses"
+                    to={primaryActionPath}
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90"
                   >
-                    <span className="material-symbols-outlined text-[18px]">menu_book</span>
-                    {t('payments.result.actions.myCourses')}
+                    <span className="material-symbols-outlined text-[18px]">{primaryActionIcon}</span>
+                    {primaryActionLabel}
                   </Link>
                 </div>
               </div>

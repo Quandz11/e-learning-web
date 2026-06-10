@@ -6,6 +6,8 @@ import { courseApi } from '../services/courseApi';
 import { paymentApi, type PaymentInstructionDto, type ReferralPreviewResponse } from '../services/paymentApi';
 import { paymentCart, type PaymentCartItem } from '../services/paymentCart';
 import { wellnessApi } from '../services/wellnessApi';
+import { ApiError } from '../types/apiErrors';
+import { extractErrorMessage } from '../utils/errorHandler';
 
 interface PendingPaymentSession {
   orderId: string;
@@ -60,12 +62,30 @@ const CheckoutPage: React.FC = () => {
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const singleMode = searchParams.get('single') === '1';
   const queryCourseIds = useMemo(() => parseCourseIds(searchParams.get('courseIds')), [searchParams]);
+  const returnTo = (searchParams.get('returnTo') || '').trim();
   const wellnessPackageCode = useMemo(
     () => (searchParams.get('wellnessPackage') || '').trim().toUpperCase(),
     [searchParams],
   );
   const isWellnessCheckout = Boolean(wellnessPackageCode);
-  const backToPath = isWellnessCheckout ? '/wellness' : '/courses';
+  const backToPath = useMemo(() => {
+    if (!isWellnessCheckout) {
+      return '/courses';
+    }
+
+    if (returnTo) {
+      const params = new URLSearchParams();
+      params.set('returnTo', returnTo);
+      return `/wellness-upgrade?${params.toString()}`;
+    }
+
+    const params = new URLSearchParams();
+    params.set('source', 'wellness');
+    if (wellnessPackageCode) {
+      params.set('wellnessPackage', wellnessPackageCode);
+    }
+    return `/pricing?${params.toString()}`;
+  }, [isWellnessCheckout, returnTo, wellnessPackageCode]);
   const backLabel = isWellnessCheckout
     ? t('payments.checkout.continueWellness')
     : t('payments.checkout.continueCourses');
@@ -81,6 +101,21 @@ const CheckoutPage: React.FC = () => {
   const formatDateTime = useCallback((value: string | Date) => {
     return new Date(value).toLocaleString(locale);
   }, [locale]);
+
+  const buildPaymentResultPath = useCallback(
+    (orderId: string, status?: string) => {
+      const params = new URLSearchParams();
+      params.set('orderId', orderId);
+      if (status) {
+        params.set('status', status);
+      }
+      if (returnTo) {
+        params.set('returnTo', returnTo);
+      }
+      return `/payment/result?${params.toString()}`;
+    },
+    [returnTo],
+  );
 
   const formatStatus = useCallback(
     (status: string) => t(`payments.status.${status.toUpperCase()}`, { defaultValue: status }),
@@ -219,8 +254,8 @@ const CheckoutPage: React.FC = () => {
         }
 
         setItems(selected);
-      } catch (err: any) {
-        setError(err.message || t('payments.checkout.errors.loadInfo'));
+      } catch (err: unknown) {
+        setError(extractErrorMessage(err) || t('payments.checkout.errors.loadInfo'));
       } finally {
         setLoading(false);
       }
@@ -254,13 +289,13 @@ const CheckoutPage: React.FC = () => {
 
           setReferralPreview(preview);
           setReferralPreviewState('valid');
-        } catch (err: any) {
+        } catch (err: unknown) {
           if (lookupId !== referralLookupRef.current) {
             return;
           }
 
           setReferralPreview(null);
-          if (err?.status === 404 || err?.status === 400) {
+          if (err instanceof ApiError && (err.statusCode === 404 || err.statusCode === 400)) {
             setReferralPreviewState('invalid');
             setReferralMessage(t('payments.checkout.referral.invalid'));
             return;
@@ -333,7 +368,7 @@ const CheckoutPage: React.FC = () => {
         if (!isWellnessCheckout) {
           paymentCart.removeMany(result.items.map((item) => item.courseId));
         }
-        navigate(`/payment/result?orderId=${result.orderId}&status=success`);
+        navigate(buildPaymentResultPath(result.orderId, 'success'));
         return;
       }
 
@@ -352,8 +387,8 @@ const CheckoutPage: React.FC = () => {
       if (!result.qrCode && !result.checkoutUrl) {
         setError(t('payments.checkout.errors.noQrData'));
       }
-    } catch (err: any) {
-      setError(err.message || t('payments.checkout.errors.create'));
+    } catch (err: unknown) {
+      setError(extractErrorMessage(err) || t('payments.checkout.errors.create'));
     } finally {
       setSubmitting(false);
     }
@@ -376,12 +411,12 @@ const CheckoutPage: React.FC = () => {
           if (paidCourseIds.length > 0) {
             paymentCart.removeMany(paidCourseIds);
           }
-          navigate(`/payment/result?orderId=${status.orderId}&status=success`);
+          navigate(buildPaymentResultPath(status.orderId, 'success'));
           return;
         }
 
         if (status.status.toUpperCase() === 'FAILED' || status.status.toUpperCase() === 'CANCELLED') {
-          navigate(`/payment/result?orderId=${status.orderId}`);
+          navigate(buildPaymentResultPath(status.orderId));
           return;
         }
 
@@ -397,15 +432,15 @@ const CheckoutPage: React.FC = () => {
               }
             : prev,
         );
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (showInlineError) {
-          setError(err.message || t('payments.checkout.errors.checkStatus'));
+          setError(extractErrorMessage(err) || t('payments.checkout.errors.checkStatus'));
         }
       } finally {
         setCheckingStatus(false);
       }
     },
-    [mergePaymentInstruction, navigate, pendingPayment],
+    [buildPaymentResultPath, mergePaymentInstruction, navigate, pendingPayment, t],
   );
 
   useEffect(() => {

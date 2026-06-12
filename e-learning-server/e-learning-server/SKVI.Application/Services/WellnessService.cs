@@ -340,7 +340,7 @@ public class WellnessService : IWellnessService
 
         if (localLogDate < plan.StartDate.Date || localLogDate > plan.EndDate.Date)
         {
-            throw new InvalidOperationException("Log date is outside your plan range.");
+            // Allowed - no longer throwing an error for logs outside range.
         }
 
         var log = await _dbContext.WellnessDailyLogs

@@ -637,10 +637,21 @@ const WellnessCoachDashboard: React.FC = () => {
               <div className="mt-4 grid grid-cols-7 gap-2">
                 {weekDays.map((item) => {
                   const active = item.iso === selectedTimelineDate;
-                  const style = active ? 'border-primary bg-primary text-white' : item.day?.hasLog ? 'border-cyan-300 bg-cyan-50 text-cyan-700' : 'border-slate-200 bg-slate-50 text-slate-700';
+                  const isToday = item.iso === today;
+                  const isCompleted = item.day?.hasLog;
+                  
+                  let style = 'border-slate-200 bg-slate-50 text-slate-400 opacity-40';
+                  if (active) {
+                    style = 'border-primary bg-primary text-white shadow-md shadow-primary/20 scale-105 transition-transform';
+                  } else if (isToday) {
+                    style = 'border-primary bg-primary/10 text-primary ring-1 ring-primary/50';
+                  } else if (isCompleted) {
+                    style = 'border-primary/30 bg-primary/5 text-primary opacity-70';
+                  }
+
                   return (
-                    <button key={item.iso} type="button" onClick={() => pickTimelineDate(item.iso)} className={`rounded-xl border px-2 py-2 text-center ${style}`}>
-                      <div className="text-[11px] font-semibold">{item.date.toLocaleDateString(locale, { weekday: 'short' })}</div>
+                    <button key={item.iso} type="button" onClick={() => pickTimelineDate(item.iso)} className={`rounded-xl border px-1 py-2 text-center transition-all ${style}`}>
+                      <div className="text-[10px] font-bold uppercase tracking-wider">{item.date.toLocaleDateString(locale, { weekday: 'short' })}</div>
                       <div className="mt-1 text-base font-black">{item.date.getDate()}</div>
                     </button>
                   );

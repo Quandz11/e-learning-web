@@ -103,6 +103,7 @@ public class WellnessSettingsService : IWellnessSettingsService
                 existing.SortOrder = packageRequest.SortOrder;
                 existing.UpdatedAt = now;
 
+                _dbContext.RemoveRange(existing.PackageLessons);
                 existing.PackageLessons.Clear();
                 foreach(var lessonRequest in packageRequest.Lessons)
                 {

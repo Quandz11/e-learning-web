@@ -212,7 +212,7 @@ const DailyPlannerView: React.FC = () => {
           />
 
           {/* Study tasks */}
-          {planner.todayTasks.length > 0 && (
+          {!planner.wellnessPlan && planner.todayTasks.length > 0 && (
             <PlannerStudyCard
               tasks={planner.todayTasks}
               onStartLearning={handleStartLearning}

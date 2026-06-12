@@ -93,6 +93,12 @@ public class WellnessSettingsService : IWellnessSettingsService
             await _dbContext.WellnessPackageLessons
                 .Where(l => existingPackageIds.Contains(l.WellnessPackageId))
                 .ExecuteDeleteAsync(cancellationToken);
+
+            // Force re-sync for existing plans by deleting uncompleted tasks for today and future
+            var today = DateTime.UtcNow.Date;
+            await _dbContext.WellnessDailyTasks
+                .Where(t => !t.IsCompleted && t.TaskDate >= today)
+                .ExecuteDeleteAsync(cancellationToken);
         }
 
         var incomingCodes = new HashSet<string>(normalizedRequests.Select(p => p.Code), StringComparer.OrdinalIgnoreCase);

@@ -11,12 +11,13 @@ import type {
   WellnessCoachReply,
   WellnessMealSuggestion,
   WellnessDashboard,
-  WellnessCheckoutPackage
+  WellnessCheckoutPackage,
+  WellnessDailyTask
 } from '../services/wellnessApi';
 
 // Re-export for convenience
 export type { UserStudyPlan, DailyStudyTask, DailyStudyCheckIn };
-export type { WellnessPlan, WellnessDailyLog, WellnessFastingStatus, WellnessCoachReply, WellnessMealSuggestion, WellnessCheckoutPackage };
+export type { WellnessPlan, WellnessDailyLog, WellnessFastingStatus, WellnessCoachReply, WellnessMealSuggestion, WellnessCheckoutPackage, WellnessDailyTask };
 
 /** Onboarding wizard step */
 export type OnboardingStep = 1 | 2 | 3 | 4;
@@ -77,6 +78,7 @@ export interface DailyPlannerState {
   coachReply: WellnessCoachReply | null;
   wellnessAccess: WellnessDashboard['access'] | null;
   checkoutConfig: WellnessDashboard['checkoutConfig'] | null;
+  wellnessTasks: WellnessDailyTask[];
 
   // Computed
   stats: PlannerStats;

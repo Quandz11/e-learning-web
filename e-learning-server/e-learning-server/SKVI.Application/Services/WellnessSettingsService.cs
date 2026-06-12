@@ -58,6 +58,8 @@ public class WellnessSettingsService : IWellnessSettingsService
 
         var packages = await _dbContext.WellnessPackages
             .AsNoTracking()
+            .Include(p => p.PackageLessons)
+                .ThenInclude(l => l.Lesson)
             .OrderBy(p => p.SortOrder)
             .ThenBy(p => p.DurationDays)
             .ThenBy(p => p.Code)
@@ -83,6 +85,7 @@ public class WellnessSettingsService : IWellnessSettingsService
         var now = DateTime.UtcNow;
 
         var existingPackages = await _dbContext.WellnessPackages
+            .Include(p => p.PackageLessons)
             .ToDictionaryAsync(p => p.Code, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
         var incomingCodes = new HashSet<string>(normalizedRequests.Select(p => p.Code), StringComparer.OrdinalIgnoreCase);
@@ -99,6 +102,19 @@ public class WellnessSettingsService : IWellnessSettingsService
                 existing.IsFeatured = packageRequest.IsFeatured;
                 existing.SortOrder = packageRequest.SortOrder;
                 existing.UpdatedAt = now;
+
+                existing.PackageLessons.Clear();
+                foreach(var lessonRequest in packageRequest.Lessons)
+                {
+                    existing.PackageLessons.Add(new WellnessPackageLesson
+                    {
+                        Id = Guid.NewGuid(),
+                        LessonId = lessonRequest.LessonId,
+                        DayIndex = lessonRequest.DayIndex,
+                        SortOrder = lessonRequest.SortOrder,
+                        CreatedAt = now
+                    });
+                }
             }
             else
             {
@@ -114,7 +130,15 @@ public class WellnessSettingsService : IWellnessSettingsService
                     IsFeatured = packageRequest.IsFeatured,
                     SortOrder = packageRequest.SortOrder,
                     CreatedAt = now,
-                    UpdatedAt = now
+                    UpdatedAt = now,
+                    PackageLessons = packageRequest.Lessons.Select(l => new WellnessPackageLesson
+                    {
+                        Id = Guid.NewGuid(),
+                        LessonId = l.LessonId,
+                        DayIndex = l.DayIndex,
+                        SortOrder = l.SortOrder,
+                        CreatedAt = now
+                    }).ToList()
                 });
             }
         }
@@ -375,7 +399,13 @@ public class WellnessSettingsService : IWellnessSettingsService
                 DurationDays = request.DurationDays,
                 IsActive = request.IsActive,
                 IsFeatured = request.IsFeatured,
-                SortOrder = request.SortOrder
+                SortOrder = request.SortOrder,
+                Lessons = request.Lessons?.Select(l => new WellnessPackageLessonUpsertRequest
+                {
+                    LessonId = l.LessonId,
+                    DayIndex = l.DayIndex,
+                    SortOrder = l.SortOrder
+                }).ToList() ?? []
             });
         }
 
@@ -395,7 +425,15 @@ public class WellnessSettingsService : IWellnessSettingsService
             IsActive = package.IsActive,
             IsFeatured = package.IsFeatured,
             SortOrder = package.SortOrder,
-            UpdatedAt = package.UpdatedAt
+            UpdatedAt = package.UpdatedAt,
+            Lessons = package.PackageLessons?.OrderBy(l => l.DayIndex).ThenBy(l => l.SortOrder).Select(l => new WellnessPackageLessonDto
+            {
+                Id = l.Id,
+                LessonId = l.LessonId,
+                LessonTitle = l.Lesson?.Title ?? string.Empty,
+                DayIndex = l.DayIndex,
+                SortOrder = l.SortOrder
+            }).ToList() ?? []
         };
     }
 

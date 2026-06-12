@@ -37,24 +37,25 @@ export function useDailyPlanner() {
     coachReply: null,
     wellnessAccess: null,
     checkoutConfig: null,
+    wellnessTasks: [],
     stats: emptyStats,
     hasAnyPlan: false,
     needsOnboarding: true,
     selectedDate: new Date(),
   });
 
-  /** Compute stats from current data */
   const computeStats = useCallback(
     (
       tasks: typeof state.todayTasks,
+      wellnessTasks: typeof state.wellnessTasks,
       log: typeof state.todayLog,
       plan: typeof state.studyPlan,
       fasting: typeof state.fastingStatus
     ): PlannerStats => {
-      const tasksCompleted = tasks.filter((t) => t.isCompleted).length;
+      const tasksCompleted = tasks.filter((t) => t.isCompleted).length + wellnessTasks.filter((t) => t.isCompleted).length;
       return {
         tasksCompleted,
-        tasksTotal: tasks.length,
+        tasksTotal: tasks.length + wellnessTasks.length,
         waterMl: log?.waterMl ?? 0,
         waterGoalMl: DEFAULT_WATER_GOAL,
         streakDays: plan?.currentStreakDays ?? 0,
@@ -89,12 +90,13 @@ export function useDailyPlanner() {
       const fastingStatus = wellnessData?.fastingStatus ?? null;
       const wellnessAccess = wellnessData?.access ?? null;
       const checkoutConfig = wellnessData?.checkoutConfig ?? null;
+      const wellnessTasks = wellnessData?.todayTasks ?? [];
 
       const hasAnyPlan = !!studyPlan || !!wellnessPlan;
       // Nếu chưa có bất kỳ kế hoạch nào, luôn yêu cầu onboarding
       const needsOnboarding = !hasAnyPlan;
 
-      const stats = computeStats(todayTasks, todayLog, studyPlan, fastingStatus);
+      const stats = computeStats(todayTasks, wellnessTasks, todayLog, studyPlan, fastingStatus);
 
       setState((prev) => ({
         ...prev,
@@ -108,6 +110,7 @@ export function useDailyPlanner() {
         fastingStatus,
         wellnessAccess,
         checkoutConfig,
+        wellnessTasks,
         stats,
         hasAnyPlan,
         needsOnboarding,
@@ -213,12 +216,27 @@ export function useDailyPlanner() {
       const updatedTask = await aiWidgetApi.submitTask(taskId, payload);
       setState((prev) => {
         const updatedTasks = prev.todayTasks.map((t) => (t.id === taskId ? updatedTask : t));
-        const stats = computeStats(updatedTasks, prev.todayLog, prev.studyPlan, prev.fastingStatus);
+        const stats = computeStats(updatedTasks, prev.wellnessTasks, prev.todayLog, prev.studyPlan, prev.fastingStatus);
         return { ...prev, todayTasks: updatedTasks, stats };
       });
       return updatedTask;
     },
     [computeStats]
+  );
+
+  /** Submit a wellness task */
+  const submitWellnessTask = useCallback(
+    async (taskId: string) => {
+      if (!state.wellnessPlan?.id) return;
+      const updatedTask = await wellnessApi.completeTask(state.wellnessPlan.id, taskId);
+      setState((prev) => {
+        const updatedTasks = prev.wellnessTasks.map((t) => (t.id === taskId ? updatedTask : t));
+        const stats = computeStats(prev.todayTasks, updatedTasks, prev.todayLog, prev.studyPlan, prev.fastingStatus);
+        return { ...prev, wellnessTasks: updatedTasks, stats };
+      });
+      return updatedTask;
+    },
+    [state.wellnessPlan?.id, computeStats]
   );
 
   /** Submit daily check-in */
@@ -251,7 +269,7 @@ export function useDailyPlanner() {
 
       const updatedLog = await wellnessApi.upsertDailyLog(state.wellnessPlan.id, payload);
       setState((prev) => {
-        const stats = computeStats(prev.todayTasks, updatedLog, prev.studyPlan, prev.fastingStatus);
+        const stats = computeStats(prev.todayTasks, prev.wellnessTasks, updatedLog, prev.studyPlan, prev.fastingStatus);
         return { ...prev, todayLog: updatedLog, stats };
       });
       return updatedLog;
@@ -300,6 +318,7 @@ export function useDailyPlanner() {
       initStudyPlan,
       saveWellnessPlan,
       submitTask,
+      submitWellnessTask,
       submitCheckIn,
       logWater,
       askMoodCoach,
@@ -307,6 +326,6 @@ export function useDailyPlanner() {
       selectDate,
       initWellnessPlan,
     }),
-    [state, bootstrap, initStudyPlan, saveWellnessPlan, submitTask, submitCheckIn, logWater, askMoodCoach, generateMeal, selectDate, initWellnessPlan]
+    [state, bootstrap, initStudyPlan, saveWellnessPlan, submitTask, submitWellnessTask, submitCheckIn, logWater, askMoodCoach, generateMeal, selectDate, initWellnessPlan]
   );
 }

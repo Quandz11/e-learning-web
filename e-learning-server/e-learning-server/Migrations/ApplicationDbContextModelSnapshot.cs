@@ -2009,6 +2009,60 @@ namespace e_learning_server.Migrations
                     b.ToTable("WellnessDailyLogs");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessDailyTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DayIndex")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EstimatedMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LessonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TaskDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("WellnessPlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonId");
+
+                    b.HasIndex("WellnessPlanId", "TaskDate");
+
+                    b.ToTable("WellnessDailyTasks");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.WellnessInsight", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2133,6 +2187,36 @@ namespace e_learning_server.Migrations
                     b.HasIndex("IsActive", "SortOrder");
 
                     b.ToTable("WellnessPackages");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessPackageLesson", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DayIndex")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("WellnessPackageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonId");
+
+                    b.HasIndex("WellnessPackageId", "DayIndex", "SortOrder");
+
+                    b.ToTable("WellnessPackageLessons");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.WellnessPlan", b =>
@@ -3039,6 +3123,23 @@ namespace e_learning_server.Migrations
                     b.Navigation("Plan");
                 });
 
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessDailyTask", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.Lesson", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId");
+
+                    b.HasOne("SKVI.Domain.Entities.WellnessPlan", "WellnessPlan")
+                        .WithMany("DailyTasks")
+                        .HasForeignKey("WellnessPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("WellnessPlan");
+                });
+
             modelBuilder.Entity("SKVI.Domain.Entities.WellnessInsight", b =>
                 {
                     b.HasOne("SKVI.Domain.Entities.WellnessPlan", "Plan")
@@ -3059,6 +3160,25 @@ namespace e_learning_server.Migrations
                         .IsRequired();
 
                     b.Navigation("Plan");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.WellnessPackageLesson", b =>
+                {
+                    b.HasOne("SKVI.Domain.Entities.Lesson", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SKVI.Domain.Entities.WellnessPackage", "WellnessPackage")
+                        .WithMany("PackageLessons")
+                        .HasForeignKey("WellnessPackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("WellnessPackage");
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.WellnessPlan", b =>
@@ -3279,6 +3399,8 @@ namespace e_learning_server.Migrations
 
             modelBuilder.Entity("SKVI.Domain.Entities.WellnessPackage", b =>
                 {
+                    b.Navigation("PackageLessons");
+
                     b.Navigation("UserPackages");
                 });
 
@@ -3287,6 +3409,8 @@ namespace e_learning_server.Migrations
                     b.Navigation("CoachMessages");
 
                     b.Navigation("DailyLogs");
+
+                    b.Navigation("DailyTasks");
 
                     b.Navigation("Insights");
 

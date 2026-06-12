@@ -34,6 +34,16 @@ public class WellnessPackageAdminDto
     public bool IsFeatured { get; set; }
     public int SortOrder { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public List<WellnessPackageLessonDto> Lessons { get; set; } = [];
+}
+
+public class WellnessPackageLessonDto
+{
+    public Guid Id { get; set; }
+    public Guid LessonId { get; set; }
+    public string LessonTitle { get; set; } = string.Empty;
+    public int DayIndex { get; set; }
+    public int SortOrder { get; set; }
 }
 
 public class WellnessPackageUpsertRequest
@@ -60,6 +70,19 @@ public class WellnessPackageUpsertRequest
     public bool IsFeatured { get; set; }
 
     [Range(-1000, 1000)]
+    public int SortOrder { get; set; }
+
+    public List<WellnessPackageLessonUpsertRequest> Lessons { get; set; } = [];
+}
+
+public class WellnessPackageLessonUpsertRequest
+{
+    [Required]
+    public Guid LessonId { get; set; }
+
+    [Range(1, 365)]
+    public int DayIndex { get; set; }
+
     public int SortOrder { get; set; }
 }
 

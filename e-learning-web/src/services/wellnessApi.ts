@@ -184,12 +184,25 @@ export interface WellnessCalendarDay {
   hasLog: boolean;
 }
 
+export interface WellnessDailyTask {
+  id: string;
+  taskDate: string;
+  lessonId: string;
+  courseId?: string;
+  lessonTitle: string;
+  description: string;
+  isCompleted: boolean;
+  completedAt?: string;
+  sortOrder: number;
+}
+
 export interface WellnessDashboard {
   plan?: WellnessPlan;
   todayLog?: WellnessDailyLog;
   fastingStatus?: WellnessFastingStatus;
   todayResources?: WellnessResourceSet;
   todayInsight?: WellnessInsight;
+  todayTasks?: WellnessDailyTask[];
   weightProgress?: WellnessWeightProgress;
   upgradeSuggestion?: WellnessUpgradeSuggestion;
   checkoutConfig?: WellnessCheckoutConfig;
@@ -204,6 +217,14 @@ export interface WellnessAdminSettings {
   updatedAt?: string;
 }
 
+export interface WellnessPackageLessonAdmin {
+  id: string;
+  lessonId: string;
+  lessonTitle: string;
+  dayIndex: number;
+  sortOrder: number;
+}
+
 export interface WellnessPackageAdmin {
   id: string;
   code: string;
@@ -215,6 +236,13 @@ export interface WellnessPackageAdmin {
   isFeatured: boolean;
   sortOrder: number;
   updatedAt?: string;
+  lessons?: WellnessPackageLessonAdmin[];
+}
+
+export interface WellnessPackageLessonUpsertPayload {
+  lessonId: string;
+  dayIndex: number;
+  sortOrder: number;
 }
 
 export interface WellnessPackageUpsertPayload {
@@ -226,6 +254,7 @@ export interface WellnessPackageUpsertPayload {
   isActive: boolean;
   isFeatured: boolean;
   sortOrder: number;
+  lessons?: WellnessPackageLessonUpsertPayload[];
 }
 
 export interface UpdateWellnessAdminSettingsPayload {
@@ -416,6 +445,14 @@ export const wellnessApi = {
       method: 'GET',
     });
     timelineCache.set(cacheKey, setCache(TIMELINE_CACHE_TTL_MS, response));
+    return response;
+  },
+
+  completeTask: async (planId: string, taskId: string): Promise<WellnessDailyTask> => {
+    const response = await apiClient<WellnessDailyTask>(`/wellness/plan/${planId}/tasks/${taskId}/complete`, {
+      method: 'PUT',
+    });
+    clearWellnessDashboardCache(planId);
     return response;
   },
 

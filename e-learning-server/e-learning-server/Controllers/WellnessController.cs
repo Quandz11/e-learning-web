@@ -223,6 +223,29 @@ public class WellnessController : ControllerBase
         }
     }
 
+    [HttpPut("plan/{planId:guid}/tasks/{taskId:guid}/complete")]
+    public async Task<IActionResult> CompleteTask(Guid planId, Guid taskId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var userId = GetUserId();
+            var task = await _wellnessService.CompleteTaskAsync(userId, planId, taskId, cancellationToken);
+            return Ok(task);
+        }
+        catch (WellnessAccessException ex)
+        {
+            return PackageForbidden(ex.Code, ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return PackageForbidden("WELLNESS_PACKAGE_REQUIRED", ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet("resources")]
     public async Task<IActionResult> GetResources(CancellationToken cancellationToken)
     {

@@ -150,6 +150,7 @@ public class WellnessDashboardDto
     public WellnessInsightDto? TodayInsight { get; set; }
     public WellnessWeightProgressDto? WeightProgress { get; set; }
     public WellnessUpgradeSuggestionDto? UpgradeSuggestion { get; set; }
+    public List<WellnessDailyTaskDto>? TodayTasks { get; set; }
     public WellnessCheckoutConfigDto CheckoutConfig { get; set; } = new();
     public WellnessAccessDto Access { get; set; } = new();
 }
@@ -324,4 +325,17 @@ public class WellnessCalendarDayDto
     public bool IsToday { get; set; }
     public bool IsInPlanRange { get; set; }
     public bool HasLog { get; set; }
+}
+
+public class WellnessDailyTaskDto
+{
+    public Guid Id { get; set; }
+    public DateTime TaskDate { get; set; }
+    public Guid LessonId { get; set; }
+    public Guid? CourseId { get; set; }
+    public string LessonTitle { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public bool IsCompleted { get; set; }
+    public DateTime? CompletedAt { get; set; }
+    public int SortOrder { get; set; }
 }

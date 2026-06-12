@@ -142,6 +142,7 @@ public class WellnessService : IWellnessService
             .FirstOrDefaultAsync(l => l.PlanId == plan.Id && l.LogDate == localDate, cancellationToken);
         var todayResources = await GetOrCreateResourceSetAsync(plan, localDate, cancellationToken);
         var todayInsight = await GetOrCreateInsightAsync(plan, localDate, todayLog, cancellationToken);
+        var todayTasks = await SyncAndGetTodayTasksAsync(plan, localDate, cancellationToken);
         var fastingStatus = BuildFastingStatus(plan, localNow);
         var weightProgress = BuildWeightProgress(plan, todayLog?.CurrentWeightKg);
         var upgradeSuggestion = BuildUpgradeSuggestion(plan, localDate, weightProgress.ProgressPercent);
@@ -165,6 +166,7 @@ public class WellnessService : IWellnessService
             FastingStatus = fastingStatus,
             TodayResources = todayResources,
             TodayInsight = todayInsight,
+            TodayTasks = todayTasks,
             WeightProgress = weightProgress,
             UpgradeSuggestion = upgradeSuggestion,
             CheckoutConfig = accessEvaluation.CheckoutConfig,
@@ -553,6 +555,46 @@ public class WellnessService : IWellnessService
         var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
         await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
         return BuildWeightProgress(plan, plan.LatestWeightKg);
+    }
+
+    public async Task<WellnessDailyTaskDto> CompleteTaskAsync(Guid userId, Guid planId, Guid taskId, CancellationToken cancellationToken = default)
+    {
+        var plan = await GetOwnedPlanAsync(userId, planId, cancellationToken);
+        await EnsureAnyWellnessAccessAsync(userId, cancellationToken);
+
+        var task = await _dbContext.WellnessDailyTasks
+            .Include(t => t.Lesson)
+            .FirstOrDefaultAsync(t => t.Id == taskId && t.WellnessPlanId == planId, cancellationToken);
+
+        if (task == null)
+        {
+            throw new InvalidOperationException("Task not found.");
+        }
+
+        task.IsCompleted = true;
+        task.CompletedAt = DateTime.UtcNow;
+        
+        await WriteAuditLogAsync(
+            userId,
+            "WELLNESS_TASK_COMPLETE",
+            nameof(WellnessDailyTask),
+            task.Id,
+            new { task.TaskDate, task.LessonId });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        InvalidateDashboardCache(userId);
+
+        return new WellnessDailyTaskDto
+        {
+            Id = task.Id,
+            TaskDate = task.TaskDate,
+            LessonId = task.LessonId ?? Guid.Empty,
+            LessonTitle = task.Lesson?.Title ?? string.Empty,
+            Description = "Hoàn thành bài học roadmap.",
+            IsCompleted = task.IsCompleted,
+            CompletedAt = task.CompletedAt,
+            SortOrder = task.SortOrder
+        };
     }
 
     public async Task<WellnessProgressTimelineDto> GetProgressTimelineAsync(
@@ -1512,6 +1554,87 @@ public class WellnessService : IWellnessService
                || (bytes[0] == 192 && bytes[1] == 168)
                || (bytes[0] == 169 && bytes[1] == 254)
                || bytes[0] == 0;
+    }
+
+    private async Task<List<WellnessDailyTaskDto>> SyncAndGetTodayTasksAsync(WellnessPlan plan, DateTime localDate, CancellationToken cancellationToken)
+    {
+        // Calculate day index relative to plan start date
+        var dayIndex = (localDate - plan.StartDate.Date).Days + 1;
+        if (dayIndex < 1)
+        {
+            return []; // Plan hasn't started yet
+        }
+
+        var todayTasks = await _dbContext.WellnessDailyTasks
+            .Include(t => t.Lesson)
+                .ThenInclude(l => l.CourseLessons)
+            .Where(t => t.WellnessPlanId == plan.Id && t.TaskDate == localDate)
+            .OrderBy(t => t.SortOrder)
+            .ToListAsync(cancellationToken);
+
+        // If tasks are already generated for today, return them
+        if (todayTasks.Count > 0)
+        {
+            return todayTasks.Select(t => new WellnessDailyTaskDto
+            {
+                Id = t.Id,
+                TaskDate = t.TaskDate,
+                LessonId = t.LessonId ?? Guid.Empty,
+                CourseId = t.Lesson?.CourseLessons.FirstOrDefault()?.CourseId,
+                LessonTitle = t.Lesson?.Title ?? string.Empty,
+                Description = "Hoàn thành bài học roadmap.",
+                IsCompleted = t.IsCompleted,
+                CompletedAt = t.CompletedAt,
+                SortOrder = t.SortOrder
+            }).ToList();
+        }
+
+        // Fetch package lessons configured by admin for this specific day index
+        var packageLessons = await _dbContext.WellnessPackageLessons
+            .Where(l => l.WellnessPackage.Code == plan.PackageType && l.DayIndex == dayIndex)
+            .Include(l => l.Lesson)
+                .ThenInclude(l => l.CourseLessons)
+            .OrderBy(l => l.SortOrder)
+            .ToListAsync(cancellationToken);
+
+        if (packageLessons.Count == 0)
+        {
+            return [];
+        }
+
+        var newTasks = new List<WellnessDailyTask>();
+        foreach (var pkgLesson in packageLessons)
+        {
+            var task = new WellnessDailyTask
+            {
+                Id = Guid.NewGuid(),
+                WellnessPlanId = plan.Id,
+                LessonId = pkgLesson.LessonId,
+                TaskDate = localDate,
+                DayIndex = dayIndex,
+                Title = pkgLesson.Lesson?.Title ?? "Bài học Wellness",
+                SortOrder = pkgLesson.SortOrder,
+                IsCompleted = false,
+                CreatedAt = DateTime.UtcNow
+            };
+            newTasks.Add(task);
+            _dbContext.WellnessDailyTasks.Add(task);
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return newTasks.Select((t, i) => new WellnessDailyTaskDto
+        {
+            Id = t.Id,
+            TaskDate = t.TaskDate,
+            LessonId = t.LessonId ?? Guid.Empty,
+            CourseId = packageLessons[i].Lesson?.CourseLessons.FirstOrDefault()?.CourseId,
+            LessonTitle = packageLessons[i].Lesson?.Title ?? string.Empty,
+            Description = "Hoàn thành bài học roadmap.",
+            IsCompleted = t.IsCompleted,
+            CompletedAt = t.CompletedAt,
+            SortOrder = t.SortOrder
+        }).ToList();
     }
 
     private Task WriteAuditLogAsync(Guid userId, string action, string targetTable, Guid? targetId, object metadata)

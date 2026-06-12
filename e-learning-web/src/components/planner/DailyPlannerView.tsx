@@ -8,15 +8,15 @@ import PlannerHeroCard from './PlannerHeroCard';
 import PlannerStudyCard from './PlannerStudyCard';
 import PlannerFastingCard from './PlannerFastingCard';
 import PlannerWaterCard from './PlannerWaterCard';
-import PlannerPlanSetupCard from './PlannerPlanSetupCard';
 import PlannerDailyTipsCard from './PlannerDailyTipsCard';
 import PlannerDailyStatusCard from './PlannerDailyStatusCard';
 import PlannerStatsSidebar from './PlannerStatsSidebar';
+import PlannerWellnessTaskCard from './PlannerWellnessTaskCard';
 import PlannerSidebarLeft from './sidebars/PlannerSidebarLeft';
 import PlannerMealCard from './sidebars/PlannerMealCard';
 import OnboardingWizard from './OnboardingWizard';
 import WellnessOnboardingWizard from './WellnessOnboardingWizard';
-import type { DailyStudyTask, OnboardingFormData } from '../../types/planner';
+import type { DailyStudyTask, WellnessDailyTask, OnboardingFormData } from '../../types/planner';
 
 const DailyPlannerView: React.FC = () => {
   const { t } = useTranslation();
@@ -87,6 +87,16 @@ const DailyPlannerView: React.FC = () => {
     const target = task.relatedLessonPartId
       ? `${basePath}?partId=${encodeURIComponent(task.relatedLessonPartId)}`
       : basePath;
+    navigate(target);
+  };
+
+  const handleStartWellnessLearning = (task: WellnessDailyTask) => {
+    if (!task.courseId) {
+      navigate('/my-courses');
+      return;
+    }
+
+    const target = `/courses/${task.courseId}/learn?partId=${encodeURIComponent(task.lessonId)}`;
     navigate(target);
   };
 
@@ -211,6 +221,16 @@ const DailyPlannerView: React.FC = () => {
             />
           )}
 
+          {/* Wellness Tasks */}
+          {planner.wellnessTasks.length > 0 && (
+            <PlannerWellnessTaskCard
+              tasks={planner.wellnessTasks}
+              onStartLearning={handleStartWellnessLearning}
+              onCompleteTask={(taskId) => planner.submitWellnessTask(taskId)}
+              isSubmitting={isSubmitting}
+            />
+          )}
+
           {/* Wellness Access handling */}
           {!isWellnessUnlocked ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-700/60 dark:bg-slate-800">
@@ -220,9 +240,7 @@ const DailyPlannerView: React.FC = () => {
                 {t('wellness.dashboard.locked.desc', { defaultValue: 'Hãy xem các gói nâng cấp ở thanh menu bên trái để kích hoạt trợ lý Wellness nhé.' })}
               </p>
             </div>
-          ) : (
-            <PlannerPlanSetupCard />
-          )}
+          ) : null}
 
           {planner.wellnessPlan && (
             <>

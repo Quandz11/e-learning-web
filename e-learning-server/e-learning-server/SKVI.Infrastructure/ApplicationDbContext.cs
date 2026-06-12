@@ -94,6 +94,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<AiChatMessage> AiChatMessages { get; set; }
     public DbSet<WellnessPlan> WellnessPlans { get; set; }
     public DbSet<WellnessDailyLog> WellnessDailyLogs { get; set; }
+
     public DbSet<WellnessResource> WellnessResources { get; set; }
     public DbSet<WellnessResourceAssignment> WellnessResourceAssignments { get; set; }
     public DbSet<WellnessInsight> WellnessInsights { get; set; }
@@ -102,6 +103,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<WellnessSettings> WellnessSettings { get; set; }
     public DbSet<WellnessPackage> WellnessPackages { get; set; }
     public DbSet<WellnessUserPackage> WellnessUserPackages { get; set; }
+    public DbSet<WellnessPackageLesson> WellnessPackageLessons { get; set; }
+    public DbSet<WellnessDailyTask> WellnessDailyTasks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -689,6 +692,24 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(a => a.WorkoutResourceId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<WellnessPackageLesson>()
+            .HasIndex(l => new { l.WellnessPackageId, l.DayIndex, l.SortOrder });
+
+        modelBuilder.Entity<WellnessPackageLesson>()
+            .HasOne(l => l.WellnessPackage)
+            .WithMany(p => p.PackageLessons)
+            .HasForeignKey(l => l.WellnessPackageId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WellnessDailyTask>()
+            .HasIndex(t => new { t.WellnessPlanId, t.TaskDate });
+
+        modelBuilder.Entity<WellnessDailyTask>()
+            .HasOne(t => t.WellnessPlan)
+            .WithMany(p => p.DailyTasks)
+            .HasForeignKey(t => t.WellnessPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
             
         // Relationships are automatically configured by EF Core conventions based on navigation properties,
         // but explicit configuration can be added here if needed.

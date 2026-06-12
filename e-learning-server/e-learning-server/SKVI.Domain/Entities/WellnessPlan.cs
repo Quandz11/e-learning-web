@@ -62,5 +62,7 @@ public class WellnessPlan
     public virtual ICollection<WellnessCoachMessage> CoachMessages { get; set; } = new List<WellnessCoachMessage>();
 
     public virtual ICollection<WellnessMealSuggestion> MealSuggestions { get; set; } = new List<WellnessMealSuggestion>();
+
+    public virtual ICollection<WellnessDailyTask> DailyTasks { get; set; } = new List<WellnessDailyTask>();
 }
 

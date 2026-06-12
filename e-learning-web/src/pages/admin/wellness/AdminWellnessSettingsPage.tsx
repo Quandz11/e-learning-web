@@ -7,7 +7,9 @@ import {
   type WellnessAdminSettings,
   type WellnessPackageAdmin,
   type WellnessPackageUpsertPayload,
+  type WellnessPackageLessonAdmin,
 } from '../../../services/wellnessApi';
+import { lessonApi, type LessonDto } from '../../../services/lessonApi';
 
 const FIXED_WELLNESS_CHECKOUT_PATH = '/checkout?single=1&source=wellness';
 const DEFAULT_SETTINGS: WellnessAdminSettings = {
@@ -27,6 +29,7 @@ const createDraftPackage = (index: number): WellnessPackageAdmin => ({
   isActive: true,
   isFeatured: false,
   sortOrder: index * 10,
+  lessons: [],
 });
 
 const normalizeCode = (value: string) =>
@@ -45,6 +48,11 @@ const sanitizePackage = (value: WellnessPackageAdmin): WellnessPackageUpsertPayl
   isActive: Boolean(value.isActive),
   isFeatured: Boolean(value.isFeatured),
   sortOrder: Number(value.sortOrder || 0),
+  lessons: value.lessons?.map(l => ({
+    lessonId: l.lessonId,
+    dayIndex: Number(l.dayIndex || 1),
+    sortOrder: Number(l.sortOrder || 0),
+  })) || [],
 });
 
 const AdminWellnessSettingsPage: React.FC = () => {
@@ -53,6 +61,8 @@ const AdminWellnessSettingsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<WellnessAdminSettings>(DEFAULT_SETTINGS);
+  const [availableLessons, setAvailableLessons] = useState<LessonDto[]>([]);
+  const [expandedPackageId, setExpandedPackageId] = useState<string | null>(null);
 
   const packageRows = settings.packages ?? [];
   const normalizedPackages = useMemo(() => packageRows.map(sanitizePackage), [packageRows]);
@@ -116,7 +126,11 @@ const AdminWellnessSettingsPage: React.FC = () => {
     const load = async () => {
       try {
         setLoading(true);
-        const data = await wellnessApi.getAdminSettings();
+        const [data, lessons] = await Promise.all([
+          wellnessApi.getAdminSettings(),
+          lessonApi.getAll()
+        ]);
+        setAvailableLessons(lessons);
         setSettings({
           ...DEFAULT_SETTINGS,
           ...data,
@@ -165,6 +179,52 @@ const AdminWellnessSettingsPage: React.FC = () => {
     setSettings((prev) => ({
       ...prev,
       packages: (prev.packages ?? []).filter((pkg) => pkg.id !== id),
+    }));
+  };
+
+  const addLessonToPackage = (packageId: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      packages: (prev.packages ?? []).map((pkg) => {
+        if (pkg.id !== packageId) return pkg;
+        const newLesson: WellnessPackageLessonAdmin = {
+          id: `draft-lesson-${Date.now()}`,
+          lessonId: '',
+          lessonTitle: '',
+          dayIndex: 1,
+          sortOrder: (pkg.lessons?.length || 0) * 10,
+        };
+        return { ...pkg, lessons: [...(pkg.lessons || []), newLesson] };
+      }),
+    }));
+  };
+
+  const updateLesson = <K extends keyof WellnessPackageLessonAdmin>(
+    packageId: string,
+    lessonIndex: number,
+    key: K,
+    value: WellnessPackageLessonAdmin[K],
+  ) => {
+    setSettings((prev) => ({
+      ...prev,
+      packages: (prev.packages ?? []).map((pkg) => {
+        if (pkg.id !== packageId) return pkg;
+        const newLessons = [...(pkg.lessons || [])];
+        newLessons[lessonIndex] = { ...newLessons[lessonIndex], [key]: value };
+        return { ...pkg, lessons: newLessons };
+      }),
+    }));
+  };
+
+  const removeLesson = (packageId: string, lessonIndex: number) => {
+    setSettings((prev) => ({
+      ...prev,
+      packages: (prev.packages ?? []).map((pkg) => {
+        if (pkg.id !== packageId) return pkg;
+        const newLessons = [...(pkg.lessons || [])];
+        newLessons.splice(lessonIndex, 1);
+        return { ...pkg, lessons: newLessons };
+      }),
     }));
   };
 
@@ -387,16 +447,16 @@ const AdminWellnessSettingsPage: React.FC = () => {
 
                 <div className="max-h-[620px] divide-y divide-slate-100 overflow-auto">
                   {settings.packages.map((pkg, index) => (
-                    <div
-                      key={pkg.id || `${pkg.code}-${index}`}
-                      className={`grid grid-cols-[130px_minmax(0,1.2fr)_minmax(0,1.2fr)_120px_90px_90px_90px_90px] gap-2 px-3 py-3 transition-colors ${
-                        pkg.isFeatured
-                          ? 'bg-amber-50/50 hover:bg-amber-50'
-                          : index % 2 === 0
-                            ? 'bg-white hover:bg-cyan-50/50'
-                            : 'bg-slate-50/60 hover:bg-cyan-50/60'
-                      }`}
-                    >
+                    <React.Fragment key={pkg.id || `${pkg.code}-${index}`}>
+                      <div
+                        className={`grid grid-cols-[130px_minmax(0,1.2fr)_minmax(0,1.2fr)_120px_90px_90px_90px_90px] gap-2 px-3 py-3 transition-colors ${
+                          pkg.isFeatured
+                            ? 'bg-amber-50/50 hover:bg-amber-50'
+                            : index % 2 === 0
+                              ? 'bg-white hover:bg-cyan-50/50'
+                              : 'bg-slate-50/60 hover:bg-cyan-50/60'
+                        }`}
+                      >
                       <input
                         value={pkg.code}
                         onChange={(event) => updatePackage(pkg.id, 'code', event.target.value)}
@@ -447,17 +507,98 @@ const AdminWellnessSettingsPage: React.FC = () => {
                           className="h-4 w-4 rounded border-slate-300 accent-amber-500"
                         />
                       </label>
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedPackageId(expandedPackageId === pkg.id ? null : pkg.id)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 bg-white px-2 py-1 text-[11px] font-semibold text-cyan-700 transition-colors hover:bg-cyan-50"
+                          title={t('wellness.admin.actions.editRoadmap', { defaultValue: 'Edit Roadmap' })}
+                        >
+                          <span className="material-symbols-outlined text-[14px]">map</span>
+                        </button>
                         <button
                           type="button"
                           onClick={() => removePackage(pkg.id)}
                           className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-white px-2 py-1 text-[11px] font-semibold text-rose-700 transition-colors hover:bg-rose-50"
+                          title={t('common.delete', { defaultValue: 'Delete' })}
                         >
                           <span className="material-symbols-outlined text-[14px]">delete</span>
-                          {t('common.delete', { defaultValue: 'Delete' })}
                         </button>
                       </div>
                     </div>
+
+                    {expandedPackageId === pkg.id && (
+                      <div className="col-span-full border-t border-cyan-100 bg-cyan-50/30 p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[18px] text-cyan-600">route</span>
+                            Roadmap Lessons ({pkg.lessons?.length || 0})
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => addLessonToPackage(pkg.id)}
+                            className="text-xs font-semibold text-cyan-700 bg-cyan-100/50 border border-cyan-200 px-3 py-1.5 rounded-lg hover:bg-cyan-100 transition-colors flex items-center gap-1"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">add</span>
+                            Add Lesson
+                          </button>
+                        </div>
+                        
+                        {pkg.lessons?.length === 0 ? (
+                          <div className="text-xs text-slate-500 bg-white border border-slate-200 rounded-xl p-4 text-center">
+                            No lessons configured. Add lessons to build a roadmap for this package.
+                          </div>
+                        ) : (
+                          <div className="grid gap-2">
+                            <div className="grid grid-cols-[minmax(0,1fr)_100px_100px_40px] gap-2 px-2 text-[11px] font-semibold uppercase text-slate-500">
+                              <span>Lesson</span>
+                              <span className="text-center">Day</span>
+                              <span className="text-center">Order</span>
+                              <span></span>
+                            </div>
+                            {pkg.lessons?.map((l, lIdx) => (
+                              <div key={lIdx} className="grid grid-cols-[minmax(0,1fr)_100px_100px_40px] gap-2 items-center bg-white border border-slate-200 p-2 rounded-xl shadow-sm">
+                                <select
+                                  className="rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                  value={l.lessonId}
+                                  onChange={(e) => updateLesson(pkg.id, lIdx, 'lessonId', e.target.value)}
+                                >
+                                  <option value="">Select a lesson...</option>
+                                  {availableLessons.map(al => (
+                                    <option key={al.id} value={al.id}>{al.title}</option>
+                                  ))}
+                                </select>
+                                <input 
+                                  type="number"
+                                  className="rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-xs text-center font-medium text-slate-700 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                  placeholder="Day"
+                                  min={1}
+                                  max={pkg.durationDays}
+                                  value={l.dayIndex}
+                                  onChange={(e) => updateLesson(pkg.id, lIdx, 'dayIndex', parseInt(e.target.value) || 1)}
+                                />
+                                <input 
+                                  type="number"
+                                  className="rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-xs text-center font-medium text-slate-700 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                                  placeholder="Order"
+                                  value={l.sortOrder}
+                                  onChange={(e) => updateLesson(pkg.id, lIdx, 'sortOrder', parseInt(e.target.value) || 0)}
+                                />
+                                <button 
+                                  type="button" 
+                                  onClick={() => removeLesson(pkg.id, lIdx)} 
+                                  className="grid h-8 w-8 place-items-center rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                  title="Remove lesson"
+                                >
+                                  <span className="material-symbols-outlined text-[18px]">close</span>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    </React.Fragment>
                   ))}
 
                   {settings.packages.length === 0 && (

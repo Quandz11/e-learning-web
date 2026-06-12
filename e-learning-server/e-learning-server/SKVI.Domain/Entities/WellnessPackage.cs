@@ -36,5 +36,7 @@ public class WellnessPackage
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public virtual ICollection<WellnessUserPackage> UserPackages { get; set; } = new List<WellnessUserPackage>();
+
+    public virtual ICollection<WellnessPackageLesson> PackageLessons { get; set; } = new List<WellnessPackageLesson>();
 }
 

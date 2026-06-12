@@ -85,8 +85,15 @@ public class WellnessSettingsService : IWellnessSettingsService
         var now = DateTime.UtcNow;
 
         var existingPackages = await _dbContext.WellnessPackages
-            .Include(p => p.PackageLessons)
             .ToDictionaryAsync(p => p.Code, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
+        var existingPackageIds = existingPackages.Values.Select(p => p.Id).ToList();
+        if (existingPackageIds.Any())
+        {
+            await _dbContext.WellnessPackageLessons
+                .Where(l => existingPackageIds.Contains(l.WellnessPackageId))
+                .ExecuteDeleteAsync(cancellationToken);
+        }
 
         var incomingCodes = new HashSet<string>(normalizedRequests.Select(p => p.Code), StringComparer.OrdinalIgnoreCase);
 
@@ -103,12 +110,12 @@ public class WellnessSettingsService : IWellnessSettingsService
                 existing.SortOrder = packageRequest.SortOrder;
                 existing.UpdatedAt = now;
 
-                _dbContext.RemoveRange(existing.PackageLessons);
                 foreach(var lessonRequest in packageRequest.Lessons)
                 {
-                    existing.PackageLessons.Add(new WellnessPackageLesson
+                    _dbContext.WellnessPackageLessons.Add(new WellnessPackageLesson
                     {
                         Id = Guid.NewGuid(),
+                        WellnessPackageId = existing.Id,
                         LessonId = lessonRequest.LessonId,
                         DayIndex = lessonRequest.DayIndex,
                         SortOrder = lessonRequest.SortOrder,
@@ -118,7 +125,7 @@ public class WellnessSettingsService : IWellnessSettingsService
             }
             else
             {
-                _dbContext.WellnessPackages.Add(new WellnessPackage
+                var newPackage = new WellnessPackage
                 {
                     Id = Guid.NewGuid(),
                     Code = packageRequest.Code,
@@ -130,16 +137,23 @@ public class WellnessSettingsService : IWellnessSettingsService
                     IsFeatured = packageRequest.IsFeatured,
                     SortOrder = packageRequest.SortOrder,
                     CreatedAt = now,
-                    UpdatedAt = now,
-                    PackageLessons = packageRequest.Lessons.Select(l => new WellnessPackageLesson
+                    UpdatedAt = now
+                };
+                
+                _dbContext.WellnessPackages.Add(newPackage);
+                
+                foreach(var l in packageRequest.Lessons)
+                {
+                    _dbContext.WellnessPackageLessons.Add(new WellnessPackageLesson
                     {
                         Id = Guid.NewGuid(),
+                        WellnessPackageId = newPackage.Id,
                         LessonId = l.LessonId,
                         DayIndex = l.DayIndex,
                         SortOrder = l.SortOrder,
                         CreatedAt = now
-                    }).ToList()
-                });
+                    });
+                }
             }
         }
 

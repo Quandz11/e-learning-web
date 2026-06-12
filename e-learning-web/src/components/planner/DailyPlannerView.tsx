@@ -15,7 +15,7 @@ import PlannerWellnessTaskCard from './PlannerWellnessTaskCard';
 import PlannerSidebarLeft from './sidebars/PlannerSidebarLeft';
 import PlannerMealCard from './sidebars/PlannerMealCard';
 import OnboardingWizard from './OnboardingWizard';
-import WellnessOnboardingWizard from './WellnessOnboardingWizard';
+
 import type { DailyStudyTask, WellnessDailyTask, OnboardingFormData } from '../../types/planner';
 
 const DailyPlannerView: React.FC = () => {
@@ -131,46 +131,45 @@ const DailyPlannerView: React.FC = () => {
   // Onboarding flow (only blocks if we KNOW we need onboarding and loading is done)
   // Or if user manually interacts with the HeroCard to start onboarding
   if (!planner.isLoading && (planner.needsOnboarding || forceOnboarding)) {
-    return (
-      <div className="mx-auto max-w-2xl py-8 px-4">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-            {onboardingType === 'wellness' ? t('planner.onboarding.wellnessTitle', { defaultValue: 'Thiết lập Lộ trình Cá nhân hóa' }) : t('planner.onboarding.title')}
-          </h1>
-          <p className="mt-2 text-slate-500 dark:text-slate-400">
-            {onboardingType === 'wellness' ? t('planner.onboarding.wellnessSubtitle', { defaultValue: 'Chọn gói nhịn ăn phù hợp để bắt đầu hành trình' }) : t('planner.onboarding.subtitle')}
-          </p>
-        </div>
-        
-        {onboardingType === 'wellness' ? (
-          <WellnessOnboardingWizard 
-            onComplete={handleOnboardingComplete} 
-            isSubmitting={isSubmitting} 
-            isPaidFeature={planner.checkoutConfig?.isPersonalizedRoadmapPaid} 
-            isUnlocked={planner.wellnessAccess?.isUnlocked}
-            packages={wellnessPackagesForOnboarding}
-          />
-        ) : (
+    // If it's wellness, we don't have onboarding anymore because it's auto-generated.
+    if (onboardingType === 'wellness') {
+       if (!planner.wellnessAccess?.isUnlocked) {
+         // Just drop out of this early return to show the normal locked dashboard below
+       } else {
+         // Should not happen, backend auto creates plan if unlocked
+       }
+    } else {
+      return (
+        <div className="mx-auto max-w-2xl py-8 px-4">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              {t('planner.onboarding.title')}
+            </h1>
+            <p className="mt-2 text-slate-500 dark:text-slate-400">
+              {t('planner.onboarding.subtitle')}
+            </p>
+          </div>
+          
           <OnboardingWizard onComplete={handleOnboardingComplete} isSubmitting={isSubmitting} />
-        )}
 
-        <div className="mt-8 flex justify-center gap-4">
-           <button 
-             onClick={() => setOnboardingType(onboardingType === 'wellness' ? 'study' : 'wellness')}
-             className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-           >
-              {onboardingType === 'wellness' ? 'Chuyển sang lộ trình học tập' : 'Chuyển sang lộ trình sức khỏe'}
-           </button>
-        </div>
-        {forceOnboarding && (
-          <div className="mt-6 text-center">
-             <button onClick={() => setForceOnboarding(false)} className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors dark:text-slate-400 dark:hover:text-white">
-                Hủy tạo lộ trình, quay lại Dashboard
+          <div className="mt-8 flex justify-center gap-4">
+             <button 
+               onClick={() => setOnboardingType('wellness')}
+               className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+             >
+                Chuyển sang lộ trình sức khỏe
              </button>
           </div>
-        )}
-      </div>
-    );
+          {forceOnboarding && (
+            <div className="mt-6 text-center">
+               <button onClick={() => setForceOnboarding(false)} className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors dark:text-slate-400 dark:hover:text-white">
+                  Hủy tạo lộ trình, quay lại Dashboard
+               </button>
+            </div>
+          )}
+        </div>
+      );
+    }
   }
 
   // Main daily planner view

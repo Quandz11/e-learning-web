@@ -107,11 +107,35 @@ public class WellnessService : IWellnessService
 
         if (plan == null)
         {
-            return new WellnessDashboardDto
+            if (access.IsUnlocked && access.AllowedPackages != null && access.AllowedPackages.Any())
             {
-                CheckoutConfig = accessEvaluation.CheckoutConfig,
-                Access = access
-            };
+                var request = new UpsertWellnessPlanRequest
+                {
+                    PackageType = access.AllowedPackages.First(),
+                    StartDate = DateTime.UtcNow,
+                    FastingHours = 16,
+                    EatingHours = 8,
+                    DailyFastStartMinuteOfDay = 1200,
+                    StartWeightKg = 0,
+                    TargetWeightKg = 0,
+                    Timezone = "Asia/Ho_Chi_Minh"
+                };
+                await UpsertPlanAsync(userId, request, cancellationToken);
+
+                plan = await _dbContext.WellnessPlans
+                    .Where(p => p.UserId == userId && p.Status != PlanStatusArchived)
+                    .OrderByDescending(p => p.UpdatedAt)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
+
+            if (plan == null)
+            {
+                return new WellnessDashboardDto
+                {
+                    CheckoutConfig = accessEvaluation.CheckoutConfig,
+                    Access = access
+                };
+            }
         }
 
         var utcNow = DateTime.UtcNow;

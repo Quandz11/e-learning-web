@@ -8,9 +8,6 @@ interface PlannerStatsSidebarProps {
 
 const PlannerStatsSidebar: React.FC<PlannerStatsSidebarProps> = ({ stats }) => {
   const { t } = useTranslation();
-  const taskPercent = stats.tasksTotal > 0 ? Math.round((stats.tasksCompleted / stats.tasksTotal) * 100) : 0;
-  const waterPercent = stats.waterGoalMl > 0 ? Math.min(Math.round((stats.waterMl / stats.waterGoalMl) * 100), 100) : 0;
-
   return (
     <div className="sticky top-24 space-y-4">
       {/* Stats header */}
@@ -33,12 +30,6 @@ const PlannerStatsSidebar: React.FC<PlannerStatsSidebarProps> = ({ stats }) => {
                 {stats.tasksCompleted}/{stats.tasksTotal}
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-500"
-                style={{ width: `${taskPercent}%` }}
-              />
-            </div>
           </div>
 
           {/* Water */}
@@ -53,12 +44,6 @@ const PlannerStatsSidebar: React.FC<PlannerStatsSidebarProps> = ({ stats }) => {
               <span className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
                 {stats.waterMl}ml
               </span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500"
-                style={{ width: `${waterPercent}%` }}
-              />
             </div>
           </div>
 
@@ -75,12 +60,6 @@ const PlannerStatsSidebar: React.FC<PlannerStatsSidebarProps> = ({ stats }) => {
                 <span className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
                   {stats.fastingProgressPercent}%
                 </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-orange-400 to-amber-500 transition-all duration-500"
-                  style={{ width: `${stats.fastingProgressPercent}%` }}
-                />
               </div>
             </div>
           )}

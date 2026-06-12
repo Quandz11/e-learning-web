@@ -32,19 +32,18 @@ const PlannerDailyStatusCard: React.FC<PlannerDailyStatusCardProps> = ({ onSubmi
       </div>
 
       {!submitted ? (
-        <div className="space-y-1.5">
+        <div className="flex overflow-x-auto gap-3 pb-2 snap-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {MOOD_OPTIONS.map((mood) => (
             <button
               key={mood.id}
               onClick={() => handleSelect(mood.id)}
               disabled={isSubmitting}
-              className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-300 bg-slate-50 hover:bg-slate-100 hover:scale-[1.01] dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-100 dark:border-slate-700"
+              className="snap-start flex-shrink-0 flex flex-col items-center justify-center gap-2 rounded-2xl w-[110px] p-4 transition-all duration-300 bg-slate-50 hover:bg-slate-100 hover:scale-[1.02] dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-100 dark:border-slate-700"
             >
-              <span className="text-2xl flex-shrink-0">{mood.emoji}</span>
-              <span className="text-[13px] font-bold text-slate-700 dark:text-slate-300">
+              <span className="text-3xl">{mood.emoji}</span>
+              <span className="text-[12px] font-bold text-center text-slate-700 dark:text-slate-300 leading-tight">
                 {t(mood.labelKey)}
               </span>
-              <span className="ml-auto material-symbols-outlined text-slate-300 dark:text-slate-600 text-[20px]">chevron_right</span>
             </button>
           ))}
         </div>

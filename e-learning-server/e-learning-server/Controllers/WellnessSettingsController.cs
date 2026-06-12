@@ -40,6 +40,10 @@ public class WellnessSettingsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message, inner = ex.InnerException?.Message, stack = ex.StackTrace });
+        }
     }
 
     private Guid GetUserId()

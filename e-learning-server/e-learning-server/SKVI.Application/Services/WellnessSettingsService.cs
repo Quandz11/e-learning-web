@@ -104,7 +104,6 @@ public class WellnessSettingsService : IWellnessSettingsService
                 existing.UpdatedAt = now;
 
                 _dbContext.RemoveRange(existing.PackageLessons);
-                existing.PackageLessons.Clear();
                 foreach(var lessonRequest in packageRequest.Lessons)
                 {
                     existing.PackageLessons.Add(new WellnessPackageLesson

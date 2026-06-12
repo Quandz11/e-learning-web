@@ -125,11 +125,11 @@ const WellnessOnboardingWizard: React.FC<WellnessOnboardingWizardProps> = ({
     { icon: '⏳', titleVi: 'Thời gian nhịn ăn', titleEn: 'Fasting Duration', descVi: 'Chọn gói nhịn ăn phù hợp với thể trạng', descEn: 'Choose a fasting preset that fits your condition' },
     { icon: '📅', titleVi: 'Ngày bắt đầu', titleEn: 'Start Date', descVi: 'Khi nào bạn muốn bắt đầu lộ trình?', descEn: 'When do you want to start the roadmap?' },
     { 
-      icon: isPaidFeature ? '💳' : '✨', 
-      titleVi: isPaidFeature ? 'Kích hoạt lộ trình' : 'Sẵn sàng chưa?', 
-      titleEn: isPaidFeature ? 'Activate Roadmap' : 'Ready?', 
-      descVi: isPaidFeature ? 'Lộ trình cá nhân hóa là tính năng trả phí. Hãy kích hoạt để bắt đầu.' : 'Chúng tôi sẽ cá nhân hóa lộ trình dựa trên lựa chọn của bạn', 
-      descEn: isPaidFeature ? 'Personalized roadmap is a premium feature. Activate to start.' : 'We will personalize the roadmap based on your choices' 
+      icon: (isPaidFeature && !isUnlocked) ? '💳' : '✨', 
+      titleVi: (isPaidFeature && !isUnlocked) ? 'Kích hoạt lộ trình' : 'Sẵn sàng chưa?', 
+      titleEn: (isPaidFeature && !isUnlocked) ? 'Activate Roadmap' : 'Ready?', 
+      descVi: (isPaidFeature && !isUnlocked) ? 'Lộ trình cá nhân hóa là tính năng trả phí. Hãy kích hoạt để bắt đầu.' : 'Chúng tôi sẽ cá nhân hóa lộ trình dựa trên lựa chọn của bạn', 
+      descEn: (isPaidFeature && !isUnlocked) ? 'Personalized roadmap is a premium feature. Activate to start.' : 'We will personalize the roadmap based on your choices' 
     },
   ];
 

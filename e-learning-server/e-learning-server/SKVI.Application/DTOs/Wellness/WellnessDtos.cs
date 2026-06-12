@@ -22,10 +22,10 @@ public class UpsertWellnessPlanRequest
     [Range(0, 1439)]
     public int DailyFastStartMinuteOfDay { get; set; } = 20 * 60;
 
-    [Range(30, 350)]
+    [Range(0, 350)]
     public decimal StartWeightKg { get; set; }
 
-    [Range(30, 350)]
+    [Range(0, 350)]
     public decimal TargetWeightKg { get; set; }
 
     [MaxLength(64)]

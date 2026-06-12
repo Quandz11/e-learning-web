@@ -179,10 +179,12 @@ const DailyPlannerView: React.FC = () => {
     <div className="mx-auto max-w-[1500px] px-4 py-6">
       <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)_320px]">
         {/* Left Sidebar — Navigation & Checkout */}
-        <PlannerSidebarLeft />
+        <div className="hidden lg:block sticky top-24 h-fit">
+          <PlannerSidebarLeft />
+        </div>
 
         {/* Main content — scrollable */}
-        <div className="space-y-5 relative min-h-[50vh]">
+        <div className="space-y-5 relative min-h-[50vh] min-w-0">
           {/* Internal Loading Overlay so layout doesn't bounce */}
           {planner.isLoading && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-3xl">
@@ -236,7 +238,7 @@ const DailyPlannerView: React.FC = () => {
               <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-3">lock</span>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{t('wellness.dashboard.locked.title', { defaultValue: 'Tính năng giới hạn' })}</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                {t('wellness.dashboard.locked.desc', { defaultValue: 'Hãy xem các gói nâng cấp ở thanh menu bên trái để kích hoạt trợ lý Wellness nhé.' })}
+                {t('wellness.dashboard.locked.desc', { defaultValue: 'Hãy xem các gói nâng cấp để kích hoạt trợ lý Wellness nhé.' })}
               </p>
             </div>
           ) : null}
@@ -280,6 +282,7 @@ const DailyPlannerView: React.FC = () => {
 
       {/* Mobile stats — shown below content on small screens */}
       <div className="mt-6 lg:hidden space-y-5">
+        <PlannerSidebarLeft />
         <PlannerStatsSidebar stats={planner.stats} />
         {planner.wellnessPlan && <PlannerMealCard />}
       </div>

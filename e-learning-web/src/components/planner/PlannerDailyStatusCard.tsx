@@ -90,7 +90,7 @@ const PlannerDailyStatusCard: React.FC<PlannerDailyStatusCardProps> = ({ onSubmi
                 className="mt-2 text-[11px] font-bold text-slate-400 hover:text-purple-500 transition-colors uppercase tracking-wider flex items-center gap-1"
               >
                 <span className="material-symbols-outlined text-sm">refresh</span>
-                {t('common.change') || 'Thay đổi trạng thái'}
+                {t('common.change', { defaultValue: 'Thay đổi trạng thái' })}
               </button>
             </div>
           </div>

@@ -90,7 +90,7 @@ const PlannerSidebarLeft: React.FC = () => {
   }, [checkoutCatalog, access?.isUnlocked, access?.requiredPackages]);
 
   return (
-    <div className="sticky top-24 space-y-4 hidden lg:block h-fit">
+    <div className="space-y-4 h-fit">
       {/* Profile Card */}
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] dark:border-slate-700/60 dark:bg-slate-800">
         <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">

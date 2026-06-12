@@ -2794,7 +2794,17 @@
             "actions": {
                 "addPackage": "Thêm gói",
                 "save": "Lưu cấu hình",
-                "saving": "Đang lưu..."
+                "saving": "Đang lưu...",
+                "addLesson": "Thêm bài học",
+                "removeLesson": "Xóa bài học"
+            },
+            "packages": {
+                "roadmapLessons": "Lộ trình bài học",
+                "noLessons": "Chưa cấu hình bài học. Hãy thêm bài học để tạo lộ trình cho gói này.",
+                "lesson": "Bài học",
+                "day": "Ngày",
+                "order": "Thứ tự",
+                "selectLesson": "Chọn bài học..."
             },
             "labels": {
                 "featured": "Nổi bật"
@@ -2850,6 +2860,13 @@
             "done": "Đã hoàn thành",
             "markDone": "Đánh dấu hoàn thành"
         },
+        "tasks": {
+            "todayLessons": "Bài Học Hôm Nay",
+            "completedCount": "{{completed}}/{{total}} bài học hoàn thành",
+            "startLearning": "Bắt đầu học",
+            "markCompleted": "Đánh dấu hoàn thành",
+            "completed": "Đã hoàn thành"
+        },
         "fasting": {
             "title": "Lịch nhịn ăn",
             "eatingWindow": "Cửa sổ ăn uống",
@@ -2860,7 +2877,8 @@
         "water": {
             "title": "Uống nước",
             "goal": "Mục tiêu: {{amount}}ml",
-            "goalReached": "Đã đạt mục tiêu hôm nay!"
+            "goalReached": "Đã đạt mục tiêu hôm nay!",
+            "add500ml": "Thêm 500ml"
         },
         "tips": {
             "title": "Mẹo hôm nay",

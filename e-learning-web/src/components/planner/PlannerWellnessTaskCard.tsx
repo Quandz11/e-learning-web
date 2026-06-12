@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { WellnessDailyTask } from '../../types/planner';
 
@@ -10,6 +11,7 @@ interface PlannerWellnessTaskCardProps {
 }
 
 const PlannerWellnessTaskCard: React.FC<PlannerWellnessTaskCardProps> = ({ tasks, onStartLearning, onCompleteTask, isSubmitting }) => {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (tasks.length === 0) {
@@ -27,9 +29,13 @@ const PlannerWellnessTaskCard: React.FC<PlannerWellnessTaskCardProps> = ({ tasks
           <span className="material-symbols-outlined text-emerald-500 text-xl">self_improvement</span>
         </div>
         <div className="flex-1">
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">Bài Học Hôm Nay</h3>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">{t('planner.tasks.todayLessons', { defaultValue: "Today's Lessons" })}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            {tasks.filter((t) => t.isCompleted).length}/{tasks.length} bài học hoàn thành
+            {t('planner.tasks.completedCount', { 
+              completed: tasks.filter((t) => t.isCompleted).length, 
+              total: tasks.length, 
+              defaultValue: '{{completed}}/{{total}} lessons completed' 
+            })}
           </p>
         </div>
       </div>
@@ -65,7 +71,7 @@ const PlannerWellnessTaskCard: React.FC<PlannerWellnessTaskCardProps> = ({ tasks
             >
               <span className="flex items-center justify-center gap-2">
                 <span className="material-symbols-outlined text-lg">play_arrow</span>
-                Bắt đầu học
+                {t('planner.tasks.startLearning', { defaultValue: 'Start learning' })}
               </span>
             </button>
             <button
@@ -73,13 +79,13 @@ const PlannerWellnessTaskCard: React.FC<PlannerWellnessTaskCardProps> = ({ tasks
               disabled={isSubmitting}
               className="w-full rounded-xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
             >
-              Đánh dấu hoàn thành
+              {t('planner.tasks.markCompleted', { defaultValue: 'Mark as completed' })}
             </button>
           </div>
         ) : (
           <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-emerald-50 py-3 text-sm font-semibold text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
             <span className="material-symbols-outlined text-lg">check_circle</span>
-            Đã hoàn thành
+            {t('planner.tasks.completed', { defaultValue: 'Completed' })}
           </div>
         )}
       </div>
@@ -118,14 +124,14 @@ const PlannerWellnessTaskCard: React.FC<PlannerWellnessTaskCardProps> = ({ tasks
                         disabled={isSubmitting || !task.courseId}
                         className="rounded-lg bg-emerald-500 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
                       >
-                        Bắt đầu học
+                        {t('planner.tasks.startLearning', { defaultValue: 'Start learning' })}
                       </button>
                       <button
                         onClick={() => onCompleteTask(task.id)}
                         disabled={isSubmitting}
                         className="rounded-lg bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
                       >
-                        Đánh dấu hoàn thành
+                        {t('planner.tasks.markCompleted', { defaultValue: 'Mark as completed' })}
                       </button>
                     </div>
                   )}

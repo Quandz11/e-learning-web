@@ -48,11 +48,13 @@ const sanitizePackage = (value: WellnessPackageAdmin): WellnessPackageUpsertPayl
   isActive: Boolean(value.isActive),
   isFeatured: Boolean(value.isFeatured),
   sortOrder: Number(value.sortOrder || 0),
-  lessons: value.lessons?.map(l => ({
-    lessonId: l.lessonId,
-    dayIndex: Number(l.dayIndex || 1),
-    sortOrder: Number(l.sortOrder || 0),
-  })) || [],
+  lessons: (value.lessons || [])
+    .filter(l => l.lessonId && l.lessonId !== '')
+    .map(l => ({
+      lessonId: l.lessonId,
+      dayIndex: Number(l.dayIndex || 1),
+      sortOrder: Number(l.sortOrder || 0),
+  })),
 });
 
 const AdminWellnessSettingsPage: React.FC = () => {
@@ -532,7 +534,7 @@ const AdminWellnessSettingsPage: React.FC = () => {
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                             <span className="material-symbols-outlined text-[18px] text-cyan-600">route</span>
-                            Roadmap Lessons ({pkg.lessons?.length || 0})
+                            {t('wellness.admin.packages.roadmapLessons', { defaultValue: 'Roadmap Lessons' })} ({pkg.lessons?.length || 0})
                           </h4>
                           <button
                             type="button"
@@ -540,20 +542,20 @@ const AdminWellnessSettingsPage: React.FC = () => {
                             className="text-xs font-semibold text-cyan-700 bg-cyan-100/50 border border-cyan-200 px-3 py-1.5 rounded-lg hover:bg-cyan-100 transition-colors flex items-center gap-1"
                           >
                             <span className="material-symbols-outlined text-[14px]">add</span>
-                            Add Lesson
+                            {t('wellness.admin.actions.addLesson', { defaultValue: 'Add Lesson' })}
                           </button>
                         </div>
                         
                         {pkg.lessons?.length === 0 ? (
                           <div className="text-xs text-slate-500 bg-white border border-slate-200 rounded-xl p-4 text-center">
-                            No lessons configured. Add lessons to build a roadmap for this package.
+                            {t('wellness.admin.packages.noLessons', { defaultValue: 'No lessons configured. Add lessons to build a roadmap for this package.' })}
                           </div>
                         ) : (
                           <div className="grid gap-2">
                             <div className="grid grid-cols-[minmax(0,1fr)_100px_100px_40px] gap-2 px-2 text-[11px] font-semibold uppercase text-slate-500">
-                              <span>Lesson</span>
-                              <span className="text-center">Day</span>
-                              <span className="text-center">Order</span>
+                              <span>{t('wellness.admin.packages.lesson', { defaultValue: 'Lesson' })}</span>
+                              <span className="text-center">{t('wellness.admin.packages.day', { defaultValue: 'Day' })}</span>
+                              <span className="text-center">{t('wellness.admin.packages.order', { defaultValue: 'Order' })}</span>
                               <span></span>
                             </div>
                             {pkg.lessons?.map((l, lIdx) => (
@@ -563,7 +565,7 @@ const AdminWellnessSettingsPage: React.FC = () => {
                                   value={l.lessonId}
                                   onChange={(e) => updateLesson(pkg.id, lIdx, 'lessonId', e.target.value)}
                                 >
-                                  <option value="">Select a lesson...</option>
+                                  <option value="">{t('wellness.admin.packages.selectLesson', { defaultValue: 'Select a lesson...' })}</option>
                                   {availableLessons.map(al => (
                                     <option key={al.id} value={al.id}>{al.title}</option>
                                   ))}
@@ -571,7 +573,7 @@ const AdminWellnessSettingsPage: React.FC = () => {
                                 <input 
                                   type="number"
                                   className="rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-xs text-center font-medium text-slate-700 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                                  placeholder="Day"
+                                  placeholder={t('wellness.admin.packages.day', { defaultValue: 'Day' })}
                                   min={1}
                                   max={pkg.durationDays}
                                   value={l.dayIndex}
@@ -580,7 +582,7 @@ const AdminWellnessSettingsPage: React.FC = () => {
                                 <input 
                                   type="number"
                                   className="rounded-lg border-slate-200 bg-slate-50 px-3 py-2 text-xs text-center font-medium text-slate-700 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                                  placeholder="Order"
+                                  placeholder={t('wellness.admin.packages.order', { defaultValue: 'Order' })}
                                   value={l.sortOrder}
                                   onChange={(e) => updateLesson(pkg.id, lIdx, 'sortOrder', parseInt(e.target.value) || 0)}
                                 />
@@ -588,7 +590,7 @@ const AdminWellnessSettingsPage: React.FC = () => {
                                   type="button" 
                                   onClick={() => removeLesson(pkg.id, lIdx)} 
                                   className="grid h-8 w-8 place-items-center rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                                  title="Remove lesson"
+                                  title={t('wellness.admin.actions.removeLesson', { defaultValue: 'Remove lesson' })}
                                 >
                                   <span className="material-symbols-outlined text-[18px]">close</span>
                                 </button>

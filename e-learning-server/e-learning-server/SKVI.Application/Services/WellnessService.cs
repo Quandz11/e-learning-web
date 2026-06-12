@@ -590,7 +590,7 @@ public class WellnessService : IWellnessService
             TaskDate = task.TaskDate,
             LessonId = task.LessonId ?? Guid.Empty,
             LessonTitle = task.Lesson?.Title ?? string.Empty,
-            Description = "Hoàn thành bài học roadmap.",
+            Description = "Complete your roadmap lesson.",
             IsCompleted = task.IsCompleted,
             CompletedAt = task.CompletedAt,
             SortOrder = task.SortOrder
@@ -1582,7 +1582,7 @@ public class WellnessService : IWellnessService
                 LessonId = t.LessonId ?? Guid.Empty,
                 CourseId = t.Lesson?.CourseLessons.FirstOrDefault()?.CourseId,
                 LessonTitle = t.Lesson?.Title ?? string.Empty,
-                Description = "Hoàn thành bài học roadmap.",
+                Description = "Complete your roadmap lesson.",
                 IsCompleted = t.IsCompleted,
                 CompletedAt = t.CompletedAt,
                 SortOrder = t.SortOrder
@@ -1630,7 +1630,7 @@ public class WellnessService : IWellnessService
             LessonId = t.LessonId ?? Guid.Empty,
             CourseId = packageLessons[i].Lesson?.CourseLessons.FirstOrDefault()?.CourseId,
             LessonTitle = packageLessons[i].Lesson?.Title ?? string.Empty,
-            Description = "Hoàn thành bài học roadmap.",
+            Description = "Complete your roadmap lesson.",
             IsCompleted = t.IsCompleted,
             CompletedAt = t.CompletedAt,
             SortOrder = t.SortOrder

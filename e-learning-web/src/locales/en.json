@@ -2768,7 +2768,17 @@
             "actions": {
                 "addPackage": "Add package",
                 "save": "Save settings",
-                "saving": "Saving..."
+                "saving": "Saving...",
+                "addLesson": "Add lesson",
+                "removeLesson": "Remove lesson"
+            },
+            "packages": {
+                "roadmapLessons": "Roadmap lessons",
+                "noLessons": "No lessons configured. Add lessons to build a roadmap for this package.",
+                "lesson": "Lesson",
+                "day": "Day",
+                "order": "Order",
+                "selectLesson": "Select a lesson..."
             },
             "labels": {
                 "featured": "Featured"
@@ -2824,6 +2834,13 @@
             "done": "Completed",
             "markDone": "Mark as done"
         },
+        "tasks": {
+            "todayLessons": "Today's Lessons",
+            "completedCount": "{{completed}}/{{total}} lessons completed",
+            "startLearning": "Start learning",
+            "markCompleted": "Mark as completed",
+            "completed": "Completed"
+        },
         "fasting": {
             "title": "Fasting Schedule",
             "eatingWindow": "Eating window",
@@ -2834,7 +2851,8 @@
         "water": {
             "title": "Water Intake",
             "goal": "Goal: {{amount}}ml",
-            "goalReached": "Daily goal reached!"
+            "goalReached": "Daily goal reached!",
+            "add500ml": "Add 500ml"
         },
         "tips": {
             "title": "Today's Tips",

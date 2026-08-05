@@ -1,199 +1,168 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:e_learning_mobile/core/config/app_config.dart';
+import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
+import 'package:e_learning_mobile/core/session/session_controller.dart';
+import 'package:e_learning_mobile/core/session/session_state.dart';
+import 'package:e_learning_mobile/features/auth/presentation/controllers/auth_otp_challenge.dart';
+import 'package:e_learning_mobile/features/auth/presentation/controllers/auth_otp_challenge_controller.dart';
+import 'package:e_learning_mobile/features/auth/presentation/screens/login_screen.dart';
+import 'package:e_learning_mobile/features/auth/presentation/screens/register_screen.dart';
+import 'package:e_learning_mobile/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/app_shell.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/components_showcase_screen.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/payment_cancel_placeholder_screen.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/payment_return_placeholder_screen.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/public_placeholder_screen.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/unknown_route_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../app/home_page.dart';
-import '../../app/main_shell.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/profile_page.dart';
-import '../../features/auth/presentation/pages/register_page.dart';
-import '../../features/chat_notification/presentation/pages/chat_notification_page.dart';
-import '../../features/forum/presentation/pages/forum_page.dart';
-import '../../features/learning/presentation/pages/course_detail_page.dart';
-import '../../features/learning/presentation/pages/courses_page.dart';
-import '../../features/learning/presentation/pages/learning_player_page.dart';
-import '../../features/learning/presentation/pages/my_courses_page.dart';
-import '../../features/payment/presentation/pages/checkout_page.dart';
-import '../../features/payment/presentation/pages/orders_page.dart';
-import '../../features/payment/presentation/pages/payment_result_page.dart';
-import '../../features/referral/presentation/pages/referral_page.dart';
-import '../../features/wellness_ai/presentation/pages/wellness_ai_page.dart';
-import '../auth/session_controller.dart';
-import '../auth/session_state.dart';
-
-import 'deep_link_mapper.dart';
-import 'route_paths.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final auth = ref.watch(sessionControllerProvider);
+  final sessionState = ref.watch(sessionControllerProvider);
+  final otpChallenge = ref.watch(authOtpChallengeControllerProvider);
+  final config = ref.watch(appConfigProvider);
+  final deepLinks = DeepLinkConfig(config);
 
   return GoRouter(
-    initialLocation: RoutePaths.login,
-    debugLogDiagnostics: false,
-    redirect: (_, state) {
-      final deepLinkRoute = mapExternalDeepLinkToRoute(state.uri);
-      final currentLocation =
-          state.uri.path +
-          (state.uri.query.isEmpty ? '' : '?${state.uri.query}');
-      if (deepLinkRoute != null && deepLinkRoute != currentLocation) {
-        return deepLinkRoute;
-      }
-
-      final isAuthResolving = auth.maybeWhen(
-        initial: () => true,
-        loading: () => true,
-        orElse: () => false,
-      );
-
-      if (isAuthResolving) return null;
-
-      final isAuthed = auth.maybeWhen(
-        authenticated: (_) => true,
-        orElse: () => false,
-      );
-
-      final isAuthRoute =
-          state.matchedLocation == RoutePaths.login ||
-          state.matchedLocation == RoutePaths.register;
-
-      if (!isAuthed && !isAuthRoute) {
-        final fromLocation =
-            state.uri.path +
-            (state.uri.query.isEmpty ? '' : '?${state.uri.query}');
-        final encodedFrom = Uri.encodeComponent(fromLocation);
-        return '${RoutePaths.login}?from=$encodedFrom';
-      }
-
-      if (isAuthed && isAuthRoute) {
-        final from = state.uri.queryParameters['from'];
-        if (from != null && from.isNotEmpty) {
-          try {
-            final decoded = Uri.decodeComponent(from);
-            if (decoded.startsWith('/') &&
-                decoded != RoutePaths.login &&
-                decoded != RoutePaths.register) {
-              return decoded;
-            }
-          } catch (_) {}
-        }
-        return RoutePaths.home;
-      }
-
-      return null;
-    },
+    initialLocation: AppRoutes.appRoot,
     routes: [
-      // ── Auth routes (no shell) ───────────────────────────────────────
-      GoRoute(path: RoutePaths.login, builder: (_, __) => const LoginPage()),
       GoRoute(
-        path: RoutePaths.register,
-        builder: (_, __) => const RegisterPage(),
+        path: AppRoutes.welcome,
+        builder: (_, __) => const PublicPlaceholderScreen(),
       ),
-
-      // ── Full-screen routes without bottom nav ────────────────────────
+      GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginScreen()),
       GoRoute(
-        path: RoutePaths.checkout,
-        builder: (_, __) => const CheckoutPage(),
+        path: AppRoutes.register,
+        builder: (_, __) => const RegisterScreen(),
       ),
       GoRoute(
-        path: RoutePaths.paymentResult,
-        builder: (_, state) {
-          final orderId = state.uri.queryParameters['orderId'];
-          final orderCode = int.tryParse(
-            state.uri.queryParameters['orderCode'] ?? '',
-          );
-          return PaymentResultPage(orderId: orderId, orderCode: orderCode);
+        path: AppRoutes.verifyOtp,
+        builder: (_, state) => VerifyOtpScreen(
+          initialChallenge: otpChallengeFromRouteState(state),
+        ),
+      ),
+      if (kDebugMode)
+        GoRoute(
+          path: AppRoutes.devComponents,
+          builder: (_, __) => const ComponentsShowcaseScreen(),
+        ),
+      GoRoute(path: AppRoutes.appRoot, redirect: (_, __) => AppRoutes.appHome),
+      ShellRoute(
+        builder: (context, state, child) {
+          return AppShell(currentLocation: state.uri.path, child: child);
         },
-      ),
-      GoRoute(
-        path: RoutePaths.learningPlayer,
-        builder: (_, state) {
-          final id = state.pathParameters['id']!;
-          return LearningPlayerPage(courseId: id);
-        },
-      ),
-
-      // ── Main shell with bottom navigation ────────────────────────────
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            MainShell(navigationShell: navigationShell),
-        branches: [
-          // Tab 0 — Trang chủ
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: RoutePaths.home,
-                builder: (_, __) => const HomePage(),
-              ),
-            ],
+        routes: [
+          GoRoute(
+            path: AppRoutes.appHome,
+            builder: (_, __) => const HomePlaceholderScreen(),
           ),
-
-          // Tab 1 — Khóa học
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: RoutePaths.courses,
-                builder: (_, __) => const CoursesPage(),
-                routes: [
-                  GoRoute(
-                    path: ':id',
-                    builder: (_, state) {
-                      final id = state.pathParameters['id']!;
-                      return CourseDetailPage(courseId: id);
-                    },
-                  ),
-                ],
-              ),
-            ],
+          GoRoute(
+            path: AppRoutes.appLearning,
+            builder: (_, __) => const LearningPlaceholderScreen(),
           ),
-
-          // Tab 2 — Diễn đàn
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: RoutePaths.forum,
-                builder: (_, __) => const ForumPage(),
-              ),
-            ],
+          GoRoute(
+            path: AppRoutes.appCommunity,
+            builder: (_, __) => const CommunityPlaceholderScreen(),
           ),
-
-          // Tab 3 — Sức Khỏe
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: RoutePaths.wellnessAi,
-                builder: (_, __) => const WellnessAiPage(),
-              ),
-            ],
-          ),
-
-          // Tab 4 — Tôi
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: RoutePaths.profile,
-                builder: (_, __) => const ProfilePage(),
-                routes: [
-                  GoRoute(
-                    path: 'my-courses',
-                    builder: (_, __) => const MyCoursesPage(),
-                  ),
-                  GoRoute(
-                    path: 'orders',
-                    builder: (_, __) => const OrdersPage(),
-                  ),
-                  GoRoute(
-                    path: 'referral',
-                    builder: (_, __) => const ReferralPage(),
-                  ),
-                  GoRoute(
-                    path: 'chat-notification',
-                    builder: (_, __) => const ChatNotificationPage(),
-                  ),
-                ],
-              ),
-            ],
+          GoRoute(
+            path: AppRoutes.appProfile,
+            builder: (_, __) => const ProfilePlaceholderScreen(),
           ),
         ],
       ),
+      GoRoute(
+        path: AppRoutes.paymentReturn,
+        builder: (_, state) => PaymentReturnPlaceholderScreen(uri: state.uri),
+      ),
+      GoRoute(
+        path: AppRoutes.paymentCancel,
+        builder: (_, state) => PaymentCancelPlaceholderScreen(uri: state.uri),
+      ),
     ],
+    errorBuilder: (_, state) => UnknownRouteScreen(uri: state.uri),
+    redirect: (_, state) => appRedirect(
+      sessionState: sessionState,
+      otpChallenge: otpChallenge,
+      deepLinks: deepLinks,
+      uri: state.uri,
+      matchedLocation: state.matchedLocation,
+      extra: state.extra,
+    ),
   );
 });
+
+String? appRedirect({
+  required SessionState sessionState,
+  required AuthOtpChallenge? otpChallenge,
+  required DeepLinkConfig deepLinks,
+  required Uri uri,
+  required String matchedLocation,
+  Object? extra,
+}) {
+  final mappedDeepLink = deepLinks.mapExternalUri(uri);
+  final currentLocation = uri.path;
+  if (mappedDeepLink != null && mappedDeepLink != currentLocation) {
+    final query = uri.query;
+    return query.isEmpty ? mappedDeepLink : '$mappedDeepLink?$query';
+  }
+
+  if (sessionState.isRestoring) {
+    return null;
+  }
+
+  final isProtected =
+      matchedLocation == AppRoutes.appRoot ||
+      AppRoutes.shellDestinations.contains(matchedLocation);
+  final isPublicWelcome = matchedLocation == AppRoutes.welcome;
+  final isLogin = matchedLocation == AppRoutes.login;
+  final isRegister = matchedLocation == AppRoutes.register;
+  final isVerifyOtp = matchedLocation == AppRoutes.verifyOtp;
+  final challengeFromRoute = otpChallengeFromRoute(uri: uri, extra: extra);
+  final activeOtpChallenge = otpChallenge ?? challengeFromRoute;
+
+  if (!sessionState.isAuthenticated && isProtected) {
+    final targetPath = uri.path == AppRoutes.appRoot
+        ? AppRoutes.appHome
+        : uri.path;
+    final encoded = Uri.encodeComponent(
+      targetPath + (uri.query.isEmpty ? '' : '?${uri.query}'),
+    );
+    return '${AppRoutes.login}?from=$encoded';
+  }
+
+  if (!sessionState.isAuthenticated &&
+      isVerifyOtp &&
+      activeOtpChallenge == null) {
+    return AppRoutes.login;
+  }
+
+  if (sessionState.isAuthenticated &&
+      (isPublicWelcome || isLogin || isRegister || isVerifyOtp)) {
+    return AppRoutes.appHome;
+  }
+
+  return null;
+}
+
+AuthOtpChallenge? otpChallengeFromRouteState(GoRouterState state) {
+  return otpChallengeFromRoute(uri: state.uri, extra: state.extra);
+}
+
+AuthOtpChallenge? otpChallengeFromRoute({required Uri uri, Object? extra}) {
+  final challengeFromExtra = extra is AuthOtpChallenge && extra.isValid
+      ? extra
+      : null;
+  if (challengeFromExtra != null) {
+    return challengeFromExtra;
+  }
+
+  final handoffType = uri.queryParameters['type']?.trim().toLowerCase();
+  final email = uri.queryParameters['email']?.trim();
+  if (handoffType == 'registration' && email != null && email.isNotEmpty) {
+    final challenge = AuthOtpChallenge.registration(email: email);
+    return challenge.isValid ? challenge : null;
+  }
+
+  return null;
+}

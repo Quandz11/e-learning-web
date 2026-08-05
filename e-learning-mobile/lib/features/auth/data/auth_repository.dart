@@ -1,0 +1,105 @@
+import 'package:e_learning_mobile/core/session/app_session.dart';
+import 'package:e_learning_mobile/core/session/session_repository.dart';
+import 'package:e_learning_mobile/features/auth/data/auth_api.dart';
+import 'package:e_learning_mobile/features/auth/data/models/login_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/register_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/two_factor_login_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/verify_otp_request.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepository(
+    api: ref.read(authApiProvider),
+    sessionRepository: ref.read(sessionRepositoryProvider),
+  );
+});
+
+class AuthRepository {
+  AuthRepository({
+    required AuthApi api,
+    required SessionRepository sessionRepository,
+  }) : _api = api,
+       _sessionRepository = sessionRepository;
+
+  final AuthApi _api;
+  final SessionRepository _sessionRepository;
+
+  Future<AuthSessionResult> login(LoginRequest request) async {
+    final response = await _api.login(request);
+    if (response.requiresTwoFactor ?? false) {
+      return AuthSessionResult(
+        session: null,
+        requiresTwoFactor: true,
+        preAuthAccessToken: response.accessToken,
+        message:
+            response.message ??
+            'Two-factor authentication is required to complete sign in.',
+      );
+    }
+
+    final session = response.toSession();
+    await _sessionRepository.writeSession(session);
+    return AuthSessionResult(
+      session: session,
+      requiresTwoFactor: false,
+      message: response.message,
+    );
+  }
+
+  Future<String> register(RegisterRequest request) async {
+    final response = await _api.register(request);
+    return response.message;
+  }
+
+  Future<AuthSessionResult> verifyOtp(VerifyOtpRequest request) async {
+    final response = await _api.verifyOtp(request);
+    final session = response.toSession();
+    await _sessionRepository.writeSession(session);
+    return AuthSessionResult(
+      session: session,
+      requiresTwoFactor: response.requiresTwoFactor ?? false,
+      message: response.message,
+    );
+  }
+
+  Future<AuthSessionResult> verifyLoginTwoFactor({
+    required TwoFactorLoginRequest request,
+    required String preAuthAccessToken,
+  }) async {
+    final response = await _api.verifyLoginTwoFactor(
+      request: request,
+      preAuthAccessToken: preAuthAccessToken,
+    );
+    final session = response.toSession();
+    await _sessionRepository.writeSession(session);
+    return AuthSessionResult(
+      session: session,
+      requiresTwoFactor: response.requiresTwoFactor ?? false,
+      message: response.message,
+    );
+  }
+
+  Future<String> logout(LogoutRequest request) async {
+    try {
+      final response = await _api.logout(request);
+      return response.message;
+    } finally {
+      await _sessionRepository.clear();
+    }
+  }
+}
+
+class AuthSessionResult {
+  const AuthSessionResult({
+    required this.session,
+    required this.requiresTwoFactor,
+    this.preAuthAccessToken,
+    this.message,
+  });
+
+  final AppSession? session;
+  final bool requiresTwoFactor;
+  final String? preAuthAccessToken;
+  final String? message;
+}

@@ -23,3 +23,25 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Flutter / mobile build artifacts
+e-learning-mobile/build/
+e-learning-mobile/.dart_tool/
+e-learning-mobile/.flutter-plugins
+e-learning-mobile/.flutter-plugins-dependencies
+e-learning-mobile/android/.gradle/
+e-learning-mobile/ios/Flutter/ephemeral/
+e-learning-mobile/android/gradlew
+e-learning-mobile/android/gradlew.bat
+e-learning-mobile/android/local.properties
+
+# Server build outputs
+e-learning-server/**/bin/
+e-learning-server/**/obj/
+
+# Local agent / codex artifacts
+e-learning-mobile/.codex/
+e-learning-mobile/.agents/
+
+# Environment files (local only)
+e-learning-mobile/assets/env/*.env*

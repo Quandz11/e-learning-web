@@ -1,0 +1,85 @@
+# General
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+Thumbs.db
+
+# IDE and editors
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.project
+.settings/
+.classpath
+
+# Dart and Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+doc/api/
+flutter_*.png
+flutter_*.log
+
+# Keep pubspec.lock committed because this repository contains an application.
+
+# Generated localization and temporary files
+**/generated_plugin_registrant.dart
+**/.dart_tool/
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+android/**/gradle-wrapper.jar
+android/app/debug/
+android/app/profile/
+android/app/release/
+*.jks
+*.keystore
+
+# iOS and macOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+ios/Flutter/.last_build_id
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Runner/GeneratedPluginRegistrant.*
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/
+macos/Pods/
+macos/.symlinks/
+macos/Flutter/ephemeral/
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/Flutter-Generated.xcconfig
+macos/Flutter/ephemeral/
+
+# Windows and Linux
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# Environment and secret files
+.env
+.env.*
+assets/env/.env.*
+!assets/env/.env.example
+!assets/env/.env.*.example
+
+# Firebase and service credentials
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+firebase_options.dart
+
+# Signing and certificates
+*.p12
+*.pem
+*.mobileprovision

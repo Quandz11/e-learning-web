@@ -26,9 +26,11 @@ Do not place temporary task notes here.
 - State management: Riverpod
 - Routing: GoRouter
 - Authenticated shell: `ShellRoute` with `/app/home`, `/app/learning`, `/app/community`, and `/app/profile`
+- Home feature: `/app/home` reuses `ProfileController` for the greeting header and loads published courses, authenticated enrollments, active categories, recent public articles, and active testimonials through a dedicated Home repository
 - Authenticated profile child routes: `/app/profile/edit`, `/app/profile/change-password`, `/app/profile/security`
 - Public recovery routes: `/forgot-password`, `/forgot-password/verify`
 - Bottom navigation source of truth: current GoRouter location only
+- Home actions route only to existing shell destinations until dedicated Learning and article-detail routes exist
 - Networking: Dio with app-owned auth and error interceptors
 - Persistence: Flutter Secure Storage for access token, refresh token, and expiry only
 - Serialization: Handwritten immutable Dart models

@@ -32,6 +32,8 @@
 - Do not hard-code repeated spacing, radius, colors, or button/input styling inside feature screens.
 - Keep shared UI abstractions narrow; do not wrap standard Flutter widgets with unnecessary pass-through APIs.
 - Prefer standard Material 3 navigation components for authenticated shell chrome unless a custom surface is necessary to preserve existing route behavior.
+- Keep Home section actions routed to existing shell destinations until dedicated feature routes are implemented.
+- Prefer section-local retry cards for optional Home failures instead of collapsing the whole screen.
 
 ## Asynchronous code
 
@@ -97,6 +99,7 @@ Before adding a package:
 - Use consistent terminology.
 - Ensure error messages are actionable and safe.
 - While new Vietnamese auth/profile strings remain inline, keep terminology consistent and avoid mixing English labels into implemented student-facing flows.
+- Keep Home labels, action copy, and error states in Vietnamese while that slice still uses inline strings.
 
 ## Design system usage
 

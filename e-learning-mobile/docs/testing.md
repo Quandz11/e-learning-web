@@ -267,3 +267,11 @@ A behavior change is sufficiently tested when:
 - Light and dark shell rendering, bottom safe-area handling, narrow-width stability, and large-text accessibility stability
 - Placeholder destination rendering without API or loading behavior
 - Regressions for login/register redirects, payment callbacks, debug showcase routing, and unknown-route handling
+
+## Phase 2 Home coverage
+
+- Home API parsing for direct-list and paged public responses, nullable fields, relative image URLs, and malformed primary payloads
+- Home repository orchestration for continue-learning selection, optional-section failure isolation, and primary-feature failure propagation
+- Home controller loading, refresh, retry, retained-content, and duplicate-request prevention
+- Home widget coverage for greeting, quick actions, continue-learning presence or omission, featured-course formatting, optional article failure, retry UI, navigation, and responsive stability
+- Shell regressions updated so `/app/home` resolves to the real Home screen while the other three shell destinations remain unchanged

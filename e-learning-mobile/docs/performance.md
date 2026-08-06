@@ -21,6 +21,7 @@
 - Keep shell tab selection route-driven so the scaffold does not maintain duplicate navigation state or preserve unnecessary inactive trees for placeholder screens.
 - Keep authenticated shell navigation styling lightweight by using standard Material 3 `NavigationBar` motion and a single shell-owned surface instead of custom animation stacks or extra navigation layers.
 - Keep auth and profile forms scrollable and controller-driven so temporary field state stays local to the screen and does not trigger shell-wide rebuilds.
+- Keep Home rendering to one scrollable list with constrained content width and controller-driven loading so repeated child rebuilds do not trigger duplicate requests.
 
 ## Images
 
@@ -29,6 +30,7 @@
 - Use project caching policy.
 - Handle placeholders and errors.
 - Avoid bundling unnecessary high-resolution assets.
+- Home cards cap cached image decode sizes and use local icon fallbacks instead of heavier custom image pipelines.
 
 ## Data and networking
 

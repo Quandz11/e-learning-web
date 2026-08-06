@@ -3,11 +3,9 @@ import 'package:e_learning_mobile/features/auth/presentation/controllers/auth_ot
 import 'package:e_learning_mobile/features/auth/presentation/controllers/auth_otp_challenge_controller.dart';
 import 'package:e_learning_mobile/features/auth/presentation/controllers/register_controller.dart';
 import 'package:e_learning_mobile/features/auth/presentation/controllers/register_state.dart';
+import 'package:e_learning_mobile/features/auth/presentation/widgets/auth_surface.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
-import 'package:e_learning_mobile/shared/widgets/app_card.dart';
-import 'package:e_learning_mobile/shared/widgets/app_page.dart';
-import 'package:e_learning_mobile/shared/widgets/app_section_header.dart';
 import 'package:e_learning_mobile/shared/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,6 +36,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _acceptedTerms = true;
 
   @override
   void dispose() {
@@ -95,154 +94,225 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       });
     });
 
-    return AppPage(
-      appBarTitle: 'Register',
+    return AuthSurface(
+      leading: AuthBackButton(
+        onPressed: state.isSubmitting
+            ? null
+            : () => context.go(AppRoutes.login),
+      ),
       child: AutofillGroup(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const AppSectionHeader(
-              title: 'Create account',
-              subtitle:
-                  'Register with your email to receive a verification code.',
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            if (state.generalMessage != null &&
-                state.status == RegisterStatus.failure) ...[
-              _RegisterMessageCard(message: state.generalMessage!),
-              const SizedBox(height: AppSpacing.md),
-            ],
-            AppTextField(
-              fieldKey: const Key('register_full_name_field'),
-              controller: _fullNameController,
-              focusNode: _fullNameFocusNode,
-              textInputAction: TextInputAction.next,
-              enabled: !state.isSubmitting,
-              autofillHints: const [AutofillHints.name],
-              onChanged: (_) => controller.onFullNameChanged(),
-              onSubmitted: (_) => _emailFocusNode.requestFocus(),
-              labelText: 'Full name',
-              errorText: state.fullNameError,
-              prefixIcon: const Icon(Icons.person_outline),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              fieldKey: const Key('register_email_field'),
-              controller: _emailController,
-              focusNode: _emailFocusNode,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              enabled: !state.isSubmitting,
-              autofillHints: const [
-                AutofillHints.username,
-                AutofillHints.email,
-              ],
-              onChanged: (_) => controller.onEmailChanged(),
-              onSubmitted: (_) => _passwordFocusNode.requestFocus(),
-              labelText: 'Email',
-              hintText: 'name@example.com',
-              errorText: state.emailError,
-              prefixIcon: const Icon(Icons.mail_outline),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              fieldKey: const Key('register_password_field'),
-              controller: _passwordController,
-              focusNode: _passwordFocusNode,
-              obscureText: _obscurePassword,
-              textInputAction: TextInputAction.next,
-              enabled: !state.isSubmitting,
-              autofillHints: const [AutofillHints.newPassword],
-              onChanged: (_) => controller.onPasswordChanged(),
-              onSubmitted: (_) => _confirmPasswordFocusNode.requestFocus(),
-              labelText: 'Password',
-              errorText: state.passwordError,
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                tooltip: _obscurePassword ? 'Show password' : 'Hide password',
-                onPressed: state.isSubmitting
-                    ? null
-                    : () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              fieldKey: const Key('register_confirm_password_field'),
-              controller: _confirmPasswordController,
-              focusNode: _confirmPasswordFocusNode,
-              obscureText: _obscureConfirmPassword,
-              textInputAction: TextInputAction.next,
-              enabled: !state.isSubmitting,
-              onChanged: (_) => controller.onConfirmPasswordChanged(),
-              onSubmitted: (_) => _phoneFocusNode.requestFocus(),
-              labelText: 'Confirm password',
-              errorText: state.confirmPasswordError,
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                tooltip: _obscureConfirmPassword
-                    ? 'Show confirm password'
-                    : 'Hide confirm password',
-                onPressed: state.isSubmitting
-                    ? null
-                    : () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
-                icon: Icon(
-                  _obscureConfirmPassword
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              fieldKey: const Key('register_phone_field'),
-              controller: _phoneController,
-              focusNode: _phoneFocusNode,
-              keyboardType: TextInputType.phone,
-              textInputAction: TextInputAction.next,
-              enabled: !state.isSubmitting,
-              autofillHints: const [AutofillHints.telephoneNumber],
-              onChanged: (_) => controller.onPhoneChanged(),
-              onSubmitted: (_) => _referralCodeFocusNode.requestFocus(),
-              labelText: 'Phone (optional)',
-              errorText: state.phoneError,
-              prefixIcon: const Icon(Icons.phone_outlined),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              fieldKey: const Key('register_referral_code_field'),
-              controller: _referralCodeController,
-              focusNode: _referralCodeFocusNode,
-              textInputAction: TextInputAction.done,
-              enabled: !state.isSubmitting,
-              onChanged: (_) => controller.onReferralCodeChanged(),
-              onSubmitted: (_) => _submit(controller),
-              labelText: 'Referral code (optional)',
-              errorText: state.referralCodeError,
-              prefixIcon: const Icon(Icons.sell_outlined),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AppButton(
-              buttonKey: const Key('register_submit_button'),
-              label: 'Create account',
-              onPressed: () => _submit(controller),
-              loading: state.isSubmitting,
-            ),
             const SizedBox(height: AppSpacing.sm),
-            AppButton(
+            AuthFormCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const AuthHeading(
+                    title: 'Đăng ký tài khoản',
+                    subtitle:
+                        'Bắt đầu hành trình nhịn ăn và sống khỏe mạnh cùng chúng tôi!',
+                    centered: true,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (state.generalMessage != null &&
+                      state.status == RegisterStatus.failure) ...[
+                    AuthMessageCard(message: state.generalMessage!),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                  AppTextField(
+                    fieldKey: const Key('register_full_name_field'),
+                    controller: _fullNameController,
+                    focusNode: _fullNameFocusNode,
+                    textInputAction: TextInputAction.next,
+                    enabled: !state.isSubmitting,
+                    autofillHints: const [AutofillHints.name],
+                    onChanged: (_) => controller.onFullNameChanged(),
+                    onSubmitted: (_) => _emailFocusNode.requestFocus(),
+                    labelText: 'Họ và tên',
+                    hintText: 'Nhập họ và tên',
+                    errorText: state.fullNameError,
+                    prefixIcon: const Icon(Icons.person_outline_rounded),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppTextField(
+                    fieldKey: const Key('register_email_field'),
+                    controller: _emailController,
+                    focusNode: _emailFocusNode,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    enabled: !state.isSubmitting,
+                    autofillHints: const [
+                      AutofillHints.username,
+                      AutofillHints.email,
+                    ],
+                    onChanged: (_) => controller.onEmailChanged(),
+                    onSubmitted: (_) => _phoneFocusNode.requestFocus(),
+                    labelText: 'Email',
+                    hintText: 'Nhập email của bạn',
+                    errorText: state.emailError,
+                    prefixIcon: const Icon(Icons.mail_outline_rounded),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppTextField(
+                    fieldKey: const Key('register_phone_field'),
+                    controller: _phoneController,
+                    focusNode: _phoneFocusNode,
+                    keyboardType: TextInputType.phone,
+                    textInputAction: TextInputAction.next,
+                    enabled: !state.isSubmitting,
+                    autofillHints: const [AutofillHints.telephoneNumber],
+                    onChanged: (_) => controller.onPhoneChanged(),
+                    onSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                    labelText: 'Số điện thoại',
+                    hintText: 'Nhập số điện thoại',
+                    errorText: state.phoneError,
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppTextField(
+                    fieldKey: const Key('register_password_field'),
+                    controller: _passwordController,
+                    focusNode: _passwordFocusNode,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.next,
+                    enabled: !state.isSubmitting,
+                    autofillHints: const [AutofillHints.newPassword],
+                    onChanged: (_) => controller.onPasswordChanged(),
+                    onSubmitted: (_) =>
+                        _confirmPasswordFocusNode.requestFocus(),
+                    labelText: 'Mật khẩu',
+                    hintText: 'Tạo mật khẩu',
+                    errorText: state.passwordError,
+                    prefixIcon: const Icon(Icons.lock_outline_rounded),
+                    suffixIcon: IconButton(
+                      tooltip: _obscurePassword
+                          ? 'Hiện mật khẩu'
+                          : 'Ẩn mật khẩu',
+                      onPressed: state.isSubmitting
+                          ? null
+                          : () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppTextField(
+                    fieldKey: const Key('register_confirm_password_field'),
+                    controller: _confirmPasswordController,
+                    focusNode: _confirmPasswordFocusNode,
+                    obscureText: _obscureConfirmPassword,
+                    textInputAction: TextInputAction.next,
+                    enabled: !state.isSubmitting,
+                    onChanged: (_) => controller.onConfirmPasswordChanged(),
+                    onSubmitted: (_) => _referralCodeFocusNode.requestFocus(),
+                    labelText: 'Xác nhận mật khẩu',
+                    hintText: 'Nhập lại mật khẩu',
+                    errorText: state.confirmPasswordError,
+                    prefixIcon: const Icon(Icons.lock_outline_rounded),
+                    suffixIcon: IconButton(
+                      tooltip: _obscureConfirmPassword
+                          ? 'Hiện xác nhận mật khẩu'
+                          : 'Ẩn xác nhận mật khẩu',
+                      onPressed: state.isSubmitting
+                          ? null
+                          : () {
+                              setState(() {
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
+                              });
+                            },
+                      icon: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppTextField(
+                    fieldKey: const Key('register_referral_code_field'),
+                    controller: _referralCodeController,
+                    focusNode: _referralCodeFocusNode,
+                    textInputAction: TextInputAction.done,
+                    enabled: !state.isSubmitting,
+                    onChanged: (_) => controller.onReferralCodeChanged(),
+                    onSubmitted: (_) => _submit(controller),
+                    labelText: 'Mã giới thiệu (không bắt buộc)',
+                    hintText: 'Nhập mã giới thiệu',
+                    errorText: state.referralCodeError,
+                    prefixIcon: const Icon(Icons.sell_outlined),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Semantics(
+                    container: true,
+                    label: 'Đồng ý điều khoản sử dụng và chính sách bảo mật',
+                    child: CheckboxListTile(
+                      key: const Key('register_terms_checkbox'),
+                      value: _acceptedTerms,
+                      onChanged: state.isSubmitting
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _acceptedTerms = value ?? false;
+                              });
+                            },
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      dense: true,
+                      title: RichText(
+                        text: TextSpan(
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          children: [
+                            const TextSpan(text: 'Tôi đồng ý với '),
+                            TextSpan(
+                              text: 'Điều khoản sử dụng',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const TextSpan(text: ' và '),
+                            TextSpan(
+                              text: 'Chính sách bảo mật',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Semantics(
+                    button: true,
+                    enabled: !state.isSubmitting,
+                    label: state.isSubmitting ? 'Đang đăng ký' : 'Đăng ký',
+                    child: AppButton(
+                      buttonKey: const Key('register_submit_button'),
+                      label: 'Đăng ký',
+                      onPressed: () => _submit(controller),
+                      loading: state.isSubmitting,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AuthFooterPrompt(
+              prompt: 'Đã có tài khoản?',
+              actionLabel: 'Đăng nhập',
               buttonKey: const Key('register_to_login_button'),
-              label: 'Already have an account? Sign in',
-              variant: AppButtonVariant.text,
               onPressed: state.isSubmitting
                   ? null
                   : () => context.go(AppRoutes.login),
@@ -262,45 +332,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       confirmPassword: _confirmPasswordController.text,
       phone: _phoneController.text,
       referralCode: _referralCodeController.text,
-    );
-  }
-}
-
-class _RegisterMessageCard extends StatelessWidget {
-  const _RegisterMessageCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Semantics(
-      liveRegion: true,
-      child: AppCard(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colorScheme.errorContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.error_outline, color: colorScheme.error),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    message,
-                    style: TextStyle(color: colorScheme.error),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

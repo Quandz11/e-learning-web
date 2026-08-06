@@ -12,6 +12,8 @@ import 'package:e_learning_mobile/core/session/session_state.dart';
 import 'package:e_learning_mobile/core/storage/secure_session_storage.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/app_shell.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
+import 'package:e_learning_mobile/features/home/data/home_repository.dart';
+import 'package:e_learning_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:e_learning_mobile/features/profile/data/models/profile.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_api.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
@@ -25,6 +27,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../helpers/in_memory_session_storage.dart';
+import '../../../helpers/fake_home_repository.dart';
 
 void main() {
   testWidgets('authenticated /app resolves to /app/home', (tester) async {
@@ -37,10 +40,7 @@ void main() {
     harness.router.go(AppRoutes.appRoot);
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Home content will be implemented in a later phase.'),
-      findsOneWidget,
-    );
+    expect(find.text('Khóa học nổi bật'), findsOneWidget);
     expect(_selectedIndex(tester), 0);
   });
 
@@ -323,17 +323,11 @@ void main() {
     await tester.pumpWidget(harness.app);
     harness.router.go(AppRoutes.login);
     await tester.pumpAndSettle();
-    expect(
-      find.text('Home content will be implemented in a later phase.'),
-      findsOneWidget,
-    );
+    expect(find.text('Khóa học nổi bật'), findsOneWidget);
 
     harness.router.go(AppRoutes.register);
     await tester.pumpAndSettle();
-    expect(
-      find.text('Home content will be implemented in a later phase.'),
-      findsOneWidget,
-    );
+    expect(find.text('Khóa học nổi bật'), findsOneWidget);
   });
 
   testWidgets('non-home tab can return to home', (tester) async {
@@ -349,10 +343,7 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Home content will be implemented in a later phase.'),
-      findsOneWidget,
-    );
+    expect(find.text('Khóa học nổi bật'), findsOneWidget);
     expect(_selectedIndex(tester), 0);
   });
 
@@ -375,10 +366,7 @@ void main() {
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Home content will be implemented in a later phase.'),
-        findsOneWidget,
-      );
+      expect(find.text('Khóa học nổi bật'), findsOneWidget);
       expect(_selectedIndex(tester), 0);
     },
   );
@@ -422,6 +410,8 @@ _ShellHarness _buildHarness({required SessionState sessionState}) {
         (ref) => _TestSessionController(sessionState),
       ),
       profileControllerProvider.overrideWith((ref) => _TestProfileController()),
+      homeRepositoryProvider.overrideWithValue(FakeHomeRepository()),
+      homeClockProvider.overrideWithValue(() => DateTime(2026, 8, 6, 8)),
     ],
   );
 

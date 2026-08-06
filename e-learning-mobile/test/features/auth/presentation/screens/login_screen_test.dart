@@ -23,11 +23,18 @@ import '../../../../helpers/fake_auth_repository.dart';
 import '../../../../helpers/in_memory_session_storage.dart';
 
 void main() {
-  testWidgets('login screen renders', (tester) async {
+  testWidgets('login screen renders branded layout', (tester) async {
     await tester.pumpWidget(_pumpLoginScreen(const LoginScreen()));
 
     expect(find.byType(LoginScreen), findsOneWidget);
-    expect(find.text('Sử dụng email và mật khẩu để tiếp tục.'), findsOneWidget);
+    expect(find.text('Nhịn ăn\nChữa lành'), findsOneWidget);
+    expect(find.text('Đăng nhập'), findsAtLeastNWidgets(1));
+    expect(
+      find.text(
+        'Đồng hành cùng bạn trên hành trình nhịn ăn và sống khỏe mạnh.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('email and password fields render', (tester) async {
@@ -61,6 +68,7 @@ void main() {
   testWidgets('empty submission shows validation', (tester) async {
     await tester.pumpWidget(_pumpLoginScreen(const LoginScreen()));
 
+    await tester.ensureVisible(find.byKey(const Key('login_submit_button')));
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pump();
 
@@ -79,6 +87,7 @@ void main() {
       find.byKey(const Key('login_password_field')),
       'secret',
     );
+    await tester.ensureVisible(find.byKey(const Key('login_submit_button')));
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pump();
 
@@ -101,6 +110,7 @@ void main() {
       find.byKey(const Key('login_password_field')),
       'secret',
     );
+    await tester.ensureVisible(find.byKey(const Key('login_submit_button')));
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pump();
 
@@ -133,6 +143,7 @@ void main() {
       find.byKey(const Key('login_password_field')),
       'secret',
     );
+    await tester.ensureVisible(find.byKey(const Key('login_submit_button')));
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('login_submit_button')));
@@ -167,6 +178,7 @@ void main() {
       find.byKey(const Key('login_password_field')),
       'bad',
     );
+    await tester.ensureVisible(find.byKey(const Key('login_submit_button')));
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pump();
 
@@ -197,6 +209,7 @@ void main() {
       find.byKey(const Key('login_password_field')),
       'secret',
     );
+    await tester.ensureVisible(find.byKey(const Key('login_submit_button')));
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pump();
 
@@ -221,6 +234,7 @@ void main() {
       find.byKey(const Key('login_password_field')),
       'secret',
     );
+    await tester.ensureVisible(find.byKey(const Key('login_submit_button')));
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pumpAndSettle();
 
@@ -251,6 +265,7 @@ void main() {
       find.byKey(const Key('login_password_field')),
       'secret',
     );
+    await tester.ensureVisible(find.byKey(const Key('login_submit_button')));
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pumpAndSettle();
 
@@ -262,6 +277,17 @@ void main() {
     expect(challenge?.type, AuthOtpChallengeType.loginTwoFactor);
     expect(challenge?.email, 'user@example.com');
     expect(find.text('Home'), findsNothing);
+  });
+
+  testWidgets('layout stays scrollable and social buttons stay hidden', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_pumpLoginScreen(const LoginScreen()));
+
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+    expect(find.text('Google'), findsNothing);
+    expect(find.text('Facebook'), findsNothing);
+    expect(find.text('Apple'), findsNothing);
   });
 
   testWidgets('small viewport does not overflow', (tester) async {
@@ -314,7 +340,7 @@ Widget _pumpLoginScreen(
 
   return UncontrolledProviderScope(
     container: container,
-    child: MaterialApp(home: Scaffold(body: child)),
+    child: MaterialApp(home: child),
   );
 }
 

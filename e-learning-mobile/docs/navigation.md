@@ -57,7 +57,8 @@ Current auth-route map:
 - `/forgot-password/verify` hosts the phone OTP plus new-password verification screen.
 - `/dev/components` is available only in debug builds for internal component verification and is not linked from product navigation.
 - `/app` redirects authenticated traffic to `/app/home`.
-- `/app/home`, `/app/learning`, `/app/community`, and `/app/profile` are the current authenticated shell destinations.
+- `/app/home` hosts the Phase 2 Home screen.
+- `/app/learning`, `/app/community`, and `/app/profile` remain the other authenticated shell destinations.
 - `/app/profile/edit`, `/app/profile/change-password`, and `/app/profile/security` are authenticated child routes under the `Cá nhân` shell destination.
 
 ## Authenticated shell
@@ -67,6 +68,7 @@ Current auth-route map:
 - The authenticated shell keeps exactly four destinations: `Trang chủ`, `Học tập`, `Cộng đồng`, and `Cá nhân`.
 - The shell navigation surface is a compact Material 3 bar rendered by the shell scaffold itself, with rounded top treatment, theme-derived container colors, and a pill-shaped selected indicator.
 - The shell must preserve safe bottom insets and back-button return from non-home tabs to `/app/home`.
+- Home-level navigation continues to target only existing shell destinations until dedicated Learning and article-detail routes are implemented.
 - Future nested routes should be added under the existing `/app/<tab>/...` path structure where practical.
 - Profile child routes under `/app/profile/...` keep `Cá nhân` selected in the bottom navigation.
 - Do not store duplicate selected-tab state in Riverpod or local widget state when the router location already identifies the active tab.

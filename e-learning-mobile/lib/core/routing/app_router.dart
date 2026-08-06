@@ -17,6 +17,7 @@ import 'package:e_learning_mobile/features/foundation/presentation/payment_cance
 import 'package:e_learning_mobile/features/foundation/presentation/payment_return_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/public_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
+import 'package:e_learning_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/unknown_route_screen.dart';
 import 'package:e_learning_mobile/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:e_learning_mobile/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -76,7 +77,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: AppRoutes.appHome,
-            builder: (_, __) => const HomePlaceholderScreen(),
+            builder: (_, __) => const HomeScreen(),
           ),
           GoRoute(
             path: AppRoutes.appLearning,

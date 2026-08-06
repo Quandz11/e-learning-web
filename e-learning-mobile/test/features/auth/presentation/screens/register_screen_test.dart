@@ -23,11 +23,15 @@ import '../../../../helpers/fake_auth_repository.dart';
 import '../../../../helpers/in_memory_session_storage.dart';
 
 void main() {
-  testWidgets('registration screen renders', (tester) async {
+  testWidgets('registration screen renders updated layout', (tester) async {
     await tester.pumpWidget(_pumpRegisterScreen(const RegisterScreen()));
 
     expect(find.byType(RegisterScreen), findsOneWidget);
-    expect(find.text('Create account'), findsAtLeastNWidgets(1));
+    expect(find.text('Đăng ký tài khoản'), findsOneWidget);
+    expect(
+      find.text('Bắt đầu hành trình nhịn ăn và sống khỏe mạnh cùng chúng tôi!'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('all confirmed fields render', (tester) async {
@@ -35,23 +39,27 @@ void main() {
 
     expect(find.byKey(const Key('register_full_name_field')), findsOneWidget);
     expect(find.byKey(const Key('register_email_field')), findsOneWidget);
+    expect(find.byKey(const Key('register_phone_field')), findsOneWidget);
     expect(find.byKey(const Key('register_password_field')), findsOneWidget);
     expect(
       find.byKey(const Key('register_confirm_password_field')),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('register_phone_field')), findsOneWidget);
     expect(
       find.byKey(const Key('register_referral_code_field')),
       findsOneWidget,
     );
   });
 
-  testWidgets('optional fields are marked appropriately', (tester) async {
+  testWidgets('terms checkbox and hidden social options render correctly', (
+    tester,
+  ) async {
     await tester.pumpWidget(_pumpRegisterScreen(const RegisterScreen()));
 
-    expect(find.text('Phone (optional)'), findsOneWidget);
-    expect(find.text('Referral code (optional)'), findsOneWidget);
+    expect(find.byKey(const Key('register_terms_checkbox')), findsOneWidget);
+    expect(find.text('Google'), findsNothing);
+    expect(find.text('Facebook'), findsNothing);
+    expect(find.text('Apple'), findsNothing);
   });
 
   testWidgets('password fields are obscured', (tester) async {
@@ -71,9 +79,9 @@ void main() {
   testWidgets('visibility controls work', (tester) async {
     await tester.pumpWidget(_pumpRegisterScreen(const RegisterScreen()));
 
-    await tester.tap(find.byTooltip('Show password'));
+    await tester.tap(find.byTooltip('Hiện mật khẩu'));
     await tester.pump();
-    await tester.tap(find.byTooltip('Show confirm password'));
+    await tester.tap(find.byTooltip('Hiện xác nhận mật khẩu'));
     await tester.pump();
 
     final passwordField = tester.widget<TextField>(
@@ -244,6 +252,9 @@ void main() {
   testWidgets('login navigation works', (tester) async {
     await tester.pumpWidget(_pumpRegisterApp());
 
+    await tester.ensureVisible(
+      find.byKey(const Key('login_to_register_button')),
+    );
     await tester.tap(find.byKey(const Key('login_to_register_button')));
     await tester.pumpAndSettle();
     await tester.ensureVisible(
@@ -255,7 +266,7 @@ void main() {
     expect(find.byType(LoginScreen), findsOneWidget);
   });
 
-  testWidgets('small viewport does not overflow', (tester) async {
+  testWidgets('screen remains scrollable on small viewport', (tester) async {
     tester.view.physicalSize = const Size(320, 480);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -263,6 +274,7 @@ void main() {
     await tester.pumpWidget(_pumpRegisterScreen(const RegisterScreen()));
     await tester.pumpAndSettle();
 
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

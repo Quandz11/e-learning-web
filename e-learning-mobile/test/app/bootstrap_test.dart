@@ -4,18 +4,27 @@ import 'package:dio/dio.dart';
 import 'package:e_learning_mobile/app/app.dart';
 import 'package:e_learning_mobile/app/bootstrap.dart';
 import 'package:e_learning_mobile/core/config/app_config.dart';
+import 'package:e_learning_mobile/core/errors/dio_error_mapper.dart';
+import 'package:e_learning_mobile/core/network/api_client.dart';
 import 'package:e_learning_mobile/core/session/app_session.dart';
-import 'package:e_learning_mobile/core/session/session_repository.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
+import 'package:e_learning_mobile/core/session/session_repository.dart';
 import 'package:e_learning_mobile/core/storage/secure_session_storage.dart';
 import 'package:e_learning_mobile/core/storage/session_storage.dart';
 import 'package:e_learning_mobile/features/auth/presentation/screens/login_screen.dart';
-import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/startup_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/startup_failure_screen.dart';
+import 'package:e_learning_mobile/features/home/data/home_repository.dart';
+import 'package:e_learning_mobile/features/home/presentation/screens/home_screen.dart';
+import 'package:e_learning_mobile/features/profile/data/profile_api.dart';
+import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
+import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/fake_home_repository.dart';
 
 void main() {
   testWidgets('application smoke test', (tester) async {
@@ -96,7 +105,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
     container.dispose();
   });
 
@@ -136,7 +145,7 @@ void main() {
 
     expect(find.byType(StartupScreen), findsOneWidget);
     expect(find.byType(LoginScreen), findsNothing);
-    expect(find.byType(HomePlaceholderScreen), findsNothing);
+    expect(find.byType(HomeScreen), findsNothing);
 
     completer.complete(await _buildContainer(storage: _NoopStorage()));
     await tester.pumpAndSettle();
@@ -188,7 +197,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(StartupScreen), findsNothing);
-    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 
   testWidgets('refresh-success startup reaches app home', (tester) async {
@@ -213,7 +222,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.byType(HomePlaceholderScreen), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 
   testWidgets('refresh-failure startup reaches login without home flicker', (
@@ -237,11 +246,11 @@ void main() {
 
     await tester.pumpWidget(app!);
     expect(find.byType(StartupScreen), findsOneWidget);
-    expect(find.byType(HomePlaceholderScreen), findsNothing);
+    expect(find.byType(HomeScreen), findsNothing);
 
     await tester.pumpAndSettle();
 
-    expect(find.byType(HomePlaceholderScreen), findsNothing);
+    expect(find.byType(HomeScreen), findsNothing);
     expect(find.byType(LoginScreen), findsOneWidget);
   });
 
@@ -296,6 +305,11 @@ Future<ProviderContainer> _buildContainer({
     overrides: [
       appConfigProvider.overrideWithValue(config),
       sessionStorageProvider.overrideWithValue(storage),
+      homeRepositoryProvider.overrideWithValue(FakeHomeRepository()),
+      homeClockProvider.overrideWithValue(() => DateTime(2026, 8, 6, 8)),
+      profileControllerProvider.overrideWith(
+        (ref) => _BootstrapProfileController(),
+      ),
       if (dio != null)
         sessionRepositoryProvider.overrideWith(
           (ref) => SessionRepository(
@@ -309,6 +323,27 @@ Future<ProviderContainer> _buildContainer({
 
   await container.read(sessionControllerProvider.notifier).restore();
   return container;
+}
+
+class _BootstrapProfileController extends ProfileController {
+  _BootstrapProfileController() : super(_NoopProfileRepository()) {
+    state = const ProfileState();
+  }
+
+  @override
+  Future<void> load({bool refresh = false}) async {}
+
+  @override
+  Future<void> refresh() async {}
+}
+
+class _NoopProfileRepository extends ProfileRepository {
+  _NoopProfileRepository() : super(api: _NoopProfileApi());
+}
+
+class _NoopProfileApi extends ProfileApi {
+  _NoopProfileApi()
+    : super(apiClient: ApiClient(Dio()), errorMapper: const DioErrorMapper());
 }
 
 class _RefreshSuccessAdapter implements HttpClientAdapter {

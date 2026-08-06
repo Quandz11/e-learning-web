@@ -47,7 +47,8 @@ class AppShell extends StatelessWidget {
   ];
 
   int get _currentIndex {
-    final index = AppRoutes.shellDestinations.indexOf(currentLocation);
+    final shellRoute = AppRoutes.shellDestinationForLocation(currentLocation);
+    final index = AppRoutes.shellDestinations.indexOf(shellRoute);
     return index >= 0 ? index : 0;
   }
 
@@ -140,7 +141,10 @@ class AppShell extends StatelessWidget {
                     selectedIndex: currentIndex,
                     onDestinationSelected: (index) {
                       final target = AppRoutes.shellDestinations[index];
-                      if (target != currentLocation) {
+                      if (target !=
+                          AppRoutes.shellDestinationForLocation(
+                            currentLocation,
+                          )) {
                         context.go(target);
                       }
                     },

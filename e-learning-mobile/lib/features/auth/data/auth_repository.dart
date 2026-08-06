@@ -3,8 +3,13 @@ import 'package:e_learning_mobile/core/session/session_repository.dart';
 import 'package:e_learning_mobile/features/auth/data/auth_api.dart';
 import 'package:e_learning_mobile/features/auth/data/models/login_request.dart';
 import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/phone_forgot_password_otp_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/phone_forgot_password_otp_verify_request.dart';
 import 'package:e_learning_mobile/features/auth/data/models/register_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/two_factor_disable_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/two_factor_enable_request.dart';
 import 'package:e_learning_mobile/features/auth/data/models/two_factor_login_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/two_factor_setup_response.dart';
 import 'package:e_learning_mobile/features/auth/data/models/verify_otp_request.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -80,6 +85,31 @@ class AuthRepository {
     );
   }
 
+  Future<TwoFactorSetupResponse> setupTwoFactor() => _api.setupTwoFactor();
+
+  Future<AuthSessionResult> enableTwoFactor({
+    required String secret,
+    required String code,
+  }) async {
+    final response = await _api.enableTwoFactor(
+      TwoFactorEnableRequest(secret: secret, code: code),
+    );
+    final session = response.toSession();
+    await _sessionRepository.writeSession(session);
+    return AuthSessionResult(
+      session: session,
+      requiresTwoFactor: response.requiresTwoFactor ?? false,
+      message: response.message,
+    );
+  }
+
+  Future<String> disableTwoFactor({required String password}) async {
+    final response = await _api.disableTwoFactor(
+      TwoFactorDisableRequest(password: password),
+    );
+    return response.message;
+  }
+
   Future<String> logout(LogoutRequest request) async {
     try {
       final response = await _api.logout(request);
@@ -87,6 +117,35 @@ class AuthRepository {
     } finally {
       await _sessionRepository.clear();
     }
+  }
+
+  Future<String> requestForgotPasswordOtp(String phone) async {
+    final response = await _api.requestForgotPasswordOtp(
+      PhoneForgotPasswordOtpRequest(phone: phone),
+    );
+    return response.message;
+  }
+
+  Future<String> resendForgotPasswordOtp(String phone) async {
+    final response = await _api.resendForgotPasswordOtp(
+      PhoneForgotPasswordOtpRequest(phone: phone),
+    );
+    return response.message;
+  }
+
+  Future<String> verifyForgotPasswordOtp({
+    required String phone,
+    required String otp,
+    required String newPassword,
+  }) async {
+    final response = await _api.verifyForgotPasswordOtp(
+      PhoneForgotPasswordOtpVerifyRequest(
+        phone: phone,
+        otp: otp,
+        newPassword: newPassword,
+      ),
+    );
+    return response.message;
   }
 }
 

@@ -4,6 +4,10 @@ import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/core/session/session_state.dart';
 import 'package:e_learning_mobile/features/auth/presentation/controllers/auth_otp_challenge.dart';
 import 'package:e_learning_mobile/features/auth/presentation/controllers/auth_otp_challenge_controller.dart';
+import 'package:e_learning_mobile/features/auth/presentation/controllers/forgot_password_challenge.dart';
+import 'package:e_learning_mobile/features/auth/presentation/controllers/forgot_password_challenge_controller.dart';
+import 'package:e_learning_mobile/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:e_learning_mobile/features/auth/presentation/screens/forgot_password_verify_screen.dart';
 import 'package:e_learning_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:e_learning_mobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:e_learning_mobile/features/auth/presentation/screens/verify_otp_screen.dart';
@@ -14,13 +18,20 @@ import 'package:e_learning_mobile/features/foundation/presentation/payment_retur
 import 'package:e_learning_mobile/features/foundation/presentation/public_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/unknown_route_screen.dart';
+import 'package:e_learning_mobile/features/profile/presentation/screens/change_password_screen.dart';
+import 'package:e_learning_mobile/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:e_learning_mobile/features/profile/presentation/screens/profile_screen.dart';
+import 'package:e_learning_mobile/features/profile/presentation/screens/security_screen.dart';
 import 'package:flutter/foundation.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final sessionState = ref.watch(sessionControllerProvider);
   final otpChallenge = ref.watch(authOtpChallengeControllerProvider);
+  final forgotPasswordChallenge = ref.watch(
+    forgotPasswordChallengeControllerProvider,
+  );
   final config = ref.watch(appConfigProvider);
   final deepLinks = DeepLinkConfig(config);
 
@@ -40,6 +51,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.verifyOtp,
         builder: (_, state) => VerifyOtpScreen(
           initialChallenge: otpChallengeFromRouteState(state),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (_, __) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPasswordVerify,
+        builder: (_, state) => ForgotPasswordVerifyScreen(
+          initialChallenge: forgotPasswordChallengeFromRouteState(state),
         ),
       ),
       if (kDebugMode)
@@ -67,7 +88,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.appProfile,
-            builder: (_, __) => const ProfilePlaceholderScreen(),
+            builder: (_, __) => const ProfileScreen(),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (_, __) => const EditProfileScreen(),
+              ),
+              GoRoute(
+                path: 'change-password',
+                builder: (_, __) => const ChangePasswordScreen(),
+              ),
+              GoRoute(
+                path: 'security',
+                builder: (_, __) => const SecurityScreen(),
+              ),
+            ],
           ),
         ],
       ),
@@ -84,6 +119,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (_, state) => appRedirect(
       sessionState: sessionState,
       otpChallenge: otpChallenge,
+      forgotPasswordChallenge: forgotPasswordChallenge,
       deepLinks: deepLinks,
       uri: state.uri,
       matchedLocation: state.matchedLocation,
@@ -95,6 +131,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 String? appRedirect({
   required SessionState sessionState,
   required AuthOtpChallenge? otpChallenge,
+  required ForgotPasswordChallenge? forgotPasswordChallenge,
   required DeepLinkConfig deepLinks,
   required Uri uri,
   required String matchedLocation,
@@ -111,15 +148,23 @@ String? appRedirect({
     return null;
   }
 
-  final isProtected =
-      matchedLocation == AppRoutes.appRoot ||
-      AppRoutes.shellDestinations.contains(matchedLocation);
+  final isProtected = AppRoutes.isProtectedLocation(matchedLocation);
   final isPublicWelcome = matchedLocation == AppRoutes.welcome;
   final isLogin = matchedLocation == AppRoutes.login;
   final isRegister = matchedLocation == AppRoutes.register;
   final isVerifyOtp = matchedLocation == AppRoutes.verifyOtp;
+  final isForgotPassword = matchedLocation == AppRoutes.forgotPassword;
+  final isForgotPasswordVerify =
+      matchedLocation == AppRoutes.forgotPasswordVerify;
+
   final challengeFromRoute = otpChallengeFromRoute(uri: uri, extra: extra);
   final activeOtpChallenge = otpChallenge ?? challengeFromRoute;
+  final forgotPasswordRouteChallenge = forgotPasswordChallengeFromRoute(
+    uri: uri,
+    extra: extra,
+  );
+  final activeForgotPasswordChallenge =
+      forgotPasswordChallenge ?? forgotPasswordRouteChallenge;
 
   if (!sessionState.isAuthenticated && isProtected) {
     final targetPath = uri.path == AppRoutes.appRoot
@@ -137,8 +182,30 @@ String? appRedirect({
     return AppRoutes.login;
   }
 
+  if (!sessionState.isAuthenticated &&
+      isForgotPasswordVerify &&
+      activeForgotPasswordChallenge == null) {
+    return AppRoutes.forgotPassword;
+  }
+
   if (sessionState.isAuthenticated &&
-      (isPublicWelcome || isLogin || isRegister || isVerifyOtp)) {
+      (isPublicWelcome ||
+          isLogin ||
+          isRegister ||
+          isVerifyOtp ||
+          isForgotPassword ||
+          isForgotPasswordVerify)) {
+    if (isLogin) {
+      final from = AppRoutes.safeAuthenticatedRedirect(
+        uri.queryParameters['from'],
+      );
+      if (from != null) {
+        return from;
+      }
+    }
+    if (isVerifyOtp) {
+      return activeOtpChallenge?.redirectPath ?? AppRoutes.appHome;
+    }
     return AppRoutes.appHome;
   }
 
@@ -162,6 +229,26 @@ AuthOtpChallenge? otpChallengeFromRoute({required Uri uri, Object? extra}) {
   if (handoffType == 'registration' && email != null && email.isNotEmpty) {
     final challenge = AuthOtpChallenge.registration(email: email);
     return challenge.isValid ? challenge : null;
+  }
+
+  return null;
+}
+
+ForgotPasswordChallenge? forgotPasswordChallengeFromRouteState(
+  GoRouterState state,
+) {
+  return forgotPasswordChallengeFromRoute(uri: state.uri, extra: state.extra);
+}
+
+ForgotPasswordChallenge? forgotPasswordChallengeFromRoute({
+  required Uri uri,
+  Object? extra,
+}) {
+  final challengeFromExtra = extra is ForgotPasswordChallenge && extra.isValid
+      ? extra
+      : null;
+  if (challengeFromExtra != null) {
+    return challengeFromExtra;
   }
 
   return null;

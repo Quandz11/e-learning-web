@@ -1,6 +1,7 @@
+import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
+import 'package:e_learning_mobile/features/auth/presentation/controllers/auth_otp_challenge_controller.dart';
 import 'package:e_learning_mobile/features/auth/presentation/controllers/login_controller.dart';
 import 'package:e_learning_mobile/features/auth/presentation/controllers/login_state.dart';
-import 'package:e_learning_mobile/features/auth/presentation/controllers/auth_otp_challenge_controller.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
@@ -11,8 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -39,6 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final redirectPath = _readRedirectPath(context);
     final state = ref.watch(loginControllerProvider);
     final controller = ref.read(loginControllerProvider.notifier);
 
@@ -66,14 +66,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return AppPage(
-      appBarTitle: 'Login',
+      appBarTitle: 'Đăng nhập',
       child: AutofillGroup(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const AppSectionHeader(
-              title: 'Sign in',
-              subtitle: 'Use your account credentials to continue.',
+              title: 'Đăng nhập',
+              subtitle: 'Sử dụng email và mật khẩu để tiếp tục.',
             ),
             const SizedBox(height: AppSpacing.lg),
             if (state.generalMessage != null) ...[
@@ -111,12 +111,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               textInputAction: TextInputAction.done,
               enabled: !state.isSubmitting,
               onChanged: (_) => controller.onPasswordChanged(),
-              onSubmitted: (_) => _submit(controller),
-              labelText: 'Password',
+              onSubmitted: (_) =>
+                  _submit(controller, redirectPath: redirectPath),
+              labelText: 'Mật khẩu',
               errorText: state.passwordError,
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                tooltip: _obscurePassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu',
                 onPressed: state.isSubmitting
                     ? null
                     : () {
@@ -132,14 +133,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: AppSpacing.lg),
             AppButton(
               buttonKey: const Key('login_submit_button'),
-              label: 'Sign in',
-              onPressed: () => _submit(controller),
+              label: 'Đăng nhập',
+              onPressed: () => _submit(controller, redirectPath: redirectPath),
               loading: state.isSubmitting,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppButton(
+              buttonKey: const Key('login_forgot_password_button'),
+              label: 'Quên mật khẩu?',
+              variant: AppButtonVariant.text,
+              onPressed: state.isSubmitting
+                  ? null
+                  : () => context.go(AppRoutes.forgotPassword),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            AppButton(
               buttonKey: const Key('login_to_register_button'),
-              label: 'Need an account? Register',
+              label: 'Chưa có tài khoản? Đăng ký',
               variant: AppButtonVariant.text,
               onPressed: state.isSubmitting
                   ? null
@@ -151,11 +161,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Future<void> _submit(LoginController controller) async {
+  String? _readRedirectPath(BuildContext context) {
+    try {
+      return AppRoutes.safeAuthenticatedRedirect(
+        GoRouterState.of(context).uri.queryParameters['from'],
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _submit(
+    LoginController controller, {
+    String? redirectPath,
+  }) async {
     TextInput.finishAutofillContext();
     await controller.submit(
       email: _emailController.text,
       password: _passwordController.text,
+      redirectPath: redirectPath,
     );
   }
 }

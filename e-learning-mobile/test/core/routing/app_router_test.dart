@@ -21,6 +21,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/app'),
       matchedLocation: AppRoutes.appRoot,
@@ -39,6 +40,7 @@ void main() {
         ),
       ),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/app'),
       matchedLocation: AppRoutes.appRoot,
@@ -71,6 +73,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse(AppRoutes.appLearning),
       matchedLocation: AppRoutes.appLearning,
@@ -83,6 +86,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.restoring(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/welcome'),
       matchedLocation: AppRoutes.welcome,
@@ -101,6 +105,7 @@ void main() {
         ),
       ),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/welcome'),
       matchedLocation: AppRoutes.welcome,
@@ -113,6 +118,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/login'),
       matchedLocation: AppRoutes.login,
@@ -125,6 +131,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/register'),
       matchedLocation: AppRoutes.register,
@@ -143,6 +150,7 @@ void main() {
         ),
       ),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/login'),
       matchedLocation: AppRoutes.login,
@@ -161,6 +169,7 @@ void main() {
         ),
       ),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/register'),
       matchedLocation: AppRoutes.register,
@@ -173,6 +182,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('skvi://payment/result?orderCode=123'),
       matchedLocation: '/unknown',
@@ -185,6 +195,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/missing'),
       matchedLocation: '/missing',
@@ -197,6 +208,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse(AppRoutes.devComponents),
       matchedLocation: AppRoutes.devComponents,
@@ -209,6 +221,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse(AppRoutes.verifyOtp),
       matchedLocation: AppRoutes.verifyOtp,
@@ -221,6 +234,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: AuthOtpChallenge.registration(email: 'user@example.com'),
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse(AppRoutes.verifyOtp),
       matchedLocation: AppRoutes.verifyOtp,
@@ -233,6 +247,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse(AppRoutes.verifyOtp),
       matchedLocation: AppRoutes.verifyOtp,
@@ -246,6 +261,7 @@ void main() {
     final redirect = appRedirect(
       sessionState: const SessionState.unauthenticated(),
       otpChallenge: null,
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse('/verify-otp?type=registration&email=user@example.com'),
       matchedLocation: AppRoutes.verifyOtp,
@@ -264,6 +280,7 @@ void main() {
         ),
       ),
       otpChallenge: AuthOtpChallenge.registration(email: 'user@example.com'),
+      forgotPasswordChallenge: null,
       deepLinks: deepLinks,
       uri: Uri.parse(AppRoutes.verifyOtp),
       matchedLocation: AppRoutes.verifyOtp,

@@ -7,8 +7,13 @@ import 'package:e_learning_mobile/features/auth/data/models/auth_token_response.
 import 'package:e_learning_mobile/features/auth/data/models/login_request.dart';
 import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
 import 'package:e_learning_mobile/features/auth/data/models/message_response.dart';
+import 'package:e_learning_mobile/features/auth/data/models/phone_forgot_password_otp_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/phone_forgot_password_otp_verify_request.dart';
 import 'package:e_learning_mobile/features/auth/data/models/register_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/two_factor_disable_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/two_factor_enable_request.dart';
 import 'package:e_learning_mobile/features/auth/data/models/two_factor_login_request.dart';
+import 'package:e_learning_mobile/features/auth/data/models/two_factor_setup_response.dart';
 import 'package:e_learning_mobile/features/auth/data/models/verify_otp_request.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,8 +59,61 @@ class AuthApi {
     );
   }
 
+  Future<TwoFactorSetupResponse> setupTwoFactor() async {
+    final data = await _postJson('/auth/2fa/setup', const <String, dynamic>{});
+    try {
+      return TwoFactorSetupResponse.fromJson(data);
+    } on AppFailure {
+      rethrow;
+    } catch (error) {
+      throw _malformedResponseFailure(
+        'The server returned an invalid response.',
+        error,
+      );
+    }
+  }
+
+  Future<AuthTokenResponse> enableTwoFactor(
+    TwoFactorEnableRequest request,
+  ) async {
+    return _postTokenResponse('/auth/2fa/enable', request.toJson());
+  }
+
+  Future<MessageResponse> disableTwoFactor(
+    TwoFactorDisableRequest request,
+  ) async {
+    return _postMessageResponse('/auth/2fa/disable', request.toJson());
+  }
+
   Future<MessageResponse> logout(LogoutRequest request) async {
     return _postMessageResponse('/auth/logout', request.toJson());
+  }
+
+  Future<MessageResponse> requestForgotPasswordOtp(
+    PhoneForgotPasswordOtpRequest request,
+  ) async {
+    return _postMessageResponse(
+      '/auth/phone/request-forgot-password-otp',
+      request.toJson(),
+    );
+  }
+
+  Future<MessageResponse> resendForgotPasswordOtp(
+    PhoneForgotPasswordOtpRequest request,
+  ) async {
+    return _postMessageResponse(
+      '/auth/phone/resend-forgot-password-otp',
+      request.toJson(),
+    );
+  }
+
+  Future<MessageResponse> verifyForgotPasswordOtp(
+    PhoneForgotPasswordOtpVerifyRequest request,
+  ) async {
+    return _postMessageResponse(
+      '/auth/phone/verify-forgot-password-otp',
+      request.toJson(),
+    );
   }
 
   Future<AuthTokenResponse> _postTokenResponse(

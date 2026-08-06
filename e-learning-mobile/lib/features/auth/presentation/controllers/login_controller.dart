@@ -25,7 +25,11 @@ class LoginController extends StateNotifier<LoginState> {
   final AuthRepository _authRepository;
   final SessionController _sessionController;
 
-  Future<void> submit({required String email, required String password}) async {
+  Future<void> submit({
+    required String email,
+    required String password,
+    String? redirectPath,
+  }) async {
     if (state.isSubmitting) {
       return;
     }
@@ -55,8 +59,7 @@ class LoginController extends StateNotifier<LoginState> {
         if (preAuthAccessToken.isEmpty) {
           state = const LoginState(
             status: LoginStatus.failure,
-            generalMessage:
-                'The sign-in response was incomplete. Please try again.',
+            generalMessage: 'Phản hồi đăng nhập chưa đầy đủ. Vui lòng thử lại.',
           );
           return;
         }
@@ -66,12 +69,11 @@ class LoginController extends StateNotifier<LoginState> {
             email: normalizedEmail,
             preAuthAccessToken: preAuthAccessToken,
             displayMessage:
-                result.message ??
-                'Enter the verification code from your authenticator app.',
+                result.message ?? 'Nhập mã xác thực từ ứng dụng của bạn.',
+            redirectPath: redirectPath,
           ),
           generalMessage:
-              result.message ??
-              'Two-factor authentication is required to complete sign in.',
+              result.message ?? 'Bạn cần xác thực hai lớp để tiếp tục.',
         );
         return;
       }
@@ -80,7 +82,7 @@ class LoginController extends StateNotifier<LoginState> {
       if (session == null) {
         state = const LoginState(
           status: LoginStatus.failure,
-          generalMessage: 'The login response was incomplete.',
+          generalMessage: 'Phản hồi đăng nhập chưa đầy đủ.',
         );
         return;
       }
@@ -124,13 +126,13 @@ class LoginController extends StateNotifier<LoginState> {
 
   String? _validateEmail(String email) {
     if (email.isEmpty) {
-      return 'Email is required.';
+      return 'Vui lòng nhập email.';
     }
 
     const emailPattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$';
     final isValid = RegExp(emailPattern).hasMatch(email);
     if (!isValid) {
-      return 'Enter a valid email address.';
+      return 'Email không hợp lệ.';
     }
 
     return null;
@@ -138,7 +140,7 @@ class LoginController extends StateNotifier<LoginState> {
 
   String? _validatePassword(String password) {
     if (password.isEmpty) {
-      return 'Password is required.';
+      return 'Vui lòng nhập mật khẩu.';
     }
     return null;
   }

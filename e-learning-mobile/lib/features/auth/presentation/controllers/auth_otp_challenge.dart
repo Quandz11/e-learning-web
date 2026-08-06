@@ -6,16 +6,19 @@ class AuthOtpChallenge {
     required this.type,
     this.preAuthAccessToken,
     this.displayMessage,
+    this.redirectPath,
   });
 
   factory AuthOtpChallenge.registration({
     required String email,
     String? displayMessage,
+    String? redirectPath,
   }) {
     return AuthOtpChallenge(
       email: email.trim(),
       type: AuthOtpChallengeType.registration,
       displayMessage: displayMessage?.trim(),
+      redirectPath: redirectPath?.trim(),
     );
   }
 
@@ -23,12 +26,14 @@ class AuthOtpChallenge {
     required String email,
     required String preAuthAccessToken,
     String? displayMessage,
+    String? redirectPath,
   }) {
     return AuthOtpChallenge(
       email: email.trim(),
       type: AuthOtpChallengeType.loginTwoFactor,
       preAuthAccessToken: preAuthAccessToken.trim(),
       displayMessage: displayMessage?.trim(),
+      redirectPath: redirectPath?.trim(),
     );
   }
 
@@ -36,6 +41,7 @@ class AuthOtpChallenge {
   final AuthOtpChallengeType type;
   final String? preAuthAccessToken;
   final String? displayMessage;
+  final String? redirectPath;
 
   bool get isValid {
     if (email.trim().isEmpty) {

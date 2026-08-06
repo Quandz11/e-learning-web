@@ -67,6 +67,15 @@ Current Phase 2.4 OTP rules:
 - The app clears temporary OTP challenge state after successful verification or explicit return to login.
 - The app does not persist partial auth state when OTP verification fails, the challenge is malformed, or the backend rejects the code.
 
+Current supported Phase 1 recovery and profile rules:
+
+- Forgot-password challenge state stores only the normalized phone number required for the active reset flow.
+- Forgot-password routes never place phone numbers, OTP values, or passwords into query parameters.
+- Profile updates submit only `fullName`, `phone`, and the preserved backend `avatarUrl`.
+- Change-password requests submit only `currentPassword` and `newPassword`.
+- Authenticated 2FA setup secrets and QR URIs remain in memory only and are cleared when the security screen is disposed or the enable flow succeeds.
+- The app does not add avatar selection or upload in this phase because no approved mobile picker capability is present in the repository.
+
 Current live-backend auth findings on 2026-07-29:
 
 - Backend login rejects users that are not both verified and `ACTIVE`.

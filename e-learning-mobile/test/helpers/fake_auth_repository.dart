@@ -25,10 +25,12 @@ class FakeAuthRepository extends AuthRepository {
       String preAuthAccessToken,
     )?
     onVerifyLoginTwoFactor,
+    Future<String> Function(String phone)? onRequestForgotPasswordOtp,
   }) : _onLogin = onLogin,
        _onRegister = onRegister,
        _onVerifyOtp = onVerifyOtp,
        _onVerifyLoginTwoFactor = onVerifyLoginTwoFactor,
+       _onRequestForgotPasswordOtp = onRequestForgotPasswordOtp,
        super(
          api: _NoopAuthApi(),
          sessionRepository: SessionRepository(
@@ -51,6 +53,7 @@ class FakeAuthRepository extends AuthRepository {
     String preAuthAccessToken,
   )?
   _onVerifyLoginTwoFactor;
+  final Future<String> Function(String phone)? _onRequestForgotPasswordOtp;
   int loginCallCount = 0;
   final List<LoginRequest> loginRequests = <LoginRequest>[];
   int registerCallCount = 0;
@@ -61,6 +64,8 @@ class FakeAuthRepository extends AuthRepository {
   final List<TwoFactorLoginRequest> verifyLoginTwoFactorRequests =
       <TwoFactorLoginRequest>[];
   final List<String> verifyLoginTwoFactorTokens = <String>[];
+  int requestForgotPasswordOtpCallCount = 0;
+  final List<String> requestForgotPasswordOtpPhones = <String>[];
 
   @override
   Future<AuthSessionResult> login(LoginRequest request) async {
@@ -112,6 +117,18 @@ class FakeAuthRepository extends AuthRepository {
     }
     throw UnimplementedError(
       'FakeAuthRepository.onVerifyLoginTwoFactor was not provided.',
+    );
+  }
+
+  @override
+  Future<String> requestForgotPasswordOtp(String phone) async {
+    requestForgotPasswordOtpCallCount += 1;
+    requestForgotPasswordOtpPhones.add(phone);
+    if (_onRequestForgotPasswordOtp != null) {
+      return _onRequestForgotPasswordOtp(phone);
+    }
+    throw UnimplementedError(
+      'FakeAuthRepository.onRequestForgotPasswordOtp was not provided.',
     );
   }
 }

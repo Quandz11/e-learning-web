@@ -46,7 +46,7 @@ void main() {
 
       await controller.submit(email: '', password: 'secret');
 
-      expect(controller.state.emailError, 'Email is required.');
+      expect(controller.state.emailError, 'Vui lòng nhập email.');
       expect(controller.state.status, LoginStatus.failure);
     });
 
@@ -60,7 +60,7 @@ void main() {
 
       await controller.submit(email: 'invalid', password: 'secret');
 
-      expect(controller.state.emailError, 'Enter a valid email address.');
+      expect(controller.state.emailError, 'Email không hợp lệ.');
     });
 
     test('empty password validation', () async {
@@ -73,7 +73,7 @@ void main() {
 
       await controller.submit(email: 'user@example.com', password: '');
 
-      expect(controller.state.passwordError, 'Password is required.');
+      expect(controller.state.passwordError, 'Vui lòng nhập mật khẩu.');
     });
 
     test('valid submission calls repository once', () async {
@@ -253,7 +253,7 @@ void main() {
       expect(controller.state.status, LoginStatus.failure);
       expect(
         controller.state.generalMessage,
-        'The sign-in response was incomplete. Please try again.',
+        'Phản hồi đăng nhập chưa đầy đủ. Vui lòng thử lại.',
       );
     });
 

@@ -31,7 +31,7 @@ void main() {
     );
 
     expect(find.byType(VerifyOtpScreen), findsOneWidget);
-    expect(find.text('Verify your account'), findsOneWidget);
+    expect(find.text('Xác minh tài khoản'), findsOneWidget);
   });
 
   testWidgets('challenge explanation renders', (tester) async {
@@ -210,7 +210,7 @@ void main() {
   testWidgets('missing challenge safe handling', (tester) async {
     await tester.pumpWidget(_pumpOtpScreen());
 
-    expect(find.textContaining('no longer available'), findsOneWidget);
+    expect(find.textContaining('không còn hiệu lực'), findsOneWidget);
   });
 
   testWidgets('small viewport no overflow', (tester) async {
@@ -294,6 +294,7 @@ Widget _pumpOtpApp({
           redirect: (_, state) => appRedirect(
             sessionState: sessionState,
             otpChallenge: ref.watch(authOtpChallengeControllerProvider),
+            forgotPasswordChallenge: null,
             deepLinks: deepLinks,
             uri: state.uri,
             matchedLocation: state.matchedLocation,

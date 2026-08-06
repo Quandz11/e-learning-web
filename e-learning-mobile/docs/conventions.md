@@ -28,6 +28,7 @@
 - Do not store derived UI values as mutable state when they can be computed.
 - Preserve accessibility semantics and touch target usability.
 - Prefer shared theme tokens and `shared/widgets/*` components over per-screen styling when the behavior is generic.
+- Keep temporary authentication challenge data in narrow Riverpod state objects; do not persist OTPs, passwords, or setup secrets.
 - Do not hard-code repeated spacing, radius, colors, or button/input styling inside feature screens.
 - Keep shared UI abstractions narrow; do not wrap standard Flutter widgets with unnecessary pass-through APIs.
 - Prefer standard Material 3 navigation components for authenticated shell chrome unless a custom surface is necessary to preserve existing route behavior.
@@ -95,6 +96,7 @@ Before adding a package:
 - Avoid hard-coded user-facing strings when localization is enabled.
 - Use consistent terminology.
 - Ensure error messages are actionable and safe.
+- While new Vietnamese auth/profile strings remain inline, keep terminology consistent and avoid mixing English labels into implemented student-facing flows.
 
 ## Design system usage
 

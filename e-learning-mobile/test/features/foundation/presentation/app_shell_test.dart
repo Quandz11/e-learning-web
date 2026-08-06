@@ -1,5 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:e_learning_mobile/app/app.dart';
 import 'package:e_learning_mobile/core/config/app_config.dart';
+import 'package:e_learning_mobile/core/errors/dio_error_mapper.dart';
+import 'package:e_learning_mobile/core/network/api_client.dart';
 import 'package:e_learning_mobile/core/routing/app_router.dart';
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/core/session/app_session.dart';
@@ -9,6 +12,11 @@ import 'package:e_learning_mobile/core/session/session_state.dart';
 import 'package:e_learning_mobile/core/storage/secure_session_storage.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/app_shell.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
+import 'package:e_learning_mobile/features/profile/data/models/profile.dart';
+import 'package:e_learning_mobile/features/profile/data/profile_api.dart';
+import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
+import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -46,10 +54,7 @@ void main() {
     harness.router.go(AppRoutes.appHome);
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Use your account credentials to continue.'),
-      findsOneWidget,
-    );
+    expect(find.text('Sử dụng email và mật khẩu để tiếp tục.'), findsOneWidget);
   });
 
   testWidgets('authenticated user can open each shell destination', (
@@ -68,7 +73,7 @@ void main() {
     }
 
     expect(
-      find.text('Profile content will be implemented in a later phase.'),
+      find.text('Thông tin tài khoản và bảo mật của bạn.'),
       findsOneWidget,
     );
   });
@@ -181,7 +186,7 @@ void main() {
     await tester.tap(find.text('Cá nhân').last);
     await tester.pumpAndSettle();
     expect(
-      find.text('Profile content will be implemented in a later phase.'),
+      find.text('Thông tin tài khoản và bảo mật của bạn.'),
       findsOneWidget,
     );
   });
@@ -389,7 +394,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Profile content will be implemented in a later phase.'),
+      find.text('Thông tin tài khoản và bảo mật của bạn.'),
       findsOneWidget,
     );
     expect(_selectedIndex(tester), 3);
@@ -416,6 +421,7 @@ _ShellHarness _buildHarness({required SessionState sessionState}) {
       sessionControllerProvider.overrideWith(
         (ref) => _TestSessionController(sessionState),
       ),
+      profileControllerProvider.overrideWith((ref) => _TestProfileController()),
     ],
   );
 
@@ -453,6 +459,37 @@ class _TestSessionController extends SessionController {
       ) {
     state = initialState;
   }
+}
+
+class _TestProfileController extends ProfileController {
+  _TestProfileController() : super(_NoopProfileRepository()) {
+    state = ProfileState(
+      status: ProfileStatus.success,
+      profile: Profile(
+        id: 'student-1',
+        email: 'user@example.com',
+        fullName: 'Người dùng',
+        phone: '0912345678',
+        role: 'Student',
+        status: 'Active',
+        avatarUrl: null,
+        isEmailVerified: true,
+        isPhoneVerified: false,
+        isTwoFactorEnabled: false,
+        createdAt: DateTime.utc(2026, 1, 1),
+        updatedAt: DateTime.utc(2026, 1, 2),
+      ),
+    );
+  }
+}
+
+class _NoopProfileRepository extends ProfileRepository {
+  _NoopProfileRepository() : super(api: _NoopProfileApi());
+}
+
+class _NoopProfileApi extends ProfileApi {
+  _NoopProfileApi()
+    : super(apiClient: ApiClient(Dio()), errorMapper: const DioErrorMapper());
 }
 
 AppSession _session() {

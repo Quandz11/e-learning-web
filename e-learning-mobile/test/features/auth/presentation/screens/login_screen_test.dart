@@ -27,10 +27,7 @@ void main() {
     await tester.pumpWidget(_pumpLoginScreen(const LoginScreen()));
 
     expect(find.byType(LoginScreen), findsOneWidget);
-    expect(
-      find.text('Use your account credentials to continue.'),
-      findsOneWidget,
-    );
+    expect(find.text('Sử dụng email và mật khẩu để tiếp tục.'), findsOneWidget);
   });
 
   testWidgets('email and password fields render', (tester) async {
@@ -52,7 +49,7 @@ void main() {
   testWidgets('visibility toggle works', (tester) async {
     await tester.pumpWidget(_pumpLoginScreen(const LoginScreen()));
 
-    await tester.tap(find.byTooltip('Show password'));
+    await tester.tap(find.byTooltip('Hiện mật khẩu'));
     await tester.pump();
 
     final field = tester.widget<TextField>(
@@ -67,8 +64,8 @@ void main() {
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pump();
 
-    expect(find.text('Email is required.'), findsOneWidget);
-    expect(find.text('Password is required.'), findsOneWidget);
+    expect(find.text('Vui lòng nhập email.'), findsOneWidget);
+    expect(find.text('Vui lòng nhập mật khẩu.'), findsOneWidget);
   });
 
   testWidgets('invalid email shows validation', (tester) async {
@@ -85,7 +82,7 @@ void main() {
     await tester.tap(find.byKey(const Key('login_submit_button')));
     await tester.pump();
 
-    expect(find.text('Enter a valid email address.'), findsOneWidget);
+    expect(find.text('Email không hợp lệ.'), findsOneWidget);
   });
 
   testWidgets('loading state disables submit', (tester) async {
@@ -372,6 +369,7 @@ Widget _pumpLoginApp({
           redirect: (_, state) => appRedirect(
             sessionState: sessionState,
             otpChallenge: ref.watch(authOtpChallengeControllerProvider),
+            forgotPasswordChallenge: null,
             deepLinks: deepLinks,
             uri: state.uri,
             matchedLocation: state.matchedLocation,

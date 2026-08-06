@@ -20,6 +20,7 @@
 - Prefer shared layout widgets with constrained content width for forms and small-screen readability instead of ad hoc nested scroll structures.
 - Keep shell tab selection route-driven so the scaffold does not maintain duplicate navigation state or preserve unnecessary inactive trees for placeholder screens.
 - Keep authenticated shell navigation styling lightweight by using standard Material 3 `NavigationBar` motion and a single shell-owned surface instead of custom animation stacks or extra navigation layers.
+- Keep auth and profile forms scrollable and controller-driven so temporary field state stays local to the screen and does not trigger shell-wide rebuilds.
 
 ## Images
 

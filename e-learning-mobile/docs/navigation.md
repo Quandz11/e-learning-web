@@ -36,9 +36,12 @@ Current behavior:
 - Unauthenticated users are redirected from `/app` and `/app/*` routes to `/login`.
 - Unauthenticated users may open `/login`.
 - Unauthenticated users may open `/register`.
+- Unauthenticated users may open `/forgot-password`.
+- Unauthenticated users may open `/forgot-password/verify` only when the app holds a valid in-memory forgot-password challenge or a typed route extra carries one for the initial handoff.
 - Unauthenticated users may open `/verify-otp` only when the app holds a valid in-memory OTP challenge or a route extra carries one for the initial handoff.
-- Authenticated users are redirected away from `/login` to `/app/home`.
+- Authenticated users are redirected away from `/login` to the safe intended `/app/*` destination when present, otherwise `/app/home`.
 - Authenticated users are redirected away from `/register` to `/app/home`.
+- Authenticated users are redirected away from forgot-password routes to `/app/home`.
 - Authenticated users are redirected away from `/verify-otp` to `/app/home`.
 - Authenticated users are redirected from the public welcome route to `/app/home`.
 - Redirects pause while the session is restoring to avoid loops.
@@ -50,9 +53,12 @@ Current auth-route map:
 - `/login` hosts the Phase 2.2 login screen.
 - `/register` hosts the Phase 2.3 registration screen.
 - `/verify-otp` hosts the shared OTP verification screen for registration completion and login 2FA completion.
+- `/forgot-password` hosts the phone-based forgot-password request screen.
+- `/forgot-password/verify` hosts the phone OTP plus new-password verification screen.
 - `/dev/components` is available only in debug builds for internal component verification and is not linked from product navigation.
 - `/app` redirects authenticated traffic to `/app/home`.
 - `/app/home`, `/app/learning`, `/app/community`, and `/app/profile` are the current authenticated shell destinations.
+- `/app/profile/edit`, `/app/profile/change-password`, and `/app/profile/security` are authenticated child routes under the `Cá nhân` shell destination.
 
 ## Authenticated shell
 
@@ -62,6 +68,7 @@ Current auth-route map:
 - The shell navigation surface is a compact Material 3 bar rendered by the shell scaffold itself, with rounded top treatment, theme-derived container colors, and a pill-shaped selected indicator.
 - The shell must preserve safe bottom insets and back-button return from non-home tabs to `/app/home`.
 - Future nested routes should be added under the existing `/app/<tab>/...` path structure where practical.
+- Profile child routes under `/app/profile/...` keep `Cá nhân` selected in the bottom navigation.
 - Do not store duplicate selected-tab state in Riverpod or local widget state when the router location already identifies the active tab.
 
 ## Deep links

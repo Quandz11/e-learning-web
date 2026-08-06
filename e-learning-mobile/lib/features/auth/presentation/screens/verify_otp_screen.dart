@@ -57,24 +57,24 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
           next.status != VerifyOtpStatus.success) {
         return;
       }
-      context.go(AppRoutes.appHome);
+      context.go(challenge?.redirectPath ?? AppRoutes.appHome);
     });
 
     if (challenge == null || !challenge.isValid) {
       return AppPage(
-        appBarTitle: 'Verify code',
+        appBarTitle: 'Xác minh mã',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const AppSectionHeader(
-              title: 'Verification required',
+              title: 'Cần xác minh',
               subtitle:
-                  'Your verification session is no longer available. Sign in to continue.',
+                  'Phiên xác minh không còn hiệu lực. Vui lòng đăng nhập lại để tiếp tục.',
             ),
             const SizedBox(height: AppSpacing.lg),
             AppButton(
               buttonKey: const Key('otp_missing_back_to_login_button'),
-              label: 'Back to login',
+              label: 'Quay lại đăng nhập',
               onPressed: _goToLogin,
             ),
           ],
@@ -83,20 +83,20 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
     }
 
     return AppPage(
-      appBarTitle: 'Verify code',
+      appBarTitle: 'Xác minh mã',
       child: AutofillGroup(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSectionHeader(
               title: challenge.type == AuthOtpChallengeType.registration
-                  ? 'Verify your account'
-                  : 'Complete sign in',
+                  ? 'Xác minh tài khoản'
+                  : 'Hoàn tất đăng nhập',
               subtitle: challenge.displayMessage?.trim().isNotEmpty ?? false
                   ? challenge.displayMessage!
                   : challenge.type == AuthOtpChallengeType.registration
-                  ? 'Enter the 6-digit code sent to your email address.'
-                  : 'Enter the 6-digit code from your authenticator app.',
+                  ? 'Nhập mã xác minh 6 chữ số đã gửi tới email của bạn.'
+                  : 'Nhập mã 6 chữ số từ ứng dụng xác thực.',
             ),
             const SizedBox(height: AppSpacing.lg),
             _OtpEmailCard(maskedEmail: _maskEmail(challenge.email)),
@@ -116,7 +116,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
               enabled: !state.isSubmitting,
               onChanged: (_) => controller.onOtpChanged(),
               onSubmitted: (_) => _submit(controller, challenge),
-              labelText: 'Verification code',
+              labelText: 'Mã xác minh',
               hintText: '123456',
               errorText: state.otpError,
               prefixIcon: const Icon(Icons.password_outlined),
@@ -128,14 +128,14 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
             const SizedBox(height: AppSpacing.lg),
             AppButton(
               buttonKey: const Key('otp_submit_button'),
-              label: 'Verify code',
+              label: 'Xác minh',
               onPressed: () => _submit(controller, challenge),
               loading: state.isSubmitting,
             ),
             const SizedBox(height: AppSpacing.sm),
             AppButton(
               buttonKey: const Key('otp_back_to_login_button'),
-              label: 'Back to login',
+              label: 'Quay lại đăng nhập',
               variant: AppButtonVariant.text,
               onPressed: state.isSubmitting ? null : _goToLogin,
             ),
@@ -183,7 +183,7 @@ class _OtpEmailCard extends StatelessWidget {
 
     return AppCard(
       child: Semantics(
-        label: 'Verification destination $maskedEmail',
+        label: 'Email xác minh $maskedEmail',
         child: Row(
           children: [
             Icon(Icons.mark_email_read_outlined, color: colorScheme.primary),

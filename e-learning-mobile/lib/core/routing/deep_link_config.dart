@@ -50,11 +50,16 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const register = '/register';
   static const verifyOtp = '/verify-otp';
+  static const forgotPassword = '/forgot-password';
+  static const forgotPasswordVerify = '/forgot-password/verify';
   static const appRoot = '/app';
   static const appHome = '/app/home';
   static const appLearning = '/app/learning';
   static const appCommunity = '/app/community';
   static const appProfile = '/app/profile';
+  static const appProfileEdit = '/app/profile/edit';
+  static const appProfileChangePassword = '/app/profile/change-password';
+  static const appProfileSecurity = '/app/profile/security';
   static const protectedHome = appRoot;
   static const paymentReturn = '/payment-return';
   static const paymentCancel = '/payment-cancel';
@@ -65,4 +70,40 @@ abstract final class AppRoutes {
     appCommunity,
     appProfile,
   ];
+
+  static String shellDestinationForLocation(String location) {
+    if (location == appProfile || location.startsWith('$appProfile/')) {
+      return appProfile;
+    }
+    if (location == appLearning || location.startsWith('$appLearning/')) {
+      return appLearning;
+    }
+    if (location == appCommunity || location.startsWith('$appCommunity/')) {
+      return appCommunity;
+    }
+    return appHome;
+  }
+
+  static bool isProtectedLocation(String matchedLocation) {
+    return matchedLocation == appRoot ||
+        matchedLocation.startsWith('$appRoot/');
+  }
+
+  static String? safeAuthenticatedRedirect(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return null;
+    }
+
+    final decoded = Uri.decodeComponent(raw).trim();
+    if (!decoded.startsWith('/app') || decoded.startsWith('//')) {
+      return null;
+    }
+
+    final uri = Uri.tryParse(decoded);
+    if (uri == null || uri.hasScheme) {
+      return null;
+    }
+
+    return decoded;
+  }
 }

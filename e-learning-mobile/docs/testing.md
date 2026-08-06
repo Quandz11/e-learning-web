@@ -227,6 +227,13 @@ A behavior change is sufficiently tested when:
 - Router regressions for `/verify-otp` access control, authenticated redirect-away behavior, and safe handoff from registration and login 2FA flows
 - Startup regressions confirming login is the no-session entry screen and authenticated sessions resolve to the shell
 
+## Supported Phase 1 auth and profile coverage
+
+- Forgot-password widget coverage for the public request screen and basic phone validation
+- Profile overview widget coverage for summary rendering and authenticated actions
+- Updated shell regressions proving `/app/profile` is a real authenticated feature and profile child routes preserve shell ownership
+- Updated login, registration, and OTP widget regressions for the current Vietnamese auth labels and redirect behavior
+
 ## Startup experience coverage
 
 - Bootstrap host coverage that confirms the startup screen renders while initialization is pending and disappears once the app settles

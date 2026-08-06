@@ -238,7 +238,7 @@ void main() {
     expect(challenge?.type, AuthOtpChallengeType.registration);
     expect(challenge?.email, 'user@example.com');
     expect(find.byType(VerifyOtpScreen), findsOneWidget);
-    expect(find.text('Verify your account'), findsOneWidget);
+    expect(find.text('Xác minh tài khoản'), findsOneWidget);
   });
 
   testWidgets('login navigation works', (tester) async {
@@ -390,6 +390,7 @@ Widget _pumpRegisterApp({
           redirect: (_, state) => appRedirect(
             sessionState: sessionState,
             otpChallenge: ref.watch(authOtpChallengeControllerProvider),
+            forgotPasswordChallenge: null,
             deepLinks: deepLinks,
             uri: state.uri,
             matchedLocation: state.matchedLocation,

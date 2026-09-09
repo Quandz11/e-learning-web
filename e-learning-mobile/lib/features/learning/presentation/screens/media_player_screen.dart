@@ -2,6 +2,8 @@ import 'package:e_learning_mobile/features/learning/presentation/controllers/les
 import 'package:e_learning_mobile/features/learning/presentation/controllers/lesson_state.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
 import 'package:e_learning_mobile/features/learning/presentation/widgets/media_player_panel.dart';
+import 'package:e_learning_mobile/shared/theme/app_colors.dart';
+import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
@@ -26,6 +28,8 @@ class MediaPlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
+  int _selectedTabIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -47,10 +51,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_isValidId(widget.courseId) || !_isValidId(widget.lessonPartId)) {
-      return const SafeArea(
-        bottom: false,
-        child: AppErrorView(
-          message: 'KhÃ´ng tÃ¬m tháº¥y video cáº§n hiá»ƒn thá»‹.',
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: AppErrorView(message: 'Không tìm thấy video cần hiển thị.'),
         ),
       );
     }
@@ -58,101 +62,241 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
     final state = ref.watch(_provider);
     final controller = ref.read(_provider.notifier);
 
-    return SafeArea(
-      bottom: false,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
-          AppSpacing.xl,
-        ),
-        children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppSizes.contentMaxWidth,
-              ),
-              child: _MediaPlayerContent(
-                state: state,
-                onRetry: controller.load,
-              ),
-            ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.textPrimary,
+            size: 20,
           ),
-        ],
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          state.detail?.part.title ?? 'Xem Video Bài Học',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: state.isInitialLoading
+            ? const AppLoadingView(label: 'Đang tải video...')
+            : state.status == LessonStatus.failure || state.detail == null
+            ? AppErrorView(
+                message: learningFailureMessage(
+                  state.primaryFailure,
+                  fallback: 'Không thể tải video lúc này.',
+                ),
+                onRetry: controller.load,
+              )
+            : SingleChildScrollView(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: AppSizes.contentMaxWidth,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // 1. Video Player Container
+                          MediaPlayerPanel(part: state.detail!.part),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // 2. Video Title & Metadata Card
+                          AppCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  state.detail!.course.title,
+                                  style: Theme.of(context).textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  state.detail!.part.title,
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                ),
+                                if (state.detail!.part.videoDuration > 0) ...[
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time_rounded,
+                                        size: 14,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Thời lượng: ${formatLearningDuration(Duration(seconds: state.detail!.part.videoDuration.round()))}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // 3. Segmented Tabs (Bài học / Ghi chú / Thảo luận)
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: AppColors.mint,
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _buildTabButton(0, 'Nội dung bài'),
+                                ),
+                                Expanded(child: _buildTabButton(1, 'Ghi chú')),
+                                Expanded(
+                                  child: _buildTabButton(2, 'Thảo luận'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // 4. Tab Content Body
+                          if (_selectedTabIndex == 0) ...[
+                            AppCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Tóm tắt bài học',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    'Trong bài học này, bạn sẽ hiểu rõ về cơ chế tự thực (Autophagy) khi nhịn ăn 16/8, giúp tế bào tự làm sạch và tái tạo năng lượng cho cơ thể.',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: AppColors.textSecondary,
+                                          height: 1.5,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else if (_selectedTabIndex == 1) ...[
+                            AppCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Ghi chú cá nhân',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  const TextField(
+                                    maxLines: 4,
+                                    decoration: InputDecoration(
+                                      hintText:
+                                          'Nhập ghi chú quan trọng trong lúc xem video...',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else ...[
+                            AppCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Hỏi đáp & Thảo luận',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    'Chưa có bình luận nào. Hãy gửi câu hỏi cho bác sĩ hoặc học viên khác!',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: AppColors.textMuted),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
-}
 
-class _MediaPlayerContent extends StatelessWidget {
-  const _MediaPlayerContent({required this.state, required this.onRetry});
-
-  final LessonState state;
-  final Future<void> Function() onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    if (state.isInitialLoading) {
-      return const AppLoadingView(label: 'Äang táº£i video...');
-    }
-
-    final detail = state.detail;
-    if (state.status == LessonStatus.failure || detail == null) {
-      return AppErrorView(
-        message: learningFailureMessage(
-          state.primaryFailure,
-          fallback: 'KhÃ´ng thá»ƒ táº£i video lÃºc nÃ y.',
+  Widget _buildTabButton(int index, String label) {
+    final isSelected = _selectedTabIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTabIndex = index;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
-        onRetry: onRetry,
-      );
-    }
-
-    if (!detail.part.isVideo) {
-      return const AppErrorView(
-        message: 'Ná»™i dung nÃ y khÃ´ng pháº£i video.',
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: IconButton(
-            tooltip: 'Quay láº¡i bÃ i há»c',
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_rounded),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+            fontSize: 13,
           ),
         ),
-        AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                detail.course.title,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Semantics(
-                header: true,
-                child: Text(
-                  detail.part.title,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              if (detail.part.videoDuration > 0) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Thá»i lÆ°á»£ng: ${formatLearningDuration(Duration(seconds: detail.part.videoDuration.round()))}',
-                ),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        MediaPlayerPanel(part: detail.part),
-      ],
+      ),
     );
   }
 }

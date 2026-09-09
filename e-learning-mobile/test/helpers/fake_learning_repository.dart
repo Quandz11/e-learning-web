@@ -16,6 +16,9 @@ class FakeLearningRepository extends LearningRepository {
   int loadCallCount = 0;
 
   @override
+  Future<LearningLoadResult?> loadLearningFromCache() async => null;
+
+  @override
   Future<LearningLoadResult> loadLearning() async {
     loadCallCount += 1;
     if (onLoad != null) {

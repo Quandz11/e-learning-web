@@ -1,7 +1,4 @@
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
-import 'package:e_learning_mobile/shared/theme/app_radius.dart';
-import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
-import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -28,15 +25,15 @@ class AppShell extends StatelessWidget {
     ),
     _ShellDestination(
       route: AppRoutes.appLearning,
-      label: 'Học tập',
-      icon: Icons.school_outlined,
-      selectedIcon: Icons.school_rounded,
+      label: 'Khóa học',
+      icon: Icons.menu_book_outlined,
+      selectedIcon: Icons.menu_book_rounded,
     ),
     _ShellDestination(
-      route: AppRoutes.appCommunity,
-      label: 'Cộng đồng',
-      icon: Icons.groups_2_outlined,
-      selectedIcon: Icons.groups_2_rounded,
+      route: AppRoutes.appPersonalization,
+      label: 'Cá nhân hóa',
+      icon: Icons.tune_outlined,
+      selectedIcon: Icons.tune_rounded,
     ),
     _ShellDestination(
       route: AppRoutes.appProfile,
@@ -67,11 +64,7 @@ class AppShell extends StatelessWidget {
             systemNavigationBarColor: Colors.transparent,
             systemNavigationBarDividerColor: Colors.transparent,
           );
-    final navSurfaceColor = colorScheme.surfaceContainerLow;
-    final navBorderColor = colorScheme.outlineVariant;
-    final indicatorColor = colorScheme.secondaryContainer;
-    final selectedForeground = colorScheme.onSecondaryContainer;
-    final unselectedForeground = colorScheme.onSurfaceVariant;
+
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
@@ -91,51 +84,63 @@ class AppShell extends StatelessWidget {
           bottomNavigationBar: SafeArea(
             key: navigationSafeAreaKey,
             top: false,
-            minimum: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.sm,
-              AppSpacing.md,
-              AppSpacing.md,
-            ),
-            child: NavigationBarTheme(
-              data: NavigationBarThemeData(
-                height: 72,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                backgroundColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                indicatorColor: indicatorColor,
-                indicatorShape: const StadiumBorder(),
-                iconTheme: WidgetStateProperty.resolveWith((states) {
-                  final isSelected = states.contains(WidgetState.selected);
-                  return IconThemeData(
-                    size: AppSizes.iconMd,
-                    color: isSelected
-                        ? selectedForeground
-                        : unselectedForeground,
-                  );
-                }),
-                labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                  final isSelected = states.contains(WidgetState.selected);
-                  return theme.textTheme.labelMedium?.copyWith(
-                    color: isSelected
-                        ? selectedForeground
-                        : unselectedForeground,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  );
-                }),
-              ),
-              child: Material(
-                elevation: 3,
-                color: navSurfaceColor,
-                shadowColor: colorScheme.shadow.withValues(alpha: 0.08),
-                surfaceTintColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  side: BorderSide(color: navBorderColor),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border(
+                  top: BorderSide(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    width: 1.0,
+                  ),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                child: NavigationBarTheme(
+                  data: NavigationBarThemeData(
+                    height: 66,
+                    labelBehavior:
+                        NavigationDestinationLabelBehavior.alwaysShow,
+                    backgroundColor: colorScheme.surface,
+                    surfaceTintColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    indicatorColor: const Color(0xFFD8EAD9),
+                    indicatorShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    iconTheme: WidgetStateProperty.resolveWith((states) {
+                      final isSelected = states.contains(WidgetState.selected);
+                      return IconThemeData(
+                        size: 24,
+                        color: isSelected
+                            ? const Color(0xFF132A17)
+                            : const Color(0xFF757575),
+                      );
+                    }),
+                    labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                      final isSelected = states.contains(WidgetState.selected);
+                      return TextStyle(
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? const Color(0xFF132A17)
+                            : const Color(0xFF757575),
+                      );
+                    }),
+                  ),
                   child: NavigationBar(
                     key: navigationBarKey,
                     selectedIndex: currentIndex,

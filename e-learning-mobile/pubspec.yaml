@@ -42,6 +42,7 @@ dependencies:
   url_launcher: ^6.3.2
   flutter_dotenv: ^5.2.1
   webview_flutter: ^4.13.0
+  webview_flutter_android: ^4.10.0
   collection: ^1.19.1
   firebase_core: ^4.9.0
   firebase_messaging: ^16.2.2
@@ -52,6 +53,9 @@ dependencies:
   flutter_widget_from_html: ^0.17.2
   video_player: 2.10.1
   syncfusion_flutter_pdfviewer: 30.2.7
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+  shared_preferences: ^2.5.2
 
 dev_dependencies:
   flutter_test:

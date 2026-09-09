@@ -12,6 +12,31 @@ class LearningRepository {
 
   final LearningApi _api;
 
+  Future<LearningLoadResult?> loadLearningFromCache() async {
+    try {
+      final courses = await _api.getCachedPublishedCourses();
+      if (courses == null) return null;
+
+      final enrollments = await _api.getCachedEnrollments() ?? const [];
+      final categories = await _api.getCachedActiveCategories() ?? const [];
+
+      return LearningLoadResult(
+        courses: courses
+            .where((course) => course.isPublished)
+            .toList(growable: false),
+        enrollments: enrollments
+            .where((enrollment) => enrollment.status == 'ACTIVE')
+            .toList(growable: false),
+        categories: categories
+            .where((category) => category.isActive)
+            .toList(growable: false)
+          ..sort((left, right) => left.order.compareTo(right.order)),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<LearningLoadResult> loadLearning() async {
     final courses = await _api.getPublishedCourses();
     final enrollments = await _captureOptional(_api.getEnrollments);

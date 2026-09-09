@@ -37,6 +37,22 @@ class HomeController extends StateNotifier<HomeState> {
       );
     }
 
+    if (!refresh && state.featuredCourses.isEmpty) {
+      try {
+        final cachedResult = await _repository.loadHomeFromCache();
+        if (cachedResult != null && mounted && state.status == HomeStatus.loading) {
+          state = HomeState(
+            status: HomeStatus.success,
+            featuredCourses: cachedResult.featuredCourses,
+            continueLearning: cachedResult.continueLearning,
+            categories: cachedResult.categories,
+            articles: cachedResult.articles,
+            testimonials: cachedResult.testimonials,
+          );
+        }
+      } catch (_) {}
+    }
+
     try {
       final result = await _repository.loadHome();
       if (!mounted) {

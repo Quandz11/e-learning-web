@@ -7,12 +7,15 @@ import 'package:e_learning_mobile/core/network/network_providers.dart';
 import 'package:e_learning_mobile/features/learning/data/models/learning_models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:e_learning_mobile/core/network/cache_service.dart';
+
 final learningApiProvider = Provider<LearningApi>((ref) {
   final config = ref.read(appConfigProvider);
   return LearningApi(
     apiClient: ref.read(apiClientProvider),
     errorMapper: ref.read(dioErrorMapperProvider),
     apiBaseUrl: config.apiBaseUrl,
+    cacheService: ref.read(cacheServiceProvider),
   );
 });
 
@@ -21,13 +24,16 @@ class LearningApi {
     required ApiClient apiClient,
     required DioErrorMapper errorMapper,
     required Uri apiBaseUrl,
-  }) : _apiClient = apiClient,
-       _errorMapper = errorMapper,
-       _apiBaseUrl = apiBaseUrl;
+    CacheService? cacheService,
+  })  : _apiClient = apiClient,
+        _errorMapper = errorMapper,
+        _apiBaseUrl = apiBaseUrl,
+        _cacheService = cacheService;
 
   final ApiClient _apiClient;
   final DioErrorMapper _errorMapper;
   final Uri _apiBaseUrl;
+  final CacheService? _cacheService;
 
   Future<List<LearningCourse>> getPublishedCourses() async {
     final rows = await _getJsonList(
@@ -83,9 +89,7 @@ class LearningApi {
 
   Future<Uri?> getVideoEmbedUrl(String videoId) async {
     try {
-      final data = await _apiClient.get<Object?>(
-        '/videos/$videoId/embed-url',
-      );
+      final data = await _apiClient.get<Object?>('/videos/$videoId/embed-url');
       final json = _coerceJsonMap(data);
       final embedUrl = _resolveUrl(_optionalString(json['embedUrl']));
       return embedUrl == null ? null : Uri.tryParse(embedUrl);
@@ -97,16 +101,54 @@ class LearningApi {
     }
   }
 
+  Future<List<LearningCourse>?> getCachedPublishedCourses() async {
+    final cached = await _cacheService?.getList('/courses?isPublished=true');
+    if (cached == null) return null;
+    try {
+      final rows = _coerceJsonList(cached);
+      return rows.map(_parseCourse).toList(growable: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<LearningEnrollment>?> getCachedEnrollments() async {
+    final cached = await _cacheService?.getList('/enrollments');
+    if (cached == null) return null;
+    try {
+      final rows = _coerceJsonList(cached);
+      return rows.map(_parseEnrollment).toList(growable: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<LearningCategory>?> getCachedActiveCategories() async {
+    final cached = await _cacheService?.getList('/categories/active');
+    if (cached == null) return null;
+    try {
+      final rows = _coerceJsonList(cached);
+      return rows.map(_parseCategory).toList(growable: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> _getJsonList(
     String path, {
     Map<String, dynamic>? queryParameters,
   }) async {
+    final cacheKey = queryParameters != null && queryParameters.isNotEmpty
+        ? '$path?${Uri(queryParameters: queryParameters.map((k, v) => MapEntry(k, v.toString()))).query}'
+        : path;
     try {
       final data = await _apiClient.get<Object?>(
         path,
         queryParameters: queryParameters,
       );
-      return _coerceJsonList(data);
+      final list = _coerceJsonList(data);
+      _cacheService?.set(cacheKey, list);
+      return list;
     } on DioException catch (error) {
       throw _map(error);
     }

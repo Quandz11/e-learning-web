@@ -11,12 +11,11 @@ import 'package:e_learning_mobile/features/auth/presentation/screens/forgot_pass
 import 'package:e_learning_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:e_learning_mobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:e_learning_mobile/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:e_learning_mobile/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/app_shell.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/components_showcase_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/payment_cancel_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/payment_return_placeholder_screen.dart';
-import 'package:e_learning_mobile/features/foundation/presentation/public_placeholder_screen.dart';
-import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:e_learning_mobile/features/learning/presentation/screens/course_detail_screen.dart';
 import 'package:e_learning_mobile/features/learning/presentation/screens/document_reader_screen.dart';
@@ -28,6 +27,15 @@ import 'package:e_learning_mobile/features/profile/presentation/screens/change_p
 import 'package:e_learning_mobile/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:e_learning_mobile/features/profile/presentation/screens/profile_screen.dart';
 import 'package:e_learning_mobile/features/profile/presentation/screens/security_screen.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/screens/personalization_screen.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/screens/wellness_coach_screen.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/screens/wellness_plan_editor_screen.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/screens/wellness_progress_screen.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/screens/wellness_resources_screen.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/screens/reminder_list_screen.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/screens/reminder_editor_screen.dart';
+import 'package:e_learning_mobile/features/progress/presentation/screens/learning_progress_screen.dart';
+import 'package:e_learning_mobile/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -46,7 +54,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: AppRoutes.welcome,
-        builder: (_, __) => const PublicPlaceholderScreen(),
+        builder: (_, __) => const WelcomeScreen(),
       ),
       GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginScreen()),
       GoRoute(
@@ -124,8 +132,50 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
           GoRoute(
-            path: AppRoutes.appCommunity,
-            builder: (_, __) => const CommunityPlaceholderScreen(),
+            path: AppRoutes.appPersonalization,
+            builder: (_, __) => const PersonalizationScreen(),
+            routes: [
+              GoRoute(
+                path: 'coach',
+                builder: (_, __) => const WellnessCoachScreen(),
+              ),
+              GoRoute(
+                path: 'plan-editor',
+                builder: (_, __) => const WellnessPlanEditorScreen(),
+              ),
+              GoRoute(
+                path: 'progress-timeline',
+                builder: (_, __) => const WellnessProgressScreen(),
+              ),
+              GoRoute(
+                path: 'resources',
+                builder: (_, __) => const WellnessResourcesScreen(),
+              ),
+              GoRoute(
+                path: 'reminders',
+                builder: (_, __) => const ReminderListScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    builder: (_, __) => const ReminderEditorScreen(),
+                  ),
+                  GoRoute(
+                    path: ':reminderId/edit',
+                    builder: (_, state) => ReminderEditorScreen(
+                      reminderId: state.pathParameters['reminderId'],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          GoRoute(
+            path: AppRoutes.appProgress,
+            builder: (_, __) => const LearningProgressScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.appSettings,
+            builder: (_, __) => const SettingsScreen(),
           ),
           GoRoute(
             path: AppRoutes.appProfile,

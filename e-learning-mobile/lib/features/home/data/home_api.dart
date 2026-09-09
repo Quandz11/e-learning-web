@@ -7,12 +7,15 @@ import 'package:e_learning_mobile/core/network/network_providers.dart';
 import 'package:e_learning_mobile/features/home/data/models/home_models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:e_learning_mobile/core/network/cache_service.dart';
+
 final homeApiProvider = Provider<HomeApi>((ref) {
   final config = ref.read(appConfigProvider);
   return HomeApi(
     apiClient: ref.read(apiClientProvider),
     errorMapper: ref.read(dioErrorMapperProvider),
     apiBaseUrl: config.apiBaseUrl,
+    cacheService: ref.read(cacheServiceProvider),
   );
 });
 
@@ -21,13 +24,16 @@ class HomeApi {
     required ApiClient apiClient,
     required DioErrorMapper errorMapper,
     required Uri apiBaseUrl,
-  }) : _apiClient = apiClient,
-       _errorMapper = errorMapper,
-       _apiBaseUrl = apiBaseUrl;
+    CacheService? cacheService,
+  })  : _apiClient = apiClient,
+        _errorMapper = errorMapper,
+        _apiBaseUrl = apiBaseUrl,
+        _cacheService = cacheService;
 
   final ApiClient _apiClient;
   final DioErrorMapper _errorMapper;
   final Uri _apiBaseUrl;
+  final CacheService? _cacheService;
 
   Future<List<HomeCourse>> getPublishedCourses() async {
     final rows = await _getJsonList(
@@ -62,16 +68,76 @@ class HomeApi {
     return rows.map(_parseTestimonial).toList(growable: false);
   }
 
+  Future<List<HomeCourse>?> getCachedPublishedCourses() async {
+    final cached = await _cacheService?.getList('/courses?isPublished=true');
+    if (cached == null) return null;
+    try {
+      final rows = _coerceJsonList(cached);
+      return rows.map(_parseCourse).toList(growable: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<HomeEnrollment>?> getCachedEnrollments() async {
+    final cached = await _cacheService?.getList('/enrollments');
+    if (cached == null) return null;
+    try {
+      final rows = _coerceJsonList(cached);
+      return rows.map(_parseEnrollment).toList(growable: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<HomeCategory>?> getCachedActiveCategories() async {
+    final cached = await _cacheService?.getList('/categories/active');
+    if (cached == null) return null;
+    try {
+      final rows = _coerceJsonList(cached);
+      return rows.map(_parseCategory).toList(growable: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<HomeArticle>?> getCachedRecentArticles() async {
+    final cached = await _cacheService?.getMap('/articles?page=1&pageSize=4');
+    if (cached == null) return null;
+    try {
+      final items = _coerceJsonList(cached['items']);
+      return items.map(_parseArticle).toList(growable: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<HomeTestimonial>?> getCachedActiveTestimonials() async {
+    final cached = await _cacheService?.getList('/testimonials/active');
+    if (cached == null) return null;
+    try {
+      final rows = _coerceJsonList(cached);
+      return rows.map(_parseTestimonial).toList(growable: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<Map<String, dynamic>> _getJsonMap(
     String path, {
     Map<String, dynamic>? queryParameters,
   }) async {
+    final cacheKey = queryParameters != null && queryParameters.isNotEmpty
+        ? '$path?${Uri(queryParameters: queryParameters.map((k, v) => MapEntry(k, v.toString()))).query}'
+        : path;
     try {
       final data = await _apiClient.get<Object?>(
         path,
         queryParameters: queryParameters,
       );
-      return _coerceJsonMap(data);
+      final map = _coerceJsonMap(data);
+      _cacheService?.set(cacheKey, map);
+      return map;
     } on DioException catch (error) {
       throw _map(error);
     }
@@ -81,12 +147,17 @@ class HomeApi {
     String path, {
     Map<String, dynamic>? queryParameters,
   }) async {
+    final cacheKey = queryParameters != null && queryParameters.isNotEmpty
+        ? '$path?${Uri(queryParameters: queryParameters.map((k, v) => MapEntry(k, v.toString()))).query}'
+        : path;
     try {
       final data = await _apiClient.get<Object?>(
         path,
         queryParameters: queryParameters,
       );
-      return _coerceJsonList(data);
+      final list = _coerceJsonList(data);
+      _cacheService?.set(cacheKey, list);
+      return list;
     } on DioException catch (error) {
       throw _map(error);
     }

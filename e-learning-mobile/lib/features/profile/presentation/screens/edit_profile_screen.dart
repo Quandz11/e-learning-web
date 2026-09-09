@@ -41,8 +41,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     if (!_initialized && profileState.profile != null) {
       _fillFromProfile(profileState.profile!);
-      controller.markReady();
       _initialized = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.markReady();
+      });
     }
 
     if (profileState.profile == null &&

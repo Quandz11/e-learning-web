@@ -2,14 +2,16 @@ import 'package:e_learning_mobile/features/learning/presentation/controllers/les
 import 'package:e_learning_mobile/features/learning/presentation/controllers/lesson_state.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
 import 'package:e_learning_mobile/features/learning/presentation/widgets/document_reader_panel.dart';
+import 'package:e_learning_mobile/shared/theme/app_colors.dart';
+import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
-import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class DocumentReaderScreen extends ConsumerStatefulWidget {
   const DocumentReaderScreen({
@@ -27,14 +29,26 @@ class DocumentReaderScreen extends ConsumerStatefulWidget {
 }
 
 class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
+  late final PdfViewerController _pdfController;
+  final int _currentPage = 1;
+  final int _totalPages = 8;
+  double _zoomScale = 1.0;
+
   @override
   void initState() {
     super.initState();
+    _pdfController = PdfViewerController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_isValidId(widget.courseId) && _isValidId(widget.lessonPartId)) {
         ref.read(_provider.notifier).ensureLoaded();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _pdfController.dispose();
+    super.dispose();
   }
 
   LessonRouteArgs get _args => LessonRouteArgs(
@@ -48,10 +62,10 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_isValidId(widget.courseId) || !_isValidId(widget.lessonPartId)) {
-      return const SafeArea(
-        bottom: false,
-        child: AppErrorView(
-          message: 'KhÃ´ng tÃ¬m tháº¥y tÃ i liá»‡u cáº§n hiá»ƒn thá»‹.',
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: AppErrorView(message: 'Không tìm thấy tài liệu cần hiển thị.'),
         ),
       );
     }
@@ -59,93 +73,166 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
     final state = ref.watch(_provider);
     final controller = ref.read(_provider.notifier);
 
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
-          AppSpacing.xl,
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
+          onPressed: () => context.pop(),
         ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppSizes.contentMaxWidth,
-            ),
-            child: _DocumentReaderContent(
-              state: state,
-              onRetry: controller.load,
-            ),
+        title: Text(
+          state.detail?.part.title ?? 'Đọc Tài Liệu',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Tải tài liệu PDF',
+            icon: const Icon(Icons.download_rounded, color: AppColors.primary),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Đang tải xuống file PDF...')),
+              );
+            },
+          ),
+        ],
       ),
-    );
-  }
-}
-
-class _DocumentReaderContent extends StatelessWidget {
-  const _DocumentReaderContent({required this.state, required this.onRetry});
-
-  final LessonState state;
-  final Future<void> Function() onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    if (state.isInitialLoading) {
-      return const AppLoadingView(label: 'Äang táº£i tÃ i liá»‡u...');
-    }
-
-    final detail = state.detail;
-    if (state.status == LessonStatus.failure || detail == null) {
-      return AppErrorView(
-        message: learningFailureMessage(
-          state.primaryFailure,
-          fallback: 'KhÃ´ng thá»ƒ táº£i tÃ i liá»‡u lÃºc nÃ y.',
-        ),
-        onRetry: onRetry,
-      );
-    }
-
-    if (!detail.part.isDocument) {
-      return const AppErrorView(
-        message: 'Ná»™i dung nÃ y khÃ´ng pháº£i tÃ i liá»‡u.',
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: IconButton(
-            tooltip: 'Quay láº¡i bÃ i há»c',
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-        ),
-        AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                detail.course.title,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Semantics(
-                header: true,
-                child: Text(
-                  detail.part.title,
-                  style: Theme.of(context).textTheme.headlineSmall,
+      body: SafeArea(
+        child: state.isInitialLoading
+            ? const AppLoadingView(label: 'Đang tải tài liệu...')
+            : state.status == LessonStatus.failure || state.detail == null
+            ? AppErrorView(
+                message: learningFailureMessage(
+                  state.primaryFailure,
+                  fallback: 'Không thể tải tài liệu lúc này.',
                 ),
+                onRetry: controller.load,
+              )
+            : Column(
+                children: [
+                  // 1. PDF Reader Toolbar Controls
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs,
+                    ),
+                    color: AppColors.mint,
+                    child: Row(
+                      children: [
+                        Text(
+                          'Trang $_currentPage / $_totalPages',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.remove_circle_outline_rounded,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            if (_zoomScale > 0.75) {
+                              final newZoom = _zoomScale - 0.25;
+                              setState(() => _zoomScale = newZoom);
+                              try {
+                                _pdfController.zoomLevel = newZoom;
+                              } catch (_) {}
+                            }
+                          },
+                        ),
+                        Text(
+                          '${(_zoomScale * 100).toInt()}%',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.add_circle_outline_rounded,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            if (_zoomScale < 3.0) {
+                              final newZoom = _zoomScale + 0.25;
+                              setState(() => _zoomScale = newZoom);
+                              try {
+                                _pdfController.zoomLevel = newZoom;
+                              } catch (_) {}
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 2. Document Reader Panel Canvas with explicit bounds
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxWidth: AppSizes.contentMaxWidth,
+                          ),
+                          child: DocumentReaderPanel(part: state.detail!.part),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // 3. Bottom Complete Action Bar
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: const BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border(top: BorderSide(color: AppColors.border)),
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            controller.markComplete();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Đã hoàn thành bài đọc!'),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.check_circle_rounded),
+                          label: const Text(
+                            'Đánh dấu đã đọc hoàn thành',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Expanded(child: DocumentReaderPanel(part: detail.part)),
-      ],
+      ),
     );
   }
 }

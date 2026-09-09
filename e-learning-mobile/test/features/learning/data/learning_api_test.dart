@@ -219,9 +219,7 @@ void main() {
         method: 'GET',
         path: '/courses/11111111-1111-1111-1111-111111111111',
         statusCode: 200,
-        body: _courseDetailJsonWithPlaybackUrl(
-          '//video.example.com/play.m3u8',
-        ),
+        body: _courseDetailJsonWithPlaybackUrl('//video.example.com/play.m3u8'),
       );
 
       final course = await api.getCourse(

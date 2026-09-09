@@ -1,0 +1,57 @@
+{
+  "brand": {
+    "name": "Nhìn Ăn Chữa Lành",
+    "tagline": "Học để sống an lành hơn mỗi ngày"
+  },
+  "colors": {
+    "primary": "#176B43",
+    "primaryDark": "#0F5132",
+    "primaryLight": "#DDEFE5",
+    "sage": "#84A98C",
+    "mint": "#EDF7F0",
+    "background": "#F7FAF7",
+    "surface": "#FFFFFF",
+    "warmSurface": "#F8F6F1",
+    "textPrimary": "#1F2D27",
+    "textSecondary": "#6B7770",
+    "textMuted": "#98A19C",
+    "border": "#E4EAE6",
+    "success": "#218B57",
+    "warning": "#DFA73C",
+    "error": "#C94A4A",
+    "info": "#3D7EA6",
+    "waterAccent": "#DDEFFD",
+    "movementAccent": "#FCEBCF",
+    "restAccent": "#EEE7FF",
+    "studyAccent": "#E2F2E6",
+    "habitAccent": "#F5EBDD"
+  },
+  "spacing": [4, 8, 12, 16, 20, 24, 32, 40, 48],
+  "radius": {
+    "small": 8,
+    "medium": 12,
+    "large": 16,
+    "xLarge": 20,
+    "pill": 999
+  },
+  "typography": {
+    "fontFamily": "Be Vietnam Pro",
+    "fallback": "Inter",
+    "display": {"size": 28, "height": 34, "weight": 600},
+    "h1": {"size": 24, "height": 30, "weight": 600},
+    "h2": {"size": 20, "height": 26, "weight": 600},
+    "h3": {"size": 18, "height": 24, "weight": 600},
+    "title": {"size": 16, "height": 22, "weight": 600},
+    "bodyLarge": {"size": 16, "height": 24, "weight": 400},
+    "body": {"size": 14, "height": 21, "weight": 400},
+    "label": {"size": 13, "height": 18, "weight": 500},
+    "caption": {"size": 12, "height": 17, "weight": 400}
+  },
+  "layout": {
+    "phoneHorizontalPadding": 16,
+    "largeHorizontalPadding": 24,
+    "minimumTapTarget": 48,
+    "courseThumbnailAspectRatio": 1.35,
+    "videoAspectRatio": 1.7777778
+  }
+}

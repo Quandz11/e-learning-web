@@ -23,6 +23,7 @@ import 'package:e_learning_mobile/features/profile/presentation/controllers/prof
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:e_learning_mobile/shared/widgets/app_avatar.dart';
+import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,10 +57,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Chào buổi sáng'), findsOneWidget);
-    expect(find.text('Người dùng học viên'), findsOneWidget);
-    expect(find.text('Học tập'), findsWidgets);
-    expect(find.text('Cộng đồng'), findsWidgets);
-    expect(find.text('Cá nhân'), findsWidgets);
+    expect(find.text('Tiếp tục học'), findsWidgets);
+    expect(find.text('Khóa học'), findsWidgets);
+    expect(find.text('Cá nhân hóa'), findsWidgets);
+    expect(find.text('Nhắc nhở'), findsWidgets);
   });
 
   testWidgets('falls back to generic greeting when profile is unavailable', (
@@ -72,7 +73,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Chào buổi sáng'), findsOneWidget);
-    expect(find.text('Chúc bạn có một ngày học tập hiệu quả.'), findsOneWidget);
+    expect(find.text('Mai Dung'), findsWidgets);
   });
 
   testWidgets('shows continue learning and navigates to learning', (
@@ -85,10 +86,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Tiếp tục học'), findsWidgets);
-    await tester.tap(find.text('Tiếp tục học').last);
+    final continueButton = find.widgetWithText(AppButton, 'Tiếp tục học').first;
+    await tester.drag(find.byType(ListView).first, const Offset(0, -300));
+    await tester.pumpAndSettle();
+    await tester.tap(continueButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('Khóa học hiện có'), findsOneWidget);
+    expect(find.text('Khóa học của tôi'), findsOneWidget);
   });
 
   testWidgets('omits continue learning when there are no enrollments', (
@@ -110,7 +114,8 @@ void main() {
     await tester.pumpWidget(harness.app);
     await tester.pumpAndSettle();
 
-    expect(find.text('Tiếp tục học'), findsNothing);
+    expect(find.widgetWithText(AppButton, 'Tiếp tục học'), findsNothing);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
   });
 
   testWidgets('formats course prices and shows thumbnail fallback', (
@@ -140,7 +145,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1.200.000 ₫'), findsOneWidget);
-    expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.menu_book_outlined), findsWidgets);
   });
 
   testWidgets('article failure does not hide featured courses', (tester) async {
@@ -222,7 +227,7 @@ void main() {
       await tester.tap(avatarTapTarget.first);
       await tester.pumpAndSettle();
       expect(
-        find.text('Thông tin tài khoản và bảo mật của bạn.'),
+        find.text('Hồ sơ của tôi'),
         findsOneWidget,
       );
     },

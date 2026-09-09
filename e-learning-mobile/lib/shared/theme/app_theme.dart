@@ -12,9 +12,25 @@ class AppTheme {
   static ThemeData dark() => _theme(Brightness.dark);
 
   static ThemeData _theme(Brightness brightness) {
+    final isLight = brightness == Brightness.light;
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.seed,
+      seedColor: AppColors.primary,
       brightness: brightness,
+      primary: AppColors.primary,
+      onPrimary: Colors.white,
+      primaryContainer: AppColors.primaryLight,
+      onPrimaryContainer: AppColors.primaryDark,
+      surface: isLight ? AppColors.background : const Color(0xFF121B16),
+      onSurface: isLight ? AppColors.textPrimary : const Color(0xFFE4EAE6),
+      surfaceContainerLow: isLight
+          ? AppColors.surface
+          : const Color(0xFF1A2620),
+      surfaceContainerLowest: isLight
+          ? AppColors.surface
+          : const Color(0xFF14201A),
+      outline: isLight ? AppColors.sage : const Color(0xFF4A5C52),
+      outlineVariant: isLight ? AppColors.border : const Color(0xFF2E3D35),
+      error: AppColors.error,
     );
     final textTheme = AppTypography.textTheme(
       ThemeData(brightness: brightness).textTheme,

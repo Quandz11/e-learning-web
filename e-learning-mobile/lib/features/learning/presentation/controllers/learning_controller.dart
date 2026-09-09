@@ -36,6 +36,20 @@ class LearningController extends StateNotifier<LearningState> {
       );
     }
 
+    if (!refresh && state.courses.isEmpty) {
+      try {
+        final cachedResult = await _repository.loadLearningFromCache();
+        if (cachedResult != null && mounted && state.status == LearningStatus.loading) {
+          state = LearningState(
+            status: LearningStatus.success,
+            courses: cachedResult.courses,
+            enrollments: cachedResult.enrollments,
+            categories: cachedResult.categories,
+          );
+        }
+      } catch (_) {}
+    }
+
     try {
       final result = await _repository.loadLearning();
       if (!mounted) {

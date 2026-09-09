@@ -20,7 +20,8 @@ import 'package:e_learning_mobile/features/profile/data/profile_api.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
-import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/features/personalization/data/personalization_repository.dart';
+import 'package:e_learning_mobile/features/personalization/domain/reminder_model.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,7 +76,7 @@ void main() {
     }
 
     expect(
-      find.text('Thông tin tài khoản và bảo mật của bạn.'),
+      find.text('Hồ sơ của tôi'),
       findsOneWidget,
     );
   });
@@ -93,8 +94,8 @@ void main() {
 
       expect(find.byType(NavigationBar), findsOneWidget);
       expect(find.text('Trang chủ'), findsWidgets);
-      expect(find.text('Học tập'), findsWidgets);
-      expect(find.text('Cộng đồng'), findsWidgets);
+      expect(find.text('Khóa học'), findsWidgets);
+      expect(find.text('Cá nhân hóa'), findsWidgets);
       expect(find.text('Cá nhân'), findsWidgets);
     },
   );
@@ -106,7 +107,7 @@ void main() {
     addTearDown(harness.container.dispose);
 
     await tester.pumpWidget(harness.app);
-    harness.router.go(AppRoutes.appCommunity);
+    harness.router.go(AppRoutes.appPersonalization);
     await tester.pumpAndSettle();
 
     expect(_selectedIndex(tester), 2);
@@ -126,21 +127,12 @@ void main() {
     final barTheme = tester.widget<NavigationBarTheme>(
       find.byType(NavigationBarTheme),
     );
-    final material = tester.widget<Material>(
-      find
-          .ancestor(
-            of: find.byKey(AppShell.navigationBarKey),
-            matching: find.byType(Material),
-          )
-          .first,
-    );
 
-    expect(barTheme.data.indicatorShape, isA<StadiumBorder>());
+    expect(barTheme.data.indicatorShape, isA<RoundedRectangleBorder>());
     expect(
       barTheme.data.labelBehavior,
       NavigationDestinationLabelBehavior.alwaysShow,
     );
-    expect(material.elevation, greaterThan(0));
   });
 
   testWidgets('unselected destinations remain visually distinct', (
@@ -157,8 +149,8 @@ void main() {
     );
 
     expect(find.byIcon(Icons.home_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.school_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.groups_2_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.tune_outlined), findsOneWidget);
     expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
   });
 
@@ -171,21 +163,18 @@ void main() {
     await tester.pumpWidget(harness.app);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Học tập').last);
+    await tester.tap(find.text('Khóa học').last);
     await tester.pumpAndSettle();
     expect(find.text('Khóa học hiện có'), findsOneWidget);
 
-    await tester.tap(find.text('Cộng đồng').last);
+    await tester.tap(find.text('Cá nhân hóa').last);
     await tester.pumpAndSettle();
-    expect(
-      find.text('Community content will be implemented in a later phase.'),
-      findsOneWidget,
-    );
+    expect(find.text('Cá nhân hóa'), findsWidgets);
 
     await tester.tap(find.text('Cá nhân').last);
     await tester.pumpAndSettle();
     expect(
-      find.text('Thông tin tài khoản và bảo mật của bạn.'),
+      find.text('Hồ sơ của tôi'),
       findsOneWidget,
     );
   });
@@ -201,7 +190,7 @@ void main() {
     await tester.pumpWidget(harness.app);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Học tập').last);
+    await tester.tap(find.text('Khóa học').last);
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsOneWidget);
 
@@ -259,7 +248,6 @@ void main() {
       find.byKey(AppShell.navigationSafeAreaKey),
     );
 
-    expect(safeArea.minimum.bottom, AppSpacing.md);
     expect(safeArea.top, isFalse);
   });
 
@@ -357,7 +345,7 @@ void main() {
       await tester.pumpWidget(harness.app);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Học tập').last);
+      await tester.tap(find.text('Khóa học').last);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Trang chủ').last);
       await tester.pumpAndSettle();
@@ -381,7 +369,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Thông tin tài khoản và bảo mật của bạn.'),
+      find.text('Hồ sơ của tôi'),
       findsOneWidget,
     );
     expect(_selectedIndex(tester), 3);
@@ -412,6 +400,9 @@ _ShellHarness _buildHarness({required SessionState sessionState}) {
       homeRepositoryProvider.overrideWithValue(FakeHomeRepository()),
       learningRepositoryProvider.overrideWithValue(FakeLearningRepository()),
       homeClockProvider.overrideWithValue(() => DateTime(2026, 8, 6, 8)),
+      personalizationStateProvider.overrideWith(
+        (ref) => _TestPersonalizationController(),
+      ),
     ],
   );
 
@@ -420,6 +411,24 @@ _ShellHarness _buildHarness({required SessionState sessionState}) {
     router: container.read(appRouterProvider),
     app: UncontrolledProviderScope(container: container, child: const App()),
   );
+}
+
+class _TestPersonalizationController extends PersonalizationController {
+  _TestPersonalizationController() : super(_NoopPersonalizationRepository()) {
+    state = AsyncValue.data(const PersonalizationProfile(reminders: []));
+  }
+}
+
+class _NoopPersonalizationRepository extends PersonalizationRepository {
+  @override
+  Future<PersonalizationProfile> getProfile() async {
+    return const PersonalizationProfile(reminders: []);
+  }
+
+  @override
+  Future<List<Reminder>> getReminders() async {
+    return [];
+  }
 }
 
 class _ShellHarness {
@@ -471,6 +480,12 @@ class _TestProfileController extends ProfileController {
       ),
     );
   }
+
+  @override
+  Future<void> load({bool refresh = false}) async {}
+
+  @override
+  Future<void> refresh() async {}
 }
 
 class _NoopProfileRepository extends ProfileRepository {

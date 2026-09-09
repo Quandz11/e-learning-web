@@ -5,6 +5,7 @@ import 'package:e_learning_mobile/features/learning/data/models/learning_models.
 import 'package:e_learning_mobile/features/learning/presentation/controllers/learning_controller.dart';
 import 'package:e_learning_mobile/features/learning/presentation/controllers/learning_state.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
+import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
@@ -75,7 +76,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
   }
 }
 
-class _LearningContent extends StatelessWidget {
+class _LearningContent extends StatefulWidget {
   const _LearningContent({
     required this.state,
     required this.onRetry,
@@ -87,52 +88,120 @@ class _LearningContent extends StatelessWidget {
   final Future<void> Function() onSectionRetry;
 
   @override
+  State<_LearningContent> createState() => _LearningContentState();
+}
+
+class _LearningContentState extends State<_LearningContent> {
+  int _filterIndex = 0; // 0: Tất cả, 1: Đang học, 2: Đã hoàn thành
+
+  @override
   Widget build(BuildContext context) {
-    if (state.isInitialLoading) {
+    if (widget.state.isInitialLoading) {
       return const _LearningLoadingSkeleton();
     }
 
-    if (state.status == LearningStatus.failure && !state.hasLoadedContent) {
+    if (widget.state.status == LearningStatus.failure &&
+        !widget.state.hasLoadedContent) {
       return AppErrorView(
         message: _toVietnameseMessage(
-          state.primaryFailure,
+          widget.state.primaryFailure,
           fallback: 'Không thể tải nội dung học tập lúc này.',
         ),
-        onRetry: onRetry,
+        onRetry: widget.onRetry,
       );
     }
+
+    final allEnrollments = widget.state.enrollments;
+    final filteredEnrollments = allEnrollments.where((e) {
+      if (_filterIndex == 1) return !e.isCompleted;
+      if (_filterIndex == 2) return e.isCompleted;
+      return true;
+    }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const _LearningHeader(),
-        if (state.refreshFailure != null) ...[
+        if (widget.state.refreshFailure != null) ...[
           const SizedBox(height: AppSpacing.md),
           _SectionErrorCard(
             message: _toVietnameseMessage(
-              state.refreshFailure,
+              widget.state.refreshFailure,
               fallback: 'Không thể làm mới nội dung học tập.',
             ),
-            onRetry: onSectionRetry,
+            onRetry: widget.onSectionRetry,
           ),
         ],
-        const SizedBox(height: AppSpacing.lg),
-        _MyLearningSection(
-          enrollments: state.enrollments,
-          issue: state.enrollmentIssue,
-          onRetry: onSectionRetry,
+        const SizedBox(height: AppSpacing.md),
+
+        // Status Filter Chips
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildFilterChip('Tất cả', 0),
+              const SizedBox(width: AppSpacing.xs),
+              _buildFilterChip('Đang học', 1),
+              const SizedBox(width: AppSpacing.xs),
+              _buildFilterChip('Đã hoàn thành', 2),
+            ],
+          ),
         ),
-        if (state.categories.isNotEmpty || state.categoryIssue != null) ...[
+        const SizedBox(height: AppSpacing.lg),
+
+        _MyLearningSection(
+          enrollments: filteredEnrollments,
+          issue: widget.state.enrollmentIssue,
+          onRetry: widget.onSectionRetry,
+        ),
+        if (widget.state.categories.isNotEmpty ||
+            widget.state.categoryIssue != null) ...[
           const SizedBox(height: AppSpacing.lg),
           _CategoriesSection(
-            categories: state.categories,
-            issue: state.categoryIssue,
-            onRetry: onSectionRetry,
+            categories: widget.state.categories,
+            issue: widget.state.categoryIssue,
+            onRetry: widget.onSectionRetry,
           ),
         ],
         const SizedBox(height: AppSpacing.lg),
-        _CourseCatalogSection(courses: state.courses),
+        _CourseCatalogSection(courses: widget.state.courses),
       ],
+    );
+  }
+
+  Widget _buildFilterChip(String label, int index) {
+    final selected = _filterIndex == index;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      selectedColor: AppColors.primary,
+      backgroundColor: colorScheme.surface,
+      elevation: selected ? 2 : 0,
+      shadowColor: AppColors.primary.withValues(alpha: 0.2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        side: BorderSide(
+          color: selected
+              ? AppColors.primary
+              : colorScheme.outlineVariant,
+          width: 1.0,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : colorScheme.onSurfaceVariant,
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+        fontSize: 13,
+      ),
+      onSelected: (val) {
+        if (val) {
+          setState(() {
+            _filterIndex = index;
+          });
+        }
+      },
     );
   }
 }
@@ -142,34 +211,22 @@ class _LearningHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return AppCard(
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Semantics(
-                  header: true,
-                  child: Text('Học tập', style: textTheme.headlineSmall),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Tiếp tục hành trình học tập của bạn.',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
+    return Row(
+      children: [
+        IconButton(
+          tooltip: 'Quay lại',
+          onPressed: () => context.go(AppRoutes.appHome),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+        const Expanded(
+          child: Text(
+            'Khóa học',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(width: AppSpacing.md),
-          Icon(Icons.school_rounded, color: colorScheme.primary, size: 40),
-        ],
-      ),
+        ),
+        const SizedBox(width: 48),
+      ],
     );
   }
 }
@@ -302,13 +359,15 @@ class _EnrollmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final progress = enrollment.progressPercentage / 100;
+    final progress = (enrollment.progressPercentage / 100).clamp(0.0, 1.0);
+    final isDone = enrollment.isCompleted;
 
     return Semantics(
       container: true,
       label:
           'Khóa học ${enrollment.courseTitle}. Đã hoàn thành ${enrollment.progressPercentage} phần trăm.',
       child: AppCard(
+        onTap: () => context.push(AppRoutes.courseDetailPath(enrollment.courseId)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -326,31 +385,64 @@ class _EnrollmentCard extends StatelessWidget {
                     enrollment.courseTitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _enrollmentStatusLabel(enrollment),
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Đã hoàn thành ${enrollment.progressPercentage}%',
-                    style: textTheme.labelMedium,
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isDone
+                          ? AppColors.mint
+                          : AppColors.primaryLight.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    child: Text(
+                      _enrollmentStatusLabel(enrollment),
+                      style: textTheme.labelSmall?.copyWith(
+                        color: isDone ? AppColors.success : AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Semantics(
-                    value:
-                        'Đã hoàn thành ${enrollment.progressPercentage} phần trăm',
-                    child: LinearProgressIndicator(value: progress),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 13,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          'Truy cập: ${_dateFormatter.format(enrollment.lastAccessedAt.toLocal())}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Truy cập gần nhất ${_dateFormatter.format(enrollment.lastAccessedAt.toLocal())}',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 6,
+                      backgroundColor: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isDone ? AppColors.success : AppColors.primary,
+                      ),
                     ),
                   ),
                 ],
@@ -372,9 +464,7 @@ class _LearningCourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final description = course.description == null
-        ? null
-        : _stripHtml(course.description!);
+    final lessonCount = course.lessons.isNotEmpty ? course.lessons.length : 12;
 
     return Semantics(
       container: true,
@@ -382,7 +472,7 @@ class _LearningCourseCard extends StatelessWidget {
       child: AppCard(
         onTap: () => context.push(AppRoutes.courseDetailPath(course.id)),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _CourseImage(
               imageUrl: course.thumbnailUrl,
@@ -394,86 +484,29 @@ class _LearningCourseCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Wrap(
-                    spacing: AppSpacing.xs,
-                    runSpacing: AppSpacing.xs,
-                    children: [
-                      _StatusChip(
-                        label: course.isFree ? 'Miễn phí' : 'Khóa học trả phí',
-                        color: course.isFree
-                            ? colorScheme.primary
-                            : colorScheme.tertiary,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     course.title,
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: textTheme.titleMedium,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  if (course.instructorName != null) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      course.instructorName!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '$lessonCount bài học',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
-                  ],
-                  if (description != null && description.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodyMedium,
-                    ),
-                  ],
-                  if (course.defaultAccessDurationDays != null) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Thời hạn truy cập ${course.defaultAccessDurationDays} ngày',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
               ),
             ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: colorScheme.onSurfaceVariant,
+            ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.w700,
-          ),
         ),
       ),
     );
@@ -629,10 +662,6 @@ String _enrollmentStatusLabel(LearningEnrollment enrollment) {
 
 String _toVietnameseMessage(AppFailure? failure, {required String fallback}) {
   return learningFailureMessage(failure, fallback: fallback);
-}
-
-String _stripHtml(String value) {
-  return stripHtml(value);
 }
 
 final DateFormat _dateFormatter = DateFormat('dd/MM/yyyy');

@@ -12,6 +12,35 @@ class HomeRepository {
 
   final HomeApi _api;
 
+  Future<HomeLoadResult?> loadHomeFromCache() async {
+    try {
+      final featuredCourses = await _api.getCachedPublishedCourses();
+      if (featuredCourses == null) return null;
+
+      final enrollments = await _api.getCachedEnrollments() ?? const [];
+      final categories = await _api.getCachedActiveCategories() ?? const [];
+      final articles = await _api.getCachedRecentArticles() ?? const [];
+      final testimonials = await _api.getCachedActiveTestimonials() ?? const [];
+
+      return HomeLoadResult(
+        featuredCourses: featuredCourses
+            .where((course) => course.isPublished)
+            .take(4)
+            .toList(growable: false),
+        continueLearning: _selectContinueLearning(enrollments),
+        categories: categories
+            .where((category) => category.isActive)
+            .toList(growable: false)
+          ..sort((left, right) => left.order.compareTo(right.order)),
+        articles: articles.take(4).toList(growable: false),
+        testimonials: testimonials.take(2).toList(growable: false)
+          ..sort((left, right) => left.order.compareTo(right.order)),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<HomeLoadResult> loadHome() async {
     final featuredCoursesFuture = _api.getPublishedCourses();
     final enrollmentsFuture = _captureOptional(_api.getEnrollments);

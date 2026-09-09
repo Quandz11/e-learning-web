@@ -29,6 +29,7 @@ import 'package:e_learning_mobile/features/profile/data/profile_repository.dart'
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
+import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -52,7 +53,7 @@ void main() {
     expect(find.byType(CourseDetailScreen), findsOneWidget);
     expect(find.text(fakeDetailCourse().title), findsOneWidget);
     expect(find.text(fakeDetailCourse().instructorName!), findsOneWidget);
-    expect(find.textContaining('Tiến độ'), findsOneWidget);
+    expect(find.textContaining('bài học'), findsWidgets);
     expect(find.text(fakeLesson().title), findsOneWidget);
     expect(find.text(fakeLessonPart().title), findsOneWidget);
   });
@@ -137,11 +138,11 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    final courseInk = find.ancestor(
+    final courseCard = find.ancestor(
       of: courseTitle,
-      matching: find.byType(InkWell),
+      matching: find.byType(AppCard),
     );
-    await tester.tap(courseInk.last);
+    await tester.tap(courseCard.first);
     await tester.pumpAndSettle();
     expect(find.byType(CourseDetailScreen), findsOneWidget);
 
@@ -264,8 +265,13 @@ _Harness _buildAppHarness() {
         ),
       ),
       learningMediaPlayerBuilderProvider.overrideWithValue(
-        ({required url, required title, required duration, embedUrl, videoId}) =>
-            Text('Fake player: $title'),
+        ({
+          required url,
+          required title,
+          required duration,
+          embedUrl,
+          videoId,
+        }) => Text('Fake player: $title'),
       ),
       documentReaderBuilderProvider.overrideWithValue(
         ({required url, required title}) => Text('Fake reader: $title'),

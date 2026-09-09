@@ -38,11 +38,17 @@ class DocumentReaderPdfViewer extends StatefulWidget {
   const DocumentReaderPdfViewer({
     required this.url,
     required this.title,
+    this.controller,
+    this.onDocumentLoaded,
+    this.onPageChanged,
     super.key,
   });
 
   final Uri url;
   final String title;
+  final PdfViewerController? controller;
+  final void Function(PdfDocumentLoadedDetails details)? onDocumentLoaded;
+  final void Function(PdfPageChangedDetails details)? onPageChanged;
 
   @override
   State<DocumentReaderPdfViewer> createState() =>
@@ -69,44 +75,51 @@ class _DocumentReaderPdfViewerState extends State<DocumentReaderPdfViewer> {
     }
 
     return AppCard(
+      padding: EdgeInsets.zero,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          children: [
-            KeyedSubtree(
-              key: ValueKey(_reloadToken),
-              child: SfPdfViewer.network(
-                widget.url.toString(),
-                canShowScrollHead: true,
-                canShowScrollStatus: true,
-                enableDoubleTapZooming: true,
-                pageLayoutMode: PdfPageLayoutMode.continuous,
-                onDocumentLoaded: (_) {
-                  if (mounted) {
-                    setState(() {
-                      _isLoading = false;
-                      _errorMessage = null;
-                    });
-                  }
-                },
-                onDocumentLoadFailed: (details) {
-                  if (mounted) {
-                    setState(() {
-                      _isLoading = false;
-                      _errorMessage = details.description;
-                    });
-                  }
-                },
-              ),
-            ),
-            if (_isLoading)
-              const Positioned.fill(
-                child: ColoredBox(
-                  color: Color(0x99FFFFFF),
-                  child: AppLoadingView(label: 'Đang tải tài liệu...'),
+        child: SizedBox(
+          height: 520,
+          child: Stack(
+            children: [
+              KeyedSubtree(
+                key: ValueKey(_reloadToken),
+                child: SfPdfViewer.network(
+                  widget.url.toString(),
+                  controller: widget.controller,
+                  canShowScrollHead: true,
+                  canShowScrollStatus: true,
+                  enableDoubleTapZooming: true,
+                  pageLayoutMode: PdfPageLayoutMode.continuous,
+                  onPageChanged: widget.onPageChanged,
+                  onDocumentLoaded: (details) {
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                        _errorMessage = null;
+                      });
+                    }
+                    widget.onDocumentLoaded?.call(details);
+                  },
+                  onDocumentLoadFailed: (details) {
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                        _errorMessage = details.description;
+                      });
+                    }
+                  },
                 ),
               ),
-          ],
+              if (_isLoading)
+                const Positioned.fill(
+                  child: ColoredBox(
+                    color: Color(0x99FFFFFF),
+                    child: AppLoadingView(label: 'Đang tải tài liệu...'),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

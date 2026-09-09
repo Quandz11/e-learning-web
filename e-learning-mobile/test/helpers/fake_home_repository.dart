@@ -16,6 +16,9 @@ class FakeHomeRepository extends HomeRepository {
   int loadCallCount = 0;
 
   @override
+  Future<HomeLoadResult?> loadHomeFromCache() async => null;
+
+  @override
   Future<HomeLoadResult> loadHome() async {
     loadCallCount += 1;
     if (onLoad != null) {

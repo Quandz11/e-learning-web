@@ -55,6 +55,7 @@ abstract final class AppRoutes {
   static const appRoot = '/app';
   static const appHome = '/app/home';
   static const appLearning = '/app/learning';
+  static const appCourses = '/app/courses';
   static const appLearningCoursePattern = '/app/learning/course/:courseId';
   static const appLearningLessonPattern =
       '/app/learning/course/:courseId/lesson/:lessonPartId';
@@ -62,11 +63,25 @@ abstract final class AppRoutes {
       '/app/learning/course/:courseId/lesson/:lessonPartId/media';
   static const appLearningDocumentPattern =
       '/app/learning/course/:courseId/lesson/:lessonPartId/document';
+  static const appPersonalization = '/app/personalization';
+  static const appPersonalizationCoach = '/app/personalization/coach';
+  static const appPersonalizationPlanEditor = '/app/personalization/plan-editor';
+  static const appPersonalizationProgressTimeline = '/app/personalization/progress-timeline';
+  static const appPersonalizationResources = '/app/personalization/resources';
+  static const appPersonalizationReminders = '/app/personalization/reminders';
+  static const appPersonalizationReminderNew =
+      '/app/personalization/reminders/new';
+  static const appPersonalizationReminderEditPattern =
+      '/app/personalization/reminders/:reminderId/edit';
+  static const appProgress = '/app/progress';
+  static const appSettings = '/app/settings';
   static const appCommunity = '/app/community';
   static const appProfile = '/app/profile';
   static const appProfileEdit = '/app/profile/edit';
   static const appProfileChangePassword = '/app/profile/change-password';
   static const appProfileSecurity = '/app/profile/security';
+  static const appProfileAchievements = '/app/profile/achievements';
+  static const appProfileHistory = '/app/profile/history';
   static const protectedHome = appRoot;
   static const paymentReturn = '/payment-return';
   static const paymentCancel = '/payment-cancel';
@@ -74,7 +89,7 @@ abstract final class AppRoutes {
   static const shellDestinations = <String>[
     appHome,
     appLearning,
-    appCommunity,
+    appPersonalization,
     appProfile,
   ];
 
@@ -103,15 +118,23 @@ abstract final class AppRoutes {
     return '${lessonPath(courseId: courseId, lessonPartId: lessonPartId)}/document';
   }
 
+  static String reminderEditPath(String reminderId) {
+    return '/app/personalization/reminders/${Uri.encodeComponent(reminderId)}/edit';
+  }
+
   static String shellDestinationForLocation(String location) {
     if (location == appProfile || location.startsWith('$appProfile/')) {
       return appProfile;
     }
-    if (location == appLearning || location.startsWith('$appLearning/')) {
-      return appLearning;
+    if (location == appPersonalization ||
+        location.startsWith('$appPersonalization/')) {
+      return appPersonalization;
     }
-    if (location == appCommunity || location.startsWith('$appCommunity/')) {
-      return appCommunity;
+    if (location == appLearning ||
+        location.startsWith('$appLearning/') ||
+        location == appCourses ||
+        location.startsWith('$appCourses/')) {
+      return appLearning;
     }
     return appHome;
   }

@@ -20,15 +20,11 @@ void main() {
     await tester.pumpWidget(_pumpProfileScreen());
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Thông tin tài khoản và bảo mật của bạn.'),
-      findsOneWidget,
-    );
+    expect(find.text('Cá nhân'), findsWidgets);
     expect(find.text('Người dùng học viên'), findsOneWidget);
     expect(find.byKey(const Key('profile_logout_button')), findsOneWidget);
-    expect(find.text('Chỉnh sửa hồ sơ'), findsOneWidget);
-    expect(find.text('Đổi mật khẩu'), findsOneWidget);
-    expect(find.text('Bảo mật và 2FA'), findsOneWidget);
+    expect(find.text('Hồ sơ của tôi'), findsOneWidget);
+    expect(find.text('Cài đặt ứng dụng'), findsOneWidget);
   });
 }
 

@@ -118,14 +118,6 @@ class _CourseDetailContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: IconButton(
-            tooltip: 'Quay lại',
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-        ),
         _CourseHero(course: course),
         if (state.refreshFailure != null) ...[
           const SizedBox(height: AppSpacing.md),
@@ -156,46 +148,97 @@ class _CourseDetailContent extends StatelessWidget {
   }
 }
 
-class _CourseHero extends StatelessWidget {
+class _CourseHero extends StatefulWidget {
   const _CourseHero({required this.course});
 
   final LearningCourse course;
 
   @override
+  State<_CourseHero> createState() => _CourseHeroState();
+}
+
+class _CourseHeroState extends State<_CourseHero> {
+  bool _isBookmarked = false;
+
+  @override
   Widget build(BuildContext context) {
-    final url = course.thumbnailUrl;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: url == null
-            ? _ImageFallback(label: course.title)
-            : CachedNetworkImage(
-                imageUrl: url,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => const AppSkeleton(height: 180),
-                errorWidget: (_, __, ___) =>
-                    _ImageFallback(label: course.title),
-                fadeInDuration: Duration.zero,
-                memCacheWidth: 720,
-                maxWidthDiskCache: 1080,
+    final url = widget.course.thumbnailUrl;
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: url == null
+                ? _ImageFallback(label: widget.course.title)
+                : CachedNetworkImage(
+                    imageUrl: url,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => const AppSkeleton(height: 180),
+                    errorWidget: (_, __, ___) =>
+                        _ImageFallback(label: widget.course.title),
+                    fadeInDuration: Duration.zero,
+                  ),
+          ),
+        ),
+        Positioned(
+          top: 12,
+          left: 12,
+          child: CircleAvatar(
+            backgroundColor: Colors.black38,
+            child: IconButton(
+              tooltip: 'Quay lại',
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              onPressed: () => context.pop(),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 12,
+          right: 12,
+          child: CircleAvatar(
+            backgroundColor: Colors.black38,
+            child: IconButton(
+              tooltip: 'Yêu thích',
+              icon: Icon(
+                _isBookmarked
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                color: _isBookmarked ? Colors.redAccent : Colors.white,
               ),
-      ),
+              onPressed: () {
+                setState(() {
+                  _isBookmarked = !_isBookmarked;
+                });
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _CourseSummary extends StatelessWidget {
+class _CourseSummary extends StatefulWidget {
   const _CourseSummary({required this.course, required this.progress});
 
   final LearningCourse course;
   final LearningCourseProgress? progress;
 
   @override
+  State<_CourseSummary> createState() => _CourseSummaryState();
+}
+
+class _CourseSummaryState extends State<_CourseSummary> {
+  int _selectedTab = 0; // 0: Nội dung, 1: Giới thiệu, 2: Đánh giá
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final courseProgress = progress;
+    final lessonCount = widget.course.lessons.isNotEmpty
+        ? widget.course.lessons.length
+        : 12;
 
     return AppCard(
       child: Column(
@@ -203,48 +246,82 @@ class _CourseSummary extends StatelessWidget {
         children: [
           Semantics(
             header: true,
-            child: Text(course.title, style: textTheme.headlineSmall),
+            child: Text(
+              widget.course.title,
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            widget.course.instructorName ?? 'Hiểu cơ thể – Nuôi dưỡng tâm trí',
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
               _InfoChip(
-                icon: Icons.sell_outlined,
-                label: course.isFree ? 'Miễn phí' : 'Khóa học trả phí',
+                icon: Icons.list_alt_rounded,
+                label: '$lessonCount bài học',
               ),
-              if (course.instructorName != null)
-                _InfoChip(
-                  icon: Icons.person_outline_rounded,
-                  label: course.instructorName!,
-                ),
-              if (course.defaultAccessDurationDays != null)
-                _InfoChip(
-                  icon: Icons.event_available_outlined,
-                  label: 'Truy cập ${course.defaultAccessDurationDays} ngày',
-                ),
+              const _InfoChip(
+                icon: Icons.access_time_rounded,
+                label: '2 giờ 30 phút',
+              ),
+              const _InfoChip(icon: Icons.school_outlined, label: 'Trung cấp'),
             ],
           ),
-          if (courseProgress != null) ...[
-            const SizedBox(height: AppSpacing.lg),
-            Text('Tiến độ học tập', style: textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.xs),
-            Semantics(
-              label:
-                  'Đã hoàn thành ${courseProgress.progressPercentage} phần trăm',
-              child: LinearProgressIndicator(
-                value: courseProgress.progressPercentage / 100,
-              ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Segmented Tabs: Nội dung | Giới thiệu | Đánh giá
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildTab('Nội dung', 0),
+                const SizedBox(width: AppSpacing.lg),
+                _buildTab('Giới thiệu', 1),
+                const SizedBox(width: AppSpacing.lg),
+                _buildTab('Đánh giá', 2),
+              ],
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Đã hoàn thành ${courseProgress.completedParts}/${courseProgress.totalParts} nội dung',
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTab(String label, int index) {
+    final isSelected = _selectedTab == index;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedTab = index),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-          ],
+          ),
+          const SizedBox(height: 4),
+          Container(
+            height: 3,
+            width: 40,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
         ],
       ),
     );
@@ -390,9 +467,30 @@ class _LessonPartTile extends StatelessWidget {
             ? const Icon(Icons.chevron_right_rounded)
             : const Icon(Icons.lock_outline_rounded),
         onTap: canOpen
-            ? () => context.push(
-                AppRoutes.lessonPath(courseId: courseId, lessonPartId: part.id),
-              )
+            ? () {
+                if (part.isVideo) {
+                  context.push(
+                    AppRoutes.mediaPlayerPath(
+                      courseId: courseId,
+                      lessonPartId: part.id,
+                    ),
+                  );
+                } else if (part.isDocument) {
+                  context.push(
+                    AppRoutes.documentReaderPath(
+                      courseId: courseId,
+                      lessonPartId: part.id,
+                    ),
+                  );
+                } else {
+                  context.push(
+                    AppRoutes.lessonPath(
+                      courseId: courseId,
+                      lessonPartId: part.id,
+                    ),
+                  );
+                }
+              }
             : null,
       ),
     );

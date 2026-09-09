@@ -21,6 +21,7 @@ void main() {
             required title,
             required duration,
             embedUrl,
+            videoId,
           }) {
             capturedUrl = url;
             return Text('Fake player: $title');

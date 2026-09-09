@@ -264,7 +264,7 @@ _Harness _buildAppHarness() {
         ),
       ),
       learningMediaPlayerBuilderProvider.overrideWithValue(
-        ({required url, required title, required duration}) =>
+        ({required url, required title, required duration, embedUrl, videoId}) =>
             Text('Fake player: $title'),
       ),
       documentReaderBuilderProvider.overrideWithValue(

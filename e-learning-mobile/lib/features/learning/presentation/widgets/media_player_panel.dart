@@ -1,4 +1,5 @@
 import 'package:e_learning_mobile/features/learning/data/models/learning_models.dart';
+import 'package:e_learning_mobile/features/learning/data/learning_api.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
@@ -11,12 +12,13 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 final learningMediaPlayerBuilderProvider = Provider<LearningMediaPlayerBuilder>(
   (ref) =>
-      ({required url, required title, required duration, embedUrl}) =>
+      ({required url, required title, required duration, embedUrl, videoId}) =>
           LearningMediaPlayer(
             url: url,
             title: title,
             duration: duration,
             embedUrl: embedUrl,
+            videoId: videoId,
           ),
 );
 
@@ -26,7 +28,12 @@ typedef LearningMediaPlayerBuilder =
       required String title,
       required double duration,
       Uri? embedUrl,
+      String? videoId,
     });
+
+final _videoEmbedUrlProvider = FutureProvider.family<Uri?, String>(
+  (ref, videoId) => ref.read(learningApiProvider).getVideoEmbedUrl(videoId),
+);
 
 class MediaPlayerPanel extends ConsumerWidget {
   const MediaPlayerPanel({required this.part, super.key});
@@ -39,9 +46,14 @@ class MediaPlayerPanel extends ConsumerWidget {
     final url = playbackUrl == null ? null : Uri.tryParse(playbackUrl);
     final embedUrl = part.embedUrl?.trim();
     final embedUri = embedUrl == null ? null : Uri.tryParse(embedUrl);
+    final videoId = part.videoId?.trim();
     if (url == null || !_isSupportedNetworkUrl(url)) {
       if (embedUri != null && _isSupportedNetworkUrl(embedUri)) {
         return LearningVideoEmbedPlayer(url: embedUri, title: part.title);
+      }
+
+      if (videoId != null) {
+        return LearningVideoEmbedFallback(videoId: videoId, title: part.title);
       }
 
       return const _InvalidMediaUrlCard();
@@ -53,6 +65,7 @@ class MediaPlayerPanel extends ConsumerWidget {
       title: part.title,
       duration: part.videoDuration,
       embedUrl: embedUri,
+      videoId: videoId,
     );
   }
 }
@@ -63,6 +76,7 @@ class LearningMediaPlayer extends StatefulWidget {
     required this.title,
     required this.duration,
     this.embedUrl,
+    this.videoId,
     super.key,
   });
 
@@ -70,6 +84,7 @@ class LearningMediaPlayer extends StatefulWidget {
   final String title;
   final double duration;
   final Uri? embedUrl;
+  final String? videoId;
 
   @override
   State<LearningMediaPlayer> createState() => _LearningMediaPlayerState();
@@ -153,6 +168,11 @@ class _LearningMediaPlayerState extends State<LearningMediaPlayer> {
       final embedUrl = widget.embedUrl;
       if (embedUrl != null) {
         return LearningVideoEmbedPlayer(url: embedUrl, title: widget.title);
+      }
+
+      final videoId = widget.videoId;
+      if (videoId != null) {
+        return LearningVideoEmbedFallback(videoId: videoId, title: widget.title);
       }
 
       return AppErrorView(
@@ -266,6 +286,36 @@ class _LearningVideoEmbedPlayerState extends State<LearningVideoEmbedPlayer> {
           child: WebViewWidget(controller: _controller),
         ),
       ),
+    );
+  }
+}
+
+class LearningVideoEmbedFallback extends ConsumerWidget {
+  const LearningVideoEmbedFallback({
+    required this.videoId,
+    required this.title,
+    super.key,
+  });
+
+  final String videoId;
+  final String title;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final embedUrlAsync = ref.watch(_videoEmbedUrlProvider(videoId));
+    return embedUrlAsync.when(
+      loading: () => const AppLoadingView(label: 'Đang mở trình phát tương thích...'),
+      error: (error, stackTrace) => AppErrorView(
+        message: 'Không thể mở trình phát tương thích. Vui lòng thử lại sau.',
+        onRetry: () => ref.invalidate(_videoEmbedUrlProvider(videoId)),
+      ),
+      data: (embedUrl) {
+        if (embedUrl == null || !_isSupportedNetworkUrl(embedUrl)) {
+          return const _InvalidMediaUrlCard();
+        }
+
+        return LearningVideoEmbedPlayer(url: embedUrl, title: title);
+      },
     );
   }
 }

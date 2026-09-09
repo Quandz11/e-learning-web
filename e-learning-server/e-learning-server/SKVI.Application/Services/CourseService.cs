@@ -258,6 +258,9 @@ public class CourseService : ICourseService
                     var playbackUrl = part.Video != null && !string.IsNullOrWhiteSpace(part.Video.BunnyVideoId)
                          ? _bunnyStreamService.GetPlaybackUrl(part.Video.BunnyVideoId) 
                          : null;
+                    var embedUrl = part.Video != null && !string.IsNullOrWhiteSpace(part.Video.BunnyVideoId)
+                         ? _bunnyStreamService.GetEmbedUrl(part.Video.BunnyVideoId)
+                         : null;
 
                     lessonDto.Parts.Add(new LessonPartDto
                     {
@@ -269,6 +272,7 @@ public class CourseService : ICourseService
                         VideoId = part.VideoId,
                         VideoDuration = part.Video?.Duration ?? 0,
                         PlaybackUrl = playbackUrl,
+                        EmbedUrl = embedUrl,
                         DocumentId = part.DocumentId,
                         DocumentUrl = part.Document?.BunnyStoragePath,
                         Content = part.Content

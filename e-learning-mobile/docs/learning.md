@@ -6,7 +6,7 @@
 - `/app/learning/course/:courseId` shows backend-confirmed course detail under the Learning tab.
 - `/app/learning/course/:courseId/lesson/:lessonPartId` shows a single embedded lesson part under the Learning tab.
 - Phase 4 covers course detail, embedded lesson lists, progress display, preview access, lesson completion, media playback, document reading, and lesson-part stack navigation.
-- Checkout, enrollment purchase, payment results, orders, refunds, watched-duration progress mutation, and native direct PDF rendering are intentionally deferred.
+- Checkout, enrollment purchase, payment results, orders, refunds, and watched-duration progress mutation are intentionally deferred.
 
 ## Backend contracts
 
@@ -45,7 +45,7 @@
 - Course and enrollment thumbnails use the existing cached image package with bounded decode sizes and local icon fallbacks.
 - HTML lesson content uses the existing HTML rendering dependency already present in the project.
 - Video playback uses the direct `video_player` dependency with the backend-provided `playbackUrl`, loading/error states, retry, play/pause, scrubbing, buffering feedback, and safe URL validation.
-- Document viewing uses the existing WebView dependency with JavaScript disabled and the backend-provided `documentUrl`.
+- Document viewing uses Syncfusion's native PDF viewer with the backend-provided `documentUrl`.
 - Unsupported media states and invalid URLs show safe user-facing messages rather than fake playback or raw backend data.
 
 ## Progress and access

@@ -4,7 +4,7 @@ Last updated: 2026-09-09
 
 ## Current objective
 
-- Phase 4 Media Player, Document Reader, and Learning UI is implemented on top of the completed auth/profile, Home, Learning catalog, course detail, lesson, and progress foundations.
+- Phase 4 Media Player, Document Reader, and Learning UI is implemented on top of the completed auth/profile, Home, Learning catalog, course detail, lesson, and progress foundations, including a native PDF viewer for lesson documents.
 
 ## In progress
 
@@ -39,13 +39,12 @@ Last updated: 2026-09-09
 - Added a direct `video_player` dependency for the existing transitive player package so the app can import it safely and play backend-provided lesson playback URLs.
 - Implemented authenticated media and document child routes under `/app/learning/course/:courseId/lesson/:lessonPartId`.
 - Added native Flutter chrome for lesson video playback with loading, retry, buffering, controls, scrubbing, and duration formatting.
-- Added document reading through the existing WebView dependency using backend-provided document URLs with JavaScript disabled and safe invalid-URL handling.
+- Added native Syncfusion PDF viewing for lesson documents using backend-provided document URLs, with loading, retry, and invalid-URL handling.
 - Added previous/next lesson-part stack navigation inside `LessonScreen` without introducing nested navigation or duplicate selected-tab state.
 
 ## Known failures
 
 - Enrollment purchase flow, checkout, payment result handling, orders, and refunds remain intentionally deferred.
-- Android WebView PDF rendering remains platform/CDN dependent because no compatible direct PDF viewer package is installed for the current Flutter/iOS baseline.
 - Search, filters, category filtering, and pagination are not implemented because the confirmed Phase 3 backend contracts do not expose those behaviors for the mobile catalog.
 - Article detail remains intentionally deferred; Home routes article-related actions only to approved existing destinations.
 - Avatar selection and upload remain deferred because this phase does not introduce a file-picker dependency.

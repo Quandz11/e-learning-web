@@ -66,6 +66,7 @@ class LearningLessonPart {
     required this.videoDuration,
     this.videoId,
     this.playbackUrl,
+    this.embedUrl,
     this.documentId,
     this.documentUrl,
     this.documentFileName,
@@ -80,6 +81,7 @@ class LearningLessonPart {
   final String? videoId;
   final double videoDuration;
   final String? playbackUrl;
+  final String? embedUrl;
   final String? documentId;
   final String? documentUrl;
   final String? documentFileName;

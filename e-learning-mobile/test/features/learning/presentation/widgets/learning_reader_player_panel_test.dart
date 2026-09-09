@@ -20,6 +20,7 @@ void main() {
             required url,
             required title,
             required duration,
+            embedUrl,
           }) {
             capturedUrl = url;
             return Text('Fake player: $title');

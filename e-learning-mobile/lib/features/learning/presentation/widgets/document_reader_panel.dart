@@ -2,14 +2,15 @@ import 'package:e_learning_mobile/features/learning/data/models/learning_models.
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
+import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 final documentReaderBuilderProvider = Provider<DocumentReaderBuilder>(
   (ref) =>
       ({required url, required title}) =>
-          DocumentReaderWebView(url: url, title: title),
+          DocumentReaderPdfViewer(url: url, title: title),
 );
 
 typedef DocumentReaderBuilder =
@@ -33,8 +34,8 @@ class DocumentReaderPanel extends ConsumerWidget {
   }
 }
 
-class DocumentReaderWebView extends StatefulWidget {
-  const DocumentReaderWebView({
+class DocumentReaderPdfViewer extends StatefulWidget {
+  const DocumentReaderPdfViewer({
     required this.url,
     required this.title,
     super.key,
@@ -44,79 +45,79 @@ class DocumentReaderWebView extends StatefulWidget {
   final String title;
 
   @override
-  State<DocumentReaderWebView> createState() => _DocumentReaderWebViewState();
+  State<DocumentReaderPdfViewer> createState() =>
+      _DocumentReaderPdfViewerState();
 }
 
-class _DocumentReaderWebViewState extends State<DocumentReaderWebView> {
-  late final WebViewController _controller;
+class _DocumentReaderPdfViewerState extends State<DocumentReaderPdfViewer> {
   var _isLoading = true;
-  var _hasError = false;
+  String? _errorMessage;
+  var _reloadToken = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.disabled)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) {
-            if (mounted) {
-              setState(() {
-                _isLoading = true;
-                _hasError = false;
-              });
-            }
-          },
-          onPageFinished: (_) {
-            if (mounted) {
-              setState(() {
-                _isLoading = false;
-              });
-            }
-          },
-          onWebResourceError: (_) {
-            if (mounted) {
-              setState(() {
-                _isLoading = false;
-                _hasError = true;
-              });
-            }
-          },
-        ),
-      )
-      ..loadRequest(widget.url);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_hasError) {
+    if (_errorMessage != null) {
       return AppErrorView(
         message: 'Không thể tải tài liệu. Vui lòng thử lại.',
-        onRetry: () {
-          setState(() {
-            _isLoading = true;
-            _hasError = false;
-          });
-          _controller.reload();
-        },
+        onRetry: _reload,
       );
     }
 
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: WebViewWidget(controller: _controller),
-        ),
-        if (_isLoading)
-          const Positioned.fill(
-            child: ColoredBox(
-              color: Color(0x99FFFFFF),
-              child: Center(child: CircularProgressIndicator()),
+    return AppCard(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            KeyedSubtree(
+              key: ValueKey(_reloadToken),
+              child: SfPdfViewer.network(
+                widget.url.toString(),
+                canShowScrollHead: true,
+                canShowScrollStatus: true,
+                enableDoubleTapZooming: true,
+                pageLayoutMode: PdfPageLayoutMode.continuous,
+                onDocumentLoaded: (_) {
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                      _errorMessage = null;
+                    });
+                  }
+                },
+                onDocumentLoadFailed: (details) {
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                      _errorMessage = details.description;
+                    });
+                  }
+                },
+              ),
             ),
-          ),
-      ],
+            if (_isLoading)
+              const Positioned.fill(
+                child: ColoredBox(
+                  color: Color(0x99FFFFFF),
+                  child: AppLoadingView(label: 'Đang tải tài liệu...'),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
+  }
+
+  Future<void> _reload() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _reloadToken += 1;
+    });
   }
 }
 

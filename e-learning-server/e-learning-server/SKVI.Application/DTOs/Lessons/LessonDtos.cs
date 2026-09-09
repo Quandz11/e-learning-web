@@ -27,6 +27,7 @@ public class LessonPartDto
     public Guid? VideoId { get; set; }
     public double VideoDuration { get; set; }
     public string? PlaybackUrl { get; set; }
+    public string? EmbedUrl { get; set; }
     
     public Guid? DocumentId { get; set; }
     public string? DocumentUrl { get; set; }

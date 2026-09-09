@@ -214,6 +214,26 @@ void main() {
       );
     });
 
+    test('normalizes protocol-relative playback urls', () async {
+      adapter.enqueue(
+        method: 'GET',
+        path: '/courses/11111111-1111-1111-1111-111111111111',
+        statusCode: 200,
+        body: _courseDetailJsonWithPlaybackUrl(
+          '//video.example.com/play.m3u8',
+        ),
+      );
+
+      final course = await api.getCourse(
+        '11111111-1111-1111-1111-111111111111',
+      );
+
+      expect(
+        course.lessons.single.parts.single.playbackUrl,
+        'https://video.example.com/play.m3u8',
+      );
+    });
+
     test('parses course progress response', () async {
       adapter.enqueue(
         method: 'GET',
@@ -317,4 +337,16 @@ Map<String, Object?> _courseDetailJson() {
       },
     ],
   };
+}
+
+Map<String, Object?> _courseDetailJsonWithPlaybackUrl(String playbackUrl) {
+  final json = _courseDetailJson();
+  final lessons = List<Map<String, Object?>>.from(json['lessons'] as List);
+  final firstLesson = Map<String, Object?>.from(lessons.first);
+  final parts = List<Map<String, Object?>>.from(firstLesson['parts'] as List);
+  final firstPart = Map<String, Object?>.from(parts.first);
+  firstPart['playbackUrl'] = playbackUrl;
+  firstLesson['parts'] = [firstPart];
+  json['lessons'] = [firstLesson];
+  return json;
 }

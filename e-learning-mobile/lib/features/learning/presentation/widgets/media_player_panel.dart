@@ -7,11 +7,17 @@ import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 final learningMediaPlayerBuilderProvider = Provider<LearningMediaPlayerBuilder>(
   (ref) =>
-      ({required url, required title, required duration}) =>
-          LearningMediaPlayer(url: url, title: title, duration: duration),
+      ({required url, required title, required duration, embedUrl}) =>
+          LearningMediaPlayer(
+            url: url,
+            title: title,
+            duration: duration,
+            embedUrl: embedUrl,
+          ),
 );
 
 typedef LearningMediaPlayerBuilder =
@@ -19,6 +25,7 @@ typedef LearningMediaPlayerBuilder =
       required Uri url,
       required String title,
       required double duration,
+      Uri? embedUrl,
     });
 
 class MediaPlayerPanel extends ConsumerWidget {
@@ -30,12 +37,23 @@ class MediaPlayerPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final playbackUrl = part.playbackUrl?.trim();
     final url = playbackUrl == null ? null : Uri.tryParse(playbackUrl);
+    final embedUrl = part.embedUrl?.trim();
+    final embedUri = embedUrl == null ? null : Uri.tryParse(embedUrl);
     if (url == null || !_isSupportedNetworkUrl(url)) {
+      if (embedUri != null && _isSupportedNetworkUrl(embedUri)) {
+        return LearningVideoEmbedPlayer(url: embedUri, title: part.title);
+      }
+
       return const _InvalidMediaUrlCard();
     }
 
     final builder = ref.watch(learningMediaPlayerBuilderProvider);
-    return builder(url: url, title: part.title, duration: part.videoDuration);
+    return builder(
+      url: url,
+      title: part.title,
+      duration: part.videoDuration,
+      embedUrl: embedUri,
+    );
   }
 }
 
@@ -44,12 +62,14 @@ class LearningMediaPlayer extends StatefulWidget {
     required this.url,
     required this.title,
     required this.duration,
+    this.embedUrl,
     super.key,
   });
 
   final Uri url;
   final String title;
   final double duration;
+  final Uri? embedUrl;
 
   @override
   State<LearningMediaPlayer> createState() => _LearningMediaPlayerState();
@@ -130,8 +150,13 @@ class _LearningMediaPlayerState extends State<LearningMediaPlayer> {
   Widget build(BuildContext context) {
     final controller = _controller;
     if (_error != null) {
+      final embedUrl = widget.embedUrl;
+      if (embedUrl != null) {
+        return LearningVideoEmbedPlayer(url: embedUrl, title: widget.title);
+      }
+
       return AppErrorView(
-        message: 'Video chưa có đường dẫn phát hợp lệ. Vui lòng quay lại sau.',
+        message: 'Không thể phát video trực tiếp. Vui lòng thử lại sau.',
         onRetry: _retry,
       );
     }
@@ -204,6 +229,42 @@ class _LearningMediaPlayerState extends State<LearningMediaPlayer> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class LearningVideoEmbedPlayer extends StatefulWidget {
+  const LearningVideoEmbedPlayer({required this.url, required this.title, super.key});
+
+  final Uri url;
+  final String title;
+
+  @override
+  State<LearningVideoEmbedPlayer> createState() => _LearningVideoEmbedPlayerState();
+}
+
+class _LearningVideoEmbedPlayerState extends State<LearningVideoEmbedPlayer> {
+  late final WebViewController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.transparent)
+      ..loadRequest(widget.url);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: WebViewWidget(controller: _controller),
+        ),
       ),
     );
   }

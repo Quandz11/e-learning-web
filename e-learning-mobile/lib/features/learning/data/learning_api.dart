@@ -254,6 +254,7 @@ class LearningApi {
       videoId: _optionalString(json['videoId']),
       videoDuration: _requireDouble(json['videoDuration']),
       playbackUrl: _resolveUrl(_optionalString(json['playbackUrl'])),
+      embedUrl: _resolveUrl(_optionalString(json['embedUrl'])),
       documentId: _optionalString(json['documentId']),
       documentUrl: _resolveUrl(_optionalString(json['documentUrl'])),
       documentFileName: _optionalString(json['documentFileName']),
@@ -370,6 +371,10 @@ class LearningApi {
   String? _resolveUrl(String? raw) {
     if (raw == null) {
       return null;
+    }
+
+    if (raw.startsWith('//')) {
+      return Uri.parse('https:$raw').toString();
     }
 
     final uri = Uri.tryParse(raw);

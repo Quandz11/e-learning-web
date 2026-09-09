@@ -66,9 +66,9 @@ Keep entries concise. Do not paste full diffs, logs, or private reasoning.
 
 ### 2026-09-09 — Phase 4 Media Player / Document Reader / Learning UI
 
-* Implemented: authenticated media-player and document-reader child routes, video playback UI, document WebView reader, and previous/next lesson-part navigation.
-* Changed: added `video_player` as a direct dependency, reused existing WebView support for document URLs, preserved the existing App Shell and route-derived `Học tập` tab selection.
+* Implemented: authenticated media-player and document-reader child routes, video playback UI, native PDF document reader, and previous/next lesson-part navigation.
+* Changed: added `video_player` as a direct dependency, pinned Syncfusion PDF viewer plus the compatible `device_info_plus` release for this Flutter SDK, preserved the existing App Shell and route-derived `Học tập` tab selection.
 * Tests: added media/document panel coverage and extended course detail, lesson, and router regressions for nested media/document routes and responsive lesson navigation.
-* Validation: `flutter pub get`, `dart format --output=none --set-exit-if-changed .`, `flutter analyze`, and `flutter test` passed on 2026-09-09.
-* Remaining risk: direct PDF rendering inside Android WebView depends on platform/CDN behavior; checkout, payments, orders, refunds, and watched-duration progress remain deferred.
+* Validation: `flutter pub get`, `flutter analyze`, and focused learning widget tests passed on 2026-09-09 after the Syncfusion and dependency pinning changes.
+* Remaining risk: checkout, payments, orders, refunds, and watched-duration progress remain deferred.
 

@@ -82,6 +82,57 @@ void main() {
     expect(redirect, contains(AppRoutes.login));
   });
 
+  test('unauthenticated user cannot enter course detail route', () {
+    final redirect = appRedirect(
+      sessionState: const SessionState.unauthenticated(),
+      otpChallenge: null,
+      forgotPasswordChallenge: null,
+      deepLinks: deepLinks,
+      uri: Uri.parse(
+        AppRoutes.courseDetailPath('11111111-1111-1111-1111-111111111111'),
+      ),
+      matchedLocation: AppRoutes.appLearningCoursePattern,
+    );
+
+    expect(redirect, contains(AppRoutes.login));
+  });
+
+  test('learning child routes keep learning shell destination', () {
+    expect(
+      AppRoutes.shellDestinationForLocation(
+        AppRoutes.courseDetailPath('11111111-1111-1111-1111-111111111111'),
+      ),
+      AppRoutes.appLearning,
+    );
+    expect(
+      AppRoutes.shellDestinationForLocation(
+        AppRoutes.lessonPath(
+          courseId: '11111111-1111-1111-1111-111111111111',
+          lessonPartId: '33333333-3333-3333-3333-333333333333',
+        ),
+      ),
+      AppRoutes.appLearning,
+    );
+    expect(
+      AppRoutes.shellDestinationForLocation(
+        AppRoutes.mediaPlayerPath(
+          courseId: '11111111-1111-1111-1111-111111111111',
+          lessonPartId: '33333333-3333-3333-3333-333333333333',
+        ),
+      ),
+      AppRoutes.appLearning,
+    );
+    expect(
+      AppRoutes.shellDestinationForLocation(
+        AppRoutes.documentReaderPath(
+          courseId: '11111111-1111-1111-1111-111111111111',
+          lessonPartId: '55555555-5555-5555-5555-555555555555',
+        ),
+      ),
+      AppRoutes.appLearning,
+    );
+  });
+
   test('restoring session does not create redirect loop', () {
     final redirect = appRedirect(
       sessionState: const SessionState.restoring(),

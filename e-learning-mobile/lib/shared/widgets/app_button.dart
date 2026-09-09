@@ -35,7 +35,11 @@ class AppButton extends StatelessWidget {
         ? Text(label)
         : Row(
             mainAxisSize: MainAxisSize.min,
-            children: [icon!, const SizedBox(width: 8), Text(label)],
+            children: [
+              icon!,
+              const SizedBox(width: 8),
+              Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+            ],
           );
 
     final disabled = loading || onPressed == null;

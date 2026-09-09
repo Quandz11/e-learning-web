@@ -14,6 +14,7 @@ import 'package:e_learning_mobile/features/foundation/presentation/app_shell.dar
 import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/home/data/home_repository.dart';
 import 'package:e_learning_mobile/features/home/presentation/screens/home_screen.dart';
+import 'package:e_learning_mobile/features/learning/data/learning_repository.dart';
 import 'package:e_learning_mobile/features/profile/data/models/profile.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_api.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
@@ -28,6 +29,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../helpers/in_memory_session_storage.dart';
 import '../../../helpers/fake_home_repository.dart';
+import '../../../helpers/fake_learning_repository.dart';
 
 void main() {
   testWidgets('authenticated /app resolves to /app/home', (tester) async {
@@ -54,7 +56,7 @@ void main() {
     harness.router.go(AppRoutes.appHome);
     await tester.pumpAndSettle();
 
-    expect(find.text('Sử dụng email và mật khẩu để tiếp tục.'), findsOneWidget);
+    expect(find.text('Nhịn ăn\nChữa lành'), findsOneWidget);
   });
 
   testWidgets('authenticated user can open each shell destination', (
@@ -171,10 +173,7 @@ void main() {
 
     await tester.tap(find.text('Học tập').last);
     await tester.pumpAndSettle();
-    expect(
-      find.text('Learning content will be implemented in a later phase.'),
-      findsOneWidget,
-    );
+    expect(find.text('Khóa học hiện có'), findsOneWidget);
 
     await tester.tap(find.text('Cộng đồng').last);
     await tester.pumpAndSettle();
@@ -411,6 +410,7 @@ _ShellHarness _buildHarness({required SessionState sessionState}) {
       ),
       profileControllerProvider.overrideWith((ref) => _TestProfileController()),
       homeRepositoryProvider.overrideWithValue(FakeHomeRepository()),
+      learningRepositoryProvider.overrideWithValue(FakeLearningRepository()),
       homeClockProvider.overrideWithValue(() => DateTime(2026, 8, 6, 8)),
     ],
   );

@@ -55,6 +55,13 @@ abstract final class AppRoutes {
   static const appRoot = '/app';
   static const appHome = '/app/home';
   static const appLearning = '/app/learning';
+  static const appLearningCoursePattern = '/app/learning/course/:courseId';
+  static const appLearningLessonPattern =
+      '/app/learning/course/:courseId/lesson/:lessonPartId';
+  static const appLearningMediaPattern =
+      '/app/learning/course/:courseId/lesson/:lessonPartId/media';
+  static const appLearningDocumentPattern =
+      '/app/learning/course/:courseId/lesson/:lessonPartId/document';
   static const appCommunity = '/app/community';
   static const appProfile = '/app/profile';
   static const appProfileEdit = '/app/profile/edit';
@@ -70,6 +77,31 @@ abstract final class AppRoutes {
     appCommunity,
     appProfile,
   ];
+
+  static String courseDetailPath(String courseId) {
+    return '/app/learning/course/${Uri.encodeComponent(courseId)}';
+  }
+
+  static String lessonPath({
+    required String courseId,
+    required String lessonPartId,
+  }) {
+    return '/app/learning/course/${Uri.encodeComponent(courseId)}/lesson/${Uri.encodeComponent(lessonPartId)}';
+  }
+
+  static String mediaPlayerPath({
+    required String courseId,
+    required String lessonPartId,
+  }) {
+    return '${lessonPath(courseId: courseId, lessonPartId: lessonPartId)}/media';
+  }
+
+  static String documentReaderPath({
+    required String courseId,
+    required String lessonPartId,
+  }) {
+    return '${lessonPath(courseId: courseId, lessonPartId: lessonPartId)}/document';
+  }
 
   static String shellDestinationForLocation(String location) {
     if (location == appProfile || location.startsWith('$appProfile/')) {

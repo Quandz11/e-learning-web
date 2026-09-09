@@ -18,6 +18,11 @@ import 'package:e_learning_mobile/features/foundation/presentation/payment_retur
 import 'package:e_learning_mobile/features/foundation/presentation/public_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/shell_destination_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/home/presentation/screens/home_screen.dart';
+import 'package:e_learning_mobile/features/learning/presentation/screens/course_detail_screen.dart';
+import 'package:e_learning_mobile/features/learning/presentation/screens/document_reader_screen.dart';
+import 'package:e_learning_mobile/features/learning/presentation/screens/lesson_screen.dart';
+import 'package:e_learning_mobile/features/learning/presentation/screens/learning_screen.dart';
+import 'package:e_learning_mobile/features/learning/presentation/screens/media_player_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/unknown_route_screen.dart';
 import 'package:e_learning_mobile/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:e_learning_mobile/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -81,7 +86,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: AppRoutes.appLearning,
-            builder: (_, __) => const LearningPlaceholderScreen(),
+            builder: (_, __) => const LearningScreen(),
+            routes: [
+              GoRoute(
+                path: 'course/:courseId',
+                builder: (_, state) => CourseDetailScreen(
+                  courseId: state.pathParameters['courseId'] ?? '',
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'lesson/:lessonPartId',
+                    builder: (_, state) => LessonScreen(
+                      courseId: state.pathParameters['courseId'] ?? '',
+                      lessonPartId: state.pathParameters['lessonPartId'] ?? '',
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'media',
+                        builder: (_, state) => MediaPlayerScreen(
+                          courseId: state.pathParameters['courseId'] ?? '',
+                          lessonPartId:
+                              state.pathParameters['lessonPartId'] ?? '',
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'document',
+                        builder: (_, state) => DocumentReaderScreen(
+                          courseId: state.pathParameters['courseId'] ?? '',
+                          lessonPartId:
+                              state.pathParameters['lessonPartId'] ?? '',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
           GoRoute(
             path: AppRoutes.appCommunity,

@@ -15,6 +15,7 @@ import 'package:e_learning_mobile/core/network/api_client.dart';
 import 'package:e_learning_mobile/features/home/data/home_repository.dart';
 import 'package:e_learning_mobile/features/home/data/models/home_models.dart';
 import 'package:e_learning_mobile/features/home/presentation/screens/home_screen.dart';
+import 'package:e_learning_mobile/features/learning/data/learning_repository.dart';
 import 'package:e_learning_mobile/features/profile/data/models/profile.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_api.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
@@ -28,6 +29,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../helpers/fake_home_repository.dart';
+import '../../../../helpers/fake_learning_repository.dart';
 import '../../../../helpers/in_memory_session_storage.dart';
 
 void main() {
@@ -86,10 +88,7 @@ void main() {
     await tester.tap(find.text('Tiếp tục học').last);
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Learning content will be implemented in a later phase.'),
-      findsOneWidget,
-    );
+    expect(find.text('Khóa học hiện có'), findsOneWidget);
   });
 
   testWidgets('omits continue learning when there are no enrollments', (
@@ -276,6 +275,7 @@ _HomeHarness _buildHarness({
       homeRepositoryProvider.overrideWithValue(
         repository ?? FakeHomeRepository(),
       ),
+      learningRepositoryProvider.overrideWithValue(FakeLearningRepository()),
       profileControllerProvider.overrideWith(
         (ref) => _TestProfileController(
           profileState ??

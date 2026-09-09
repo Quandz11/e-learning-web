@@ -22,6 +22,9 @@
 - Keep authenticated shell navigation styling lightweight by using standard Material 3 `NavigationBar` motion and a single shell-owned surface instead of custom animation stacks or extra navigation layers.
 - Keep auth and profile forms scrollable and controller-driven so temporary field state stays local to the screen and does not trigger shell-wide rebuilds.
 - Keep Home rendering to one scrollable list with constrained content width and controller-driven loading so repeated child rebuilds do not trigger duplicate requests.
+- Keep Learning rendering to one scrollable list with constrained content width; the controller triggers the initial request once after mount and retains loaded content during refresh.
+- Keep course detail and lesson rendering to a single scrollable surface under the existing shell; controllers trigger initial loads once and retain existing content during refresh or completion failures.
+- Media and document child routes reuse the existing lesson repository/controller boundary and do not rebuild the router or shell for playback/reading state.
 
 ## Images
 
@@ -31,6 +34,9 @@
 - Handle placeholders and errors.
 - Avoid bundling unnecessary high-resolution assets.
 - Home cards cap cached image decode sizes and use local icon fallbacks instead of heavier custom image pipelines.
+- Learning course and enrollment cards use the existing cached image dependency with bounded image dimensions, capped cache widths, zero fade delay, and local icon fallbacks for missing or failed thumbnails.
+- Course detail thumbnails use the existing cached image dependency with bounded cache dimensions and lightweight fallback icons.
+- Document reading does not add a PDF bitmap cache; it delegates the backend-provided URL to the existing WebView surface.
 
 ## Data and networking
 
@@ -38,6 +44,12 @@
 - Avoid duplicate requests.
 - Cache only where correctness and invalidation are understood.
 - Move expensive parsing or computation off the UI isolate when justified by measurement.
+- The confirmed Learning backend returns direct lists without pagination metadata, so Phase 3 does not invent pagination or infinite scroll.
+- Learning loads courses as the primary section and isolates enrollment/category failures so one optional failure does not hide the catalog.
+- Course detail loads progress separately from course content and treats not-found/forbidden progress responses as access-state information for locked non-preview lessons.
+- Lesson completion reloads backend-confirmed progress after success instead of mutating complex local progress state.
+- Video playback streams the backend-provided URL through `video_player`; the app does not download media files into Dart memory.
+- Watched-duration progress is not simulated without a confirmed backend progress mutation contract.
 
 ## Startup
 
@@ -55,6 +67,7 @@
 - Avoid retaining large collections or widget contexts unnecessarily.
 - Cancel unused subscriptions and requests when supported.
 - Review image and cache limits.
+- Dispose video and WebView-owned route resources when media/document routes are removed.
 
 ## Validation
 

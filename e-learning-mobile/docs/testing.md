@@ -219,6 +219,16 @@ A behavior change is sufficiently tested when:
 - Registration widget rendering, password visibility toggles, loading disablement, duplicate-tap safety, viewport safety, and autofill/input configuration
 - Router regressions for `/register`, authenticated redirect-away behavior, login-to-register and register-to-login navigation, and safe transition to the `/verify-otp` placeholder
 
+## Phase 4 Learning detail coverage
+
+- Learning API parsing for embedded course lessons, lesson parts, course progress, and lesson completion endpoints
+- Course detail repository behavior for successful detail loading, accessible lesson lookup, forbidden locked lessons, and completion reloads
+- Course detail controller loading, failure, retained refresh content, and duplicate-load prevention
+- Lesson controller loading, not-found failure, completion success, completion failure, and duplicate-completion prevention
+- Course detail widget states for progress, lessons, missing optional fields, image fallback, responsive layout, and route handoff to lesson detail
+- Lesson widget states for content, loading, missing lessons, unsupported media/document types, completion, responsive layout, and large text
+- Router regressions for authenticated Learning child routes, unauthenticated redirects, and `Học tập` shell selection on nested routes
+
 ## Phase 2.4 OTP verification coverage
 
 - OTP controller initial, validating, submitting, success, failure, invalid-challenge, and duplicate-submit states
@@ -275,3 +285,19 @@ A behavior change is sufficiently tested when:
 - Home controller loading, refresh, retry, retained-content, and duplicate-request prevention
 - Home widget coverage for greeting, quick actions, continue-learning presence or omission, featured-course formatting, optional article failure, retry UI, navigation, and responsive stability
 - Shell regressions updated so `/app/home` resolves to the real Home screen while the other three shell destinations remain unchanged
+
+## Phase 3 Learning coverage
+
+- Learning API parsing for direct-list course, enrollment, and category responses, nullable optional fields, relative image URLs, malformed primary payloads, and mapped server failures
+- Learning repository orchestration for published-course loading, active-enrollment filtering, active-category filtering, and optional-section failure isolation
+- Learning controller coverage for initial load, success, empty enrollment, optional failures, primary failure, refresh with retained content, and duplicate-refresh prevention
+- Learning widget coverage for loading, heading, enrolled-course summaries, empty states, course cards, image fallback, category chips, isolated errors, retry, pull-to-refresh, responsive stability, dark mode, and unsupported search/filter/checkout controls staying absent
+- Shell and Home regressions updated so `/app/learning` resolves to the real Learning screen while four shell destinations and route-driven tab selection remain unchanged
+
+
+## Phase 4 media/document coverage
+
+- Media panel coverage for backend-provided playback URLs, invalid playback URLs, and test-injected player builders.
+- Document panel coverage for backend-provided document URLs, invalid document URLs, and test-injected reader builders.
+- Lesson widget coverage for media/document actions, previous/next navigation, completion, unsupported types, and responsive large-text layout.
+- Router regressions for `/media` and `/document` child routes preserving the existing authenticated shell and `Học tập` tab selection.

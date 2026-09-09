@@ -27,11 +27,13 @@ Do not place temporary task notes here.
 - Routing: GoRouter
 - Authenticated shell: `ShellRoute` with `/app/home`, `/app/learning`, `/app/community`, and `/app/profile`
 - Home feature: `/app/home` reuses `ProfileController` for the greeting header and loads published courses, authenticated enrollments, active categories, recent public articles, and active testimonials through a dedicated Home repository
+- Learning feature: `/app/learning` loads published courses, active authenticated enrollments, and active categories through a dedicated Learning repository; `/app/learning/course/:courseId` shows backend-confirmed course detail; `/app/learning/course/:courseId/lesson/:lessonPartId` shows embedded lesson-part detail with progress/completion; `/media` and `/document` child routes open backend-provided lesson media URLs
 - Authenticated profile child routes: `/app/profile/edit`, `/app/profile/change-password`, `/app/profile/security`
 - Public recovery routes: `/forgot-password`, `/forgot-password/verify`
 - Bottom navigation source of truth: current GoRouter location only
-- Home actions route only to existing shell destinations until dedicated Learning and article-detail routes exist
+- Home actions route only to existing shell destinations and Learning detail routes until article-detail routes exist
 - Networking: Dio with app-owned auth and error interceptors
+- Media playback: `video_player` is a direct dependency for backend-provided lesson playback URLs
 - Persistence: Flutter Secure Storage for access token, refresh token, and expiry only
 - Serialization: Handwritten immutable Dart models
 - Backend auth pattern: JWT bearer access tokens plus refresh-token body refresh against `/auth/refresh`

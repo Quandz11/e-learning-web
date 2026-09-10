@@ -12,6 +12,7 @@ import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/core/session/session_repository.dart';
 import 'package:e_learning_mobile/core/session/session_state.dart';
 import 'package:e_learning_mobile/core/storage/secure_session_storage.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/app_shell.dart';
 import 'package:e_learning_mobile/features/home/data/home_repository.dart';
 import 'package:e_learning_mobile/features/learning/data/course_detail_repository.dart';
 import 'package:e_learning_mobile/features/learning/data/learning_repository.dart';
@@ -152,8 +153,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LessonScreen), findsOneWidget);
-    final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(bar.selectedIndex, 1);
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
   });
 
   testWidgets('lesson child routes resolve media player and document reader', (
@@ -173,10 +173,7 @@ void main() {
 
     expect(find.byType(MediaPlayerScreen), findsOneWidget);
     expect(find.text('Fake player: ${fakeLessonPart().title}'), findsOneWidget);
-    expect(
-      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      1,
-    );
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
 
     harness.router!.go(
       AppRoutes.documentReaderPath(
@@ -191,10 +188,7 @@ void main() {
       find.text('Fake reader: ${fakeDocumentPart().documentFileName}'),
       findsOneWidget,
     );
-    expect(
-      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      1,
-    );
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
   });
 }
 

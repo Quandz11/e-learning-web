@@ -134,13 +134,17 @@ class _ForgotPasswordVerifyScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const AppSectionHeader(
+            AppSectionHeader(
               title: 'Nhập OTP và mật khẩu mới',
-              subtitle:
-                  'Mã OTP được gửi qua Zalo. Mật khẩu mới phải có ít nhất 8 ký tự.',
+              subtitle: challenge.isEmail
+                  ? 'Mã OTP được gửi về email của bạn. Mật khẩu mới phải có ít nhất 6 ký tự.'
+                  : 'Mã OTP được gửi qua Zalo. Mật khẩu mới phải có ít nhất 6 ký tự.',
             ),
             const SizedBox(height: AppSpacing.lg),
-            _PhoneCard(phone: challenge.phone),
+            _RecipientCard(
+              target: challenge.target,
+              isEmail: challenge.isEmail,
+            ),
             const SizedBox(height: AppSpacing.md),
             if (state.generalMessage != null &&
                 state.status == ForgotPasswordVerifyStatus.failure) ...[
@@ -270,6 +274,7 @@ class _ForgotPasswordVerifyScreenState
     TextInput.finishAutofillContext();
     await controller.submit(
       phone: challenge.phone,
+      email: challenge.email,
       otp: _otpController.text,
       newPassword: _passwordController.text,
       confirmPassword: _confirmPasswordController.text,
@@ -285,7 +290,10 @@ class _ForgotPasswordVerifyScreenState
       _resendMessage = null;
     });
 
-    final message = await controller.resend(challenge.phone);
+    final message = await controller.resend(
+      phone: challenge.phone,
+      email: challenge.email,
+    );
     if (!mounted) {
       return;
     }
@@ -322,19 +330,31 @@ class _ForgotPasswordVerifyScreenState
   }
 }
 
-class _PhoneCard extends StatelessWidget {
-  const _PhoneCard({required this.phone});
+class _RecipientCard extends StatelessWidget {
+  const _RecipientCard({required this.target, required this.isEmail});
 
-  final String phone;
+  final String target;
+  final bool isEmail;
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
       child: Row(
         children: [
-          const Icon(Icons.phone_android_outlined),
+          Icon(
+            isEmail ? Icons.email_outlined : Icons.phone_android_outlined,
+            color: const Color(0xFF0F5B38),
+          ),
           const SizedBox(width: 12),
-          Expanded(child: Text(phone)),
+          Expanded(
+            child: Text(
+              target,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ],
       ),
     );

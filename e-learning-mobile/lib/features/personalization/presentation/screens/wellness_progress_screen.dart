@@ -311,20 +311,20 @@ class _WellnessProgressScreenState
                   Row(
                     children: [
                       _buildMiniMetric(
-                        icon: Icons.water_drop_outlined,
-                        color: const Color(0xFF0F5B38),
+                        icon: Icons.local_drink_rounded,
+                        color: const Color(0xFF0284C7),
                         value: '${item.waterMl} ml',
                       ),
                       const SizedBox(width: AppSpacing.md),
                       _buildMiniMetric(
-                        icon: Icons.timer_outlined,
-                        color: const Color(0xFF0F5B38),
+                        icon: Icons.directions_run_rounded,
+                        color: const Color(0xFFD97706),
                         value: '${item.workoutMinutes}p',
                       ),
                       if (item.currentWeightKg != null) ...[
                         const SizedBox(width: AppSpacing.md),
                         _buildMiniMetric(
-                          icon: Icons.monitor_weight_outlined,
+                          icon: Icons.scale_rounded,
                           color: const Color(0xFF0F5B38),
                           value: '${item.currentWeightKg} kg',
                         ),

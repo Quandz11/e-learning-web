@@ -314,6 +314,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     final currentWater = todayLog?.waterMl ?? 0;
     final currentMovement = todayLog?.workoutMinutes ?? 0;
     final currentWeight = todayLog?.currentWeightKg;
+    final cupsCount = (currentWater / 250).ceil();
 
     return Row(
       children: [
@@ -321,15 +322,14 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         Expanded(
           child: _buildBentoCard(
             context: context,
-            icon: Icons.water_drop_outlined,
-            iconColor: const Color(0xFF1E88E5),
-            bgColor: const Color(0xFFF2F8FD),
+            icon: Icons.local_drink_rounded,
+            iconColor: const Color(0xFF0284C7),
+            bgColor: const Color(0xFFE0F2FE),
             label: 'Nước uống',
-            value: '$currentWater/2.5L',
-            actionText: '+250ml',
-            onAction: () {
-              ref.read(wellnessControllerProvider.notifier).logWaterDelta(250);
-            },
+            value: '$currentWater ml',
+            subtitle: '$cupsCount/8 cốc',
+            actionText: '+Thêm',
+            onAction: () => _showWaterActionSheet(context, currentWater),
           ),
         ),
         const SizedBox(width: 10),
@@ -338,17 +338,14 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         Expanded(
           child: _buildBentoCard(
             context: context,
-            icon: Icons.directions_walk_outlined,
+            icon: Icons.directions_run_rounded,
             iconColor: const Color(0xFFD97706),
-            bgColor: const Color(0xFFFDF7F0),
+            bgColor: const Color(0xFFFEF3C7),
             label: 'Vận động',
-            value: '$currentMovement/30p',
-            actionText: '+15p',
-            onAction: () {
-              ref
-                  .read(wellnessControllerProvider.notifier)
-                  .logWorkout(15, 'Vận động nhẹ');
-            },
+            value: '$currentMovement phút',
+            subtitle: 'Mục tiêu: 30p',
+            actionText: '+Tập',
+            onAction: () => _showWorkoutActionSheet(context, currentMovement),
           ),
         ),
         const SizedBox(width: 10),
@@ -357,15 +354,16 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         Expanded(
           child: _buildBentoCard(
             context: context,
-            icon: Icons.monitor_weight_outlined,
+            icon: Icons.scale_rounded,
             iconColor: const Color(0xFF0F5B38),
-            bgColor: const Color(0xFFF2F8F4),
+            bgColor: const Color(0xFFDCFCE7),
             label: 'Cân nặng',
             value: currentWeight != null
                 ? '${currentWeight.toStringAsFixed(1)} kg'
                 : '-- kg',
-            actionText: 'Ghi nhận',
-            onAction: () => _showMinimalWeightSheet(context, currentWeight),
+            subtitle: currentWeight != null ? 'Hôm nay' : 'Chưa ghi',
+            actionText: 'Ghi',
+            onAction: () => _showEnhancedWeightSheet(context, currentWeight, state),
           ),
         ),
       ],
@@ -379,41 +377,42 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     required Color bgColor,
     required String label,
     required String value,
+    String? subtitle,
     required String actionText,
     required VoidCallback onAction,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFEAEFE9), width: 0.8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x04000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  borderRadius: BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: onAction,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFEAEFE9), width: 0.8),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x04000000),
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, size: 18, color: iconColor),
                 ),
-                child: Icon(icon, size: 16, color: iconColor),
-              ),
-              InkWell(
-                onTap: onAction,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                child: Container(
+                Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                   decoration: BoxDecoration(
@@ -424,35 +423,48 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                     actionText,
                     style: const TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                       color: Color(0xFF0F5B38),
                     ),
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF717873),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A2520),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 1),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w300,
+                  color: Color(0xFF8E9E94),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w300,
-              color: Color(0xFF8E9E94),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF1A2520),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -788,13 +800,395 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     );
   }
 
-  // Weight entry bottom sheet
-  void _showMinimalWeightSheet(BuildContext context, double? currentWeight) {
+  // 1. Water Intake Action Sheet (with visual cups)
+  void _showWaterActionSheet(BuildContext context, int currentWater) {
+    final cupsCount = (currentWater / 250).ceil();
+    final progress = (currentWater / 2000.0).clamp(0.0, 1.0);
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2EBE5),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE0F2FE),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.local_drink_rounded,
+                        color: Color(0xFF0284C7),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Ghi nhận Nước uống',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E2621),
+                            ),
+                          ),
+                          Text(
+                            'Đã uống $currentWater ml • $cupsCount/8 cốc trong ngày',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF717873),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Progress Bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 8,
+                    backgroundColor: const Color(0xFFE0F2FE),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0284C7)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Chọn nhanh lượng nước vừa uống:',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF1E2621),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _buildWaterOption(
+                      title: 'Cốc nhỏ',
+                      volume: '+150 ml',
+                      icon: Icons.local_cafe_outlined,
+                      onTap: () {
+                        ref.read(wellnessControllerProvider.notifier).logWaterDelta(150);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    _buildWaterOption(
+                      title: 'Cốc chuẩn',
+                      volume: '+250 ml',
+                      icon: Icons.local_drink_rounded,
+                      isHighlight: true,
+                      onTap: () {
+                        ref.read(wellnessControllerProvider.notifier).logWaterDelta(250);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    _buildWaterOption(
+                      title: 'Bình nước',
+                      volume: '+500 ml',
+                      icon: Icons.water_drop_outlined,
+                      onTap: () {
+                        ref.read(wellnessControllerProvider.notifier).logWaterDelta(500);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildWaterOption({
+    required String title,
+    required String volume,
+    required IconData icon,
+    bool isHighlight = false,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: isHighlight ? const Color(0xFFE0F2FE) : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isHighlight ? const Color(0xFF0284C7) : const Color(0xFFE2E8F0),
+              width: isHighlight ? 1.2 : 0.8,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: isHighlight ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF334155),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                volume,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isHighlight ? const Color(0xFF0284C7) : const Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 2. Workout / Movement Action Sheet
+  void _showWorkoutActionSheet(BuildContext context, int currentMovement) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2EBE5),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF3C7),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.directions_run_rounded,
+                        color: Color(0xFFD97706),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Ghi nhận Hoạt động Vận động',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E2621),
+                            ),
+                          ),
+                          Text(
+                            'Đã tập $currentMovement phút hôm nay • Mục tiêu: 30 phút',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF717873),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Chọn bài tập vừa thực hiện:',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF1E2621),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _buildWorkoutOption(
+                  ctx: ctx,
+                  icon: Icons.directions_walk_rounded,
+                  title: 'Đi bộ nhẹ nhàng',
+                  minutes: 15,
+                  desc: 'Hỗ trợ tuần hoàn máu và nhẹ bụng',
+                ),
+                _buildWorkoutOption(
+                  ctx: ctx,
+                  icon: Icons.self_improvement_rounded,
+                  title: 'Yoga & Dãn cơ phục hồi',
+                  minutes: 20,
+                  desc: 'Thư giãn cơ bắp và giảm căng thẳng',
+                ),
+                _buildWorkoutOption(
+                  ctx: ctx,
+                  icon: Icons.directions_run_rounded,
+                  title: 'Chạy bộ / Đi bộ nhanh',
+                  minutes: 30,
+                  desc: 'Tăng cường trao đổi chất và đốt mỡ',
+                ),
+                _buildWorkoutOption(
+                  ctx: ctx,
+                  icon: Icons.fitness_center_rounded,
+                  title: 'Tập thể lực / HIIT / Kháng lực',
+                  minutes: 45,
+                  desc: 'Xây dựng cơ bắp và đốt calo sâu',
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildWorkoutOption({
+    required BuildContext ctx,
+    required IconData icon,
+    required String title,
+    required int minutes,
+    required String desc,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () {
+          ref.read(wellnessControllerProvider.notifier).logWorkout(minutes, title);
+          Navigator.pop(ctx);
+        },
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAFAFA),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFEAEFE9), width: 0.8),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 20, color: const Color(0xFFD97706)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF1E2621),
+                      ),
+                    ),
+                    Text(
+                      desc,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF8E9E94),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '+$minutes phút',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F5B38),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 3. Enhanced Weight Tracking Action Sheet
+  void _showEnhancedWeightSheet(
+    BuildContext context,
+    double? currentWeight,
+    WellnessState state,
+  ) {
+    final weightProg = state.dashboard?.weightProgress;
+    final startWeight = weightProg?.startWeightKg ?? (currentWeight ?? 65.0);
     final controller = TextEditingController(
       text: currentWeight?.toStringAsFixed(1) ?? '62.0',
     );
 
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
@@ -802,92 +1196,178 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Ghi nhận cân nặng hôm nay',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF1A2520),
-                ),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final parsedWeight = double.tryParse(controller.text) ?? 62.0;
+            final delta = parsedWeight - startWeight;
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 16,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
               ),
-              const SizedBox(height: 4),
-              const Text(
-                'Theo dõi biến thiên cân nặng trong chu kỳ nhịn ăn',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w300,
-                  color: Color(0xFF8E9E94),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: controller,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                autofocus: true,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w300,
-                  color: Color(0xFF1A2520),
-                ),
-                decoration: InputDecoration(
-                  suffixText: 'kg',
-                  suffixStyle: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF8E9E94),
-                  ),
-                  filled: true,
-                  fillColor: const Color(0xFFF7FAF8),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final val = double.tryParse(controller.text);
-                    if (val != null && val > 0) {
-                      ref
-                          .read(wellnessControllerProvider.notifier)
-                          .logWeight(val);
-                      Navigator.pop(ctx);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F5B38),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2EBE5),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    'Lưu cân nặng',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDCFCE7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.scale_rounded,
+                          color: Color(0xFF0F5B38),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Ghi nhận Cân nặng',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1E2621),
+                              ),
+                            ),
+                            Text(
+                              delta.abs() < 0.05
+                                  ? 'Bằng cân nặng lúc bắt đầu ($startWeight kg)'
+                                  : delta < 0
+                                      ? 'Giảm ${(delta.abs()).toStringAsFixed(1)} kg so với ban đầu'
+                                      : 'Tăng ${delta.toStringAsFixed(1)} kg so với ban đầu',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: delta < 0
+                                    ? const Color(0xFF0F5B38)
+                                    : const Color(0xFF717873),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // Weight Stepper Display
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9FBF9),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFEAEFE9)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline_rounded, size: 32),
+                          color: const Color(0xFF0F5B38),
+                          onPressed: () {
+                            final current = double.tryParse(controller.text) ?? 62.0;
+                            final next = (current - 0.1).clamp(30.0, 250.0);
+                            controller.text = next.toStringAsFixed(1);
+                            setModalState(() {});
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: 110,
+                          child: TextField(
+                            controller: controller,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E2621),
+                            ),
+                            decoration: const InputDecoration(
+                              filled: false,
+                              border: InputBorder.none,
+                              suffixText: 'kg',
+                              suffixStyle: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFF717873),
+                              ),
+                            ),
+                            onChanged: (_) => setModalState(() {}),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline_rounded, size: 32),
+                          color: const Color(0xFF0F5B38),
+                          onPressed: () {
+                            final current = double.tryParse(controller.text) ?? 62.0;
+                            final next = (current + 0.1).clamp(30.0, 250.0);
+                            controller.text = next.toStringAsFixed(1);
+                            setModalState(() {});
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final val = double.tryParse(controller.text);
+                        if (val != null && val > 0) {
+                          ref.read(wellnessControllerProvider.notifier).logWeight(val);
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Đã ghi nhận cân nặng: ${val.toStringAsFixed(1)} kg'),
+                              backgroundColor: const Color(0xFF0F5B38),
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F5B38),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                      ),
+                      child: const Text(
+                        'Lưu cân nặng hôm nay',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

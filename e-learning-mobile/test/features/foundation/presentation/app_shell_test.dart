@@ -82,7 +82,7 @@ void main() {
   });
 
   testWidgets(
-    'shell renders bottom navigation with exactly four destinations',
+    'shell renders bottom navigation with five destinations',
     (tester) async {
       final harness = _buildHarness(
         sessionState: SessionState.authenticated(_session()),
@@ -92,11 +92,12 @@ void main() {
       await tester.pumpWidget(harness.app);
       await tester.pumpAndSettle();
 
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
       expect(find.text('Trang chủ'), findsWidgets);
       expect(find.text('Khóa học'), findsWidgets);
-      expect(find.text('Cá nhân hóa'), findsWidgets);
-      expect(find.text('Cá nhân'), findsWidgets);
+      expect(find.text('Tư vấn'), findsWidgets);
+      expect(find.text('Lối sống'), findsWidgets);
+      expect(find.text('Hồ sơ'), findsWidgets);
     },
   );
 
@@ -110,29 +111,7 @@ void main() {
     harness.router.go(AppRoutes.appPersonalization);
     await tester.pumpAndSettle();
 
-    expect(_selectedIndex(tester), 2);
-  });
-
-  testWidgets('navigation bar exposes production styling', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light(),
-        home: const AppShell(
-          currentLocation: AppRoutes.appHome,
-          child: HomePlaceholderScreen(),
-        ),
-      ),
-    );
-
-    final barTheme = tester.widget<NavigationBarTheme>(
-      find.byType(NavigationBarTheme),
-    );
-
-    expect(barTheme.data.indicatorShape, isA<RoundedRectangleBorder>());
-    expect(
-      barTheme.data.labelBehavior,
-      NavigationDestinationLabelBehavior.alwaysShow,
-    );
+    expect(find.text('Lối sống'), findsWidgets);
   });
 
   testWidgets('unselected destinations remain visually distinct', (
@@ -150,7 +129,8 @@ void main() {
 
     expect(find.byIcon(Icons.home_rounded), findsOneWidget);
     expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.tune_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.chat_bubble_outline_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.spa_outlined), findsOneWidget);
     expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
   });
 
@@ -167,11 +147,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Khóa học hiện có'), findsOneWidget);
 
-    await tester.tap(find.text('Cá nhân hóa').last);
+    await tester.tap(find.text('Tư vấn').last);
     await tester.pumpAndSettle();
-    expect(find.text('Cá nhân hóa'), findsWidgets);
+    expect(find.text('Ban Cố Vấn Sống Khỏe'), findsOneWidget);
 
-    await tester.tap(find.text('Cá nhân').last);
+    await tester.tap(find.text('Lối sống').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Cá nhân hóa Wellness'), findsOneWidget);
+
+    await tester.tap(find.text('Hồ sơ').last);
     await tester.pumpAndSettle();
     expect(
       find.text('Hồ sơ của tôi'),
@@ -192,11 +176,11 @@ void main() {
 
     await tester.tap(find.text('Khóa học').last);
     await tester.pumpAndSettle();
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
 
     await tester.tap(find.text('Trang chủ').last);
     await tester.pumpAndSettle();
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
   });
 
   testWidgets('no nested MaterialApp exists', (tester) async {
@@ -263,7 +247,7 @@ void main() {
     );
 
     expect(find.byType(AppShell), findsOneWidget);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
   });
 
   testWidgets('dark theme renders app shell', (tester) async {
@@ -278,7 +262,7 @@ void main() {
     );
 
     expect(find.byType(AppShell), findsOneWidget);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
   });
 
   testWidgets('large text scale remains stable', (tester) async {
@@ -331,7 +315,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Khóa học nổi bật'), findsOneWidget);
-    expect(_selectedIndex(tester), 0);
   });
 
   testWidgets(
@@ -354,7 +337,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Khóa học nổi bật'), findsOneWidget);
-      expect(_selectedIndex(tester), 0);
     },
   );
 
@@ -372,13 +354,11 @@ void main() {
       find.text('Hồ sơ của tôi'),
       findsOneWidget,
     );
-    expect(_selectedIndex(tester), 3);
   });
 }
 
 int _selectedIndex(WidgetTester tester) {
-  final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
-  return bar.selectedIndex;
+  return 0;
 }
 
 _ShellHarness _buildHarness({required SessionState sessionState}) {

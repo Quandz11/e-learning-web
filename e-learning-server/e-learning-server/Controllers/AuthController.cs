@@ -96,6 +96,64 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> RequestForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        try
+        {
+            await _authService.RequestForgotPasswordOtpAsync(request.Email);
+            return Ok(new { message = "Đã gửi mã OTP đặt lại mật khẩu về email của bạn." });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ApiError(StatusCodes.Status404NotFound, "AUTH_USER_NOT_FOUND", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_FORGOT_PASSWORD_FAILED", ex.Message);
+        }
+    }
+
+    [HttpPost("resend-forgot-password-otp")]
+    public async Task<IActionResult> ResendForgotPasswordOtp([FromBody] ForgotPasswordRequest request)
+    {
+        try
+        {
+            await _authService.ResendForgotPasswordOtpAsync(request.Email);
+            return Ok(new { message = "Đã gửi lại mã OTP đặt lại mật khẩu về email." });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ApiError(StatusCodes.Status404NotFound, "AUTH_USER_NOT_FOUND", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_RESEND_OTP_FAILED", ex.Message);
+        }
+    }
+
+    [HttpPost("verify-forgot-password-otp")]
+    public async Task<IActionResult> VerifyForgotPasswordOtp([FromBody] VerifyForgotPasswordOtpRequest request)
+    {
+        try
+        {
+            await _authService.VerifyForgotPasswordOtpAsync(request.Email, request.Otp, request.NewPassword);
+            return Ok(new { message = "Mật khẩu đã được đặt lại thành công." });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_OTP_INVALID", ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_VALIDATION_ERROR", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return ApiError(StatusCodes.Status400BadRequest, "AUTH_RESET_PASSWORD_FAILED", ex.Message);
+        }
+    }
+
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest? request)
     {

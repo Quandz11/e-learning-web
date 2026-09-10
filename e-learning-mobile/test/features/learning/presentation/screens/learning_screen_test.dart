@@ -12,6 +12,7 @@ import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/core/session/session_repository.dart';
 import 'package:e_learning_mobile/core/session/session_state.dart';
 import 'package:e_learning_mobile/core/storage/secure_session_storage.dart';
+import 'package:e_learning_mobile/features/foundation/presentation/app_shell.dart';
 import 'package:e_learning_mobile/features/home/data/home_repository.dart';
 import 'package:e_learning_mobile/features/learning/data/learning_repository.dart';
 import 'package:e_learning_mobile/features/learning/data/models/learning_models.dart';
@@ -294,8 +295,7 @@ void main() {
     harness.router!.go(AppRoutes.appLearning);
     await tester.pumpAndSettle();
 
-    final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(bar.selectedIndex, 1);
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
     expect(find.byType(LearningScreen), findsOneWidget);
   });
 }

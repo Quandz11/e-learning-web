@@ -551,4 +551,73 @@ public class AuthService : IAuthService
         
         return "Unknown Browser";
     }
+
+    public async Task RequestForgotPasswordOtpAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Email không tồn tại trong hệ thống.");
+        }
+
+        if (user.IsDeleted)
+        {
+            throw new UnauthorizedAccessException("Tài khoản đã bị xóa.");
+        }
+
+        var otp = Random.Shared.Next(100000, 999999).ToString();
+        user.OtpCode = otp;
+        user.OtpExpiration = DateTime.UtcNow.AddMinutes(10);
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        string subject = "Mã xác thực đặt lại mật khẩu - SKVI E-Learning";
+        string body = $"<h3>Yêu cầu đặt lại mật khẩu</h3><p>Mã OTP của bạn là: <strong>{otp}</strong></p><p>Mã này có hiệu lực trong 10 phút.</p>";
+
+        await Task.Run(() => BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body)), cancellationToken);
+    }
+
+    public async Task ResendForgotPasswordOtpAsync(string email, CancellationToken cancellationToken = default)
+    {
+        await RequestForgotPasswordOtpAsync(email, cancellationToken);
+    }
+
+    public async Task VerifyForgotPasswordOtpAsync(string email, string otp, string newPassword, CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Email không tồn tại trong hệ thống.");
+        }
+
+        if (user.IsDeleted)
+        {
+            throw new UnauthorizedAccessException("Tài khoản đã bị xóa.");
+        }
+
+        if (string.IsNullOrWhiteSpace(user.OtpCode) || user.OtpCode != otp.Trim())
+        {
+            throw new UnauthorizedAccessException("Mã OTP không chính xác.");
+        }
+
+        if (user.OtpExpiration < DateTime.UtcNow)
+        {
+            throw new UnauthorizedAccessException("Mã OTP đã hết hạn.");
+        }
+
+        if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
+        {
+            throw new InvalidOperationException("Mật khẩu mới phải có ít nhất 6 ký tự.");
+        }
+
+        user.PasswordHash = _passwordHasher.HashPassword(newPassword);
+        user.OtpCode = null;
+        user.OtpExpiration = null;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

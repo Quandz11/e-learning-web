@@ -22,7 +22,8 @@ class ForgotPasswordVerifyController
   final AuthRepository _authRepository;
 
   Future<void> submit({
-    required String phone,
+    String? phone,
+    String? email,
     required String otp,
     required String newPassword,
     required String confirmPassword,
@@ -56,11 +57,17 @@ class ForgotPasswordVerifyController
     );
 
     try {
-      final message = await _authRepository.verifyForgotPasswordOtp(
-        phone: phone,
-        otp: normalizedOtp,
-        newPassword: newPassword,
-      );
+      final message = email != null && email.isNotEmpty
+          ? await _authRepository.verifyEmailForgotPasswordOtp(
+              email: email,
+              otp: normalizedOtp,
+              newPassword: newPassword,
+            )
+          : await _authRepository.verifyForgotPasswordOtp(
+              phone: phone ?? '',
+              otp: normalizedOtp,
+              newPassword: newPassword,
+            );
       state = ForgotPasswordVerifyState(
         status: ForgotPasswordVerifyStatus.success,
         generalMessage: message,
@@ -73,9 +80,13 @@ class ForgotPasswordVerifyController
     }
   }
 
-  Future<String?> resend(String phone) async {
+  Future<String?> resend({String? phone, String? email}) async {
     try {
-      return await _authRepository.resendForgotPasswordOtp(phone);
+      if (email != null && email.isNotEmpty) {
+        return await _authRepository.resendEmailForgotPasswordOtp(email);
+      } else {
+        return await _authRepository.resendForgotPasswordOtp(phone ?? '');
+      }
     } on AppFailure catch (failure) {
       return failure.message;
     }

@@ -207,6 +207,8 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                       maxLines: 4,
                       minLines: 1,
                       decoration: const InputDecoration(
+                        filled: false,
+                        fillColor: Colors.transparent,
                         hintText: 'Nhắn tin cho Ban Cố Vấn...',
                         hintStyle: TextStyle(
                           fontSize: 13,
@@ -214,6 +216,10 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                           color: Color(0xFFA5A9A5),
                         ),
                         border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(vertical: 10),
                       ),

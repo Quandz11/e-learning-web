@@ -21,6 +21,11 @@ public interface IAuthService
     Task<List<ActiveSessionDto>> GetActiveSessionsAsync(Guid userId, string? currentRefreshToken);
     Task RevokeSessionAsync(Guid userId, Guid sessionId);
     Task RevokeAllSessionsAsync(Guid userId, string? currentRefreshToken);
+
+    // Forgot Password (Email)
+    Task RequestForgotPasswordOtpAsync(string email, CancellationToken cancellationToken = default);
+    Task ResendForgotPasswordOtpAsync(string email, CancellationToken cancellationToken = default);
+    Task VerifyForgotPasswordOtpAsync(string email, string otp, string newPassword, CancellationToken cancellationToken = default);
 }
 
 public interface ITokenService

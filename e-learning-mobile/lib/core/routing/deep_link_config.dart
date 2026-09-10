@@ -95,6 +95,7 @@ abstract final class AppRoutes {
   static const shellDestinations = <String>[
     appHome,
     appLearning,
+    appChat,
     appPersonalization,
     appProfile,
   ];
@@ -135,6 +136,9 @@ abstract final class AppRoutes {
     if (location == appPersonalization ||
         location.startsWith('$appPersonalization/')) {
       return appPersonalization;
+    }
+    if (location == appChat || location.startsWith('$appChat/')) {
+      return appChat;
     }
     if (location == appLearning ||
         location.startsWith('$appLearning/') ||

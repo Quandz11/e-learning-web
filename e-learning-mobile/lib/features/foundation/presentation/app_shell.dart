@@ -30,14 +30,21 @@ class AppShell extends StatelessWidget {
       selectedIcon: Icons.menu_book_rounded,
     ),
     _ShellDestination(
+      route: AppRoutes.appChat,
+      label: 'Tư vấn',
+      icon: Icons.chat_bubble_outline_rounded,
+      selectedIcon: Icons.chat_bubble_rounded,
+      isCenterAction: true,
+    ),
+    _ShellDestination(
       route: AppRoutes.appPersonalization,
-      label: 'Cá nhân hóa',
-      icon: Icons.tune_outlined,
-      selectedIcon: Icons.tune_rounded,
+      label: 'Lối sống',
+      icon: Icons.spa_outlined,
+      selectedIcon: Icons.spa_rounded,
     ),
     _ShellDestination(
       route: AppRoutes.appProfile,
-      label: 'Cá nhân',
+      label: 'Hồ sơ',
       icon: Icons.person_outline_rounded,
       selectedIcon: Icons.person_rounded,
     ),
@@ -65,7 +72,6 @@ class AppShell extends StatelessWidget {
             systemNavigationBarDividerColor: Colors.transparent,
           );
 
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
       child: PopScope<void>(
@@ -86,88 +92,188 @@ class AppShell extends StatelessWidget {
             top: false,
             child: Container(
               decoration: BoxDecoration(
-                color: colorScheme.surface,
+                color: Colors.white,
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
+                  top: Radius.circular(24),
                 ),
                 border: Border(
                   top: BorderSide(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    color: const Color(0xFFEAEFE9),
                     width: 1.0,
                   ),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, -3),
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
-                child: NavigationBarTheme(
-                  data: NavigationBarThemeData(
-                    height: 66,
-                    labelBehavior:
-                        NavigationDestinationLabelBehavior.alwaysShow,
-                    backgroundColor: colorScheme.surface,
-                    surfaceTintColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    indicatorColor: const Color(0xFFD8EAD9),
-                    indicatorShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    iconTheme: WidgetStateProperty.resolveWith((states) {
-                      final isSelected = states.contains(WidgetState.selected);
-                      return IconThemeData(
-                        size: 24,
-                        color: isSelected
-                            ? const Color(0xFF132A17)
-                            : const Color(0xFF757575),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                child: Row(
+                  key: navigationBarKey,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(_destinations.length, (index) {
+                    final dest = _destinations[index];
+                    final isSelected = index == currentIndex;
+
+                    if (dest.isCenterAction) {
+                      return _CenterNavButton(
+                        destination: dest,
+                        isSelected: isSelected,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          final target = dest.route;
+                          if (target != AppRoutes.shellDestinationForLocation(currentLocation)) {
+                            context.go(target);
+                          }
+                        },
                       );
-                    }),
-                    labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                      final isSelected = states.contains(WidgetState.selected);
-                      return TextStyle(
-                        fontSize: 12,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isSelected
-                            ? const Color(0xFF132A17)
-                            : const Color(0xFF757575),
-                      );
-                    }),
-                  ),
-                  child: NavigationBar(
-                    key: navigationBarKey,
-                    selectedIndex: currentIndex,
-                    onDestinationSelected: (index) {
-                      final target = AppRoutes.shellDestinations[index];
-                      if (target !=
-                          AppRoutes.shellDestinationForLocation(
-                            currentLocation,
-                          )) {
-                        context.go(target);
-                      }
-                    },
-                    destinations: _destinations
-                        .map((destination) {
-                          return NavigationDestination(
-                            icon: Icon(destination.icon),
-                            selectedIcon: Icon(destination.selectedIcon),
-                            label: destination.label,
-                            tooltip: destination.label,
-                          );
-                        })
-                        .toList(growable: false),
-                  ),
+                    }
+
+                    return Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          final target = dest.route;
+                          if (target != AppRoutes.shellDestinationForLocation(currentLocation)) {
+                            context.go(target);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? const Color(0xFFEBF5EE)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  isSelected ? dest.selectedIcon : dest.icon,
+                                  size: 22,
+                                  color: isSelected
+                                      ? const Color(0xFF0F5B38)
+                                      : const Color(0xFF8E9E94),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                dest.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                  color: isSelected
+                                      ? const Color(0xFF0F5B38)
+                                      : const Color(0xFF8E9E94),
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
                 ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CenterNavButton extends StatelessWidget {
+  const _CenterNavButton({
+    required this.destination,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final _ShellDestination destination;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                gradient: isSelected
+                    ? const LinearGradient(
+                        colors: [Color(0xFF0F5B38), Color(0xFF1B7A4E)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
+                color: isSelected ? null : const Color(0xFFF0FDF4),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF0F5B38)
+                      : const Color(0xFFD4E8DC),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: isSelected
+                        ? const Color(0xFF0F5B38).withValues(alpha: 0.35)
+                        : Colors.black.withValues(alpha: 0.04),
+                    blurRadius: isSelected ? 8 : 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  isSelected
+                      ? destination.selectedIcon
+                      : destination.icon,
+                  color: isSelected ? Colors.white : const Color(0xFF0F5B38),
+                  size: 22,
+                ),
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              destination.label,
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xFF0F5B38)
+                    : const Color(0xFF717873),
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -180,10 +286,12 @@ class _ShellDestination {
     required this.label,
     required this.icon,
     required this.selectedIcon,
+    this.isCenterAction = false,
   });
 
   final String route;
   final String label;
   final IconData icon;
   final IconData selectedIcon;
+  final bool isCenterAction;
 }

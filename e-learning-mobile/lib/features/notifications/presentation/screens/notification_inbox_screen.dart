@@ -33,6 +33,11 @@ class NotificationInboxScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
             onPressed: () {
               ref.read(notificationsControllerProvider.notifier).markAllAsRead();
             },
@@ -40,7 +45,7 @@ class NotificationInboxScreen extends ConsumerWidget {
               'Đã đọc tất cả',
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w500,
                 color: Color(0xFF0F5B38),
                 letterSpacing: -0.2,
               ),

@@ -91,7 +91,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _HomeContent extends ConsumerWidget {
+class _HomeContent extends ConsumerStatefulWidget {
   const _HomeContent({
     required this.state,
     required this.profileState,
@@ -105,25 +105,117 @@ class _HomeContent extends ConsumerWidget {
   final Future<void> Function() onSectionRetry;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (state.isInitialLoading) {
+  ConsumerState<_HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends ConsumerState<_HomeContent> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _selectedCategory = 'Tất cả';
+  String _selectedLevel = 'Tất cả';
+  String _selectedSort = 'Mặc định';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _clearAllFilters() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+      _selectedCategory = 'Tất cả';
+      _selectedLevel = 'Tất cả';
+      _selectedSort = 'Mặc định';
+    });
+  }
+
+  bool get _hasActiveFilters =>
+      _searchQuery.isNotEmpty ||
+      _selectedCategory != 'Tất cả' ||
+      _selectedLevel != 'Tất cả' ||
+      _selectedSort != 'Mặc định';
+
+  void _showFilterModal(List<HomeCategory> categories) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _HomeFilterBottomSheet(
+        initialCategory: _selectedCategory,
+        initialLevel: _selectedLevel,
+        initialSort: _selectedSort,
+        categories: categories,
+        onApply: (cat, level, sort) {
+          setState(() {
+            _selectedCategory = cat;
+            _selectedLevel = level;
+            _selectedSort = sort;
+          });
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.state.isInitialLoading) {
       return const _HomeLoadingSkeleton();
     }
 
-    if (state.status == HomeStatus.failure && !state.hasLoadedContent) {
+    if (widget.state.status == HomeStatus.failure &&
+        !widget.state.hasLoadedContent) {
       return AppErrorView(
         message: _toVietnameseMessage(
-          state.primaryFailure,
+          widget.state.primaryFailure,
           fallback: 'Không thể tải trang chủ lúc này.',
         ),
-        onRetry: onRetry,
+        onRetry: widget.onRetry,
       );
     }
 
     final greeting = _buildGreeting(
       clock: ref.watch(homeClockProvider),
-      profileState: profileState,
+      profileState: widget.profileState,
     );
+
+    // Filter courses
+    var filteredCourses = widget.state.featuredCourses.where((c) {
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        final matchTitle = c.title.toLowerCase().contains(q);
+        final matchInstructor = (c.instructorName ?? '').toLowerCase().contains(q);
+        if (!matchTitle && !matchInstructor) return false;
+      }
+      if (_selectedCategory != 'Tất cả') {
+        final cat = _selectedCategory.toLowerCase();
+        final matchTitle = c.title.toLowerCase().contains(cat);
+        final matchInstructor = (c.instructorName ?? '').toLowerCase().contains(cat);
+        if (!matchTitle && !matchInstructor) return false;
+      }
+      return true;
+    }).toList();
+
+    if (_selectedSort == 'Mới nhất') {
+      filteredCourses.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+
+    // Filter articles
+    final filteredArticles = widget.state.articles.where((a) {
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        final matchTitle = a.title.toLowerCase().contains(q);
+        final matchExcerpt = (a.excerpt ?? '').toLowerCase().contains(q);
+        final matchCat = (a.categoryName ?? '').toLowerCase().contains(q);
+        if (!matchTitle && !matchExcerpt && !matchCat) return false;
+      }
+      if (_selectedCategory != 'Tất cả') {
+        final cat = (a.categoryName ?? '').toLowerCase();
+        if (cat != _selectedCategory.toLowerCase()) return false;
+      }
+      return true;
+    }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -135,53 +227,228 @@ class _HomeContent extends ConsumerWidget {
           avatarUrl: greeting.avatarUrl,
         ),
         const SizedBox(height: AppSpacing.md),
-        const _HomeSearchBar(),
+        _HomeSearchBar(
+          controller: _searchController,
+          onChanged: (val) => setState(() => _searchQuery = val.trim()),
+          onClear: () {
+            _searchController.clear();
+            setState(() => _searchQuery = '');
+          },
+          onOpenFilter: () => _showFilterModal(widget.state.categories),
+          hasActiveFilter: _hasActiveFilters,
+        ),
         const SizedBox(height: AppSpacing.md),
-        const _EditorialBanner(),
-        const SizedBox(height: AppSpacing.lg),
-        if (state.refreshFailure != null) ...[
-          _SectionErrorCard(
-            message: _toVietnameseMessage(
-              state.refreshFailure,
-              fallback: 'Không thể làm mới nội dung.',
+
+        // Active Filter Indicators Bar
+        if (_hasActiveFilters) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FDF4),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color(0xFFD4E8DC),
+                width: 0.8,
+              ),
             ),
-            onRetry: onSectionRetry,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.filter_list_rounded,
+                      size: 16,
+                      color: Color(0xFF0F5B38),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Kết quả: ${filteredCourses.length} khóa học, ${filteredArticles.length} bài viết',
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF0F5B38),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _clearAllFilters,
+                      child: const Text(
+                        'Xóa bộ lọc',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFDC2626),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    if (_searchQuery.isNotEmpty)
+                      _ActiveFilterChip(
+                        label: 'Tìm: "$_searchQuery"',
+                        onDeleted: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      ),
+                    if (_selectedCategory != 'Tất cả')
+                      _ActiveFilterChip(
+                        label: 'Chuyên mục: $_selectedCategory',
+                        onDeleted: () =>
+                            setState(() => _selectedCategory = 'Tất cả'),
+                      ),
+                    if (_selectedLevel != 'Tất cả')
+                      _ActiveFilterChip(
+                        label: 'Cấp độ: $_selectedLevel',
+                        onDeleted: () =>
+                            setState(() => _selectedLevel = 'Tất cả'),
+                      ),
+                    if (_selectedSort != 'Mặc định')
+                      _ActiveFilterChip(
+                        label: 'Sắp xếp: $_selectedSort',
+                        onDeleted: () =>
+                            setState(() => _selectedSort = 'Mặc định'),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
         ],
-        const _QuickActionsSection(),
-        const SizedBox(height: AppSpacing.lg),
-        if (state.continueLearning != null) ...[
-          _ContinueLearningSection(enrollment: state.continueLearning!),
+
+        if (!_hasActiveFilters) ...[
+          const _EditorialBanner(),
           const SizedBox(height: AppSpacing.lg),
         ],
-        _FeaturedCoursesSection(
-          courses: state.featuredCourses,
-          onRetry: onSectionRetry,
-        ),
-        if (state.categories.isNotEmpty || state.categoryIssue != null) ...[
+
+        if (widget.state.refreshFailure != null) ...[
+          _SectionErrorCard(
+            message: _toVietnameseMessage(
+              widget.state.refreshFailure,
+              fallback: 'Không thể làm mới nội dung.',
+            ),
+            onRetry: widget.onSectionRetry,
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+
+        if (!_hasActiveFilters) ...[
+          const _QuickActionsSection(),
+          const SizedBox(height: AppSpacing.lg),
+          if (widget.state.continueLearning != null) ...[
+            _ContinueLearningSection(
+              enrollment: widget.state.continueLearning!,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+        ],
+
+        // Filtered results or full list
+        if (_hasActiveFilters &&
+            filteredCourses.isEmpty &&
+            filteredArticles.isEmpty) ...[
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.search_off_rounded,
+                  size: 44,
+                  color: Color(0xFF8E9E94),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Không tìm thấy nội dung phù hợp',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF1E2621),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Vui lòng thử từ khóa tìm kiếm khác hoặc xóa bộ lọc để xem toàn bộ danh mục.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w300,
+                    color: Color(0xFF717873),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: _clearAllFilters,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF0F5B38),
+                    side: const BorderSide(color: Color(0xFF0F5B38)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text('Xem tất cả nội dung'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ] else ...[
+          _FeaturedCoursesSection(
+            courses: filteredCourses,
+            onRetry: widget.onSectionRetry,
+          ),
+        ],
+
+        if (widget.state.categories.isNotEmpty ||
+            widget.state.categoryIssue != null) ...[
           const SizedBox(height: AppSpacing.lg),
           _CategoriesSection(
-            categories: state.categories,
-            issue: state.categoryIssue,
-            onRetry: onSectionRetry,
+            categories: widget.state.categories,
+            selectedCategory: _selectedCategory,
+            onCategoryTap: (cat) {
+              setState(() {
+                _selectedCategory = _selectedCategory == cat ? 'Tất cả' : cat;
+              });
+            },
+            issue: widget.state.categoryIssue,
+            onRetry: widget.onSectionRetry,
           ),
         ],
-        if (state.articles.isNotEmpty || state.articleIssue != null) ...[
+
+        if (filteredArticles.isNotEmpty ||
+            widget.state.articleIssue != null) ...[
           const SizedBox(height: AppSpacing.lg),
           _ArticlesSection(
-            articles: state.articles,
-            issue: state.articleIssue,
-            onRetry: onSectionRetry,
+            articles: filteredArticles,
+            issue: widget.state.articleIssue,
+            onRetry: widget.onSectionRetry,
           ),
         ],
-        if (state.testimonials.isNotEmpty ||
-            state.testimonialIssue != null) ...[
+
+        if (!_hasActiveFilters &&
+            (widget.state.testimonials.isNotEmpty ||
+                widget.state.testimonialIssue != null)) ...[
           const SizedBox(height: AppSpacing.lg),
           _TestimonialsSection(
-            testimonials: state.testimonials,
-            issue: state.testimonialIssue,
-            onRetry: onSectionRetry,
+            testimonials: widget.state.testimonials,
+            issue: widget.state.testimonialIssue,
+            onRetry: widget.onSectionRetry,
           ),
         ],
       ],
@@ -189,8 +456,61 @@ class _HomeContent extends ConsumerWidget {
   }
 }
 
+class _ActiveFilterChip extends StatelessWidget {
+  const _ActiveFilterChip({required this.label, required this.onDeleted});
+
+  final String label;
+  final VoidCallback onDeleted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFD4E8DC), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF1E2621),
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: onDeleted,
+            child: const Icon(
+              Icons.close_rounded,
+              size: 13,
+              color: Color(0xFF717873),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _HomeSearchBar extends StatelessWidget {
-  const _HomeSearchBar();
+  const _HomeSearchBar({
+    required this.controller,
+    required this.onChanged,
+    required this.onClear,
+    required this.onOpenFilter,
+    required this.hasActiveFilter,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+  final VoidCallback onOpenFilter;
+  final bool hasActiveFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -199,12 +519,12 @@ class _HomeSearchBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: isDark ? colorScheme.surface : const Color(0xFFF4F6F5),
         borderRadius: BorderRadius.circular(AppRadius.pill),
         border: Border.all(
           color: isDark
               ? colorScheme.outlineVariant.withValues(alpha: 0.5)
-              : const Color(0xFFEAEFE9),
+              : const Color(0xFFE2EBE5),
           width: 0.8,
         ),
         boxShadow: isDark
@@ -212,7 +532,7 @@ class _HomeSearchBar extends StatelessWidget {
             : [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 10,
+                  blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
@@ -223,45 +543,359 @@ class _HomeSearchBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.search_rounded,
-            color: colorScheme.primary,
+            color: Color(0xFF0F5B38),
             size: 20,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: TextField(
-              decoration: InputDecoration(
+              controller: controller,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF1E2621),
+              ),
+              decoration: const InputDecoration(
+                filled: false,
+                fillColor: Colors.transparent,
                 hintText: 'Tìm khóa học, bài học...',
                 hintStyle: TextStyle(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  color: Color(0xFF8E9E94),
                   fontSize: 13,
                   fontWeight: FontWeight.w300,
                 ),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                contentPadding: EdgeInsets.symmetric(vertical: 12),
               ),
-              onSubmitted: (val) => context.go(AppRoutes.appLearning),
+              onChanged: onChanged,
             ),
           ),
-          InkWell(
-            onTap: () => context.go(AppRoutes.appLearning),
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0F5F2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.tune_rounded,
-                size: 16,
-                color: colorScheme.primary,
+          if (controller.text.isNotEmpty)
+            GestureDetector(
+              onTap: onClear,
+              behavior: HitTestBehavior.opaque,
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 18,
+                  color: Color(0xFF717873),
+                ),
               ),
             ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: onOpenFilter,
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: hasActiveFilter
+                        ? const Color(0xFF0F5B38)
+                        : const Color(0xFFE8F2EC),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.tune_rounded,
+                    size: 16,
+                    color: hasActiveFilter
+                        ? Colors.white
+                        : const Color(0xFF0F5B38),
+                  ),
+                ),
+                if (hasActiveFilter)
+                  Positioned(
+                    top: -2,
+                    right: -2,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD97706),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeFilterBottomSheet extends StatefulWidget {
+  const _HomeFilterBottomSheet({
+    required this.initialCategory,
+    required this.initialLevel,
+    required this.initialSort,
+    required this.categories,
+    required this.onApply,
+  });
+
+  final String initialCategory;
+  final String initialLevel;
+  final String initialSort;
+  final List<HomeCategory> categories;
+  final void Function(String category, String level, String sort) onApply;
+
+  @override
+  State<_HomeFilterBottomSheet> createState() => _HomeFilterBottomSheetState();
+}
+
+class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
+  late String _selectedCategory;
+  late String _selectedLevel;
+  late String _selectedSort;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategory = widget.initialCategory;
+    _selectedLevel = widget.initialLevel;
+    _selectedSort = widget.initialSort;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final catNames = <String>[
+      'Tất cả',
+      ...widget.categories.map((c) => c.name),
+    ];
+    final levels = const ['Tất cả', 'Cơ bản', 'Nâng cao'];
+    final sorts = const ['Mặc định', 'Mới nhất', 'Nổi bật nhất'];
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        20 + MediaQuery.of(context).padding.bottom,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE2EBE5),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Bộ lọc tìm kiếm',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1E2621),
+                  letterSpacing: -0.3,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 20),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Categories section
+          const Text(
+            'Chuyên mục',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F5B38),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: catNames.map((name) {
+              final isSelected = _selectedCategory == name;
+              return ChoiceChip(
+                label: Text(name),
+                selected: isSelected,
+                selectedColor: const Color(0xFF0F5B38),
+                backgroundColor: const Color(0xFFF4F6F5),
+                labelStyle: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? Colors.white : const Color(0xFF334036),
+                ),
+                side: BorderSide(
+                  color: isSelected
+                      ? const Color(0xFF0F5B38)
+                      : const Color(0xFFE2EBE5),
+                  width: 0.8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                onSelected: (_) => setState(() => _selectedCategory = name),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+
+          // Level section
+          const Text(
+            'Trình độ / Cấp độ',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F5B38),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: levels.map((lvl) {
+              final isSelected = _selectedLevel == lvl;
+              return ChoiceChip(
+                label: Text(lvl),
+                selected: isSelected,
+                selectedColor: const Color(0xFF0F5B38),
+                backgroundColor: const Color(0xFFF4F6F5),
+                labelStyle: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? Colors.white : const Color(0xFF334036),
+                ),
+                side: BorderSide(
+                  color: isSelected
+                      ? const Color(0xFF0F5B38)
+                      : const Color(0xFFE2EBE5),
+                  width: 0.8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                onSelected: (_) => setState(() => _selectedLevel = lvl),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+
+          // Sort section
+          const Text(
+            'Sắp xếp',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F5B38),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: sorts.map((s) {
+              final isSelected = _selectedSort == s;
+              return ChoiceChip(
+                label: Text(s),
+                selected: isSelected,
+                selectedColor: const Color(0xFF0F5B38),
+                backgroundColor: const Color(0xFFF4F6F5),
+                labelStyle: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? Colors.white : const Color(0xFF334036),
+                ),
+                side: BorderSide(
+                  color: isSelected
+                      ? const Color(0xFF0F5B38)
+                      : const Color(0xFFE2EBE5),
+                  width: 0.8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                onSelected: (_) => setState(() => _selectedSort = s),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+
+          // Buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedCategory = 'Tất cả';
+                      _selectedLevel = 'Tất cả';
+                      _selectedSort = 'Mặc định';
+                    });
+                  },
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    side: const BorderSide(color: Color(0xFFD4E8DC)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'Đặt lại',
+                    style: TextStyle(color: Color(0xFF55645B)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    widget.onApply(
+                      _selectedCategory,
+                      _selectedLevel,
+                      _selectedSort,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    backgroundColor: const Color(0xFF0F5B38),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'Áp dụng bộ lọc',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -683,11 +1317,15 @@ class _CategoriesSection extends StatelessWidget {
     required this.categories,
     required this.issue,
     required this.onRetry,
+    this.selectedCategory = 'Tất cả',
+    this.onCategoryTap,
   });
 
   final List<HomeCategory> categories;
   final HomeSectionIssue? issue;
   final Future<void> Function() onRetry;
+  final String selectedCategory;
+  final ValueChanged<String>? onCategoryTap;
 
   @override
   Widget build(BuildContext context) {
@@ -697,25 +1335,36 @@ class _CategoriesSection extends StatelessWidget {
           ? Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
-              children: categories
-                  .map(
-                    (category) => ActionChip(
-                      label: Text(category.name),
-                      labelStyle: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 13,
-                      ),
-                      side: const BorderSide(
-                        color: Color(0xFFEAEFE9),
-                        width: 0.8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.pill),
-                      ),
-                      onPressed: () => context.go(AppRoutes.appLearning),
-                    ),
-                  )
-                  .toList(growable: false),
+              children: categories.map((category) {
+                final isSelected = selectedCategory == category.name;
+                return ChoiceChip(
+                  label: Text(category.name),
+                  selected: isSelected,
+                  selectedColor: const Color(0xFF0F5B38),
+                  backgroundColor: const Color(0xFFF4F6F5),
+                  labelStyle: TextStyle(
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    fontSize: 13,
+                    color: isSelected ? Colors.white : const Color(0xFF334036),
+                  ),
+                  side: BorderSide(
+                    color: isSelected
+                        ? const Color(0xFF0F5B38)
+                        : const Color(0xFFE2EBE5),
+                    width: 0.8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                  onSelected: (_) {
+                    if (onCategoryTap != null) {
+                      onCategoryTap!(category.name);
+                    } else {
+                      context.go(AppRoutes.appLearning);
+                    }
+                  },
+                );
+              }).toList(growable: false),
             )
           : issue == null
           ? const SizedBox.shrink()

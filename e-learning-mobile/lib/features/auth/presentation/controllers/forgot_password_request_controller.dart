@@ -22,51 +22,105 @@ class ForgotPasswordRequestController
 
   final AuthRepository _authRepository;
 
-  Future<void> submit(String phone) async {
+  void setMode({required bool isEmailMode}) {
+    if (state.isEmailMode == isEmailMode) return;
+    state = ForgotPasswordRequestState(isEmailMode: isEmailMode);
+  }
+
+  Future<void> submit(String input) async {
     if (state.isSubmitting) {
       return;
     }
 
-    final phoneError = validatePhoneInput(phone);
-    final normalizedPhone = normalizeVietnamesePhone(phone);
-    if (phoneError != null || normalizedPhone == null) {
-      state = ForgotPasswordRequestState(
-        status: ForgotPasswordRequestStatus.failure,
-        phoneError: phoneError,
-      );
-      return;
-    }
+    if (state.isEmailMode) {
+      final email = input.trim();
+      final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+      if (email.isEmpty) {
+        state = state.copyWith(
+          status: ForgotPasswordRequestStatus.failure,
+          emailError: 'Vui lòng nhập địa chỉ email.',
+        );
+        return;
+      }
+      if (!emailRegex.hasMatch(email)) {
+        state = state.copyWith(
+          status: ForgotPasswordRequestStatus.failure,
+          emailError: 'Địa chỉ email không hợp lệ.',
+        );
+        return;
+      }
 
-    state = const ForgotPasswordRequestState(
-      status: ForgotPasswordRequestStatus.submitting,
-    );
+      state = state.copyWith(
+        status: ForgotPasswordRequestStatus.submitting,
+        clearEmailError: true,
+        clearGeneralMessage: true,
+      );
 
-    try {
-      final message = await _authRepository.requestForgotPasswordOtp(
-        normalizedPhone,
+      try {
+        final message = await _authRepository.requestEmailForgotPasswordOtp(email);
+        state = state.copyWith(
+          status: ForgotPasswordRequestStatus.success,
+          generalMessage: message,
+          submittedEmail: email,
+        );
+      } on AppFailure catch (failure) {
+        state = state.copyWith(
+          status: ForgotPasswordRequestStatus.failure,
+          generalMessage: failure.message,
+        );
+      }
+    } else {
+      final phoneError = validatePhoneInput(input);
+      final normalizedPhone = normalizeVietnamesePhone(input);
+      if (phoneError != null || normalizedPhone == null) {
+        state = state.copyWith(
+          status: ForgotPasswordRequestStatus.failure,
+          phoneError: phoneError,
+        );
+        return;
+      }
+
+      state = state.copyWith(
+        status: ForgotPasswordRequestStatus.submitting,
+        clearPhoneError: true,
+        clearGeneralMessage: true,
       );
-      state = ForgotPasswordRequestState(
-        status: ForgotPasswordRequestStatus.success,
-        generalMessage: message,
-        submittedPhone: normalizedPhone,
-      );
-    } on AppFailure catch (failure) {
-      state = ForgotPasswordRequestState(
-        status: ForgotPasswordRequestStatus.failure,
-        generalMessage: failure.message,
-      );
+
+      try {
+        final message = await _authRepository.requestForgotPasswordOtp(
+          normalizedPhone,
+        );
+        state = state.copyWith(
+          status: ForgotPasswordRequestStatus.success,
+          generalMessage: message,
+          submittedPhone: normalizedPhone,
+        );
+      } on AppFailure catch (failure) {
+        state = state.copyWith(
+          status: ForgotPasswordRequestStatus.failure,
+          generalMessage: failure.message,
+        );
+      }
     }
   }
 
   void onPhoneChanged() {
-    if (state.phoneError == null && state.generalMessage == null) {
+    onInputChanged();
+  }
+
+  void onInputChanged() {
+    if (state.phoneError == null &&
+        state.emailError == null &&
+        state.generalMessage == null) {
       return;
     }
 
     state = state.copyWith(
       status: ForgotPasswordRequestStatus.idle,
+      clearEmailError: true,
       clearPhoneError: true,
       clearGeneralMessage: true,
+      clearSubmittedEmail: true,
       clearSubmittedPhone: true,
     );
   }

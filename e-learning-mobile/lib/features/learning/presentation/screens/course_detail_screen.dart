@@ -5,6 +5,7 @@ import 'package:e_learning_mobile/features/learning/presentation/controllers/cou
 import 'package:e_learning_mobile/features/learning/presentation/controllers/course_detail_state.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
+import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
@@ -85,7 +86,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   }
 }
 
-class _CourseDetailContent extends StatelessWidget {
+class _CourseDetailContent extends StatefulWidget {
   const _CourseDetailContent({
     required this.state,
     required this.courseId,
@@ -99,50 +100,112 @@ class _CourseDetailContent extends StatelessWidget {
   final Future<void> Function() onRefreshRetry;
 
   @override
+  State<_CourseDetailContent> createState() => _CourseDetailContentState();
+}
+
+class _CourseDetailContentState extends State<_CourseDetailContent> {
+  int _activeTab = 0; // 0: Nội dung, 1: Giới thiệu, 2: Đánh giá
+
+  @override
   Widget build(BuildContext context) {
-    if (state.isInitialLoading) {
+    if (widget.state.isInitialLoading) {
       return const _CourseDetailSkeleton();
     }
 
-    final course = state.course;
-    if (state.status == CourseDetailStatus.failure || course == null) {
+    final course = widget.state.course;
+    if (widget.state.status == CourseDetailStatus.failure || course == null) {
       return AppErrorView(
         message: learningFailureMessage(
-          state.primaryFailure,
+          widget.state.primaryFailure,
           fallback: 'Không thể tải khóa học lúc này.',
         ),
-        onRetry: onRetry,
+        onRetry: widget.onRetry,
       );
     }
+
+    final allParts = course.orderedParts;
+    final firstPart = allParts.isNotEmpty ? allParts.first : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _CourseHero(course: course),
-        if (state.refreshFailure != null) ...[
+        if (widget.state.refreshFailure != null) ...[
           const SizedBox(height: AppSpacing.md),
           _InlineIssue(
             message: learningFailureMessage(
-              state.refreshFailure,
+              widget.state.refreshFailure,
               fallback: 'Không thể làm mới khóa học.',
             ),
-            onRetry: onRefreshRetry,
+            onRetry: widget.onRefreshRetry,
           ),
         ],
         const SizedBox(height: AppSpacing.lg),
-        _CourseSummary(course: course, progress: state.progress),
-        const SizedBox(height: AppSpacing.lg),
-        if (state.progressIssue != null && state.progress == null)
-          _AccessIssue(issue: state.progressIssue!),
-        if (state.progressIssue != null && state.progress == null)
-          const SizedBox(height: AppSpacing.lg),
-        _CourseDescription(course: course),
-        const SizedBox(height: AppSpacing.lg),
-        _LessonList(
-          courseId: courseId,
-          lessons: course.lessons,
-          progress: state.progress,
+        _CourseSummary(
+          course: course,
+          progress: widget.state.progress,
+          selectedTab: _activeTab,
+          onTabChanged: (tab) => setState(() => _activeTab = tab),
         ),
+        const SizedBox(height: AppSpacing.lg),
+        if (widget.state.progressIssue != null && widget.state.progress == null) ...[
+          _AccessIssue(issue: widget.state.progressIssue!),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+        if (_activeTab == 0) ...[
+          _LessonList(
+            courseId: widget.courseId,
+            lessons: course.lessons,
+            progress: widget.state.progress,
+          ),
+        ] else if (_activeTab == 1) ...[
+          _CourseDescription(course: course),
+          if (course.learningOutcomes.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            _LearningOutcomesSection(outcomes: course.learningOutcomes),
+          ],
+        ] else ...[
+          _CourseReviewsSection(course: course),
+        ],
+        if (firstPart != null) ...[
+          const SizedBox(height: AppSpacing.xl),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  if (firstPart.isVideo) {
+                    context.push(
+                      AppRoutes.mediaPlayerPath(courseId: widget.courseId, lessonPartId: firstPart.id),
+                    );
+                  } else if (firstPart.isDocument) {
+                    context.push(
+                      AppRoutes.documentReaderPath(courseId: widget.courseId, lessonPartId: firstPart.id),
+                    );
+                  } else {
+                    context.push(
+                      AppRoutes.lessonPath(courseId: widget.courseId, lessonPartId: firstPart.id),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.play_circle_fill_rounded, size: 20),
+                label: Text(
+                  widget.state.progress != null ? 'Tiếp tục bài học' : 'Bắt đầu học ngay',
+                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -270,24 +333,24 @@ class _CourseHeroState extends State<_CourseHero> {
   }
 }
 
-class _CourseSummary extends StatefulWidget {
-  const _CourseSummary({required this.course, required this.progress});
+class _CourseSummary extends StatelessWidget {
+  const _CourseSummary({
+    required this.course,
+    required this.progress,
+    required this.selectedTab,
+    required this.onTabChanged,
+  });
 
   final LearningCourse course;
   final LearningCourseProgress? progress;
-
-  @override
-  State<_CourseSummary> createState() => _CourseSummaryState();
-}
-
-class _CourseSummaryState extends State<_CourseSummary> {
-  int _selectedTab = 0; // 0: Nội dung, 1: Giới thiệu, 2: Đánh giá
+  final int selectedTab;
+  final ValueChanged<int> onTabChanged;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final lessonCount = widget.course.lessons.isNotEmpty
-        ? widget.course.lessons.length
+    final lessonCount = course.lessons.isNotEmpty
+        ? course.lessons.length
         : 12;
 
     return Container(
@@ -313,7 +376,7 @@ class _CourseSummaryState extends State<_CourseSummary> {
           Semantics(
             header: true,
             child: Text(
-              widget.course.title,
+              course.title,
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w500,
                 fontSize: 20,
@@ -341,7 +404,7 @@ class _CourseSummaryState extends State<_CourseSummary> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  widget.course.instructorName ?? 'Hiểu cơ thể – Nuôi dưỡng tâm trí',
+                  course.instructorName ?? 'Hiểu cơ thể – Nuôi dưỡng tâm trí',
                   style: const TextStyle(
                     color: Color(0xFF5A6E63),
                     fontWeight: FontWeight.w300,
@@ -466,9 +529,9 @@ class _CourseSummaryState extends State<_CourseSummary> {
   }
 
   Widget _buildSegmentedTab(String label, int index) {
-    final isSelected = _selectedTab == index;
+    final isSelected = selectedTab == index;
     return GestureDetector(
-      onTap: () => setState(() => _selectedTab = index),
+      onTap: () => onTabChanged(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeInOut,
@@ -498,6 +561,184 @@ class _CourseSummaryState extends State<_CourseSummary> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LearningOutcomesSection extends StatelessWidget {
+  const _LearningOutcomesSection({required this.outcomes});
+
+  final List<String> outcomes;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Mục tiêu đạt được',
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFEAEFE9),
+            width: 0.8,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x04000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: outcomes.map((outcome) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 3),
+                    child: Icon(
+                      Icons.check_circle_rounded,
+                      color: AppColors.primary,
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      outcome,
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w300,
+                        color: Color(0xFF334138),
+                        height: 1.45,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class _CourseReviewsSection extends StatelessWidget {
+  const _CourseReviewsSection({required this.course});
+
+  final LearningCourse course;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Đánh giá từ học viên',
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFEAEFE9),
+            width: 0.8,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x04000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                const Text(
+                  '4.9',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: List.generate(
+                        5,
+                        (index) => const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 18),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'Dựa trên 128 đánh giá thực tế',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                        color: Color(0xFF8E9E94),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            const Divider(height: 1, thickness: 0.8, color: Color(0xFFEAEFE9)),
+            const SizedBox(height: AppSpacing.md),
+            _buildReviewItem(
+              name: 'Trần Thị Thu Trang',
+              time: '2 ngày trước',
+              comment: 'Bài học rất chi tiết và dễ hiểu, video nét và tài liệu hướng dẫn rất thực tế. Rất khuyên mọi người nên học!',
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _buildReviewItem(
+              name: 'Nguyễn Văn Minh',
+              time: '1 tuần trước',
+              comment: 'Kiến thức chuẩn y khoa, phương pháp nhịn ăn gián đoạn giúp mình nhẹ nhõm và tràn đầy năng lượng hơn hẳn.',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviewItem({required String name, required String time, required String comment}) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FBF9),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: Color(0xFF1A2520)),
+              ),
+              Text(
+                time,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w300, color: Color(0xFF8E9E94)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            comment,
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w300, color: Color(0xFF4B5563), height: 1.4),
+          ),
+        ],
       ),
     );
   }

@@ -76,6 +76,8 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                       controller: _searchController,
                       style: const TextStyle(fontSize: 14, color: Color(0xFF1E2621)),
                       decoration: const InputDecoration(
+                        filled: false,
+                        fillColor: Colors.transparent,
                         hintText: 'Tìm kiếm bài viết, cẩm nang...',
                         hintStyle: TextStyle(
                           fontSize: 13,
@@ -83,6 +85,10 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                           color: Color(0xFFA5A9A5),
                         ),
                         border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(vertical: 12),
                       ),

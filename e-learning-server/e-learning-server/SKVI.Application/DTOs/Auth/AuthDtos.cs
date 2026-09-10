@@ -12,3 +12,5 @@ public record AuthResponse(string AccessToken, string RefreshToken, DateTime Exp
 public record TwoFactorEnableRequest(string Secret, string Code);
 public record TwoFactorDisableRequest(string Password);
 public record TwoFactorLoginRequest(string Code);
+public record ForgotPasswordRequest(string Email);
+public record VerifyForgotPasswordOtpRequest(string Email, string Otp, string NewPassword);

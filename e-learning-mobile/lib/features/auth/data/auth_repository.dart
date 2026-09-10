@@ -147,6 +147,29 @@ class AuthRepository {
     );
     return response.message;
   }
+
+  Future<String> requestEmailForgotPasswordOtp(String email) async {
+    final response = await _api.requestEmailForgotPasswordOtp(email);
+    return response.message;
+  }
+
+  Future<String> resendEmailForgotPasswordOtp(String email) async {
+    final response = await _api.resendEmailForgotPasswordOtp(email);
+    return response.message;
+  }
+
+  Future<String> verifyEmailForgotPasswordOtp({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
+    final response = await _api.verifyEmailForgotPasswordOtp(
+      email: email,
+      otp: otp,
+      newPassword: newPassword,
+    );
+    return response.message;
+  }
 }
 
 class AuthSessionResult {

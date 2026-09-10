@@ -45,7 +45,10 @@ class AuthSurface extends StatelessWidget {
                     ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight - AppSpacing.sm,
+                        minHeight: math.max(
+                          0.0,
+                          constraints.maxHeight - (AppSpacing.sm + AppSpacing.lg),
+                        ),
                       ),
                       child: Center(
                         child: ConstrainedBox(
@@ -94,9 +97,9 @@ class AuthBrandHeader extends StatelessWidget {
 
     return Column(
       children: [
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.sm),
         const AuthBrandMark(),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.md),
         Semantics(
           header: true,
           child: Text(
@@ -108,11 +111,11 @@ class AuthBrandHeader extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: textTheme.bodyLarge?.copyWith(
+          style: textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
         ),
@@ -133,28 +136,28 @@ class AuthBrandMark extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.10),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+            color: colorScheme.shadow.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: CircleAvatar(
-        radius: 58,
+        radius: 40,
         backgroundColor: colorScheme.surface,
         child: Stack(
           alignment: Alignment.center,
           children: [
             Icon(
               Icons.spa_rounded,
-              size: 54,
+              size: 36,
               color: colorScheme.primary.withValues(alpha: 0.55),
             ),
             Transform.translate(
-              offset: const Offset(4, 8),
+              offset: const Offset(3, 5),
               child: Icon(
                 Icons.eco_rounded,
-                size: 58,
+                size: 40,
                 color: colorScheme.primary,
               ),
             ),

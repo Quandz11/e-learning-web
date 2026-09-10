@@ -8,6 +8,7 @@ import 'package:e_learning_mobile/features/notifications/services/notification_s
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 typedef AppRunner = void Function(Widget app);
@@ -18,6 +19,43 @@ Future<void> bootstrapAndRun({
   Bootstrapper? bootstrapper,
 }) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter Exception: ${details.exception}\n${details.stack}');
+  };
+
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    final stack = details.stack;
+    String stackInfo = '';
+    if (stack != null) {
+      final lines = stack.toString().split('\n');
+      final appLines = lines.where((l) => l.contains('package:e_learning_mobile')).take(3).toList();
+      stackInfo = appLines.isNotEmpty ? '\n${appLines.join('\n')}' : '\n${lines.take(2).join('\n')}';
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Color(0xFFC0392B), size: 32),
+              const SizedBox(height: 8),
+              SelectableText(
+                'Lỗi: ${details.exception}$stackInfo',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFFC0392B), fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  };
+
   runner(_BootstrapHost(bootstrapper: bootstrapper ?? bootstrap));
 }
 
@@ -80,6 +118,12 @@ class _BootstrapHostState extends State<_BootstrapHost> {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('vi'), Locale('en')],
       home: _startupErrorMessage == null
           ? const StartupScreen()
           : StartupFailureScreen(message: _startupErrorMessage!),

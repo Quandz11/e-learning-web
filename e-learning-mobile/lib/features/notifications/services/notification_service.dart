@@ -218,11 +218,18 @@ class NotificationService {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         final token = await messaging.getToken();
-        if (token != null && onTokenRefresh != null) {
-          onTokenRefresh(token);
+        if (token != null) {
+          debugPrint('====================================');
+          debugPrint('🔥 FCM REGISTRATION TOKEN:');
+          debugPrint(token);
+          debugPrint('====================================');
+          if (onTokenRefresh != null) {
+            onTokenRefresh(token);
+          }
         }
 
         messaging.onTokenRefresh.listen((newToken) {
+          debugPrint('🔥 FCM TOKEN REFRESHED: $newToken');
           if (onTokenRefresh != null) {
             onTokenRefresh(newToken);
           }

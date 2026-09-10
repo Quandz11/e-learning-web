@@ -10,6 +10,7 @@ import 'package:e_learning_mobile/shared/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class SecurityScreen extends ConsumerStatefulWidget {
   const SecurityScreen({super.key});
@@ -141,9 +142,57 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text('Mã bí mật'),
+                    const Text(
+                      'Quét mã QR bằng ứng dụng Authenticator',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1E2621),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE9EBEA)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: QrImageView(
+                          data: state.qrCodeUri!,
+                          version: QrVersions.auto,
+                          size: 180.0,
+                          backgroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    const Text(
+                      'Hoặc nhập mã bí mật thủ công:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF717873),
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.xs),
-                    SelectableText(state.secret!),
+                    SelectableText(
+                      state.secret!,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
+                        color: Color(0xFF0F5B38),
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.sm),
                     AppButton(
                       buttonKey: const Key('security_copy_secret_button'),
@@ -151,11 +200,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                       variant: AppButtonVariant.secondary,
                       onPressed: () => _copyValue(state.secret!),
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    const Text('Liên kết QR'),
                     const SizedBox(height: AppSpacing.xs),
-                    SelectableText(state.qrCodeUri!),
-                    const SizedBox(height: AppSpacing.sm),
                     AppButton(
                       buttonKey: const Key('security_copy_qr_uri_button'),
                       label: 'Sao chép liên kết QR',

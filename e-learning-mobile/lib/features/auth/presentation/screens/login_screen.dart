@@ -64,17 +64,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return AuthSurface(
-      child: AutofillGroup(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const AuthBrandHeader(
-              title: 'Nhịn ăn\nChữa lành',
-              subtitle:
-                  'Đồng hành cùng bạn trên hành trình nhịn ăn và sống khỏe mạnh.',
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            AuthFormCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const AuthBrandHeader(
+            title: 'Nhịn ăn\nChữa lành',
+            subtitle:
+                'Đồng hành cùng bạn trên hành trình nhịn ăn và sống khỏe mạnh.',
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          AuthFormCard(
+            child: AutofillGroup(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -83,7 +83,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     subtitle: 'Sử dụng email và mật khẩu để tiếp tục.',
                     centered: true,
                   ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.md),
                   if (state.generalMessage != null) ...[
                     AuthMessageCard(
                       message: state.generalMessage!,
@@ -96,10 +96,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     controller: _emailController,
                     focusNode: _emailFocusNode,
                     keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [
-                      AutofillHints.username,
-                      AutofillHints.email,
-                    ],
+                    autofillHints: const [AutofillHints.email],
                     textInputAction: TextInputAction.next,
                     enabled: !state.isSubmitting,
                     onChanged: (_) => controller.onEmailChanged(),
@@ -172,17 +169,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            AuthFooterPrompt(
-              prompt: 'Chưa có tài khoản?',
-              actionLabel: 'Đăng ký ngay',
-              buttonKey: const Key('login_to_register_button'),
-              onPressed: state.isSubmitting
-                  ? null
-                  : () => context.go(AppRoutes.register),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AuthFooterPrompt(
+            prompt: 'Chưa có tài khoản?',
+            actionLabel: 'Đăng ký ngay',
+            buttonKey: const Key('login_to_register_button'),
+            onPressed: state.isSubmitting
+                ? null
+                : () => context.go(AppRoutes.register),
+          ),
+        ],
       ),
     );
   }

@@ -79,8 +79,10 @@ void main() {
   testWidgets('visibility controls work', (tester) async {
     await tester.pumpWidget(_pumpRegisterScreen(const RegisterScreen()));
 
+    await tester.ensureVisible(find.byTooltip('Hiện mật khẩu'));
     await tester.tap(find.byTooltip('Hiện mật khẩu'));
     await tester.pump();
+    await tester.ensureVisible(find.byTooltip('Hiện xác nhận mật khẩu'));
     await tester.tap(find.byTooltip('Hiện xác nhận mật khẩu'));
     await tester.pump();
 

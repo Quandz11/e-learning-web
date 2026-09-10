@@ -1,6 +1,7 @@
 import 'package:e_learning_mobile/core/routing/app_router.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class App extends ConsumerWidget {
@@ -12,12 +13,17 @@ class App extends ConsumerWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'SKVI Mobile',
+      title: 'Nhịn Ăn Chữa Lành',
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
       routerConfig: router,
-      supportedLocales: const [Locale('en'), Locale('vi')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('vi'), Locale('en')],
     );
   }
 }

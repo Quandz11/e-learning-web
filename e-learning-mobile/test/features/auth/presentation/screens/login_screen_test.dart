@@ -56,6 +56,7 @@ void main() {
   testWidgets('visibility toggle works', (tester) async {
     await tester.pumpWidget(_pumpLoginScreen(const LoginScreen()));
 
+    await tester.ensureVisible(find.byTooltip('Hiện mật khẩu'));
     await tester.tap(find.byTooltip('Hiện mật khẩu'));
     await tester.pump();
 

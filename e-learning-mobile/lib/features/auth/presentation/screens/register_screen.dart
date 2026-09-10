@@ -100,10 +100,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ? null
             : () => context.go(AppRoutes.login),
       ),
-      child: AutofillGroup(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
             const SizedBox(height: AppSpacing.sm),
             AuthFormCard(
               child: Column(
@@ -319,7 +318,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 

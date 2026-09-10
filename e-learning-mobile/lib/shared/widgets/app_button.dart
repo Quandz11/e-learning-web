@@ -25,18 +25,19 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buttonIcon = icon;
     final buttonChild = loading
         ? const SizedBox(
             width: AppSizes.iconMd,
             height: AppSizes.iconMd,
             child: CircularProgressIndicator(strokeWidth: 2),
           )
-        : icon == null
+        : buttonIcon == null
         ? Text(label)
         : Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              icon!,
+              buttonIcon,
               const SizedBox(width: 8),
               Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
             ],

@@ -45,6 +45,11 @@ class AppTheme {
       canvasColor: colorScheme.surface,
       dividerColor: colorScheme.outlineVariant,
       disabledColor: colorScheme.onSurface.withValues(alpha: 0.38),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: colorScheme.primary,
+        selectionColor: colorScheme.primary.withValues(alpha: 0.25),
+        selectionHandleColor: colorScheme.primary,
+      ),
       appBarTheme: AppBarTheme(
         centerTitle: false,
         backgroundColor: colorScheme.surface,
@@ -102,12 +107,21 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: BorderSide(color: colorScheme.error, width: 1.5),
         ),
-        errorMaxLines: 3,
-        hintStyle: textTheme.bodyMedium?.copyWith(
+        hintStyle: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
           color: colorScheme.onSurfaceVariant,
         ),
-        labelStyle: textTheme.bodyMedium,
-        alignLabelWithHint: true,
+        labelStyle: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        floatingLabelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: colorScheme.primary,
+        ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(

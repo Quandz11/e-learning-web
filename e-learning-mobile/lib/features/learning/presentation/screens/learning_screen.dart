@@ -331,22 +331,17 @@ class _LearningHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          tooltip: 'Quay lại',
-          onPressed: () => context.go(AppRoutes.appHome),
-          icon: const Icon(Icons.arrow_back_rounded),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Text(
+        'Khóa học',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF1E2621),
+          letterSpacing: -0.4,
         ),
-        const Expanded(
-          child: Text(
-            'Khóa học',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, letterSpacing: -0.3),
-          ),
-        ),
-        const SizedBox(width: 48),
-      ],
+      ),
     );
   }
 }

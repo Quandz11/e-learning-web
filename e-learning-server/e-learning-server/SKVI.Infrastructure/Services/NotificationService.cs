@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SKVI.Application.DTOs.Notification;
 using SKVI.Application.Interfaces;
@@ -50,7 +50,7 @@ public class NotificationService : INotificationService
             };
 
             await _hubContext.Clients.Group($"user-{userId}").SendAsync("ReceiveNotification", dto);
-            await LogPushTargetsAsync(new[] { userId }, title);
+            await SendPushNotificationAsync(new[] { userId }, title, content, notification.Id);
             _logger.LogInformation("Sent notification {NotificationId} to user {UserId}", notification.Id, userId);
         }
         catch (Exception ex)
@@ -64,7 +64,6 @@ public class NotificationService : INotificationService
     {
         try
         {
-            // Find users in role
             var users = await _context.Users
                 .Where(u => u.Role == role)
                 .Select(u => u.Id)
@@ -85,14 +84,9 @@ public class NotificationService : INotificationService
             await _context.Notifications.AddRangeAsync(notifications);
             await _context.SaveChangesAsync();
 
-            // Broadcast via SignalR to role group
-            // Note: This sends to online users. The dto passed here might act as a "generic" one
-            // OR we rely on the fact they will fetch latest notifications.
-            // But usually we want to show a toast.
-            // We can send a "generic" DTO for the toast.
             var broadcastDto = new NotificationDto
             {
-                Id = Guid.Empty, // Placeholder ID for broadcast toast, or generate one if client expects valid GUID
+                Id = Guid.Empty,
                 Title = title,
                 Content = content,
                 IsRead = false,
@@ -100,7 +94,7 @@ public class NotificationService : INotificationService
             };
 
             await _hubContext.Clients.Group($"role-{role}").SendAsync("ReceiveNotification", broadcastDto);
-            await LogPushTargetsAsync(users, title);
+            await SendPushNotificationAsync(users, title, content);
             _logger.LogInformation("Sent notification to {Count} users in role {Role}", users.Count, role);
         }
         catch (Exception ex)
@@ -127,7 +121,6 @@ public class NotificationService : INotificationService
                 IsRead = false
             }).ToList();
 
-            // Use batch insert if available or just AddRange
             await _context.Notifications.AddRangeAsync(notifications);
             await _context.SaveChangesAsync();
 
@@ -141,7 +134,7 @@ public class NotificationService : INotificationService
             };
 
             await _hubContext.Clients.Group("all-users").SendAsync("ReceiveNotification", broadcastDto);
-            await LogPushTargetsAsync(users, title);
+            await SendPushNotificationAsync(users, title, content);
             _logger.LogInformation("Sent notification to all {Count} users", users.Count);
         }
         catch (Exception ex)
@@ -267,23 +260,97 @@ public class NotificationService : INotificationService
         await _context.SaveChangesAsync();
     }
 
-    private async Task LogPushTargetsAsync(IEnumerable<Guid> userIds, string title)
+    private async Task SendPushNotificationAsync(IEnumerable<Guid> userIds, string title, string content, Guid? notificationId = null)
     {
-        var ids = userIds.Distinct().ToList();
-        if (!ids.Any())
+        try
         {
-            return;
+            var ids = userIds.Distinct().ToList();
+            if (!ids.Any()) return;
+
+            var userTokens = await _context.UserDeviceTokens
+                .Where(t => ids.Contains(t.UserId) && t.IsActive && !string.IsNullOrWhiteSpace(t.Token))
+                .ToListAsync();
+
+            if (!userTokens.Any()) return;
+
+            _logger.LogInformation("Dispatching push notification to {Count} registered device tokens for Title={Title}", userTokens.Count, title);
+
+            if (FirebaseAdmin.FirebaseApp.DefaultInstance == null)
+            {
+                _logger.LogWarning("FirebaseApp is not initialized. Skipping FCM push dispatch.");
+                return;
+            }
+
+            var tokenStrings = userTokens.Select(t => t.Token).Distinct().ToList();
+            const int batchSize = 500;
+
+            for (int i = 0; i < tokenStrings.Count; i += batchSize)
+            {
+                var batch = tokenStrings.Skip(i).Take(batchSize).ToList();
+                var message = new FirebaseAdmin.Messaging.MulticastMessage
+                {
+                    Tokens = batch,
+                    Notification = new FirebaseAdmin.Messaging.Notification
+                    {
+                        Title = title,
+                        Body = content
+                    },
+                    Data = new Dictionary<string, string>
+                    {
+                        ["title"] = title,
+                        ["body"] = content,
+                        ["notificationId"] = notificationId?.ToString() ?? "",
+                        ["click_action"] = "FLUTTER_NOTIFICATION_CLICK"
+                    },
+                    Android = new FirebaseAdmin.Messaging.AndroidConfig
+                    {
+                        Priority = FirebaseAdmin.Messaging.Priority.High,
+                        Notification = new FirebaseAdmin.Messaging.AndroidNotification
+                        {
+                            ChannelId = "skvi_notifications",
+                            Sound = "default"
+                        }
+                    },
+                    Apns = new FirebaseAdmin.Messaging.ApnsConfig
+                    {
+                        Aps = new FirebaseAdmin.Messaging.Aps
+                        {
+                            Sound = "default",
+                            Badge = 1
+                        }
+                    }
+                };
+
+                var response = await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+                _logger.LogInformation("FCM dispatch completed: Success={SuccessCount}, Failure={FailureCount}", response.SuccessCount, response.FailureCount);
+
+                if (response.FailureCount > 0)
+                {
+                    for (int j = 0; j < response.Responses.Count; j++)
+                    {
+                        if (!response.Responses[j].IsSuccess)
+                        {
+                            var failedToken = batch[j];
+                            var errorCode = response.Responses[j].Exception?.MessagingErrorCode;
+                            if (errorCode == FirebaseAdmin.Messaging.MessagingErrorCode.Unregistered ||
+                                errorCode == FirebaseAdmin.Messaging.MessagingErrorCode.InvalidArgument)
+                            {
+                                var dbTokens = userTokens.Where(t => t.Token == failedToken);
+                                foreach (var dt in dbTokens)
+                                {
+                                    dt.IsActive = false;
+                                    dt.UpdatedAt = DateTime.UtcNow;
+                                }
+                            }
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                }
+            }
         }
-
-        var activeTokenCount = await _context.UserDeviceTokens
-            .CountAsync(t => ids.Contains(t.UserId) && t.IsActive);
-
-        if (activeTokenCount > 0)
+        catch (Exception ex)
         {
-            _logger.LogInformation(
-                "Push notification queued for {DeviceCount} active devices. Title={Title}",
-                activeTokenCount,
-                title);
+            _logger.LogError(ex, "Failed to send FCM push notification for Title={Title}", title);
         }
     }
 }

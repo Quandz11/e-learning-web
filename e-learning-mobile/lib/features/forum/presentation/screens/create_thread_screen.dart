@@ -2,6 +2,7 @@ import 'package:e_learning_mobile/features/forum/data/forum_repository.dart';
 import 'package:e_learning_mobile/features/forum/presentation/controllers/forum_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateThreadScreen extends ConsumerStatefulWidget {
   const CreateThreadScreen({super.key});
@@ -97,7 +98,13 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF1E2621)),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/app/community');
+            }
+          },
         ),
         title: const Text(
           'Tạo thảo luận mới',

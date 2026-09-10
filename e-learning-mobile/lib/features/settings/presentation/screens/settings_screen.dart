@@ -35,7 +35,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             color: AppColors.textPrimary,
             size: 20,
           ),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/app/profile');
+            }
+          },
         ),
         title: const Text(
           'Cài đặt ứng dụng',

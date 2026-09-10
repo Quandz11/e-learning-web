@@ -35,7 +35,13 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF1E2621)),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/app');
+            }
+          },
         ),
         title: const Text(
           'Kiến thức Sống khỏe',

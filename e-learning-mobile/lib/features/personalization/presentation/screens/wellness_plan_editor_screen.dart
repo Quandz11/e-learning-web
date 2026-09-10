@@ -4,6 +4,7 @@ import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class WellnessPlanEditorScreen extends ConsumerStatefulWidget {
   const WellnessPlanEditorScreen({super.key});
@@ -95,6 +96,20 @@ class _WellnessPlanEditorScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF9FBF9),
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF1A2520),
+            size: 18,
+          ),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/app/wellness');
+            }
+          },
+        ),
         title: const Text(
           'Thiết lập Kế hoạch Nhịn ăn',
           style: TextStyle(
@@ -315,6 +330,14 @@ class _WellnessPlanEditorScreenState
                   final picked = await showTimePicker(
                     context: context,
                     initialTime: _fastingStartTime,
+                    builder: (context, child) {
+                      return MediaQuery(
+                        data: MediaQuery.of(context).copyWith(
+                          textScaler: MediaQuery.of(context).textScaler.clamp(maxScaleFactor: 1.0),
+                        ),
+                        child: child ?? const SizedBox.shrink(),
+                      );
+                    },
                   );
                   if (picked != null) {
                     setState(() => _fastingStartTime = picked);

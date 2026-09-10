@@ -4,7 +4,9 @@ import 'package:e_learning_mobile/core/config/app_config_loader.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/startup_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/startup_failure_screen.dart';
+import 'package:e_learning_mobile/features/notifications/services/notification_service.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,6 +22,14 @@ Future<void> bootstrapAndRun({
 }
 
 Future<ProviderContainer> bootstrap() async {
+  try {
+    await Firebase.initializeApp();
+    await NotificationService.instance.initialize();
+    await NotificationService.instance.setupFirebaseMessaging();
+  } catch (e) {
+    debugPrint('Firebase/Notification init warning (safe to ignore in test/offline): $e');
+  }
+
   final config = await AppConfigLoader.load();
   final container = ProviderContainer(
     overrides: [appConfigProvider.overrideWithValue(config)],

@@ -1259,19 +1259,25 @@ class _QuickActionsSection extends StatelessWidget {
 
     return _OptionalSectionWrapper(
       title: 'Lối tắt',
-      child: Row(
-        children: actions
-            .map(
-              (action) => Expanded(
-                child: Padding(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        clipBehavior: Clip.none,
+        child: Row(
+          children: actions
+              .map(
+                (action) => Padding(
                   padding: EdgeInsets.only(
-                    right: action == actions.last ? 0 : AppSpacing.xs,
+                    right: action == actions.last ? 0 : 10,
                   ),
-                  child: _QuickActionCard(action: action),
+                  child: SizedBox(
+                    width: 82,
+                    child: _QuickActionCard(action: action),
+                  ),
                 ),
-              ),
-            )
-            .toList(growable: false),
+              )
+              .toList(growable: false),
+        ),
       ),
     );
   }
@@ -1528,16 +1534,21 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Semantics(
       button: true,
       label: action.label,
       child: InkWell(
-        onTap: () => context.go(action.route),
+        onTap: () {
+          if (action.route == AppRoutes.appCommunity ||
+              action.route == AppRoutes.appArticles) {
+            context.push(action.route);
+          } else {
+            context.go(action.route);
+          }
+        },
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -1566,7 +1577,7 @@ class _QuickActionCard extends StatelessWidget {
                       color: action.bgColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(action.icon, color: action.iconColor, size: 20),
+                    child: Icon(action.icon, color: action.iconColor, size: 21),
                   ),
                   if (action.badge != null)
                     Positioned(
@@ -1583,7 +1594,7 @@ class _QuickActionCard extends StatelessWidget {
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 9,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -1595,11 +1606,11 @@ class _QuickActionCard extends StatelessWidget {
                 action.label,
                 textAlign: TextAlign.center,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w400,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
                   fontSize: 12,
-                  color: const Color(0xFF1A2520),
+                  color: Color(0xFF1E2621),
+                  letterSpacing: -0.2,
                 ),
               ),
             ],

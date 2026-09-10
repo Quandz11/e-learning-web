@@ -1,4 +1,5 @@
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
+import 'package:e_learning_mobile/features/notifications/services/notification_service.dart';
 import 'package:e_learning_mobile/features/personalization/data/personalization_repository.dart';
 import 'package:e_learning_mobile/features/personalization/domain/reminder_model.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
@@ -31,7 +32,13 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
             color: Color(0xFF1A2520),
             size: 18,
           ),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/app/wellness');
+            }
+          },
         ),
         title: const Text(
           'Danh sách nhắc nhở',
@@ -42,6 +49,28 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
             color: Color(0xFF1A2520),
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Thử nghiệm thông báo',
+            icon: const Icon(
+              Icons.notifications_active_outlined,
+              size: 22,
+              color: Color(0xFF0F5B38),
+            ),
+            onPressed: () async {
+              await NotificationService.instance.sendTestNotification();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Đã gửi thông báo nhắc nhở thử nghiệm đến thiết bị!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
         elevation: 0,
         backgroundColor: const Color(0xFFF9FBF9),
       ),

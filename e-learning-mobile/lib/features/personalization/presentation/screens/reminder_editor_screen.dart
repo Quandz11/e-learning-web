@@ -88,6 +88,14 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
     final picked = await showTimePicker(
       context: context,
       initialTime: isStart ? _startTime : _endTime,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: MediaQuery.of(context).textScaler.clamp(maxScaleFactor: 1.0),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -126,7 +134,11 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
         .saveReminder(reminder);
 
     if (mounted) {
-      context.pop();
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        context.go('/app/wellness/reminders');
+      }
     }
   }
 
@@ -143,7 +155,13 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
             color: Color(0xFF1A2520),
             size: 18,
           ),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/app/wellness/reminders');
+            }
+          },
         ),
         title: Text(
           isEditing ? 'Chỉnh sửa nhắc nhở' : 'Tạo nhắc nhở mới',

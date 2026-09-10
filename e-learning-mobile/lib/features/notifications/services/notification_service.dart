@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -10,6 +12,11 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
+
+  static const String channelId = 'skvi_wellness_channel';
+  static const String channelName = 'Nhắc nhở & Thông báo SKVI';
+  static const String channelDesc =
+      'Thông báo nhắc nhở uống nước, nhịn ăn, vận động và tin tức hệ thống';
 
   bool _isInitialized = false;
 
@@ -43,6 +50,25 @@ class NotificationService {
       },
     );
 
+    final androidImplementation = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
+    if (androidImplementation != null) {
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          channelId,
+          channelName,
+          description: channelDesc,
+          importance: Importance.max,
+          playSound: true,
+          enableVibration: true,
+          showBadge: true,
+        ),
+      );
+    }
+
     _isInitialized = true;
   }
 
@@ -73,6 +99,41 @@ class NotificationService {
     return androidGranted && iosGranted;
   }
 
+  Future<void> showImmediateNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    await initialize();
+
+    const androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDesc,
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      showWhen: true,
+    );
+    const darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+    );
+
+    try {
+      await _plugin.show(id, title, body, details, payload: payload);
+    } catch (e) {
+      debugPrint('Failed to show immediate notification: $e');
+    }
+  }
+
   Future<void> scheduleDailyNotification({
     required int id,
     required String title,
@@ -83,14 +144,19 @@ class NotificationService {
     await initialize();
 
     const androidDetails = AndroidNotificationDetails(
-      'nhin_an_chua_lanh_habits',
-      'Nhắc nhở thói quen lành mạnh',
-      channelDescription:
-          'Thông báo nhắc nhở uống nước, vận động, nghỉ ngơi, học tập',
-      importance: Importance.high,
+      channelId,
+      channelName,
+      channelDescription: channelDesc,
+      importance: Importance.max,
       priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
     );
-    const darwinDetails = DarwinNotificationDetails();
+    const darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
     const details = NotificationDetails(
       android: androidDetails,
       iOS: darwinDetails,
@@ -124,6 +190,58 @@ class NotificationService {
       );
     } catch (e) {
       debugPrint('Failed to zone schedule notification: $e');
+    }
+  }
+
+  Future<void> sendTestNotification() async {
+    await showImmediateNotification(
+      id: 9999,
+      title: '🌿 Nhắc nhở Sống khỏe SKVI',
+      body: 'Đến giờ uống một cốc nước ấm và vận động nhẹ rồi bạn nhé!',
+      payload: 'wellness_reminder',
+    );
+  }
+
+  Future<void> setupFirebaseMessaging({
+    Function(String token)? onTokenRefresh,
+  }) async {
+    try {
+      if (Firebase.apps.isEmpty) {
+        return;
+      }
+      final messaging = FirebaseMessaging.instance;
+      final settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        final token = await messaging.getToken();
+        if (token != null && onTokenRefresh != null) {
+          onTokenRefresh(token);
+        }
+
+        messaging.onTokenRefresh.listen((newToken) {
+          if (onTokenRefresh != null) {
+            onTokenRefresh(newToken);
+          }
+        });
+
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+          final notification = message.notification;
+          if (notification != null) {
+            showImmediateNotification(
+              id: message.hashCode,
+              title: notification.title ?? 'Thông báo mới',
+              body: notification.body ?? '',
+              payload: message.data.toString(),
+            );
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Firebase Messaging setup skipped / not configured: $e');
     }
   }
 

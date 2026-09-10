@@ -1,5 +1,4 @@
 using System.Text;
-using e_learning_server.Controllers;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -54,7 +53,6 @@ builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<ICheckoutService, CheckoutService>();
 builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
-builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
@@ -81,34 +79,30 @@ builder.Services.AddSingleton<IGuestConversationService, GuestConversationServic
 // Background Services
 builder.Services.AddHostedService<SKVI.Infrastructure.BackgroundServices.GuestConversationCleanupService>();
 
-// Ngăn background service crash (VD: HangfireServer) kéo chết toàn bộ app
-// Đặc biệt quan trọng khi Hangfire DB schema chưa được tạo trên Azure SQL
+// Configure Background Service Exception Behavior
 builder.Services.Configure<HostOptions>(options =>
 {
     options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
 });
 
-// Hangfire Configuration — dùng schema 'dbo' để tránh lỗi CREATE SCHEMA trên Azure SQL
-// Azure SQL user có quyền CREATE TABLE trong dbo nhưng không có quyền CREATE SCHEMA mới
+// Hangfire Configuration
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
     {
-        SchemaName = "dbo",                    // Dùng schema dbo có sẵn, không cần tạo schema HangFire mới
+        SchemaName = "dbo",
         CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
         SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
         QueuePollInterval = TimeSpan.Zero,
         UseRecommendedIsolationLevel = true,
-        PrepareSchemaIfNecessary = true        // Tự tạo các bảng Hangfire nếu chưa có
+        PrepareSchemaIfNecessary = true
     }));
 
-// Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
 
-// Application Insights — chỉ bật khi có connection string (tránh crash trên môi trường không cấu hình)
-// APPLICATIONINSIGHTS_CONNECTION_STRING phải được set trong Azure App Settings
+// Application Insights
 var appInsightsConnStr = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
     ?? builder.Configuration["ApplicationInsights:ConnectionString"];
 if (!string.IsNullOrEmpty(appInsightsConnStr))
@@ -119,7 +113,7 @@ if (!string.IsNullOrEmpty(appInsightsConnStr))
     });
 }
 
-// Video Security Service (for signed URLs)
+// Video Security Service
 builder.Services.AddScoped<IVideoSecurityService>(sp =>
 {
     var bunnySettings = sp.GetRequiredService<IOptions<BunnySettings>>().Value;
@@ -139,6 +133,31 @@ builder.Services.AddHttpClient<IPhoneOtpSender, ZaloOtpService>((sp, client) =>
     client.BaseAddress = new Uri(settings.ApiBaseUrl.TrimEnd('/'));
     client.Timeout = TimeSpan.FromSeconds(20);
 });
+
+// Firebase Admin SDK Initialization
+try
+{
+    var firebaseCredPath = builder.Configuration["Firebase:CredentialFilePath"] ?? "firebase-service-account.json";
+    if (File.Exists(firebaseCredPath))
+    {
+        if (FirebaseAdmin.FirebaseApp.DefaultInstance == null)
+        {
+            FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions
+            {
+                Credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromFile(firebaseCredPath)
+            });
+            Console.WriteLine("[Firebase] Admin SDK initialized successfully.");
+        }
+    }
+    else
+    {
+        Console.WriteLine($"[Firebase] Credential file not found at '{firebaseCredPath}'. Push notifications via FCM will run in simulated mode.");
+    }
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"[Firebase] Initialization warning: {ex.Message}");
+}
 
 // Authentication & JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
@@ -238,7 +257,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Add JWT Authentication to Swagger
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -286,7 +304,6 @@ builder.Services.AddRateLimiter(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-// Automatically apply migrations on startup
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -300,30 +317,26 @@ using (var scope = app.Services.CreateScope())
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while migrating the database.");
-        throw; // Re-throw the exception to fail the startup
+        throw;
     }
 }
 
-// Enable Swagger in all environments for API documentation
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "SKVI E-Learning API v1");
-    options.RoutePrefix = "swagger"; // Access at /swagger
+    options.RoutePrefix = "swagger";
     options.DocumentTitle = "SKVI E-Learning API Documentation";
 });
 
-// CORS must come before UseHttpsRedirection
 app.UseCors("StrictPolicy");
 
 app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.UseHttpsRedirection();
 
-// Serve static files from wwwroot
 app.UseStaticFiles();
 
-// Serve static files from uploads folder
 var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
 if (!Directory.Exists(uploadsPath))
 {
@@ -340,7 +353,6 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Cấu hình Hangfire Dashboard (chỉ active nếu Hangfire đã được đăng ký thành công)
 try
 {
     app.UseHangfireDashboard("/hangfire", new DashboardOptions

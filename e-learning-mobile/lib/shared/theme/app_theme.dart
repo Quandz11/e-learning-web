@@ -144,6 +144,34 @@ class AppTheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: colorScheme.primary,
       ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: colorScheme.surface,
+        hourMinuteColor: isLight ? const Color(0xFFF0F7F2) : const Color(0xFF1E2D24),
+        hourMinuteTextColor: colorScheme.primary,
+        dayPeriodColor: isLight ? const Color(0xFFF0F7F2) : const Color(0xFF1E2D24),
+        dayPeriodTextColor: colorScheme.primary,
+        dialHandColor: colorScheme.primary,
+        dialBackgroundColor: isLight ? const Color(0xFFF0F7F2) : const Color(0xFF1E2D24),
+        dialTextColor: colorScheme.onSurface,
+        entryModeIconColor: colorScheme.primary,
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: isLight ? const Color(0xFFF0F7F2) : const Color(0xFF1E2D24),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderSide: BorderSide(color: colorScheme.primary),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderSide: BorderSide(color: colorScheme.outlineVariant),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+          ),
+        ),
+      ),
     );
   }
 }

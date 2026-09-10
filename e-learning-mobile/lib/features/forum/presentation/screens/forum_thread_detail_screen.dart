@@ -3,6 +3,7 @@ import 'package:e_learning_mobile/features/forum/data/models/forum_models.dart';
 import 'package:e_learning_mobile/features/forum/presentation/controllers/forum_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class ForumThreadDetailScreen extends ConsumerStatefulWidget {
@@ -61,7 +62,13 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF1E2621)),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/app/community');
+            }
+          },
         ),
         title: const Text(
           'Chi tiết Thảo luận',

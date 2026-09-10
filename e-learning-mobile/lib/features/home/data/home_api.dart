@@ -35,6 +35,23 @@ class HomeApi {
   final Uri _apiBaseUrl;
   final CacheService? _cacheService;
 
+  Future<HomeFeedData> getMobileHomeFeed() async {
+    final data = await _getJsonMap('/mobile/home-feed');
+    final courses = _coerceJsonList(data['featuredCourses']).map(_parseCourse).toList(growable: false);
+    final enrollments = _coerceJsonList(data['myEnrollments']).map(_parseEnrollment).toList(growable: false);
+    final categories = _coerceJsonList(data['categories']).map(_parseCategory).toList(growable: false);
+    final articles = _coerceJsonList(data['recentArticles']).map(_parseArticle).toList(growable: false);
+    final testimonials = _coerceJsonList(data['testimonials']).map(_parseTestimonial).toList(growable: false);
+
+    return HomeFeedData(
+      courses: courses,
+      enrollments: enrollments,
+      categories: categories,
+      articles: articles,
+      testimonials: testimonials,
+    );
+  }
+
   Future<List<HomeCourse>> getPublishedCourses() async {
     final rows = await _getJsonList(
       '/courses',

@@ -78,6 +78,16 @@ class CourseDetailController extends StateNotifier<CourseDetailState> {
 
   Future<void> refresh() => load(refresh: true);
 
+  Future<bool> enroll() async {
+    try {
+      await _repository.enrollInCourse(_courseId);
+      await load(refresh: true);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   void _applyFailure(AppFailure failure, {required bool refresh}) {
     if (refresh && state.hasContent) {
       state = state.copyWith(

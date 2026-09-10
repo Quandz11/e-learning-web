@@ -476,7 +476,7 @@ class _HomeHeader extends StatelessWidget {
         ),
         IconButton(
           tooltip: 'Thông báo',
-          onPressed: () => context.go(AppRoutes.appPersonalizationReminders),
+          onPressed: () => context.push(AppRoutes.appNotifications),
           icon: Badge(
             smallSize: 8,
             child: Icon(
@@ -593,19 +593,26 @@ class _QuickActionsSection extends StatelessWidget {
         iconColor: Color(0xFF0F5B38),
       ),
       _QuickAction(
-        label: 'Cá nhân hóa',
-        icon: Icons.spa_outlined,
-        route: AppRoutes.appPersonalization,
+        label: 'Cộng đồng',
+        icon: Icons.forum_outlined,
+        route: AppRoutes.appCommunity,
         bgColor: Color(0xFFFFFBEB),
         iconColor: Color(0xFFD97706),
         badge: 'Mới',
       ),
       _QuickAction(
-        label: 'Nhắc nhở',
-        icon: Icons.notifications_none_rounded,
-        route: AppRoutes.appPersonalizationReminders,
+        label: 'Kiến thức',
+        icon: Icons.auto_stories_outlined,
+        route: AppRoutes.appArticles,
         bgColor: Color(0xFFF5F3FF),
         iconColor: Color(0xFF7C3AED),
+      ),
+      _QuickAction(
+        label: 'Tư vấn',
+        icon: Icons.support_agent_rounded,
+        route: AppRoutes.appChat,
+        bgColor: Color(0xFFECFDF5),
+        iconColor: Color(0xFF059669),
       ),
       _QuickAction(
         label: 'Tiến độ',
@@ -738,6 +745,15 @@ class _ArticlesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return _OptionalSectionWrapper(
       title: 'Bài viết mới',
+      trailing: TextButton(
+        style: TextButton.styleFrom(
+          minimumSize: const Size(0, AppSizes.controlHeight),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        ),
+        onPressed: () => context.push(AppRoutes.appArticles),
+        child: const Text('Xem tất cả'),
+      ),
       child: articles.isNotEmpty
           ? Column(
               children: articles
@@ -1059,6 +1075,7 @@ class _ArticleCard extends StatelessWidget {
     return Semantics(
       label: 'Bài viết ${article.title}',
       child: AppCard(
+        onTap: () => context.push('/app/articles/${article.slug}'),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

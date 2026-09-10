@@ -34,6 +34,13 @@ import 'package:e_learning_mobile/features/personalization/presentation/screens/
 import 'package:e_learning_mobile/features/personalization/presentation/screens/wellness_resources_screen.dart';
 import 'package:e_learning_mobile/features/personalization/presentation/screens/reminder_list_screen.dart';
 import 'package:e_learning_mobile/features/personalization/presentation/screens/reminder_editor_screen.dart';
+import 'package:e_learning_mobile/features/articles/presentation/screens/article_detail_screen.dart';
+import 'package:e_learning_mobile/features/articles/presentation/screens/articles_screen.dart';
+import 'package:e_learning_mobile/features/chat/presentation/screens/support_chat_screen.dart';
+import 'package:e_learning_mobile/features/forum/presentation/screens/create_thread_screen.dart';
+import 'package:e_learning_mobile/features/forum/presentation/screens/forum_home_screen.dart';
+import 'package:e_learning_mobile/features/forum/presentation/screens/forum_thread_detail_screen.dart';
+import 'package:e_learning_mobile/features/notifications/presentation/screens/notification_inbox_screen.dart';
 import 'package:e_learning_mobile/features/progress/presentation/screens/learning_progress_screen.dart';
 import 'package:e_learning_mobile/features/settings/presentation/screens/settings_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -176,6 +183,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.appSettings,
             builder: (_, __) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.appNotifications,
+            builder: (_, __) => const NotificationInboxScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.appArticles,
+            builder: (_, __) => const ArticlesScreen(),
+            routes: [
+              GoRoute(
+                path: ':slug',
+                builder: (_, state) => ArticleDetailScreen(
+                  slug: state.pathParameters['slug'] ?? '',
+                ),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: AppRoutes.appCommunity,
+            builder: (_, __) => const ForumHomeScreen(),
+            routes: [
+              GoRoute(
+                path: 'threads/:threadId',
+                builder: (_, state) => ForumThreadDetailScreen(
+                  threadId: state.pathParameters['threadId'] ?? '',
+                ),
+              ),
+              GoRoute(
+                path: 'create-thread',
+                builder: (_, state) => const CreateThreadScreen(),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: AppRoutes.appChat,
+            builder: (_, __) => const SupportChatScreen(),
           ),
           GoRoute(
             path: AppRoutes.appProfile,

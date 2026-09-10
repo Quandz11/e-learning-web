@@ -62,4 +62,19 @@ class ApiClient {
     );
     return response.data as T;
   }
+
+  Future<T> patch<T>(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    final response = await _dio.patch<T>(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+    );
+    return response.data as T;
+  }
 }

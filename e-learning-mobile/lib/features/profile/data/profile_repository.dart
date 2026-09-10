@@ -22,4 +22,11 @@ class ProfileRepository {
   Future<String> changePassword(ChangePasswordRequest request) {
     return _api.changePassword(request);
   }
+
+  Future<String> uploadAvatar({
+    required List<int> bytes,
+    required String fileName,
+  }) {
+    return _api.uploadAvatar(bytes: bytes, fileName: fileName);
+  }
 }

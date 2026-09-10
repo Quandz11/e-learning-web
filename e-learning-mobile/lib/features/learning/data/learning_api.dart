@@ -87,6 +87,48 @@ class LearningApi {
     }
   }
 
+  Future<void> trackLessonProgress({
+    required String courseId,
+    required String lessonPartId,
+    required int watchedDurationSeconds,
+  }) async {
+    try {
+      await _apiClient.post<Object?>(
+        '/enrollments/$courseId/lessons/$lessonPartId/progress',
+        data: {'watchedDuration': watchedDurationSeconds},
+      );
+    } on DioException catch (error) {
+      throw _map(error);
+    }
+  }
+
+  Future<LearningEnrollment> enrollInCourse(String courseId) async {
+    try {
+      final data = await _apiClient.post<Object?>(
+        '/enrollments',
+        data: {'courseId': courseId},
+      );
+      return _parseEnrollment(_coerceJsonMap(data));
+    } on DioException catch (error) {
+      throw _map(error);
+    }
+  }
+
+  Future<bool> checkEnrollment(String courseId) async {
+    try {
+      final data = await _apiClient.get<Object?>(
+        '/enrollments/check/$courseId',
+      );
+      final json = _coerceJsonMap(data);
+      return json['isEnrolled'] as bool? ?? false;
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 404) {
+        return false;
+      }
+      throw _map(error);
+    }
+  }
+
   Future<Uri?> getVideoEmbedUrl(String videoId) async {
     try {
       final data = await _apiClient.get<Object?>('/videos/$videoId/embed-url');

@@ -62,6 +62,28 @@ class ProfileApi {
     }
   }
 
+  Future<String> uploadAvatar({
+    required List<int> bytes,
+    required String fileName,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': MultipartFile.fromBytes(
+          bytes,
+          filename: fileName,
+        ),
+      });
+      final data = await _apiClient.post<Object?>(
+        '/profile/upload-avatar',
+        data: formData,
+      );
+      final json = _coerceJson(data);
+      return json['url'] as String? ?? '';
+    } on DioException catch (error) {
+      throw _map(error);
+    }
+  }
+
   Future<Map<String, dynamic>> _getJson(String path) async {
     try {
       final data = await _apiClient.get<Object?>(path);

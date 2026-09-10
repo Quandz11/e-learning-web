@@ -69,4 +69,15 @@ class CacheService {
       await prefs.remove('$_prefix$key');
     } catch (_) {}
   }
+
+  /// Clear all cached app data
+  Future<void> clear() async {
+    try {
+      final prefs = await _asyncPrefs;
+      final keys = prefs.getKeys().where((k) => k.startsWith(_prefix)).toList();
+      for (final key in keys) {
+        await prefs.remove(key);
+      }
+    } catch (_) {}
+  }
 }

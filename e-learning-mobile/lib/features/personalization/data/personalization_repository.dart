@@ -1,10 +1,15 @@
 import 'dart:convert';
 import 'package:e_learning_mobile/features/notifications/services/notification_service.dart';
+import 'package:e_learning_mobile/features/personalization/data/reminders_api.dart';
 import 'package:e_learning_mobile/features/personalization/domain/reminder_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PersonalizationRepository {
+  PersonalizationRepository({RemindersApi? remindersApi}) : _remindersApi = remindersApi;
+
+  final RemindersApi? _remindersApi;
+
   static const _remindersKey = 'personalization_reminders_v1';
   static const _profileKey = 'personalization_profile_v1';
 
@@ -100,21 +105,41 @@ class PersonalizationRepository {
   Future<List<Reminder>> getReminders() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_remindersKey);
+    List<Reminder> localReminders = defaultReminders;
+
     if (raw == null) {
       await saveReminders(defaultReminders);
-      return defaultReminders;
+    } else {
+      try {
+        final list = jsonDecode(raw) as List<dynamic>;
+        localReminders = list
+            .map((e) => Reminder.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (_) {
+        localReminders = defaultReminders;
+      }
     }
-    try {
-      final list = jsonDecode(raw) as List<dynamic>;
-      return list
-          .map((e) => Reminder.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (_) {
-      return defaultReminders;
+
+    // Try cloud sync if API is available
+    if (_remindersApi != null) {
+      try {
+        final serverReminders = await _remindersApi.getReminders();
+        if (serverReminders.isNotEmpty) {
+          await saveReminders(serverReminders, syncToServer: false);
+          return serverReminders;
+        } else if (localReminders.isNotEmpty) {
+          // Push initial local reminders to server
+          _remindersApi.syncReminders(localReminders).ignore();
+        }
+      } catch (_) {
+        // Fallback to local on network failure
+      }
     }
+
+    return localReminders;
   }
 
-  Future<void> saveReminders(List<Reminder> reminders) async {
+  Future<void> saveReminders(List<Reminder> reminders, {bool syncToServer = true}) async {
     final prefs = await SharedPreferences.getInstance();
     final encoded = jsonEncode(reminders.map((r) => r.toJson()).toList());
     await prefs.setString(_remindersKey, encoded);
@@ -135,6 +160,10 @@ class PersonalizationRepository {
         await NotificationService.instance.cancelNotification(notifId);
       }
     }
+
+    if (syncToServer && _remindersApi != null) {
+      _remindersApi.syncReminders(reminders).ignore();
+    }
   }
 
   Future<void> toggleReminder(String id, bool enabled) async {
@@ -143,6 +172,9 @@ class PersonalizationRepository {
     if (index != -1) {
       reminders[index] = reminders[index].copyWith(enabled: enabled);
       await saveReminders(reminders);
+      if (_remindersApi != null) {
+        _remindersApi.toggleReminder(id, enabled).ignore();
+      }
     }
   }
 
@@ -155,6 +187,9 @@ class PersonalizationRepository {
       reminders.add(reminder);
     }
     await saveReminders(reminders);
+    if (_remindersApi != null) {
+      _remindersApi.upsertReminder(reminder).ignore();
+    }
   }
 
   Future<void> deleteReminder(String id) async {
@@ -163,11 +198,14 @@ class PersonalizationRepository {
     await saveReminders(reminders);
     final notifId = id.hashCode.abs() % 100000;
     await NotificationService.instance.cancelNotification(notifId);
+    if (_remindersApi != null) {
+      _remindersApi.deleteReminder(id).ignore();
+    }
   }
 }
 
 final personalizationRepositoryProvider = Provider<PersonalizationRepository>(
-  (ref) => PersonalizationRepository(),
+  (ref) => PersonalizationRepository(remindersApi: ref.read(remindersApiProvider)),
 );
 
 final personalizationStateProvider =

@@ -72,6 +72,10 @@ class CourseDetailRepository {
     return loadLesson(courseId: courseId, lessonPartId: lessonPartId);
   }
 
+  Future<LearningEnrollment> enrollInCourse(String courseId) {
+    return _api.enrollInCourse(courseId);
+  }
+
   Future<_ProgressResult> _captureProgress(String courseId) async {
     try {
       return _ProgressResult(data: await _api.getCourseProgress(courseId));

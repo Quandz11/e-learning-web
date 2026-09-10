@@ -118,6 +118,23 @@ class HomeSectionIssue {
   final AppFailure failure;
 }
 
+class HomeFeedData {
+  const HomeFeedData({
+    required this.courses,
+    required this.enrollments,
+    required this.categories,
+    required this.articles,
+    required this.testimonials,
+  });
+
+  final List<HomeCourse> courses;
+  final List<HomeEnrollment> enrollments;
+  final List<HomeCategory> categories;
+  final List<HomeArticle> articles;
+  final List<HomeTestimonial> testimonials;
+}
+
+
 class HomeLoadResult {
   const HomeLoadResult({
     required this.featuredCourses,

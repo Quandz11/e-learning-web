@@ -42,47 +42,66 @@ class HomeRepository {
   }
 
   Future<HomeLoadResult> loadHome() async {
-    final featuredCoursesFuture = _api.getPublishedCourses();
-    final enrollmentsFuture = _captureOptional(_api.getEnrollments);
-    final categoriesFuture = _captureOptional(_api.getActiveCategories);
-    final articlesFuture = _captureOptional(
-      () => _api.getRecentArticles(pageSize: 4),
-    );
-    final testimonialsFuture = _captureOptional(_api.getActiveTestimonials);
+    try {
+      final feed = await _api.getMobileHomeFeed();
+      return HomeLoadResult(
+        featuredCourses: feed.courses
+            .where((course) => course.isPublished)
+            .take(4)
+            .toList(growable: false),
+        continueLearning: _selectContinueLearning(feed.enrollments),
+        categories: feed.categories
+            .where((category) => category.isActive)
+            .toList(growable: false)
+          ..sort((left, right) => left.order.compareTo(right.order)),
+        articles: feed.articles.take(4).toList(growable: false),
+        testimonials: feed.testimonials.take(2).toList(growable: false)
+          ..sort((left, right) => left.order.compareTo(right.order)),
+      );
+    } catch (_) {
+      // Graceful fallback to individual endpoints
+      final featuredCoursesFuture = _api.getPublishedCourses();
+      final enrollmentsFuture = _captureOptional(_api.getEnrollments);
+      final categoriesFuture = _captureOptional(_api.getActiveCategories);
+      final articlesFuture = _captureOptional(
+        () => _api.getRecentArticles(pageSize: 4),
+      );
+      final testimonialsFuture = _captureOptional(_api.getActiveTestimonials);
 
-    final featuredCourses = await featuredCoursesFuture;
-    final enrollments = await enrollmentsFuture;
-    final categories = await categoriesFuture;
-    final articles = await articlesFuture;
-    final testimonials = await testimonialsFuture;
+      final featuredCourses = await featuredCoursesFuture;
+      final enrollments = await enrollmentsFuture;
+      final categories = await categoriesFuture;
+      final articles = await articlesFuture;
+      final testimonials = await testimonialsFuture;
 
-    return HomeLoadResult(
-      featuredCourses: featuredCourses
-          .where((course) => course.isPublished)
-          .take(4)
-          .toList(growable: false),
-      continueLearning: _selectContinueLearning(enrollments.data),
-      categories:
-          categories.data
-              .where((category) => category.isActive)
-              .toList(growable: false)
-            ..sort((left, right) => left.order.compareTo(right.order)),
-      articles: articles.data.take(4).toList(growable: false),
-      testimonials: testimonials.data.take(2).toList(growable: false)
-        ..sort((left, right) => left.order.compareTo(right.order)),
-      enrollmentIssue: enrollments.failure == null
-          ? null
-          : HomeSectionIssue(failure: enrollments.failure!),
-      categoryIssue: categories.failure == null
-          ? null
-          : HomeSectionIssue(failure: categories.failure!),
-      articleIssue: articles.failure == null
-          ? null
-          : HomeSectionIssue(failure: articles.failure!),
-      testimonialIssue: testimonials.failure == null
-          ? null
-          : HomeSectionIssue(failure: testimonials.failure!),
-    );
+      return HomeLoadResult(
+        featuredCourses: featuredCourses
+            .where((course) => course.isPublished)
+            .take(4)
+            .toList(growable: false),
+        continueLearning: _selectContinueLearning(enrollments.data),
+        categories:
+            categories.data
+                .where((category) => category.isActive)
+                .toList(growable: false)
+              ..sort((left, right) => left.order.compareTo(right.order)),
+        articles: articles.data.take(4).toList(growable: false),
+        testimonials: testimonials.data.take(2).toList(growable: false)
+          ..sort((left, right) => left.order.compareTo(right.order)),
+        enrollmentIssue: enrollments.failure == null
+            ? null
+            : HomeSectionIssue(failure: enrollments.failure!),
+        categoryIssue: categories.failure == null
+            ? null
+            : HomeSectionIssue(failure: categories.failure!),
+        articleIssue: articles.failure == null
+            ? null
+            : HomeSectionIssue(failure: articles.failure!),
+        testimonialIssue: testimonials.failure == null
+            ? null
+            : HomeSectionIssue(failure: testimonials.failure!),
+      );
+    }
   }
 
   HomeEnrollment? _selectContinueLearning(List<HomeEnrollment> enrollments) {

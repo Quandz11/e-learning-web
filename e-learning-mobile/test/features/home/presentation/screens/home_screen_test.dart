@@ -59,8 +59,10 @@ void main() {
     expect(find.text('Chào buổi sáng'), findsOneWidget);
     expect(find.text('Tiếp tục học'), findsWidgets);
     expect(find.text('Khóa học'), findsWidgets);
-    expect(find.text('Cá nhân hóa'), findsWidgets);
-    expect(find.text('Nhắc nhở'), findsWidgets);
+    expect(find.text('Cộng đồng'), findsWidgets);
+    expect(find.text('Kiến thức'), findsWidgets);
+    expect(find.text('Tư vấn'), findsWidgets);
+    expect(find.text('Tiến độ'), findsWidgets);
   });
 
   testWidgets('falls back to generic greeting when profile is unavailable', (
@@ -208,7 +210,7 @@ void main() {
       await tester.pumpWidget(harness.app);
       await tester.pumpAndSettle();
 
-      final viewAllButton = find.widgetWithText(TextButton, 'Xem tất cả');
+      final viewAllButton = find.widgetWithText(TextButton, 'Xem tất cả').first;
       await tester.ensureVisible(viewAllButton);
       await tester.pumpAndSettle();
       await tester.tap(viewAllButton);

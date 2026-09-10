@@ -75,7 +75,13 @@ abstract final class AppRoutes {
       '/app/personalization/reminders/:reminderId/edit';
   static const appProgress = '/app/progress';
   static const appSettings = '/app/settings';
+  static const appNotifications = '/app/notifications';
+  static const appArticles = '/app/articles';
+  static const appArticleDetailPattern = '/app/articles/:slug';
   static const appCommunity = '/app/community';
+  static const appCommunityThreadPattern = '/app/community/threads/:threadId';
+  static const appCommunityCreateThread = '/app/community/create-thread';
+  static const appChat = '/app/chat';
   static const appProfile = '/app/profile';
   static const appProfileEdit = '/app/profile/edit';
   static const appProfileChangePassword = '/app/profile/change-password';

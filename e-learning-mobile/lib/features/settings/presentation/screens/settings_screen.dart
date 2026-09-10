@@ -1,3 +1,4 @@
+import 'package:e_learning_mobile/core/network/cache_service.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/features/auth/data/auth_repository.dart';
 import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
@@ -194,7 +195,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               title: 'Xóa bộ nhớ đệm (Cache)',
               subtitle: _isClearingCache
                   ? 'Đang dọn dẹp...'
-                  : 'Giải phóng 120 MB dung lượng tạm',
+                  : 'Xóa dữ liệu tải trước & bộ nhớ tạm',
               bgColor: const Color(0xFFFEF3C7),
               iconColor: const Color(0xFFB45309),
               onTap: _clearCache,
@@ -369,11 +370,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _clearCache() async {
     setState(() => _isClearingCache = true);
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      await ref.read(cacheServiceProvider).clear();
+    } catch (_) {}
     if (mounted) {
       setState(() => _isClearingCache = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã xóa 120 MB bộ nhớ đệm thành công!')),
+        const SnackBar(content: Text('Đã dọn dẹp bộ nhớ đệm thành công!')),
       );
     }
   }

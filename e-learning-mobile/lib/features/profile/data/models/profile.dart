@@ -85,4 +85,34 @@ class Profile {
   final bool isTwoFactorEnabled;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  Profile copyWith({
+    String? id,
+    String? email,
+    String? fullName,
+    String? phone,
+    String? role,
+    String? status,
+    String? avatarUrl,
+    bool? isEmailVerified,
+    bool? isPhoneVerified,
+    bool? isTwoFactorEnabled,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Profile(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      fullName: fullName ?? this.fullName,
+      phone: phone ?? this.phone,
+      role: role ?? this.role,
+      status: status ?? this.status,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
+      isTwoFactorEnabled: isTwoFactorEnabled ?? this.isTwoFactorEnabled,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

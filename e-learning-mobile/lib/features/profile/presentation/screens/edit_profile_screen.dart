@@ -1,4 +1,5 @@
 import 'package:e_learning_mobile/features/profile/data/models/profile.dart';
+import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/edit_profile_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/edit_profile_state.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
@@ -10,9 +11,11 @@ import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_page.dart';
 import 'package:e_learning_mobile/shared/widgets/app_section_header.dart';
 import 'package:e_learning_mobile/shared/widgets/app_text_field.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -24,13 +27,49 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _fullNameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _picker = ImagePicker();
   bool _initialized = false;
+  bool _isUploadingAvatar = false;
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _phoneController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAndUploadAvatar(Profile profile) async {
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    setState(() => _isUploadingAvatar = true);
+    try {
+      final bytes = await picked.readAsBytes();
+      final url = await ref.read(profileRepositoryProvider).uploadAvatar(
+        bytes: bytes,
+        fileName: picked.name,
+      );
+      if (url.isNotEmpty && mounted) {
+        final updated = profile.copyWith(avatarUrl: url);
+        ref.read(profileControllerProvider.notifier).updateProfile(updated);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tải ảnh đại diện thành công. Bấm Lưu để hoàn tất.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi tải ảnh: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUploadingAvatar = false);
+    }
   }
 
   @override
@@ -71,6 +110,81 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Avatar Picker Pod
+          Center(
+            child: Stack(
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFEAEFE9),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: ClipOval(
+                    child: profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: profile.avatarUrl!,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (_, __, ___) => const Icon(
+                              Icons.person_rounded,
+                              size: 48,
+                              color: Color(0xFF0F5B38),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.person_rounded,
+                            size: 48,
+                            color: Color(0xFF0F5B38),
+                          ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: _isUploadingAvatar ? null : () => _pickAndUploadAvatar(profile),
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F5B38),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: _isUploadingAvatar
+                          ? const Padding(
+                              padding: EdgeInsets.all(6),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.camera_alt_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           const AppSectionHeader(
             title: 'Chỉnh sửa hồ sơ',
             subtitle: 'Bạn chỉ có thể cập nhật họ tên và số điện thoại.',

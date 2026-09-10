@@ -105,6 +105,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<WellnessUserPackage> WellnessUserPackages { get; set; }
     public DbSet<WellnessPackageLesson> WellnessPackageLessons { get; set; }
     public DbSet<WellnessDailyTask> WellnessDailyTasks { get; set; }
+    public DbSet<UserReminder> UserReminders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

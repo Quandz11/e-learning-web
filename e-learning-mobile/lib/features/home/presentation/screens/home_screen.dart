@@ -204,28 +204,29 @@ class _HomeSearchBar extends StatelessWidget {
         border: Border.all(
           color: isDark
               ? colorScheme.outlineVariant.withValues(alpha: 0.5)
-              : colorScheme.outlineVariant,
+              : const Color(0xFFEAEFE9),
+          width: 0.8,
         ),
         boxShadow: isDark
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 10,
-                  offset: const Offset(0, 3),
+                  offset: const Offset(0, 2),
                 ),
               ],
       ),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: 4,
+        vertical: 2,
       ),
       child: Row(
         children: [
           Icon(
             Icons.search_rounded,
             color: colorScheme.primary,
-            size: 22,
+            size: 20,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -233,9 +234,9 @@ class _HomeSearchBar extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Tìm khóa học, bài học...',
                 hintStyle: TextStyle(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w300,
                 ),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -244,6 +245,22 @@ class _HomeSearchBar extends StatelessWidget {
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
               onSubmitted: (val) => context.go(AppRoutes.appLearning),
+            ),
+          ),
+          InkWell(
+            onTap: () => context.go(AppRoutes.appLearning),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F5F2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.tune_rounded,
+                size: 16,
+                color: colorScheme.primary,
+              ),
             ),
           ),
         ],
@@ -330,9 +347,9 @@ class _EditorialBanner extends StatelessWidget {
                     'Kiến thức hôm nay cho một phiên bản tốt hơn của chính mình',
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w400,
                       fontSize: 14,
-                      height: 1.35,
+                      height: 1.4,
                       letterSpacing: -0.1,
                     ),
                   ),
@@ -441,6 +458,7 @@ class _HomeHeader extends StatelessWidget {
                 greeting,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w300,
                 ),
               ),
               Semantics(
@@ -448,7 +466,8 @@ class _HomeHeader extends StatelessWidget {
                 child: Text(
                   displayName ?? 'Mai Dung',
                   style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.3,
                   ),
                 ),
               ),
@@ -494,16 +513,56 @@ class _ContinueLearningSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(
               enrollment.courseTitle,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.2,
+                  ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Đã hoàn thành ${enrollment.progressPercentage} phần trăm',
-              semanticsLabel:
-                  'Tiến độ học tập, đã hoàn thành ${enrollment.progressPercentage} phần trăm',
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Đã hoàn thành ${enrollment.progressPercentage} phần trăm',
+                    semanticsLabel:
+                        'Tiến độ học tập, đã hoàn thành ${enrollment.progressPercentage} phần trăm',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w300,
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.mint,
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    border: Border.all(
+                      color: const Color(0xFFD3E6DC),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '${enrollment.progressPercentage}%',
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.xs),
-            LinearProgressIndicator(value: enrollment.progressPercentage / 100),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: enrollment.progressPercentage / 100,
+                minHeight: 6,
+                backgroundColor: const Color(0xFFEFF5F1),
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
             Align(
               alignment: Alignment.centerLeft,
@@ -530,21 +589,30 @@ class _QuickActionsSection extends StatelessWidget {
         label: 'Khóa học',
         icon: Icons.menu_book_rounded,
         route: AppRoutes.appLearning,
+        bgColor: Color(0xFFF0F7F2),
+        iconColor: Color(0xFF0F5B38),
       ),
       _QuickAction(
-        label: 'Cá nhân hoá',
-        icon: Icons.autorenew_rounded,
+        label: 'Cá nhân hóa',
+        icon: Icons.spa_outlined,
         route: AppRoutes.appPersonalization,
+        bgColor: Color(0xFFFFFBEB),
+        iconColor: Color(0xFFD97706),
+        badge: 'Mới',
       ),
       _QuickAction(
         label: 'Nhắc nhở',
         icon: Icons.notifications_none_rounded,
         route: AppRoutes.appPersonalizationReminders,
+        bgColor: Color(0xFFF5F3FF),
+        iconColor: Color(0xFF7C3AED),
       ),
       _QuickAction(
         label: 'Tiến độ',
         icon: Icons.insert_chart_outlined_rounded,
         route: AppRoutes.appProgress,
+        bgColor: Color(0xFFEFF6FF),
+        iconColor: Color(0xFF2563EB),
       ),
     ];
 
@@ -626,6 +694,17 @@ class _CategoriesSection extends StatelessWidget {
                   .map(
                     (category) => ActionChip(
                       label: Text(category.name),
+                      labelStyle: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 13,
+                      ),
+                      side: const BorderSide(
+                        color: Color(0xFFEAEFE9),
+                        width: 0.8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
                       onPressed: () => context.go(AppRoutes.appLearning),
                     ),
                   )
@@ -741,7 +820,13 @@ class _OptionalSectionWrapper extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.3,
+                    ),
+              ),
             ),
             if (trailing != null) trailing!,
           ],
@@ -758,11 +843,17 @@ class _QuickAction {
     required this.label,
     required this.icon,
     required this.route,
+    required this.bgColor,
+    required this.iconColor,
+    this.badge,
   });
 
   final String label;
   final IconData icon;
   final String route;
+  final Color bgColor;
+  final Color iconColor;
+  final String? badge;
 }
 
 class _QuickActionCard extends StatelessWidget {
@@ -772,7 +863,6 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Semantics(
@@ -781,40 +871,70 @@ class _QuickActionCard extends StatelessWidget {
       child: InkWell(
         onTap: () => context.go(action.route),
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFEAEFE9),
+              width: 0.8,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x04000000),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: AppColors.mint,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: colorScheme.primary.withValues(alpha: 0.18),
-                    width: 1.0,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withValues(alpha: 0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: action.bgColor,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
-                ),
-                child: Icon(action.icon, color: colorScheme.primary, size: 24),
+                    child: Icon(action.icon, color: action.iconColor, size: 20),
+                  ),
+                  if (action.badge != null)
+                    Positioned(
+                      top: -4,
+                      right: -6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F5B38),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                        child: Text(
+                          action.badge!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Text(
                 action.label,
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                   fontSize: 12,
+                  color: const Color(0xFF1A2520),
                 ),
               ),
             ],
@@ -857,7 +977,8 @@ class _CourseCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: -0.2,
                         ),
                   ),
                   if (course.instructorName != null) ...[
@@ -875,6 +996,7 @@ class _CourseCard extends StatelessWidget {
                             course.instructorName!,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w300,
                                 ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -885,12 +1007,18 @@ class _CourseCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: course.isFree
                           ? AppColors.mint
-                          : colorScheme.primaryContainer.withValues(alpha: 0.5),
+                          : colorScheme.primaryContainer.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(AppRadius.pill),
+                      border: Border.all(
+                        color: course.isFree
+                            ? const Color(0xFFD3E6DC)
+                            : colorScheme.primary.withValues(alpha: 0.2),
+                        width: 0.8,
+                      ),
                     ),
                     child: Text(
                       course.isFree
@@ -900,7 +1028,8 @@ class _CourseCard extends StatelessWidget {
                             color: course.isFree
                                 ? AppColors.primary
                                 : colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 11,
                           ),
                     ),
                   ),

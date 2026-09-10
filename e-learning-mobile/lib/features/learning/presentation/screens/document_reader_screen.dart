@@ -117,77 +117,130 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                 ),
                 onRetry: controller.load,
               )
-            : Column(
+              : Column(
                 children: [
-                  // 1. PDF Reader Toolbar Controls
-                  Container(
+                  // 1. Floating Pill PDF Reader Toolbar Controls
+                  Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
                       vertical: AppSpacing.xs,
                     ),
-                    color: AppColors.mint,
-                    child: Row(
-                      children: [
-                        Text(
-                          'Trang $_currentPage / $_totalPages',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                            fontSize: 13,
-                          ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                        border: Border.all(
+                          color: const Color(0xFFEAEFE9),
+                          width: 0.8,
                         ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.remove_circle_outline_rounded,
-                            size: 20,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.02),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
-                          onPressed: () {
-                            if (_zoomScale > 0.75) {
-                              final newZoom = _zoomScale - 0.25;
-                              setState(() => _zoomScale = newZoom);
-                              try {
-                                _pdfController.zoomLevel = newZoom;
-                              } catch (_) {}
-                            }
-                          },
-                        ),
-                        Text(
-                          '${(_zoomScale * 100).toInt()}%',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF5F1),
+                              borderRadius: BorderRadius.circular(AppRadius.pill),
+                            ),
+                            child: Text(
+                              'Trang $_currentPage / $_totalPages',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.primary,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.add_circle_outline_rounded,
-                            size: 20,
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.remove_circle_outline_rounded,
+                              size: 18,
+                              color: AppColors.textPrimary,
+                            ),
+                            onPressed: () {
+                              if (_zoomScale > 0.75) {
+                                final newZoom = _zoomScale - 0.25;
+                                setState(() => _zoomScale = newZoom);
+                                try {
+                                  _pdfController.zoomLevel = newZoom;
+                                } catch (_) {}
+                              }
+                            },
                           ),
-                          onPressed: () {
-                            if (_zoomScale < 3.0) {
-                              final newZoom = _zoomScale + 0.25;
-                              setState(() => _zoomScale = newZoom);
-                              try {
-                                _pdfController.zoomLevel = newZoom;
-                              } catch (_) {}
-                            }
-                          },
-                        ),
-                      ],
+                          Text(
+                            '${(_zoomScale * 100).toInt()}%',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 12,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.add_circle_outline_rounded,
+                              size: 18,
+                              color: AppColors.textPrimary,
+                            ),
+                            onPressed: () {
+                              if (_zoomScale < 3.0) {
+                                final newZoom = _zoomScale + 0.25;
+                                setState(() => _zoomScale = newZoom);
+                                try {
+                                  _pdfController.zoomLevel = newZoom;
+                                } catch (_) {}
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
-                  // 2. Document Reader Panel Canvas with explicit bounds
+                  // 2. Document Reader Panel Canvas with explicit bounds and sleek frame
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.md,
+                        0,
+                        AppSpacing.md,
+                        AppSpacing.sm,
+                      ),
                       child: Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(
                             maxWidth: AppSizes.contentMaxWidth,
                           ),
-                          child: DocumentReaderPanel(part: state.detail!.part),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFFEAEFE9),
+                                width: 0.8,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: DocumentReaderPanel(part: state.detail!.part),
+                          ),
                         ),
                       ),
                     ),
@@ -195,10 +248,15 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
 
                   // 3. Bottom Complete Action Bar
                   Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
                     decoration: const BoxDecoration(
-                      color: AppColors.surface,
-                      border: Border(top: BorderSide(color: AppColors.border)),
+                      color: Colors.white,
+                      border: Border(
+                        top: BorderSide(color: Color(0xFFEAEFE9), width: 0.8),
+                      ),
                     ),
                     child: SafeArea(
                       top: false,
@@ -214,16 +272,17 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                               ),
                             );
                           },
-                          icon: const Icon(Icons.check_circle_rounded),
+                          icon: const Icon(Icons.check_circle_rounded, size: 18),
                           label: const Text(
                             'Đánh dấu đã đọc hoàn thành',
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.md),
+                              borderRadius: BorderRadius.circular(AppRadius.pill),
                             ),
                           ),
                         ),

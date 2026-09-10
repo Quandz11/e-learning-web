@@ -4,7 +4,6 @@ import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_page.dart';
-import 'package:e_learning_mobile/shared/widgets/app_section_header.dart';
 import 'package:e_learning_mobile/shared/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,9 +46,67 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AppSectionHeader(
-            title: 'Đổi mật khẩu',
-            subtitle: 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F3FF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.lock_reset_rounded,
+                    color: Color(0xFF7C3AED),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Đổi mật khẩu',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: -0.3,
+                          color: Color(0xFF1A2520),
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Mật khẩu mới phải có ít nhất 8 ký tự.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: Color(0xFF6B7280),
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           if (state.generalMessage != null &&

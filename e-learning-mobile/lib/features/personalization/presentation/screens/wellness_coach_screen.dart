@@ -1,6 +1,5 @@
 import 'package:e_learning_mobile/features/personalization/data/models/wellness_models.dart';
 import 'package:e_learning_mobile/features/personalization/presentation/controllers/wellness_controller.dart';
-import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +13,8 @@ class WellnessCoachScreen extends ConsumerStatefulWidget {
       _WellnessCoachScreenState();
 }
 
-class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
+  int _activeTabIndex = 0; // 0: Tư vấn Thể trạng, 1: Thực đơn Dinh dưỡng
 
   // Mood Coach State
   int _selectedMood = 3;
@@ -28,15 +26,15 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen>
       TextEditingController(text: 'Ức gà, Rau xanh, Cà rốt, Trứng, Gạo lứt');
   String _dietaryPreference = 'Eat Clean';
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
+  final List<String> _quickPrompts = const [
+    'Cách giảm đói ở giờ thứ 14?',
+    'Uống gì khi nhịn không bị phá vỡ?',
+    'Cách giảm mệt mỏi buổi chiều?',
+    'Tập luyện khi bụng đói có an toàn không?',
+  ];
 
   @override
   void dispose() {
-    _tabController.dispose();
     _moodPromptController.dispose();
     _ingredientsController.dispose();
     super.dispose();
@@ -47,96 +45,179 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen>
     final state = ref.watch(wellnessControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF9FBF9),
       appBar: AppBar(
         title: const Text(
-          'Trợ lý AI Wellness',
+          'Trợ lý Sức khỏe',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w400,
+            fontSize: 18,
+            letterSpacing: -0.3,
+            color: Color(0xFF1A2520),
           ),
         ),
         elevation: 0,
-        backgroundColor: AppColors.background,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
-          indicatorWeight: 3,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.psychology_rounded),
-              text: 'Tư vấn Thể trạng',
-            ),
-            Tab(
-              icon: Icon(Icons.restaurant_menu_rounded),
-              text: 'Thực đơn Eat Clean',
-            ),
-          ],
-        ),
+        backgroundColor: const Color(0xFFF9FBF9),
+        iconTheme: const IconThemeData(color: Color(0xFF1A2520)),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          _buildMoodCoachTab(context, state),
-          _buildMealPlannerTab(context, state),
+          // iOS-style Segmented Floating Pill Switcher
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFEFEF),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildSegmentButton(
+                      label: 'Tư vấn Thể trạng',
+                      icon: Icons.psychology_outlined,
+                      isActive: _activeTabIndex == 0,
+                      onTap: () => setState(() => _activeTabIndex = 0),
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildSegmentButton(
+                      label: 'Thực đơn Dinh dưỡng',
+                      icon: Icons.restaurant_menu_outlined,
+                      isActive: _activeTabIndex == 1,
+                      onTap: () => setState(() => _activeTabIndex = 1),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Tab View Content
+          Expanded(
+            child: _activeTabIndex == 0
+                ? _buildMoodCoachView(context, state)
+                : _buildMealPlannerView(context, state),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildMoodCoachTab(BuildContext context, WellnessState state) {
-    final theme = Theme.of(context);
+  Widget _buildSegmentButton({
+    required String label,
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isActive ? const Color(0xFF0F5B38) : const Color(0xFF6B7280),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
+                color: isActive ? const Color(0xFF1A2520) : const Color(0xFF6B7280),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
+  Widget _buildMoodCoachView(BuildContext context, WellnessState state) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner card
+          // Zen Intro Card
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary,
-                  AppColors.primary.withValues(alpha: 0.8),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
-                const CircleAvatar(
-                  radius: 26,
-                  backgroundColor: Colors.white24,
-                  child: Icon(
-                    Icons.auto_awesome_rounded,
-                    color: Colors.white,
-                    size: 28,
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.spa_outlined,
+                    color: Color(0xFF0F5B38),
+                    size: 22,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Huấn luyện viên Tâm trí & Năng lượng',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                        'Phục hồi Năng lượng & Cảm xúc',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF1A2520),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 2),
                       Text(
-                        'Chia sẻ cảm xúc hiện tại để nhận tư vấn phục hồi cá nhân hóa từ AI.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
+                        'Lắng nghe cơ thể bạn trong từng chu kỳ nhịn ăn để nhận gợi ý điều hòa tốt nhất.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: Color(0xFF6B7280),
+                          height: 1.4,
                         ),
                       ),
                     ],
@@ -147,66 +228,163 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen>
           ),
           const SizedBox(height: AppSpacing.lg),
 
-          // Mood selector
-          Text(
-            'Tâm trạng hiện tại của bạn?',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+          // Mood Selector: Circular Pastel Discs
+          const Text(
+            'Tâm trạng hiện tại',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A2520),
+              letterSpacing: -0.2,
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: AppSpacing.sm),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildEmojiOption(1, '😩', 'Mệt mỏi'),
-              _buildEmojiOption(2, '😟', 'Căng thẳng'),
-              _buildEmojiOption(3, '😐', 'Bình thường'),
-              _buildEmojiOption(4, '😊', 'Vui vẻ'),
-              _buildEmojiOption(5, '🤩', 'Năng lượng'),
+              _buildCircularMoodDisc(1, '😩', 'Mệt'),
+              _buildCircularMoodDisc(2, '😟', 'Căng'),
+              _buildCircularMoodDisc(3, '😐', 'Ổn'),
+              _buildCircularMoodDisc(4, '😊', 'Tươi'),
+              _buildCircularMoodDisc(5, '✨', 'Khỏe'),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
 
-          // Energy selector
-          Text(
-            'Mức năng lượng cơ thể (1 - 5):',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+          // Minimal Energy Stepper (1 to 5)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Mức năng lượng',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1A2520),
+                ),
+              ),
+              Text(
+                _getEnergyLabel(_selectedEnergy),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF0F5B38),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(5, (index) {
+                final level = index + 1;
+                final isSelected = _selectedEnergy == level;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedEnergy = level),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    width: 48,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFF0F5B38)
+                          : const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$level',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight:
+                            isSelected ? FontWeight.w500 : FontWeight.w300,
+                        color: isSelected ? Colors.white : const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Quick Prompt Chips
+          const Text(
+            'Câu hỏi gợi ý nhanh',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A2520),
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          Slider(
-            value: _selectedEnergy.toDouble(),
-            min: 1,
-            max: 5,
-            divisions: 4,
-            activeColor: AppColors.primary,
-            inactiveColor: AppColors.mint,
-            label: 'Mức $_selectedEnergy',
-            onChanged: (val) {
-              setState(() {
-                _selectedEnergy = val.toInt();
-              });
-            },
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _quickPrompts.map((prompt) {
+              return ActionChip(
+                label: Text(
+                  prompt,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w300,
+                    color: Color(0xFF374151),
+                  ),
+                ),
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: const BorderSide(
+                    color: Color(0xFFEAEFE9),
+                    width: 0.8,
+                  ),
+                ),
+                onPressed: () {
+                  _moodPromptController.text = prompt;
+                },
+              );
+            }).toList(),
           ),
           const SizedBox(height: AppSpacing.md),
 
           // Note prompt textfield
-          TextField(
-            controller: _moodPromptController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText:
-                  'Ví dụ: Hôm nay tôi hơi đau đầu nhẹ và thiếu tập trung sau khi nhịn ăn 14 tiếng...',
-              labelText: 'Ghi chú thêm (không bắt buộc)',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: TextField(
+              controller: _moodPromptController,
+              maxLines: 3,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF1A2520),
+              ),
+              decoration: const InputDecoration(
+                hintText:
+                    'Nhập cảm nhận hoặc thắc mắc (ví dụ: đang đói ở giờ thứ 15, tim đập nhẹ...)',
+                hintStyle: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w300,
+                  color: Color(0xFF9CA3AF),
+                ),
+                border: InputBorder.none,
               ),
             ),
           ),
@@ -216,7 +394,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen>
           SizedBox(
             width: double.infinity,
             height: 48,
-            child: ElevatedButton.icon(
+            child: ElevatedButton(
               onPressed: state.isCoachLoading
                   ? null
                   : () {
@@ -233,12 +411,14 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen>
                           );
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: const Color(0xFF0F5B38),
+                foregroundColor: Colors.white,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
               ),
-              icon: state.isCoachLoading
+              child: state.isCoachLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -247,21 +427,486 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen>
                         color: Colors.white,
                       ),
                     )
-                  : const Icon(Icons.send_rounded, color: Colors.white),
-              label: Text(
-                state.isCoachLoading ? 'Đang phân tích...' : 'Gửi cho AI Coach',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                  : const Text(
+                      'Nhận lời khuyên từ chuyên gia',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
 
-          // Coach Reply Section
+          // Editorial AI Reply Card
           if (state.lastCoachReply != null)
-            _buildCoachReplyCard(context, state.lastCoachReply!),
+            _buildEditorialCoachReplyCard(context, state.lastCoachReply!),
+          const SizedBox(height: AppSpacing.xl),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCircularMoodDisc(int score, String emoji, String label) {
+    final isSelected = _selectedMood == score;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedMood = score),
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected
+                  ? const Color(0xFFE8F5E9)
+                  : Colors.white,
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF0F5B38)
+                    : const Color(0xFFEAEFE9),
+                width: isSelected ? 1.5 : 0.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              emoji,
+              style: const TextStyle(fontSize: 24),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w300,
+              color: isSelected
+                  ? const Color(0xFF0F5B38)
+                  : const Color(0xFF6B7280),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditorialCoachReplyCard(
+    BuildContext context,
+    WellnessCoachReply reply,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Vertical Forest Jade Accent Stripe
+            Container(
+              width: 4,
+              color: const Color(0xFF0F5B38),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'Chuyên gia Wellness',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF0F5B38),
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        const Text(
+                          'Vừa phản hồi',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w300,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      reply.reply,
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w300,
+                        height: 1.6,
+                        color: Color(0xFF1A2520),
+                        letterSpacing: -0.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMealPlannerView(BuildContext context, WellnessState state) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Bento Info
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.restaurant_outlined,
+                    color: Color(0xFF1A2520),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Cá nhân hóa Thực đơn',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF1A2520),
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Tận dụng nguyên liệu trong tủ lạnh để tối ưu bữa ăn không gây tích mỡ.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: Color(0xFF6B7280),
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Ingredients Input
+          const Text(
+            'Nguyên liệu bạn đang có',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A2520),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: TextField(
+              controller: _ingredientsController,
+              maxLines: 2,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF1A2520),
+              ),
+              decoration: const InputDecoration(
+                hintText: 'Nhập nguyên liệu, phân cách bằng dấu phẩy...',
+                hintStyle: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w300,
+                  color: Color(0xFF9CA3AF),
+                ),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Dietary preference chips
+          const Text(
+            'Mục tiêu / Phong cách ăn',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A2520),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: ['Eat Clean', 'Low Carb', 'Keto', 'Chay thanh lọc']
+                .map((pref) {
+              final isSelected = _dietaryPreference == pref;
+              return ChoiceChip(
+                label: Text(pref),
+                selected: isSelected,
+                selectedColor: const Color(0xFF0F5B38),
+                backgroundColor: Colors.white,
+                labelStyle: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.w300,
+                  color: isSelected ? Colors.white : const Color(0xFF374151),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: isSelected
+                        ? const Color(0xFF0F5B38)
+                        : const Color(0xFFEAEFE9),
+                    width: 0.8,
+                  ),
+                ),
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() => _dietaryPreference = pref);
+                  }
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Generate Button
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: state.isCoachLoading
+                  ? null
+                  : () {
+                      final rawIngs = _ingredientsController.text
+                          .split(',')
+                          .map((e) => e.trim())
+                          .where((e) => e.isNotEmpty)
+                          .toList();
+
+                      ref
+                          .read(wellnessControllerProvider.notifier)
+                          .generateMeal(
+                            WellnessCoachMealRequest(
+                              ingredients: rawIngs,
+                              dietaryPreference: _dietaryPreference,
+                              goal: 'Eat Clean',
+                            ),
+                          );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F5B38),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+              ),
+              child: state.isCoachLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Tạo gợi ý thực đơn',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // Meal Suggestion Display
+          if (state.lastMealSuggestion != null)
+            _buildEditorialMealCard(context, state.lastMealSuggestion!),
+          const SizedBox(height: AppSpacing.xl),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditorialMealCard(
+    BuildContext context,
+    WellnessMealSuggestion suggestion,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Thực đơn đề xuất',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1A2520),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${suggestion.servings} khẩu phần',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF0F5B38),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const Divider(
+            color: Color(0xFFEAEFE9),
+            thickness: 0.8,
+            height: 1,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            suggestion.menu,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w300,
+              color: Color(0xFF1A2520),
+              height: 1.6,
+            ),
+          ),
+          if (suggestion.nutritionNotes.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FBF9),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(
+                  color: const Color(0xFFEAEFE9),
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: Color(0xFF0F5B38),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Lưu ý: ${suggestion.nutritionNotes}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                        color: Color(0xFF586B60),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -301,313 +946,21 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen>
     }
   }
 
-  Widget _buildEmojiOption(int score, String emoji, String label) {
-    final isSelected = _selectedMood == score;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedMood = score;
-        });
-      },
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.mint : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 26)),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCoachReplyCard(BuildContext context, WellnessCoachReply reply) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.lightbulb_rounded,
-                color: Colors.amber,
-                size: 24,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                'Tư vấn từ AI Coach:',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const Divider(height: AppSpacing.lg),
-          Text(
-            reply.reply,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMealPlannerTab(BuildContext context, WellnessState state) {
-    final theme = Theme.of(context);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top Banner
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.mint,
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.restaurant_rounded,
-                  color: AppColors.primary,
-                  size: 32,
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Thiết Kế Thực Đơn Dinh Dưỡng',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: AppColors.primaryDark,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Nhập nguyên liệu sẵn có để AI lập thực đơn dinh dưỡng Eat Clean.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Ingredients Input
-          TextField(
-            controller: _ingredientsController,
-            maxLines: 2,
-            decoration: InputDecoration(
-              labelText: 'Danh sách nguyên liệu sẵn có',
-              hintText: 'Phân cách bằng dấu phẩy...',
-              prefixIcon: const Icon(Icons.shopping_bag_outlined),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-
-          // Dietary preference dropdown
-          DropdownButtonFormField<String>(
-            value: _dietaryPreference,
-            decoration: InputDecoration(
-              labelText: 'Chế độ ăn mong muốn',
-              prefixIcon: const Icon(Icons.set_meal_rounded),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-            ),
-            items: ['Eat Clean', 'Low Carb', 'Keto', 'Chay thanh lọc']
-                .map((pref) => DropdownMenuItem(value: pref, child: Text(pref)))
-                .toList(),
-            onChanged: (val) {
-              if (val != null) {
-                setState(() {
-                  _dietaryPreference = val;
-                });
-              }
-            },
-          ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Generate Button
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: state.isCoachLoading
-                  ? null
-                  : () {
-                      final rawIngs = _ingredientsController.text
-                          .split(',')
-                          .map((e) => e.trim())
-                          .where((e) => e.isNotEmpty)
-                          .toList();
-
-                      ref
-                          .read(wellnessControllerProvider.notifier)
-                          .generateMeal(
-                            WellnessCoachMealRequest(
-                              ingredients: rawIngs,
-                              dietaryPreference: _dietaryPreference,
-                              goal: 'Eat Clean',
-                            ),
-                          );
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-              ),
-              icon: state.isCoachLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.auto_awesome_rounded, color: Colors.white),
-              label: Text(
-                state.isCoachLoading ? 'Đang lập thực đơn...' : 'Tạo Thực Đơn AI',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Meal Suggestion Display
-          if (state.lastMealSuggestion != null)
-            _buildMealSuggestionCard(context, state.lastMealSuggestion!),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMealSuggestionCard(
-    BuildContext context,
-    WellnessMealSuggestion suggestion,
-  ) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Gợi ý Thực đơn trong ngày',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.mint,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '${suggestion.servings} Khẩu phần',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const Divider(height: AppSpacing.lg),
-          Text(
-            suggestion.menu,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
-              height: 1.5,
-            ),
-          ),
-          if (suggestion.nutritionNotes.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: AppColors.mint,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: Text(
-                'Lưu ý dinh dưỡng: ${suggestion.nutritionNotes}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primaryDark,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
+  String _getEnergyLabel(int level) {
+    switch (level) {
+      case 1:
+        return 'Cạn kiệt';
+      case 2:
+        return 'Uể oải';
+      case 3:
+        return 'Trung bình';
+      case 4:
+        return 'Tỉnh táo';
+      case 5:
+        return 'Đỉnh cao';
+      default:
+        return 'Bình thường';
+    }
   }
 }
+

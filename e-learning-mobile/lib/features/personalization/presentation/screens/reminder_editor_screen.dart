@@ -1,6 +1,5 @@
 import 'package:e_learning_mobile/features/personalization/data/personalization_repository.dart';
 import 'package:e_learning_mobile/features/personalization/domain/reminder_model.dart';
-import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
@@ -133,62 +132,78 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isEditing = widget.reminderId != null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF9FBF9),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textPrimary,
-            size: 20,
+            color: Color(0xFF1A2520),
+            size: 18,
           ),
           onPressed: () => context.pop(),
         ),
         title: Text(
           isEditing ? 'Chỉnh sửa nhắc nhở' : 'Tạo nhắc nhở mới',
           style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w400,
+            fontSize: 18,
+            letterSpacing: -0.3,
+            color: Color(0xFF1A2520),
           ),
         ),
         elevation: 0,
-        backgroundColor: AppColors.background,
+        backgroundColor: const Color(0xFFF9FBF9),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Loại nhắc nhở',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1A2520),
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Wrap(
-                spacing: AppSpacing.xs,
-                runSpacing: AppSpacing.xs,
+                spacing: 8,
+                runSpacing: 8,
                 children: ReminderType.values.map((type) {
                   final selected = type == _selectedType;
                   return ChoiceChip(
                     label: Text(type.displayName),
                     avatar: Icon(
                       type.icon,
-                      size: 18,
-                      color: selected ? Colors.white : AppColors.primary,
+                      size: 16,
+                      color: selected ? Colors.white : const Color(0xFF0F5B38),
                     ),
                     selected: selected,
-                    selectedColor: AppColors.primary,
+                    selectedColor: const Color(0xFF0F5B38),
+                    backgroundColor: Colors.white,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : AppColors.textPrimary,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      color: selected ? Colors.white : const Color(0xFF1A2520),
+                      fontWeight: selected ? FontWeight.w500 : FontWeight.w300,
+                      fontSize: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: selected
+                            ? const Color(0xFF0F5B38)
+                            : const Color(0xFFEAEFE9),
+                        width: 0.8,
+                      ),
                     ),
                     onSelected: (val) {
                       if (val) {
@@ -205,71 +220,175 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Tên nhắc nhở',
-                  hintText: 'VD: Uống 1 ly nước ấm',
-                  border: OutlineInputBorder(),
+              // Title input
+              const Text(
+                'Tên nhắc nhở',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1A2520),
                 ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Vui lòng nhập tên nhắc nhở';
-                  }
-                  return null;
-                },
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(
+                    color: const Color(0xFFEAEFE9),
+                    width: 0.8,
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                child: TextFormField(
+                  controller: _titleController,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF1A2520),
+                  ),
+                  decoration: const InputDecoration(
+                    hintText: 'VD: Uống 1 ly nước ấm',
+                    hintStyle: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w300,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                    border: InputBorder.none,
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Vui lòng nhập tên nhắc nhở';
+                    }
+                    return null;
+                  },
+                ),
               ),
               const SizedBox(height: AppSpacing.md),
 
-              TextFormField(
-                controller: _messageController,
-                decoration: const InputDecoration(
-                  labelText: 'Nội dung lời nhắn',
-                  hintText: 'VD: Đã đến lúc tiếp nước cho cơ thể rồi!',
-                  border: OutlineInputBorder(),
+              // Message input
+              const Text(
+                'Nội dung lời nhắn',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1A2520),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  border: Border.all(
+                    color: const Color(0xFFEAEFE9),
+                    width: 0.8,
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                child: TextFormField(
+                  controller: _messageController,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF1A2520),
+                  ),
+                  decoration: const InputDecoration(
+                    hintText: 'VD: Đã đến lúc tiếp nước cho cơ thể rồi!',
+                    hintStyle: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w300,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                    border: InputBorder.none,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              Text(
+              // Time picker section
+              const Text(
                 'Khung giờ nhắc nhở',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1A2520),
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _selectTime(isStart: true),
-                      icon: const Icon(
-                        Icons.access_time_rounded,
-                        color: AppColors.primary,
-                      ),
-                      label: Text(
-                        'Từ: ${_startTime.format(context)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                    child: GestureDetector(
+                      onTap: () => _selectTime(isStart: true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(
+                            color: const Color(0xFFEAEFE9),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Từ: ${_startTime.format(context)}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w300,
+                                color: Color(0xFF1A2520),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.access_time_rounded,
+                              size: 16,
+                              color: Color(0xFF0F5B38),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _selectTime(isStart: false),
-                      icon: const Icon(
-                        Icons.access_time_rounded,
-                        color: AppColors.primary,
-                      ),
-                      label: Text(
-                        'Đến: ${_endTime.format(context)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                    child: GestureDetector(
+                      onTap: () => _selectTime(isStart: false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(
+                            color: const Color(0xFFEAEFE9),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Đến: ${_endTime.format(context)}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w300,
+                                color: Color(0xFF1A2520),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.access_time_rounded,
+                              size: 16,
+                              color: Color(0xFF0F5B38),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -278,33 +397,62 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              SwitchListTile.adaptive(
-                title: const Text(
-                  'Âm thanh thông báo',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+              // Switches card
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(
+                    color: const Color(0xFFEAEFE9),
+                    width: 0.8,
+                  ),
                 ),
-                value: _soundEnabled,
-                activeColor: AppColors.primary,
-                onChanged: (val) => setState(() => _soundEnabled = val),
-              ),
-              SwitchListTile.adaptive(
-                title: const Text(
-                  'Rung thiết bị',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                child: Column(
+                  children: [
+                    SwitchListTile.adaptive(
+                      title: const Text(
+                        'Âm thanh thông báo',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF1A2520),
+                        ),
+                      ),
+                      value: _soundEnabled,
+                      activeColor: const Color(0xFF0F5B38),
+                      onChanged: (val) => setState(() => _soundEnabled = val),
+                    ),
+                    const Divider(
+                      color: Color(0xFFEAEFE9),
+                      thickness: 0.8,
+                      height: 1,
+                    ),
+                    SwitchListTile.adaptive(
+                      title: const Text(
+                        'Rung thiết bị',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF1A2520),
+                        ),
+                      ),
+                      value: _vibrationEnabled,
+                      activeColor: const Color(0xFF0F5B38),
+                      onChanged: (val) => setState(() => _vibrationEnabled = val),
+                    ),
+                  ],
                 ),
-                value: _vibrationEnabled,
-                activeColor: AppColors.primary,
-                onChanged: (val) => setState(() => _vibrationEnabled = val),
               ),
               const SizedBox(height: AppSpacing.xl),
 
+              // Save Button
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 48,
                 child: ElevatedButton(
                   onPressed: _save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: const Color(0xFF0F5B38),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -314,12 +462,13 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                   child: Text(
                     isEditing ? 'Lưu thay đổi' : 'Lưu nhắc nhở',
                     style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
                     ),
                   ),
                 ),
               ),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         ),
@@ -327,3 +476,4 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
     );
   }
 }
+

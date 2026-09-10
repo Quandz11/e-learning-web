@@ -3,6 +3,7 @@ import 'package:e_learning_mobile/features/learning/data/models/learning_models.
 import 'package:e_learning_mobile/features/learning/presentation/controllers/lesson_controller.dart';
 import 'package:e_learning_mobile/features/learning/presentation/controllers/lesson_state.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
+import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
@@ -177,35 +178,154 @@ class _LessonHeader extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final part = detail.part;
     final progress = detail.partProgress;
-    return AppCard(
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md + 2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x04000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(detail.course.title, style: textTheme.labelLarge),
-          const SizedBox(height: AppSpacing.xs),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F7F2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.spa_outlined,
+                  size: 13,
+                  color: Color(0xFF0F5B38),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  detail.course.title,
+                  style: textTheme.labelLarge?.copyWith(
+                    color: const Color(0xFF5A6E63),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           Semantics(
             header: true,
-            child: Text(part.title, style: textTheme.headlineSmall),
+            child: Text(
+              part.title,
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 20,
+                letterSpacing: -0.4,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
-              Chip(label: Text(_typeLabel(part))),
+              Chip(
+                label: Text(_typeLabel(part)),
+                backgroundColor: const Color(0xFFF0F7F2),
+                side: const BorderSide(color: Color(0xFFD1E7DD), width: 0.8),
+                labelStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF0F5B38),
+                ),
+              ),
               if (part.videoDuration > 0)
-                Chip(label: Text(_durationLabel(part.videoDuration))),
-              if (part.isPreview) const Chip(label: Text('Xem thử')),
+                Chip(
+                  label: Text(_durationLabel(part.videoDuration)),
+                  backgroundColor: const Color(0xFFEFF6FF),
+                  side: const BorderSide(color: Color(0xFFBFDBFE), width: 0.8),
+                  labelStyle: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF2563EB),
+                  ),
+                ),
+              if (part.isPreview)
+                const Chip(
+                  label: Text('Xem thử'),
+                  backgroundColor: Color(0xFFFFFBEB),
+                  side: BorderSide(color: Color(0xFFFDE68A), width: 0.8),
+                  labelStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFFD97706),
+                  ),
+                ),
               if (progress?.isCompleted == true)
-                const Chip(label: Text('Đã hoàn thành')),
+                const Chip(
+                  label: Text('Đã hoàn thành'),
+                  backgroundColor: Color(0xFFF0FDF4),
+                  side: BorderSide(color: Color(0xFFBBF7D0), width: 0.8),
+                  labelStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF16A34A),
+                  ),
+                ),
             ],
           ),
           if (progress != null) ...[
             const SizedBox(height: AppSpacing.md),
-            Text(
-              progress.isCompleted
-                  ? 'Bạn đã hoàn thành nội dung này.'
-                  : 'Thời lượng đã xem: ${progress.watchedDuration} giây',
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FBF9),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: const Color(0xFFEAEFE9),
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    progress.isCompleted
+                        ? Icons.check_circle_rounded
+                        : Icons.schedule_rounded,
+                    size: 14,
+                    color: progress.isCompleted
+                        ? const Color(0xFF16A34A)
+                        : const Color(0xFF8E9E94),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      progress.isCompleted
+                          ? 'Bạn đã hoàn thành nội dung này.'
+                          : 'Thời lượng đã xem: ${progress.watchedDuration} giây',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                        color: Color(0xFF5A6E63),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
@@ -223,12 +343,36 @@ class _LessonBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final part = detail.part;
     final content = part.content;
-    return AppCard(
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x04000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (content != null && stripHtml(content).isNotEmpty) ...[
-            HtmlWidget(content),
+            HtmlWidget(
+              content,
+              textStyle: const TextStyle(
+                fontSize: 14,
+                height: 1.6,
+                color: Color(0xFF334138),
+                fontWeight: FontWeight.w300,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
           ],
           if (part.isVideo) _OpenMediaButton(detail: detail),
@@ -236,7 +380,14 @@ class _LessonBody extends StatelessWidget {
           if (!part.isVideo &&
               !part.isDocument &&
               (content == null || stripHtml(content).isEmpty))
-            const Text('Nội dung này chưa được hỗ trợ trên ứng dụng.'),
+            const Text(
+              'Nội dung này chưa được hỗ trợ trên ứng dụng.',
+              style: TextStyle(
+                color: Color(0xFF8E9E94),
+                fontWeight: FontWeight.w300,
+                fontSize: 13,
+              ),
+            ),
           const SizedBox(height: AppSpacing.md),
           _LessonNavigation(detail: detail),
         ],

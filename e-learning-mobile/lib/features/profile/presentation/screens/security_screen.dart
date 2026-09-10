@@ -51,12 +51,74 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                 : 'Bật xác thực hai lớp để tăng cường bảo mật.',
           ),
           const SizedBox(height: AppSpacing.lg),
-          AppCard(
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+            ),
             child: Row(
               children: [
-                const Icon(Icons.security_outlined),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(child: Text(isEnabled ? 'Đang bật' : 'Đang tắt')),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: isEnabled
+                        ? const Color(0xFFF0FDF4)
+                        : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    isEnabled
+                        ? Icons.verified_user_rounded
+                        : Icons.security_outlined,
+                    color: isEnabled
+                        ? const Color(0xFF16A34A)
+                        : const Color(0xFF64748B),
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Trạng thái bảo vệ',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w300,
+                          color: Color(0xFF8E9E94),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isEnabled ? 'Đang bật' : 'Đang tắt',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: isEnabled
+                              ? const Color(0xFF16A34A)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isEnabled
+                        ? const Color(0xFF16A34A)
+                        : const Color(0xFF9EABA3),
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ],
             ),
           ),

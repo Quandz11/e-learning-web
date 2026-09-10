@@ -132,9 +132,67 @@ class _LearningContentState extends State<_LearningContent> {
             onRetry: widget.onSectionRetry,
           ),
         ],
-        const SizedBox(height: AppSpacing.md),
+        // 1. Bento Learning Overview Strip (3 metrics like Personalize)
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFFEAEFE9),
+              width: 0.8,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x04000000),
+                blurRadius: 12,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildBentoMetricCol(
+                  label: 'Đang học',
+                  value: '${allEnrollments.where((e) => !e.isCompleted).length}',
+                  unit: 'khóa',
+                  icon: Icons.auto_stories_outlined,
+                  color: const Color(0xFF0F5B38),
+                  bgColor: const Color(0xFFF0F7F2),
+                ),
+              ),
+              Container(height: 36, width: 0.8, color: const Color(0xFFEAEFE9)),
+              Expanded(
+                child: _buildBentoMetricCol(
+                  label: 'Hoàn thành',
+                  value: '${allEnrollments.where((e) => e.isCompleted).length}',
+                  unit: 'khóa',
+                  icon: Icons.verified_outlined,
+                  color: const Color(0xFF108A55),
+                  bgColor: const Color(0xFFEDF7F1),
+                ),
+              ),
+              Container(height: 36, width: 0.8, color: const Color(0xFFEAEFE9)),
+              Expanded(
+                child: _buildBentoMetricCol(
+                  label: 'Hiện có',
+                  value: '${widget.state.courses.length}',
+                  unit: 'khóa',
+                  icon: Icons.explore_outlined,
+                  color: const Color(0xFF2563EB),
+                  bgColor: const Color(0xFFEFF6FF),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
 
-        // Status Filter Chips
+        // 2. Status Filter Chips
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -177,22 +235,21 @@ class _LearningContentState extends State<_LearningContent> {
       label: Text(label),
       selected: selected,
       selectedColor: AppColors.primary,
-      backgroundColor: colorScheme.surface,
-      elevation: selected ? 2 : 0,
-      shadowColor: AppColors.primary.withValues(alpha: 0.2),
+      backgroundColor: Colors.white,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.pill),
         side: BorderSide(
           color: selected
               ? AppColors.primary
-              : colorScheme.outlineVariant,
-          width: 1.0,
+              : const Color(0xFFEAEFE9),
+          width: 0.8,
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       labelStyle: TextStyle(
         color: selected ? Colors.white : colorScheme.onSurfaceVariant,
-        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 13,
       ),
       onSelected: (val) {
@@ -202,6 +259,69 @@ class _LearningContentState extends State<_LearningContent> {
           });
         }
       },
+    );
+  }
+
+  Widget _buildBentoMetricCol({
+    required String label,
+    required String value,
+    required String unit,
+    required IconData icon,
+    required Color color,
+    required Color bgColor,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(7),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 16, color: color),
+        ),
+        const SizedBox(height: 6),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1A2520),
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Text(
+                unit,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w300,
+                  color: Color(0xFF8E9E94),
+                ),
+              ),
+            ],
+          ),
+        ),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w300,
+              color: Color(0xFF586B60),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -222,7 +342,7 @@ class _LearningHeader extends StatelessWidget {
           child: Text(
             'Khóa học',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, letterSpacing: -0.3),
           ),
         ),
         const SizedBox(width: 48),
@@ -386,26 +506,34 @@ class _EnrollmentCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.2,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
-                      vertical: 2,
+                      vertical: 3,
                     ),
                     decoration: BoxDecoration(
                       color: isDone
-                          ? AppColors.mint
-                          : AppColors.primaryLight.withValues(alpha: 0.7),
+                          ? const Color(0xFFF0FDF4)
+                          : const Color(0xFFF0F7F2),
                       borderRadius: BorderRadius.circular(AppRadius.pill),
+                      border: Border.all(
+                        color: isDone
+                            ? const Color(0xFFBBF7D0)
+                            : const Color(0xFFD1E7DD),
+                        width: 0.8,
+                      ),
                     ),
                     child: Text(
                       _enrollmentStatusLabel(enrollment),
                       style: textTheme.labelSmall?.copyWith(
-                        color: isDone ? AppColors.success : AppColors.primary,
-                        fontWeight: FontWeight.w700,
+                        color: isDone ? const Color(0xFF16A34A) : AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -415,18 +543,19 @@ class _EnrollmentCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.access_time_rounded,
+                        Icons.schedule_rounded,
                         size: 13,
-                        color: colorScheme.onSurfaceVariant,
+                        color: const Color(0xFF8E9E94),
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          'Truy cập: ${_dateFormatter.format(enrollment.lastAccessedAt.toLocal())}',
+                          'Gần nhất: ${_dateFormatter.format(enrollment.lastAccessedAt.toLocal())}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                            color: const Color(0xFF6B7E74),
+                            fontWeight: FontWeight.w300,
                             fontSize: 11,
                           ),
                         ),
@@ -489,7 +618,8 @@ class _LearningCourseCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.2,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
@@ -497,6 +627,7 @@ class _LearningCourseCard extends StatelessWidget {
                     '$lessonCount bài học',
                     style: textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
                 ],
@@ -583,7 +714,13 @@ class _SectionWrapper extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.3,
+              ),
+        ),
         const SizedBox(height: AppSpacing.md),
         child,
       ],

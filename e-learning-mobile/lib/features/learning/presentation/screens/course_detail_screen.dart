@@ -4,7 +4,7 @@ import 'package:e_learning_mobile/features/learning/data/models/learning_models.
 import 'package:e_learning_mobile/features/learning/presentation/controllers/course_detail_controller.dart';
 import 'package:e_learning_mobile/features/learning/presentation/controllers/course_detail_state.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
-import 'package:e_learning_mobile/shared/theme/app_radius.dart';
+import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
@@ -165,46 +165,97 @@ class _CourseHeroState extends State<_CourseHero> {
     final url = widget.course.thumbnailUrl;
     return Stack(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: url == null
-                ? _ImageFallback(label: widget.course.title)
-                : CachedNetworkImage(
-                    imageUrl: url,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => const AppSkeleton(height: 180),
-                    errorWidget: (_, __, ___) =>
-                        _ImageFallback(label: widget.course.title),
-                    fadeInDuration: Duration.zero,
-                  ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFFEAEFE9),
+              width: 0.8,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x06000000),
+                blurRadius: 12,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: url == null
+                  ? _ImageFallback(label: widget.course.title)
+                  : CachedNetworkImage(
+                      imageUrl: url,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => const AppSkeleton(height: 180),
+                      errorWidget: (_, __, ___) =>
+                          _ImageFallback(label: widget.course.title),
+                      fadeInDuration: Duration.zero,
+                    ),
+            ),
           ),
         ),
         Positioned(
-          top: 12,
-          left: 12,
-          child: CircleAvatar(
-            backgroundColor: Colors.black38,
+          top: 14,
+          left: 14,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.9),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x08000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
             child: IconButton(
               tooltip: 'Quay lại',
-              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 16),
               onPressed: () => context.pop(),
             ),
           ),
         ),
         Positioned(
-          top: 12,
-          right: 12,
-          child: CircleAvatar(
-            backgroundColor: Colors.black38,
+          top: 14,
+          right: 14,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.9),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x08000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
             child: IconButton(
               tooltip: 'Yêu thích',
+              padding: EdgeInsets.zero,
               icon: Icon(
                 _isBookmarked
                     ? Icons.favorite_rounded
                     : Icons.favorite_border_rounded,
-                color: _isBookmarked ? Colors.redAccent : Colors.white,
+                color: _isBookmarked ? const Color(0xFFE11D48) : AppColors.textPrimary,
+                size: 18,
               ),
               onPressed: () {
                 setState(() {
@@ -234,13 +285,28 @@ class _CourseSummaryState extends State<_CourseSummary> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final lessonCount = widget.course.lessons.isNotEmpty
         ? widget.course.lessons.length
         : 12;
 
-    return AppCard(
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md + 2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x04000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -249,45 +315,103 @@ class _CourseSummaryState extends State<_CourseSummary> {
             child: Text(
               widget.course.title,
               style: textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w500,
+                fontSize: 20,
+                letterSpacing: -0.4,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            widget.course.instructorName ?? 'Hiểu cơ thể – Nuôi dưỡng tâm trí',
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F7F2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.spa_outlined,
+                  size: 14,
+                  color: Color(0xFF0F5B38),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  widget.course.instructorName ?? 'Hiểu cơ thể – Nuôi dưỡng tâm trí',
+                  style: const TextStyle(
+                    color: Color(0xFF5A6E63),
+                    fontWeight: FontWeight.w300,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Bento 3-Slot Metrics Pod
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FBF9),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFFEAEFE9),
+                width: 0.8,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildBentoPod(
+                    icon: Icons.auto_stories_outlined,
+                    value: '$lessonCount bài học',
+                    label: 'Nội dung',
+                    iconColor: const Color(0xFF2563EB),
+                    bgColor: const Color(0xFFEFF6FF),
+                  ),
+                ),
+                Container(height: 28, width: 0.8, color: const Color(0xFFEAEFE9)),
+                Expanded(
+                  child: _buildBentoPod(
+                    icon: Icons.schedule_rounded,
+                    value: '2 giờ 30 phút',
+                    label: 'Thời lượng',
+                    iconColor: const Color(0xFF0F5B38),
+                    bgColor: const Color(0xFFF0F7F2),
+                  ),
+                ),
+                Container(height: 28, width: 0.8, color: const Color(0xFFEAEFE9)),
+                Expanded(
+                  child: _buildBentoPod(
+                    icon: Icons.spa_outlined,
+                    value: 'Trung cấp',
+                    label: 'Cấp độ',
+                    iconColor: const Color(0xFFD97706),
+                    bgColor: const Color(0xFFFFFBEB),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
-            children: [
-              _InfoChip(
-                icon: Icons.list_alt_rounded,
-                label: '$lessonCount bài học',
-              ),
-              const _InfoChip(
-                icon: Icons.access_time_rounded,
-                label: '2 giờ 30 phút',
-              ),
-              const _InfoChip(icon: Icons.school_outlined, label: 'Trung cấp'),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
 
-          // Segmented Tabs: Nội dung | Giới thiệu | Đánh giá
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          // Segmented Pill Dock: Nội dung | Giới thiệu | Đánh giá
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0F4F1),
+              borderRadius: BorderRadius.circular(24),
+            ),
             child: Row(
               children: [
-                _buildTab('Nội dung', 0),
-                const SizedBox(width: AppSpacing.lg),
-                _buildTab('Giới thiệu', 1),
-                const SizedBox(width: AppSpacing.lg),
-                _buildTab('Đánh giá', 2),
+                Expanded(child: _buildSegmentedTab('Nội dung', 0)),
+                Expanded(child: _buildSegmentedTab('Giới thiệu', 1)),
+                Expanded(child: _buildSegmentedTab('Đánh giá', 2)),
               ],
             ),
           ),
@@ -296,33 +420,84 @@ class _CourseSummaryState extends State<_CourseSummary> {
     );
   }
 
-  Widget _buildTab(String label, int index) {
+  Widget _buildBentoPod({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color iconColor,
+    required Color bgColor,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 14, color: iconColor),
+        ),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A2520),
+            ),
+          ),
+        ),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w300,
+              color: Color(0xFF8E9E94),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSegmentedTab(String label, int index) {
     final isSelected = _selectedTab == index;
     return GestureDetector(
       onTap: () => setState(() => _selectedTab = index),
-      child: Column(
-        children: [
-          Text(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: isSelected
+              ? const [
+                  BoxShadow(
+                    color: Color(0x08000000),
+                    blurRadius: 4,
+                    offset: Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Center(
+          child: Text(
             label,
             style: TextStyle(
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+              fontSize: 13,
               color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ? const Color(0xFF0F5B38)
+                  : const Color(0xFF6B7E74),
             ),
           ),
-          const SizedBox(height: 4),
-          Container(
-            height: 3,
-            width: 40,
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -342,7 +517,33 @@ class _CourseDescription extends StatelessWidget {
 
     return _Section(
       title: 'Giới thiệu khóa học',
-      child: AppCard(child: HtmlWidget(description)),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFEAEFE9),
+            width: 0.8,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x04000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: HtmlWidget(
+          description,
+          textStyle: const TextStyle(
+            fontSize: 14,
+            height: 1.6,
+            color: Color(0xFF334138),
+            fontWeight: FontWeight.w300,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -401,19 +602,77 @@ class _LessonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return AppCard(
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x04000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(lesson.title, style: textTheme.titleMedium),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F7F2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  'CHƯƠNG HỌC',
+                  style: TextStyle(
+                    color: Color(0xFF0F5B38),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            lesson.title,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              letterSpacing: -0.2,
+              color: AppColors.textPrimary,
+            ),
+          ),
           if (lesson.description != null &&
               stripHtml(lesson.description!).isNotEmpty) ...[
             const SizedBox(height: AppSpacing.xs),
-            Text(stripHtml(lesson.description!), style: textTheme.bodySmall),
+            Text(
+              stripHtml(lesson.description!),
+              style: textTheme.bodySmall?.copyWith(
+                color: const Color(0xFF6B7E74),
+                fontWeight: FontWeight.w300,
+              ),
+            ),
           ],
           const SizedBox(height: AppSpacing.sm),
           if (lesson.parts.isEmpty)
-            const Text('Bài học chưa có nội dung.')
+            const Text(
+              'Bài học chưa có nội dung.',
+              style: TextStyle(
+                color: Color(0xFF8E9E94),
+                fontWeight: FontWeight.w300,
+                fontSize: 13,
+              ),
+            )
           else
             ...lesson.parts.map(
               (part) => _LessonPartTile(
@@ -453,45 +712,114 @@ class _LessonPartTile extends StatelessWidget {
       if (!canOpen) 'Chưa có quyền truy cập',
     ].join(' • ');
 
+    final podBg = completed
+        ? const Color(0xFFF0FDF4)
+        : part.isVideo
+            ? const Color(0xFFF0F7F2)
+            : part.isDocument
+                ? const Color(0xFFEFF6FF)
+                : const Color(0xFFF5F3FF);
+
+    final podColor = completed
+        ? const Color(0xFF16A34A)
+        : part.isVideo
+            ? const Color(0xFF0F5B38)
+            : part.isDocument
+                ? const Color(0xFF2563EB)
+                : const Color(0xFF7C3AED);
+
     return Semantics(
       button: canOpen,
       enabled: canOpen,
       label: '${part.title}. $subtitle',
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        leading: Icon(completed ? Icons.check_circle : _partIcon(part)),
-        title: Text(part.title),
-        subtitle: Text(subtitle),
-        enabled: canOpen,
-        trailing: canOpen
-            ? const Icon(Icons.chevron_right_rounded)
-            : const Icon(Icons.lock_outline_rounded),
-        onTap: canOpen
-            ? () {
-                if (part.isVideo) {
-                  context.push(
-                    AppRoutes.mediaPlayerPath(
-                      courseId: courseId,
-                      lessonPartId: part.id,
-                    ),
-                  );
-                } else if (part.isDocument) {
-                  context.push(
-                    AppRoutes.documentReaderPath(
-                      courseId: courseId,
-                      lessonPartId: part.id,
-                    ),
-                  );
-                } else {
-                  context.push(
-                    AppRoutes.lessonPath(
-                      courseId: courseId,
-                      lessonPartId: part.id,
-                    ),
-                  );
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: canOpen
+              ? () {
+                  if (part.isVideo) {
+                    context.push(
+                      AppRoutes.mediaPlayerPath(
+                        courseId: courseId,
+                        lessonPartId: part.id,
+                      ),
+                    );
+                  } else if (part.isDocument) {
+                    context.push(
+                      AppRoutes.documentReaderPath(
+                        courseId: courseId,
+                        lessonPartId: part.id,
+                      ),
+                    );
+                  } else {
+                    context.push(
+                      AppRoutes.lessonPath(
+                        courseId: courseId,
+                        lessonPartId: part.id,
+                      ),
+                    );
+                  }
                 }
-              }
-            : null,
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: podBg,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    completed ? Icons.check_circle_rounded : _partIcon(part),
+                    color: podColor,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        part.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          letterSpacing: -0.1,
+                          color: canOpen
+                              ? AppColors.textPrimary
+                              : const Color(0xFF9EABA3),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: completed
+                              ? const Color(0xFF16A34A)
+                              : const Color(0xFF8E9E94),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  canOpen
+                      ? Icons.chevron_right_rounded
+                      : Icons.lock_outline_rounded,
+                  color: const Color(0xFF9EABA3),
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -537,23 +865,19 @@ class _Section extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.3,
+                fontSize: 18,
+                color: AppColors.textPrimary,
+              ),
+        ),
         const SizedBox(height: AppSpacing.md),
         child,
       ],
     );
-  }
-}
-
-class _InfoChip extends StatelessWidget {
-  const _InfoChip({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Chip(avatar: Icon(icon, size: 18), label: Text(label));
   }
 }
 

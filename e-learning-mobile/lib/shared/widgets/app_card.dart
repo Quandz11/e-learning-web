@@ -29,16 +29,16 @@ class AppCard extends StatelessWidget {
               ? colorScheme.primary
               : (isDark
                   ? colorScheme.outlineVariant.withValues(alpha: 0.5)
-                  : colorScheme.outlineVariant),
-          width: selected ? 1.5 : 1.0,
+                  : const Color(0xFFEAEFE9)),
+          width: selected ? 1.5 : 0.8,
         ),
         boxShadow: isDark
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  offset: const Offset(0, 2),
                 ),
               ],
       ),

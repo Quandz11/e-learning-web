@@ -21,37 +21,51 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(personalizationStateProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF9FBF9),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textPrimary,
-            size: 20,
+            color: Color(0xFF1A2520),
+            size: 18,
           ),
           onPressed: () => context.pop(),
         ),
         title: const Text(
           'Danh sách nhắc nhở',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w400,
+            fontSize: 18,
+            letterSpacing: -0.3,
+            color: Color(0xFF1A2520),
           ),
         ),
         elevation: 0,
-        backgroundColor: AppColors.background,
+        backgroundColor: const Color(0xFFF9FBF9),
       ),
       body: state.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi: $err')),
+        loading: () => const Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.primary,
+          ),
+        ),
+        error: (err, _) => Center(
+          child: Text(
+            'Lỗi: $err',
+            style: const TextStyle(
+              fontWeight: FontWeight.w300,
+              color: Colors.red,
+            ),
+          ),
+        ),
         data: (profile) {
           final reminders = profile.reminders;
           return Column(
             children: [
-              // Segmented Tab Bar (Nhắc nhở chung / Lịch nhắc nhở) matching Screen 8
+              // Segmented Pill Tab Bar
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
@@ -60,8 +74,8 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.mint,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    color: const Color(0xFFEFEFEF),
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: Row(
                     children: [
@@ -73,20 +87,29 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
                               color: _selectedTabIndex == 0
-                                  ? AppColors.primary
+                                  ? Colors.white
                                   : Colors.transparent,
-                              borderRadius: BorderRadius.circular(AppRadius.sm),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: _selectedTabIndex == 0
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.04),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
                             ),
                             child: Text(
                               'Nhắc nhở chung',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontWeight: _selectedTabIndex == 0
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
+                                    ? FontWeight.w500
+                                    : FontWeight.w400,
                                 color: _selectedTabIndex == 0
-                                    ? Colors.white
-                                    : AppColors.textSecondary,
+                                    ? const Color(0xFF1A2520)
+                                    : const Color(0xFF6B7280),
                                 fontSize: 13,
                               ),
                             ),
@@ -101,20 +124,29 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
                               color: _selectedTabIndex == 1
-                                  ? AppColors.primary
+                                  ? Colors.white
                                   : Colors.transparent,
-                              borderRadius: BorderRadius.circular(AppRadius.sm),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: _selectedTabIndex == 1
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.04),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
                             ),
                             child: Text(
                               'Lịch nhắc nhở',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontWeight: _selectedTabIndex == 1
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
+                                    ? FontWeight.w500
+                                    : FontWeight.w400,
                                 color: _selectedTabIndex == 1
-                                    ? Colors.white
-                                    : AppColors.textSecondary,
+                                    ? const Color(0xFF1A2520)
+                                    : const Color(0xFF6B7280),
                                 fontSize: 13,
                               ),
                             ),
@@ -132,16 +164,35 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.notifications_off_outlined,
-                              size: 48,
-                              color: AppColors.textMuted,
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F5E9),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(
+                                Icons.notifications_off_outlined,
+                                size: 26,
+                                color: Color(0xFF0F5B38),
+                              ),
                             ),
                             const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              'Chưa có nhắc nhở nào',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: AppColors.textSecondary,
+                            const Text(
+                              'Chưa có lịch nhắc nhở nào',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFF1A2520),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'Tạo nhắc nhở uống nước hoặc vào bữa ăn để giữ nhịp sinh học.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w300,
+                                color: Color(0xFF6B7280),
                               ),
                             ),
                           ],
@@ -157,28 +208,28 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                       ),
               ),
 
-              // Bottom Sticky Green CTA Button
+              // Bottom Sticky Minimalist Pill CTA
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: SafeArea(
                   top: false,
                   child: SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 48,
                     child: ElevatedButton.icon(
                       onPressed: () {
                         context.push(AppRoutes.appPersonalizationReminderNew);
                       },
-                      icon: const Icon(Icons.add_rounded, size: 22),
+                      icon: const Icon(Icons.add_rounded, size: 20),
                       label: const Text(
                         'Thêm nhắc nhở mới',
                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: const Color(0xFF0F5B38),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -197,17 +248,26 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
   }
 
   Widget _buildReminderCard(BuildContext context, WidgetRef ref, Reminder rem) {
-    final theme = Theme.of(context);
     final timeStr =
         '${rem.startTimeHour.toString().padLeft(2, '0')}:${rem.startTimeMinute.toString().padLeft(2, '0')}';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,12 +275,13 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppSpacing.xs + 2),
+                width: 36,
+                height: 36,
                 decoration: const BoxDecoration(
-                  color: AppColors.mint,
+                  color: Color(0xFFE8F5E9),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(rem.type.icon, color: AppColors.primary, size: 20),
+                child: Icon(rem.type.icon, color: const Color(0xFF0F5B38), size: 18),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -229,16 +290,19 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                   children: [
                     Text(
                       rem.title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF1A2520),
                       ),
                     ),
                     if (rem.message.isNotEmpty)
                       Text(
                         rem.message,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          color: Color(0xFF6B7280),
                         ),
                       ),
                   ],
@@ -246,7 +310,7 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
               ),
               Switch.adaptive(
                 value: rem.enabled,
-                activeColor: AppColors.primary,
+                activeColor: const Color(0xFF0F5B38),
                 onChanged: (val) {
                   ref
                       .read(personalizationStateProvider.notifier)
@@ -255,51 +319,62 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
               ),
             ],
           ),
-          const Divider(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
+          const Divider(
+            color: Color(0xFFEAEFE9),
+            thickness: 0.8,
+            height: 1,
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               const Icon(
                 Icons.access_time_rounded,
-                size: 16,
-                color: AppColors.textMuted,
+                size: 15,
+                color: Color(0xFF9CA3AF),
               ),
               const SizedBox(width: 4),
               Text(
                 timeStr,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF1A2520),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
               const Icon(
                 Icons.repeat_rounded,
-                size: 16,
-                color: AppColors.textMuted,
+                size: 15,
+                color: Color(0xFF9CA3AF),
               ),
               const SizedBox(width: 4),
               Text(
                 rem.repeatDays.length == 7 ? 'Hằng ngày' : 'T2 - CN',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w300,
+                  color: Color(0xFF6B7280),
                 ),
               ),
               const Spacer(),
               IconButton(
+                visualDensity: VisualDensity.compact,
                 icon: const Icon(
                   Icons.edit_outlined,
-                  size: 20,
-                  color: AppColors.primary,
+                  size: 18,
+                  color: Color(0xFF586B60),
                 ),
                 onPressed: () {
                   context.push(AppRoutes.reminderEditPath(rem.id));
                 },
               ),
               IconButton(
+                visualDensity: VisualDensity.compact,
                 icon: const Icon(
                   Icons.delete_outline_rounded,
-                  size: 20,
-                  color: AppColors.error,
+                  size: 18,
+                  color: Colors.redAccent,
                 ),
                 onPressed: () {
                   ref
@@ -314,3 +389,4 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
     );
   }
 }
+

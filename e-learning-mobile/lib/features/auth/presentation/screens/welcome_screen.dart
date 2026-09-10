@@ -48,13 +48,14 @@ class WelcomeScreen extends StatelessWidget {
 
                   // App Title
                   Text(
-                    'Nhìn Ăn\nChữa Lành',
+                    'Nhịn Ăn\nChữa Lành',
                     textAlign: TextAlign.center,
                     style: textTheme.headlineMedium?.copyWith(
                       color: AppColors.primary,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.5,
                       height: 1.2,
-                      fontSize: 30,
+                      fontSize: 32,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
@@ -65,6 +66,7 @@ class WelcomeScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w300,
                       height: 1.4,
                     ),
                   ),

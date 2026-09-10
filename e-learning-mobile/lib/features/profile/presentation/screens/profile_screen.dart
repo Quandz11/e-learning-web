@@ -44,7 +44,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         title: const Text(
           'Cá nhân',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+            letterSpacing: -0.3,
             color: AppColors.textPrimary,
           ),
         ),
@@ -76,20 +78,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onRetry: controller.load,
                 ),
               ] else ...[
-                // 1. Profile Header Card matching Screen 11
+                // 1. Profile Header Card
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.border),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFEAEFE9),
+                      width: 0.8,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
-                      AppAvatar(
-                        name: state.profile?.fullName ?? 'Mai Dung',
-                        imageUrl: state.profile?.avatarUrl,
-                        size: 64,
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.25),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: AppAvatar(
+                          name: state.profile?.fullName ?? 'Mai Dung',
+                          imageUrl: state.profile?.avatarUrl,
+                          size: 60,
+                        ),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
@@ -99,7 +121,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             Text(
                               state.profile?.fullName ?? 'Mai Dung',
                               style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: -0.3,
                                 color: AppColors.textPrimary,
                               ),
                             ),
@@ -107,6 +130,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             Text(
                               state.profile?.email ?? 'maidung@gmail.com',
                               style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w300,
                                 color: AppColors.textSecondary,
                               ),
                             ),
@@ -118,11 +142,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.mint,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(AppRadius.pill),
                                 border: Border.all(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.3,
-                                  ),
+                                  color: const Color(0xFFD3E6DC),
+                                  width: 0.8,
                                 ),
                               ),
                               child: const Text(
@@ -130,7 +153,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 11,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
@@ -140,60 +163,154 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(height: AppSpacing.md),
+
+                // 2. Three-slot Stats Strip (Bento Pods)
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFFEAEFE9),
+                      width: 0.8,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x04000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatColumn('3', 'Khóa học', Icons.menu_book_rounded, const Color(0xFF0F5B38), const Color(0xFFF0F7F2)),
+                      Container(height: 32, width: 0.8, color: const Color(0xFFEAEFE9)),
+                      _buildStatColumn('60%', 'Tiến độ', Icons.pie_chart_outline_rounded, const Color(0xFF2563EB), const Color(0xFFEFF6FF)),
+                      Container(height: 32, width: 0.8, color: const Color(0xFFEAEFE9)),
+                      _buildStatColumn('7 ngày', 'Streak', Icons.local_fire_department_rounded, const Color(0xFFD97706), const Color(0xFFFFFBEB)),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.lg),
 
-                // 2. 6 Option Menu Cards matching Screen 11
-                _buildMenuOption(
-                  context,
-                  icon: Icons.person_outline_rounded,
-                  title: 'Hồ sơ của tôi',
-                  subtitle: 'Cập nhật thông tin cá nhân & ảnh đại diện',
-                  onTap: () => context.push(AppRoutes.appProfileEdit),
+                // Section 1: Học tập & Thành tích
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.xs),
+                  child: Text(
+                    'HỌC TẬP & THÀNH TÍCH',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                      fontSize: 11,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-
-                _buildMenuOption(
-                  context,
-                  icon: Icons.emoji_events_outlined,
-                  title: 'Thành tích & Huy hiệu',
-                  subtitle: 'Đã đạt 5 huy hiệu bài học & chuỗi 7 ngày',
-                  onTap: () => _showAchievementsDialog(context),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFEAEFE9),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildListTileItem(
+                        context,
+                        icon: Icons.person_outline_rounded,
+                        title: 'Hồ sơ của tôi',
+                        subtitle: 'Cập nhật thông tin cá nhân & ảnh đại diện',
+                        bgColor: const Color(0xFFEFF6FF),
+                        iconColor: const Color(0xFF2563EB),
+                        onTap: () => context.push(AppRoutes.appProfileEdit),
+                      ),
+                      const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+                      _buildListTileItem(
+                        context,
+                        icon: Icons.emoji_events_outlined,
+                        title: 'Thành tích & Huy hiệu',
+                        subtitle: 'Đã đạt 5 huy hiệu bài học & chuỗi 7 ngày',
+                        bgColor: const Color(0xFFFFFBEB),
+                        iconColor: const Color(0xFFD97706),
+                        badge: '5 huy hiệu',
+                        onTap: () => _showAchievementsDialog(context),
+                      ),
+                      const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+                      _buildListTileItem(
+                        context,
+                        icon: Icons.history_edu_rounded,
+                        title: 'Lịch sử học tập',
+                        subtitle: 'Xem danh sách bài đã xem & tiến độ tích lũy',
+                        bgColor: const Color(0xFFF0F7F2),
+                        iconColor: const Color(0xFF0F5B38),
+                        onTap: () => context.push(AppRoutes.appProgress),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.lg),
 
-                _buildMenuOption(
-                  context,
-                  icon: Icons.history_edu_rounded,
-                  title: 'Lịch sử học tập',
-                  subtitle: 'Xem danh sách bài đã xem & tiến độ tích lũy',
-                  onTap: () => context.push(AppRoutes.appProgress),
+                // Section 2: Hệ thống & Trợ giúp
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.xs),
+                  child: Text(
+                    'HỆ THỐNG & TRỢ GIÚP',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.5,
+                      fontSize: 11,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-
-                _buildMenuOption(
-                  context,
-                  icon: Icons.settings_outlined,
-                  title: 'Cài đặt ứng dụng',
-                  subtitle: 'Thông báo, bảo mật & bộ nhớ đệm',
-                  onTap: () => context.push(AppRoutes.appSettings),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-
-                _buildMenuOption(
-                  context,
-                  icon: Icons.help_outline_rounded,
-                  title: 'Trung tâm trợ giúp',
-                  subtitle: 'Hỏi đáp bác sĩ & hỗ trợ kỹ thuật',
-                  onTap: () => _showSupportDialog(context),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-
-                _buildMenuOption(
-                  context,
-                  icon: Icons.info_outline_rounded,
-                  title: 'Về ứng dụng Nhìn Ăn Chữa Lành',
-                  subtitle: 'Phiên bản 1.0.0 (Build 100)',
-                  onTap: () => _showAboutDialog(context),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFEAEFE9),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildListTileItem(
+                        context,
+                        icon: Icons.settings_outlined,
+                        title: 'Cài đặt ứng dụng',
+                        subtitle: 'Thông báo, bảo mật & bộ nhớ đệm',
+                        bgColor: const Color(0xFFF5F3FF),
+                        iconColor: const Color(0xFF7C3AED),
+                        badge: '120MB',
+                        onTap: () => context.push(AppRoutes.appSettings),
+                      ),
+                      const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+                      _buildListTileItem(
+                        context,
+                        icon: Icons.help_outline_rounded,
+                        title: 'Trung tâm trợ giúp',
+                        subtitle: 'Hỏi đáp bác sĩ & hỗ trợ kỹ thuật',
+                        bgColor: const Color(0xFFF0F9FF),
+                        iconColor: const Color(0xFF0284C7),
+                        onTap: () => _showSupportDialog(context),
+                      ),
+                      const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+                      _buildListTileItem(
+                        context,
+                        icon: Icons.info_outline_rounded,
+                        title: 'Về ứng dụng Nhìn Ăn Chữa Lành',
+                        subtitle: 'Phiên bản 1.0.0 (Build 100)',
+                        bgColor: const Color(0xFFF8FAFC),
+                        iconColor: const Color(0xFF64748B),
+                        onTap: () => _showAboutDialog(context),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
 
@@ -221,14 +338,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       'Đăng xuất',
                       style: TextStyle(
                         color: AppColors.error,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.error),
+                      side: BorderSide(
+                        color: AppColors.error.withValues(alpha: 0.4),
+                        width: 0.8,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                   ),
@@ -241,50 +361,129 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuOption(
+  Widget _buildStatColumn(
+    String value,
+    String label,
+    IconData icon,
+    Color iconColor,
+    Color bgColor,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: iconColor, size: 16),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Color(0xFF1A2520),
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+            letterSpacing: -0.2,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF8E9E94),
+            fontWeight: FontWeight.w300,
+            fontSize: 11,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildListTileItem(
     BuildContext context, {
     required IconData icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    Color iconColor = AppColors.primary,
+    Color bgColor = const Color(0xFFF0F7F2),
+    String? badge,
   }) {
     final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: AppColors.border),
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm + 4,
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.primary, size: 22),
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
+            ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: -0.1,
+                          color: const Color(0xFF1A2520),
+                          fontSize: 14,
+                        ),
+                      ),
+                      if (badge != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF2F6F3),
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                          ),
+                          child: Text(
+                            badge,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF0F5B38),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 1),
                   Text(
                     subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w300,
+                      color: const Color(0xFF8E9E94),
+                      fontSize: 12,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: Color(0xFF9EABA3),
+              size: 20,
+            ),
           ],
         ),
       ),

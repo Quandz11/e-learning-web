@@ -25,7 +25,9 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
         title: const Text(
           'Tiến độ học tập',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+            letterSpacing: -0.3,
             color: AppColors.textPrimary,
           ),
         ),
@@ -37,39 +39,91 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Circular Gauge Overview Summary Card matching Screen 10
+            // 1. Circular Gauge Overview Summary Card
             Container(
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(color: AppColors.border),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFFEAEFE9),
+                  width: 0.8,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.05),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: Column(
                 children: [
-                  // Circular Progress Gauge
+                  // Zen Dial Header with Live Status Dot
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF108A55),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF108A55).withValues(alpha: 0.4),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'TIẾN ĐỘ TÍCH CỰC',
+                        style: TextStyle(
+                          letterSpacing: 1.2,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF0F5B38),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F5F1),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                        child: const Text(
+                          'Mục tiêu tuần',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF43544B),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+
+                  // Circular Progress Zen Dial
                   SizedBox(
-                    height: 120,
-                    width: 120,
+                    height: 140,
+                    width: 140,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         SizedBox(
-                          height: 110,
-                          width: 110,
+                          height: 130,
+                          width: 130,
                           child: CircularProgressIndicator(
                             value: 0.60,
-                            strokeWidth: 10,
-                            backgroundColor: AppColors.mint,
+                            strokeWidth: 4.5,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor: const Color(0xFFEFF3EE),
                             valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppColors.primary,
+                              Color(0xFF0F5B38),
                             ),
                           ),
                         ),
@@ -79,14 +133,17 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
                             Text(
                               '60%',
                               style: theme.textTheme.headlineLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
+                                fontWeight: FontWeight.w300,
+                                letterSpacing: -0.5,
+                                color: const Color(0xFF1A2520),
+                                fontSize: 32,
                               ),
                             ),
                             Text(
-                              'Tổng tiến độ',
+                              'tổng tích lũy',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w300,
+                                color: const Color(0xFF8E9E94),
                                 fontSize: 11,
                               ),
                             ),
@@ -107,20 +164,59 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
                         Icons.local_fire_department_rounded,
                         AppColors.warning,
                       ),
-                      Container(height: 36, width: 1, color: AppColors.border),
+                      Container(height: 32, width: 0.8, color: const Color(0xFFEAEFE9)),
                       _buildMetricCol(
                         '12 bài',
                         'Bài đã xong',
                         Icons.check_circle_outline_rounded,
                         AppColors.primary,
                       ),
-                      Container(height: 36, width: 1, color: AppColors.border),
+                      Container(height: 32, width: 0.8, color: const Color(0xFFEAEFE9)),
                       _buildMetricCol(
                         '180 phút',
                         'Tổng giờ học',
                         Icons.timer_outlined,
                         Colors.blue,
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Divider(height: 1, thickness: 0.8, color: Color(0xFFEAEFE9)),
+                  const SizedBox(height: AppSpacing.md),
+
+                  // Weekly Learning Streak Chart (Thứ 2 -> Chủ nhật)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Thời gian học tuần này',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        'Mục tiêu: 30p/ngày',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w300,
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: const [
+                      _DayStreakBar(day: 'T2', minutes: 35, isToday: false),
+                      _DayStreakBar(day: 'T3', minutes: 45, isToday: false),
+                      _DayStreakBar(day: 'T4', minutes: 20, isToday: false),
+                      _DayStreakBar(day: 'T5', minutes: 50, isToday: false),
+                      _DayStreakBar(day: 'T6', minutes: 30, isToday: false),
+                      _DayStreakBar(day: 'T7', minutes: 40, isToday: true),
+                      _DayStreakBar(day: 'CN', minutes: 0, isToday: false),
                     ],
                   ),
                 ],
@@ -181,15 +277,20 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
       label: Text(label),
       selected: isSelected,
       selectedColor: AppColors.primary,
-      backgroundColor: AppColors.mint,
+      backgroundColor: Colors.white,
+      elevation: 0,
       side: BorderSide(
         color: isSelected
             ? AppColors.primary
-            : AppColors.sage.withValues(alpha: 0.4),
+            : const Color(0xFFEAEFE9),
+        width: 0.8,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       labelStyle: TextStyle(
         color: isSelected ? Colors.white : AppColors.textPrimary,
-        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 13,
       ),
       onSelected: (val) {
@@ -210,19 +311,23 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
   ) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 22),
+        Icon(icon, color: color, size: 20),
         const SizedBox(height: 4),
         Text(
           value,
           style: const TextStyle(
             color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w300,
+            fontSize: 11,
+          ),
         ),
       ],
     );
@@ -242,9 +347,19 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +370,8 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
                 child: Text(
                   title,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.1,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -264,7 +380,7 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
                 '$percent%',
                 style: const TextStyle(
                   color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -273,6 +389,7 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
           Text(
             subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w300,
               color: AppColors.textSecondary,
             ),
           ),
@@ -281,8 +398,8 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
-              minHeight: 8,
-              backgroundColor: AppColors.mint,
+              minHeight: 6,
+              backgroundColor: const Color(0xFFEFF5F1),
               valueColor: const AlwaysStoppedAnimation(AppColors.primary),
             ),
           ),
@@ -296,7 +413,7 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
               icon: const Icon(Icons.play_arrow_rounded, size: 18),
               label: const Text(
                 'Tiếp tục học >',
-                style: TextStyle(fontWeight: FontWeight.w700),
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
               ),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
@@ -307,6 +424,69 @@ class _LearningProgressScreenState extends State<LearningProgressScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DayStreakBar extends StatelessWidget {
+  const _DayStreakBar({
+    required this.day,
+    required this.minutes,
+    required this.isToday,
+  });
+
+  final String day;
+  final int minutes;
+  final bool isToday;
+
+  @override
+  Widget build(BuildContext context) {
+    // Max 60 mins for full height (64px)
+    final heightRatio = (minutes / 60.0).clamp(0.08, 1.0);
+    final barHeight = 64.0 * heightRatio;
+    final hasLearned = minutes > 0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          minutes > 0 ? '${minutes}p' : '-',
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: isToday ? FontWeight.w500 : FontWeight.w300,
+            color: isToday ? AppColors.primary : AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: 22,
+          height: 64,
+          alignment: Alignment.bottomCenter,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF5F1),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+          child: Container(
+            width: 22,
+            height: barHeight,
+            decoration: BoxDecoration(
+              color: isToday
+                  ? AppColors.primary
+                  : (hasLearned ? const Color(0xFF68B28B) : Colors.transparent),
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          day,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isToday ? FontWeight.w500 : FontWeight.w400,
+            color: isToday ? AppColors.primary : AppColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }

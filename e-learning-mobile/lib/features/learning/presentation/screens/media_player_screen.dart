@@ -161,10 +161,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
 
                           // 3. Segmented Tabs (Bài học / Ghi chú / Thảo luận)
                           Container(
-                            padding: const EdgeInsets.all(4),
+                            padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
-                              color: AppColors.mint,
-                              borderRadius: BorderRadius.circular(AppRadius.md),
+                              color: const Color(0xFFEFF5F1),
+                              borderRadius: BorderRadius.circular(AppRadius.pill),
                             ),
                             child: Row(
                               children: [
@@ -182,7 +182,23 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
 
                           // 4. Tab Content Body
                           if (_selectedTabIndex == 0) ...[
-                            AppCard(
+                            Container(
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: const Color(0xFFEAEFE9),
+                                  width: 0.8,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.02),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -192,7 +208,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                         .textTheme
                                         .titleMedium
                                         ?.copyWith(
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w500,
                                           color: AppColors.textPrimary,
                                         ),
                                   ),
@@ -204,14 +220,48 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                         .bodyMedium
                                         ?.copyWith(
                                           color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w300,
                                           height: 1.5,
                                         ),
                                   ),
+                                  const SizedBox(height: AppSpacing.md),
+                                  const Divider(height: 1, thickness: 0.8, color: Color(0xFFEAEFE9)),
+                                  const SizedBox(height: AppSpacing.md),
+                                  Text(
+                                    'Điểm cốt lõi cần nhớ',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.primary,
+                                        ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  _buildTakeawayItem('Khởi động chu trình tự thực từ giờ thứ 14 trở đi.'),
+                                  _buildTakeawayItem('Bổ sung nước lọc & điện giải tự nhiên trong khung giờ nhịn.'),
+                                  _buildTakeawayItem('Không nạp calo làm kích hoạt phản ứng insulin.'),
                                 ],
                               ),
                             ),
                           ] else if (_selectedTabIndex == 1) ...[
-                            AppCard(
+                            Container(
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: const Color(0xFFEAEFE9),
+                                  width: 0.8,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.02),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -221,24 +271,69 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                         .textTheme
                                         .titleMedium
                                         ?.copyWith(
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w500,
                                           color: AppColors.textPrimary,
                                         ),
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
-                                  const TextField(
+                                  TextField(
                                     maxLines: 4,
+                                    style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 13),
                                     decoration: InputDecoration(
                                       hintText:
                                           'Nhập ghi chú quan trọng trong lúc xem video...',
-                                      border: OutlineInputBorder(),
+                                      hintStyle: const TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w300,
+                                        fontSize: 13,
+                                      ),
+                                      filled: true,
+                                      fillColor: const Color(0xFFF9FBF9),
+                                      contentPadding: const EdgeInsets.all(12),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFFEAEFE9),
+                                          width: 0.8,
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFFEAEFE9),
+                                          width: 0.8,
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                          color: AppColors.primary,
+                                          width: 1,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                           ] else ...[
-                            AppCard(
+                            Container(
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: const Color(0xFFEAEFE9),
+                                  width: 0.8,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.02),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -248,15 +343,18 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                         .textTheme
                                         .titleMedium
                                         ?.copyWith(
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w500,
                                           color: AppColors.textPrimary,
                                         ),
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
                                   Text(
-                                    'Chưa có bình luận nào. Hãy gửi câu hỏi cho bác sĩ hoặc học viên khác!',
+                                    'Chưa có bình luận nào. Hãy gửi câu hỏi cho chuyên gia hoặc học viên khác!',
                                     style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: AppColors.textMuted),
+                                        ?.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w300,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -272,6 +370,37 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
     );
   }
 
+  Widget _buildTakeawayItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(
+              Icons.check_circle_rounded,
+              color: AppColors.primary,
+              size: 15,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w300,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTabButton(int index, String label) {
     final isSelected = _selectedTabIndex == index;
     return GestureDetector(
@@ -281,18 +410,27 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
         });
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+            color: isSelected ? AppColors.primary : AppColors.textSecondary,
             fontSize: 13,
           ),
         ),

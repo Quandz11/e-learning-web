@@ -28,7 +28,6 @@ class _WellnessResourcesScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(wellnessControllerProvider);
-    final theme = Theme.of(context);
     final resourceSet = state.dashboard?.todayResources;
 
     final List<WellnessResourceItem> allItems = [];
@@ -52,22 +51,24 @@ class _WellnessResourcesScreenState
           }).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF9FBF9),
       appBar: AppBar(
         title: const Text(
-          'Thư viện Sức khỏe & Phục hồi',
+          'Thư viện Phục hồi & Sức khỏe',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w400,
+            fontSize: 18,
+            letterSpacing: -0.3,
+            color: Color(0xFF1A2520),
           ),
         ),
         elevation: 0,
-        backgroundColor: AppColors.background,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        backgroundColor: const Color(0xFFF9FBF9),
+        iconTheme: const IconThemeData(color: Color(0xFF1A2520)),
       ),
       body: Column(
         children: [
-          // Category chips bar
+          // Horizontal Floating Pill Filter Bar
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(
@@ -79,30 +80,45 @@ class _WellnessResourcesScreenState
                 final isSelected = _selectedCategory == category;
                 return Padding(
                   padding: const EdgeInsets.only(right: AppSpacing.xs),
-                  child: FilterChip(
-                    label: Text(category),
-                    selected: isSelected,
-                    selectedColor: AppColors.primary,
-                    backgroundColor: AppColors.surface,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                      fontSize: 13,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedCategory = category),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primary
-                            : AppColors.border,
+                            ? const Color(0xFF0F5B38)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFF0F5B38)
+                              : const Color(0xFFEAEFE9),
+                          width: 0.8,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.02),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        category,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight:
+                              isSelected ? FontWeight.w500 : FontWeight.w300,
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFF374151),
+                        ),
                       ),
                     ),
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedCategory = category;
-                      });
-                    },
                   ),
                 );
               }).toList(),
@@ -113,41 +129,69 @@ class _WellnessResourcesScreenState
           // Resource List
           Expanded(
             child: state.isLoading && allItems.isEmpty
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  )
                 : filteredItems.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.menu_book_rounded,
-                              size: 48,
-                              color: AppColors.textMuted,
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F5E9),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(
+                                Icons.spa_outlined,
+                                size: 26,
+                                color: Color(0xFF0F5B38),
+                              ),
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            Text(
-                              'Chưa có bài hướng dẫn nào trong mục này',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
+                            const Text(
+                              'Không có nội dung trong mục này',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFF1A2520),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Vui lòng chọn danh mục khác hoặc kéo xuống để làm mới.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w300,
+                                color: Color(0xFF6B7280),
                               ),
                             ),
                           ],
                         ),
                       )
                     : RefreshIndicator(
+                        color: const Color(0xFF0F5B38),
                         onRefresh: () async {
                           await ref
                               .read(wellnessControllerProvider.notifier)
                               .loadDashboard();
                         },
                         child: ListView.separated(
-                          padding: const EdgeInsets.all(AppSpacing.md),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
+                          ),
                           itemCount: filteredItems.length,
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: AppSpacing.md),
                           itemBuilder: (context, index) {
                             final item = filteredItems[index];
-                            return _buildResourceCard(context, item);
+                            return _buildEditorialResourceCard(context, item);
                           },
                         ),
                       ),
@@ -157,40 +201,38 @@ class _WellnessResourcesScreenState
     );
   }
 
-  Widget _buildResourceCard(
+  Widget _buildEditorialResourceCard(
     BuildContext context,
     WellnessResourceItem item,
   ) {
-    final theme = Theme.of(context);
-
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner / Thumbnail placeholder with Category badge
+          // Magazine-style banner preview
           Container(
-            height: 110,
+            height: 100,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.mint, AppColors.primaryLight],
+                colors: [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(AppRadius.lg),
-                topRight: Radius.circular(AppRadius.lg),
               ),
             ),
             child: Stack(
@@ -198,8 +240,8 @@ class _WellnessResourcesScreenState
                 Center(
                   child: Icon(
                     _getResourceIcon(item.resourceType),
-                    size: 48,
-                    color: AppColors.primary.withValues(alpha: 0.7),
+                    size: 40,
+                    color: const Color(0xFF0F5B38).withValues(alpha: 0.4),
                   ),
                 ),
                 Positioned(
@@ -208,20 +250,24 @@ class _WellnessResourcesScreenState
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
-                      vertical: 4,
+                      vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFEAEFE9),
+                        width: 0.8,
+                      ),
                     ),
                     child: Text(
                       item.resourceType.isNotEmpty
                           ? item.resourceType
                           : 'Sức khỏe',
                       style: const TextStyle(
-                        color: Colors.white,
                         fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF0F5B38),
                       ),
                     ),
                   ),
@@ -237,27 +283,31 @@ class _WellnessResourcesScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.title.isNotEmpty ? item.title : 'Bài thực hành',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                  item.title.isNotEmpty ? item.title : 'Bài thực hành phục hồi',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF1A2520),
+                    letterSpacing: -0.2,
                   ),
                 ),
                 if (item.description.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
                     item.description,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.4,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w300,
+                      color: Color(0xFF6B7280),
+                      height: 1.45,
                     ),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
                 const SizedBox(height: AppSpacing.md),
 
-                // Button Action
+                // Button Action: Editorial pill button
                 SizedBox(
                   width: double.infinity,
                   height: 40,
@@ -266,22 +316,32 @@ class _WellnessResourcesScreenState
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'Đang mở bài thực hành "${item.title}"',
+                            'Bắt đầu: ${item.title}',
                           ),
+                          backgroundColor: const Color(0xFF0F5B38),
                         ),
                       );
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
+                      foregroundColor: const Color(0xFF0F5B38),
+                      side: const BorderSide(
+                        color: Color(0xFF0F5B38),
+                        width: 0.8,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                     ),
-                    icon: const Icon(Icons.play_circle_outline_rounded, size: 20),
+                    icon: const Icon(
+                      Icons.play_circle_outline_rounded,
+                      size: 18,
+                    ),
                     label: const Text(
                       'Bắt Đầu Thực Hành',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
@@ -305,3 +365,4 @@ class _WellnessResourcesScreenState
     return Icons.menu_book_rounded;
   }
 }
+

@@ -2,7 +2,6 @@ import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/features/auth/data/auth_repository.dart';
 import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
-import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +39,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title: const Text(
           'Cài đặt ứng dụng',
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+            letterSpacing: -0.3,
             color: AppColors.textPrimary,
           ),
         ),
@@ -57,20 +58,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.person_outline_rounded,
               title: 'Thông tin cá nhân',
               subtitle: 'Quản lý họ tên, email, số điện thoại',
+              bgColor: const Color(0xFFEFF6FF),
+              iconColor: const Color(0xFF2563EB),
               onTap: () => context.push('/app/profile/edit'),
             ),
-            const Divider(height: 1),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
               icon: Icons.lock_outline_rounded,
               title: 'Đổi mật khẩu',
               subtitle: 'Cập nhật mật khẩu đăng nhập',
+              bgColor: const Color(0xFFF5F3FF),
+              iconColor: const Color(0xFF7C3AED),
               onTap: () => context.push('/app/profile/change-password'),
             ),
-            const Divider(height: 1),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
               icon: Icons.verified_user_outlined,
               title: 'Bảo mật & 2FA',
               subtitle: 'Xác thực hai yếu tố cho tài khoản',
+              bgColor: const Color(0xFFF0FDF4),
+              iconColor: const Color(0xFF16A34A),
               onTap: () => context.push('/app/profile/security'),
             ),
           ]),
@@ -80,18 +87,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildSectionTitle(theme, 'Cấu hình ứng dụng'),
           _buildSettingContainer([
             SwitchListTile.adaptive(
-              secondary: const Icon(
-                Icons.notifications_none_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
+              secondary: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFBEB),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: Color(0xFFD97706),
+                  size: 18,
+                ),
               ),
               title: const Text(
                 'Thông báo nhắc nhở',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
               ),
               subtitle: const Text(
                 'Bật/tắt lời nhắc nhở hằng ngày & khóa học',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w300),
               ),
               value: _notificationsEnabled,
               activeColor: AppColors.primary,
@@ -99,16 +114,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 setState(() => _notificationsEnabled = val);
               },
             ),
-            const Divider(height: 1),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             ListTile(
-              leading: const Icon(
-                Icons.palette_outlined,
-                color: AppColors.textPrimary,
-                size: 22,
+              leading: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F3FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.palette_outlined,
+                  color: Color(0xFF7C3AED),
+                  size: 18,
+                ),
               ),
               title: const Text(
                 'Giao diện ứng dụng',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
               ),
               trailing: DropdownButton<String>(
                 value: _selectedTheme,
@@ -126,16 +149,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 },
               ),
             ),
-            const Divider(height: 1),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             ListTile(
-              leading: const Icon(
-                Icons.language_rounded,
-                color: AppColors.textPrimary,
-                size: 22,
+              leading: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.language_rounded,
+                  color: Color(0xFF0F5B38),
+                  size: 18,
+                ),
               ),
               title: const Text(
                 'Ngôn ngữ',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
               ),
               trailing: DropdownButton<String>(
                 value: _selectedLanguage,
@@ -164,13 +195,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: _isClearingCache
                   ? 'Đang dọn dẹp...'
                   : 'Giải phóng 120 MB dung lượng tạm',
+              bgColor: const Color(0xFFFEF3C7),
+              iconColor: const Color(0xFFB45309),
               onTap: _clearCache,
             ),
-            const Divider(height: 1),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
               icon: Icons.privacy_tip_outlined,
               title: 'Quyền riêng tư & Dữ liệu',
               subtitle: 'Kiểm soát chia sẻ dữ liệu thể trạng',
+              bgColor: const Color(0xFFEFF6FF),
+              iconColor: const Color(0xFF2563EB),
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -179,16 +214,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ),
-            const Divider(height: 1),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
               icon: Icons.description_outlined,
               title: 'Điều khoản sử dụng',
+              bgColor: const Color(0xFFF8FAFC),
+              iconColor: const Color(0xFF64748B),
               onTap: () => _launchUrl('https://nhinanchualanh.vn/terms'),
             ),
-            const Divider(height: 1),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
               icon: Icons.policy_outlined,
               title: 'Chính sách bảo mật',
+              bgColor: const Color(0xFFF8FAFC),
+              iconColor: const Color(0xFF64748B),
               onTap: () => _launchUrl('https://nhinanchualanh.vn/privacy'),
             ),
           ]),
@@ -197,23 +236,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // 4. Red Logout Row matching Screen 12
           Container(
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.error.withValues(alpha: 0.3),
+                width: 0.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: ListTile(
-              leading: const Icon(
-                Icons.logout_rounded,
-                color: AppColors.error,
-                size: 22,
+              leading: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDE8E8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.logout_rounded,
+                  color: AppColors.error,
+                  size: 18,
+                ),
               ),
               title: const Text(
                 'Đăng xuất tài khoản',
                 style: TextStyle(
                   color: AppColors.error,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
                 ),
+              ),
+              trailing: const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.error,
+                size: 20,
               ),
               onTap: _logout,
             ),
@@ -231,7 +293,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title,
         style: theme.textTheme.labelLarge?.copyWith(
           color: AppColors.primary,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+          letterSpacing: -0.1,
         ),
       ),
     );
@@ -240,9 +304,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildSettingContainer(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFEAEFE9),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(children: children),
     );
@@ -253,13 +327,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String title,
     String? subtitle,
     required VoidCallback onTap,
+    Color bgColor = const Color(0xFFF0F7F2),
+    Color iconColor = AppColors.primary,
   }) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.textPrimary, size: 22),
+      leading: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: iconColor, size: 18),
+      ),
       title: Text(
         title,
         style: const TextStyle(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
           fontSize: 14,
         ),
@@ -269,13 +353,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle,
               style: const TextStyle(
                 color: AppColors.textSecondary,
+                fontWeight: FontWeight.w300,
                 fontSize: 12,
               ),
             )
           : null,
       trailing: const Icon(
         Icons.chevron_right_rounded,
-        color: AppColors.textMuted,
+        color: Color(0xFF9EABA3),
+        size: 20,
       ),
       onTap: onTap,
     );

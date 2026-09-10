@@ -47,8 +47,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     ref.listen<ForgotPasswordRequestState>(
       forgotPasswordRequestControllerProvider,
       (previous, next) {
-        if (previous?.status == next.status ||
-            next.status != ForgotPasswordRequestStatus.success) {
+        if (next.status != ForgotPasswordRequestStatus.success) {
           return;
         }
 
@@ -64,12 +63,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             .read(forgotPasswordChallengeControllerProvider.notifier)
             .setChallenge(challenge);
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) {
-            return;
-          }
+        if (mounted) {
           context.go(AppRoutes.forgotPasswordVerify, extra: challenge);
-        });
+        }
       },
     );
 
@@ -235,6 +231,19 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         ? _emailController.text
         : _phoneController.text;
     await controller.submit(input);
+    if (!mounted) return;
+    final nextState = ref.read(forgotPasswordRequestControllerProvider);
+    if (nextState.status == ForgotPasswordRequestStatus.success) {
+      final challenge = nextState.isEmailMode
+          ? ForgotPasswordChallenge(email: nextState.submittedEmail)
+          : ForgotPasswordChallenge(phone: nextState.submittedPhone);
+      if (challenge.isValid) {
+        ref
+            .read(forgotPasswordChallengeControllerProvider.notifier)
+            .setChallenge(challenge);
+        context.go(AppRoutes.forgotPasswordVerify, extra: challenge);
+      }
+    }
   }
 }
 

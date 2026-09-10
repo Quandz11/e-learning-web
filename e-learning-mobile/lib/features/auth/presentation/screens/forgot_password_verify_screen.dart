@@ -98,7 +98,8 @@ class _ForgotPasswordVerifyScreenState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                next.generalMessage ?? 'Đặt lại mật khẩu thành công.',
+                next.generalMessage ??
+                    'Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.',
               ),
             ),
           );
@@ -109,7 +110,7 @@ class _ForgotPasswordVerifyScreenState
 
     if (challenge == null || !challenge.isValid) {
       return AppPage(
-        appBarTitle: 'Xác minh OTP',
+        appBarTitle: 'Đặt lại mật khẩu',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -129,16 +130,16 @@ class _ForgotPasswordVerifyScreenState
     }
 
     return AppPage(
-      appBarTitle: 'Xác minh OTP',
+      appBarTitle: 'Đặt lại mật khẩu',
       child: AutofillGroup(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSectionHeader(
-              title: 'Nhập OTP và mật khẩu mới',
+              title: 'Đặt lại mật khẩu',
               subtitle: challenge.isEmail
-                  ? 'Mã OTP được gửi về email của bạn. Mật khẩu mới phải có ít nhất 6 ký tự.'
-                  : 'Mã OTP được gửi qua Zalo. Mật khẩu mới phải có ít nhất 6 ký tự.',
+                  ? 'Nhập mã OTP được gửi về email của bạn và tạo mật khẩu mới.'
+                  : 'Nhập mã OTP được gửi qua Zalo và tạo mật khẩu mới.',
             ),
             const SizedBox(height: AppSpacing.lg),
             _RecipientCard(
@@ -238,7 +239,7 @@ class _ForgotPasswordVerifyScreenState
             const SizedBox(height: AppSpacing.lg),
             AppButton(
               buttonKey: const Key('forgot_password_verify_submit_button'),
-              label: 'Đổi mật khẩu',
+              label: 'Xác nhận & Đặt lại mật khẩu',
               onPressed: () => _submit(controller, challenge),
               loading: state.isSubmitting,
             ),

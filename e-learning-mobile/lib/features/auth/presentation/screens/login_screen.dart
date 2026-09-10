@@ -41,8 +41,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final controller = ref.read(loginControllerProvider.notifier);
 
     ref.listen<LoginState>(loginControllerProvider, (previous, next) {
-      if (previous?.status == next.status ||
-          next.status != LoginStatus.twoFactorRequired) {
+      if (next.status != LoginStatus.twoFactorRequired) {
         return;
       }
 
@@ -55,12 +54,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .read(authOtpChallengeControllerProvider.notifier)
           .setChallenge(challenge);
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
+      if (mounted) {
         context.go(AppRoutes.verifyOtp, extra: challenge);
-      });
+      }
     });
 
     return AuthSurface(
@@ -204,5 +200,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       password: _passwordController.text,
       redirectPath: redirectPath,
     );
+    if (!mounted) return;
+    final state = ref.read(loginControllerProvider);
+    if (state.status == LoginStatus.twoFactorRequired &&
+        state.pendingChallenge != null) {
+      final challenge = state.pendingChallenge!;
+      ref
+          .read(authOtpChallengeControllerProvider.notifier)
+          .setChallenge(challenge);
+      context.go(AppRoutes.verifyOtp, extra: challenge);
+    }
   }
 }

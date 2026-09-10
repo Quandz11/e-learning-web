@@ -60,6 +60,8 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
       context.go(challenge?.redirectPath ?? AppRoutes.appHome);
     });
 
+    final is2FA = challenge?.type == AuthOtpChallengeType.loginTwoFactor;
+
     if (challenge == null || !challenge.isValid) {
       return AppPage(
         appBarTitle: 'Xác minh mã',
@@ -83,23 +85,28 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
     }
 
     return AppPage(
-      appBarTitle: 'Xác minh mã',
+      appBarTitle: is2FA ? 'Xác thực 2FA' : 'Xác minh mã',
       child: AutofillGroup(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppSectionHeader(
-              title: challenge.type == AuthOtpChallengeType.registration
-                  ? 'Xác minh tài khoản'
-                  : 'Hoàn tất đăng nhập',
+              title: is2FA
+                  ? 'Xác thực 2FA'
+                  : (challenge.type == AuthOtpChallengeType.registration
+                      ? 'Xác minh tài khoản'
+                      : 'Hoàn tất đăng nhập'),
               subtitle: challenge.displayMessage?.trim().isNotEmpty ?? false
                   ? challenge.displayMessage!
-                  : challenge.type == AuthOtpChallengeType.registration
-                  ? 'Nhập mã xác minh 6 chữ số đã gửi tới email của bạn.'
-                  : 'Nhập mã 6 chữ số từ ứng dụng xác thực.',
+                  : (is2FA
+                      ? 'Mở ứng dụng Google Authenticator hoặc Authy để lấy mã 6 chữ số.'
+                      : 'Nhập mã xác minh 6 chữ số đã gửi tới email của bạn.'),
             ),
             const SizedBox(height: AppSpacing.lg),
-            _OtpEmailCard(maskedEmail: _maskEmail(challenge.email)),
+            _OtpChallengeCard(
+              maskedEmail: _maskEmail(challenge.email),
+              is2FA: is2FA,
+            ),
             const SizedBox(height: AppSpacing.md),
             if (state.generalMessage != null &&
                 state.status == VerifyOtpStatus.failure) ...[
@@ -116,10 +123,12 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
               enabled: !state.isSubmitting,
               onChanged: (_) => controller.onOtpChanged(),
               onSubmitted: (_) => _submit(controller, challenge),
-              labelText: 'Mã xác minh',
+              labelText: is2FA ? 'Mã 2FA (Authenticator)' : 'Mã xác minh',
               hintText: '123456',
               errorText: state.otpError,
-              prefixIcon: const Icon(Icons.password_outlined),
+              prefixIcon: is2FA
+                  ? const Icon(Icons.security_outlined)
+                  : const Icon(Icons.password_outlined),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(6),
@@ -128,7 +137,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
             const SizedBox(height: AppSpacing.lg),
             AppButton(
               buttonKey: const Key('otp_submit_button'),
-              label: 'Xác minh',
+              label: is2FA ? 'Xác nhận đăng nhập' : 'Xác minh',
               onPressed: () => _submit(controller, challenge),
               loading: state.isSubmitting,
             ),
@@ -172,10 +181,11 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
   }
 }
 
-class _OtpEmailCard extends StatelessWidget {
-  const _OtpEmailCard({required this.maskedEmail});
+class _OtpChallengeCard extends StatelessWidget {
+  const _OtpChallengeCard({required this.maskedEmail, required this.is2FA});
 
   final String maskedEmail;
+  final bool is2FA;
 
   @override
   Widget build(BuildContext context) {
@@ -183,14 +193,21 @@ class _OtpEmailCard extends StatelessWidget {
 
     return AppCard(
       child: Semantics(
-        label: 'Email xác minh $maskedEmail',
+        label: is2FA
+            ? 'Xác thực 2FA tài khoản $maskedEmail'
+            : 'Email xác minh $maskedEmail',
         child: Row(
           children: [
-            Icon(Icons.mark_email_read_outlined, color: colorScheme.primary),
+            Icon(
+              is2FA ? Icons.security_rounded : Icons.mark_email_read_outlined,
+              color: colorScheme.primary,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                maskedEmail,
+                is2FA
+                    ? 'Tài khoản: $maskedEmail'
+                    : maskedEmail,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),

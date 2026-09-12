@@ -4,6 +4,7 @@ import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/features/home/data/models/home_models.dart';
 import 'package:e_learning_mobile/features/home/presentation/controllers/home_controller.dart';
 import 'package:e_learning_mobile/features/home/presentation/controllers/home_state.dart';
+import 'package:e_learning_mobile/features/notifications/presentation/controllers/notifications_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
@@ -1049,7 +1050,7 @@ _GreetingData _buildGreeting({
   );
 }
 
-class _HomeHeader extends StatelessWidget {
+class _HomeHeader extends ConsumerWidget {
   const _HomeHeader({
     required this.greeting,
     required this.displayName,
@@ -1063,9 +1064,12 @@ class _HomeHeader extends StatelessWidget {
   final String? avatarUrl;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    final notificationsState = ref.watch(notificationsControllerProvider);
+    final unreadCount = notificationsState.valueOrNull?.unreadCount ?? 0;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1112,6 +1116,7 @@ class _HomeHeader extends StatelessWidget {
           tooltip: 'Thông báo',
           onPressed: () => context.push(AppRoutes.appNotifications),
           icon: Badge(
+            isLabelVisible: unreadCount > 0,
             smallSize: 8,
             child: Icon(
               Icons.notifications_outlined,

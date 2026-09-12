@@ -9,10 +9,14 @@ namespace SKVI.Application.Services;
 public class ChatService : IChatService
 {
     private readonly ApplicationDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public ChatService(ApplicationDbContext context)
+    public ChatService(
+        ApplicationDbContext context,
+        INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<List<ConversationResponse>> GetUserConversationsAsync(Guid userId)
@@ -342,6 +346,28 @@ public class ChatService : IChatService
         var messageWithSender = await _context.Messages
             .Include(m => m.Sender)
             .FirstAsync(m => m.Id == message.Id);
+
+        // Dispatch FCM Push Notifications to other participants asynchronously
+        try
+        {
+            var otherParticipants = await _context.ConversationParticipants
+                .Where(p => p.ConversationId == conversationId && p.UserId != userId)
+                .Select(p => p.UserId)
+                .ToListAsync();
+
+            var senderName = messageWithSender.Sender?.FullName ?? "Tin nhắn mới";
+            var senderAvatar = messageWithSender.Sender?.AvatarUrl;
+
+            foreach (var recipientId in otherParticipants)
+            {
+                _ = _notificationService.SendChatMessageNotificationAsync(
+                    recipientId, conversationId, senderName, content, senderAvatar);
+            }
+        }
+        catch
+        {
+            // Silently ignore push notification errors so messaging never fails
+        }
 
         return MapToMessageResponse(messageWithSender);
     }

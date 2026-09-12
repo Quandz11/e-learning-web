@@ -13,4 +13,5 @@ public interface INotificationService
     Task MarkAllAsReadAsync(Guid userId);
     Task RegisterDeviceTokenAsync(Guid userId, RegisterDeviceTokenRequest request);
     Task UnregisterDeviceTokenAsync(Guid userId, string deviceId);
+    Task SendChatMessageNotificationAsync(Guid recipientUserId, Guid conversationId, string senderName, string content, string? senderAvatarUrl);
 }

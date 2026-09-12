@@ -28,6 +28,11 @@ class NotificationService {
   static const String channelDesc =
       'Thông báo nhắc nhở uống nước, nhịn ăn, vận động và tin tức hệ thống';
 
+  static const String chatChannelId = 'skvi_chat_channel';
+  static const String chatChannelName = 'Tin nhắn trò chuyện';
+  static const String chatChannelDesc =
+      'Thông báo tin nhắn mới từ hỗ trợ viên và bạn học';
+
   static const String fallbackChannelId = 'skvi_notifications';
 
   bool _isInitialized = false;
@@ -73,6 +78,17 @@ class NotificationService {
           channelId,
           channelName,
           description: channelDesc,
+          importance: Importance.max,
+          playSound: true,
+          enableVibration: true,
+          showBadge: true,
+        ),
+      );
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          chatChannelId,
+          chatChannelName,
+          description: chatChannelDesc,
           importance: Importance.max,
           playSound: true,
           enableVibration: true,
@@ -127,25 +143,34 @@ class NotificationService {
     required String title,
     required String body,
     String? payload,
+    bool isChat = false,
   }) async {
     await initialize();
 
-    const androidDetails = AndroidNotificationDetails(
-      channelId,
-      channelName,
-      channelDescription: channelDesc,
+    final androidDetails = AndroidNotificationDetails(
+      isChat ? chatChannelId : channelId,
+      isChat ? chatChannelName : channelName,
+      channelDescription: isChat ? chatChannelDesc : channelDesc,
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
       enableVibration: true,
       showWhen: true,
+      category: isChat ? AndroidNotificationCategory.message : null,
+      styleInformation: isChat
+          ? BigTextStyleInformation(
+              body,
+              contentTitle: title,
+              summaryText: 'Tin nhắn mới',
+            )
+          : null,
     );
     const darwinDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: darwinDetails,
     );
@@ -268,12 +293,14 @@ class NotificationService {
 
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           final notification = message.notification;
+          final isChat = message.data['type'] == 'chat';
           if (notification != null) {
             showImmediateNotification(
               id: message.hashCode,
-              title: notification.title ?? 'Thông báo mới',
+              title: notification.title ?? (isChat ? 'Tin nhắn mới' : 'Thông báo mới'),
               body: notification.body ?? '',
               payload: message.data.toString(),
+              isChat: isChat,
             );
           }
         });

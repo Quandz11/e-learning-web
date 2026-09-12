@@ -365,4 +365,79 @@ public class NotificationService : INotificationService
             _logger.LogError(ex, "Failed to send FCM push notification for Title={Title}", title);
         }
     }
+
+    public async Task SendChatMessageNotificationAsync(
+        Guid recipientUserId,
+        Guid conversationId,
+        string senderName,
+        string content,
+        string? senderAvatarUrl)
+    {
+        try
+        {
+            var userTokens = await _context.UserDeviceTokens
+                .Where(t => t.UserId == recipientUserId && t.IsActive && !string.IsNullOrWhiteSpace(t.Token))
+                .ToListAsync();
+
+            if (!userTokens.Any()) return;
+
+            _logger.LogInformation("Dispatching Chat FCM push to {Count} device tokens for Recipient={UserId}, Sender={SenderName}",
+                userTokens.Count, recipientUserId, senderName);
+
+            if (FirebaseAdmin.FirebaseApp.DefaultInstance == null)
+            {
+                _logger.LogWarning("FirebaseApp is not initialized. Skipping Chat FCM push.");
+                return;
+            }
+
+            var tokenStrings = userTokens.Select(t => t.Token).Distinct().ToList();
+
+            var message = new FirebaseAdmin.Messaging.MulticastMessage
+            {
+                Tokens = tokenStrings,
+                Notification = new FirebaseAdmin.Messaging.Notification
+                {
+                    Title = senderName,
+                    Body = content
+                },
+                Data = new Dictionary<string, string>
+                {
+                    ["type"] = "chat",
+                    ["conversationId"] = conversationId.ToString(),
+                    ["senderName"] = senderName,
+                    ["senderAvatar"] = senderAvatarUrl ?? "",
+                    ["title"] = senderName,
+                    ["body"] = content,
+                    ["click_action"] = "FLUTTER_NOTIFICATION_CLICK"
+                },
+                Android = new FirebaseAdmin.Messaging.AndroidConfig
+                {
+                    Priority = FirebaseAdmin.Messaging.Priority.High,
+                    Notification = new FirebaseAdmin.Messaging.AndroidNotification
+                    {
+                        ChannelId = "skvi_chat_channel",
+                        Sound = "default",
+                        Tag = $"chat_{conversationId}"
+                    }
+                },
+                Apns = new FirebaseAdmin.Messaging.ApnsConfig
+                {
+                    Aps = new FirebaseAdmin.Messaging.Aps
+                    {
+                        Sound = "default",
+                        Badge = 1,
+                        Category = "CHAT_MESSAGE",
+                        MutableContent = true
+                    }
+                }
+            };
+
+            var response = await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
+            _logger.LogInformation("Chat FCM dispatch completed: Success={SuccessCount}, Failure={FailureCount}", response.SuccessCount, response.FailureCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send Chat FCM push notification for Conversation={ConversationId}", conversationId);
+        }
+    }
 }

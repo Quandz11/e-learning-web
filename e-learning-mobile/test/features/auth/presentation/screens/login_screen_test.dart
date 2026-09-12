@@ -277,6 +277,7 @@ void main() {
 
     expect(challenge?.type, AuthOtpChallengeType.loginTwoFactor);
     expect(challenge?.email, 'user@example.com');
+    expect(find.text('Xác thực 2FA'), findsAtLeastNWidgets(1));
     expect(find.text('Home'), findsNothing);
   });
 
@@ -359,10 +360,11 @@ Widget _pumpLoginApp({
       if (repository != null)
         authRepositoryProvider.overrideWithValue(repository),
       appRouterProvider.overrideWith((ref) {
-        final sessionState = ref.watch(sessionControllerProvider);
+        final notifier = ref.watch(appRouterNotifierProvider);
         final deepLinks = DeepLinkConfig(appConfig);
         return GoRouter(
           initialLocation: AppRoutes.login,
+          refreshListenable: notifier,
           routes: [
             GoRoute(
               path: AppRoutes.welcome,
@@ -394,8 +396,8 @@ Widget _pumpLoginApp({
             ),
           ],
           redirect: (_, state) => appRedirect(
-            sessionState: sessionState,
-            otpChallenge: ref.watch(authOtpChallengeControllerProvider),
+            sessionState: ref.read(sessionControllerProvider),
+            otpChallenge: ref.read(authOtpChallengeControllerProvider),
             forgotPasswordChallenge: null,
             deepLinks: deepLinks,
             uri: state.uri,

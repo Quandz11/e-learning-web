@@ -5,6 +5,7 @@ import 'package:e_learning_mobile/features/notifications/data/models/notificatio
 import 'package:e_learning_mobile/features/notifications/data/notifications_api.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -129,7 +130,16 @@ class NotificationsRepository {
         deviceId: deviceId,
         appVersion: version,
       );
-    } catch (_) {}
+
+      debugPrint('====================================');
+      debugPrint('✅ FCM TOKEN REGISTERED TO SERVER DB:');
+      debugPrint('   Device ID: $deviceId');
+      debugPrint('   Platform: $platform');
+      debugPrint('   Token: $token');
+      debugPrint('====================================');
+    } catch (e) {
+      debugPrint('⚠️ Failed to sync FCM Device Token: $e');
+    }
   }
 
   Future<void> unregisterCurrentDeviceToken() async {
@@ -148,6 +158,13 @@ class NotificationsRepository {
       } catch (_) {}
 
       await unregisterDeviceToken(deviceId);
-    } catch (_) {}
+
+      debugPrint('====================================');
+      debugPrint('🗑️ FCM TOKEN UNREGISTERED FROM SERVER DB:');
+      debugPrint('   Device ID: $deviceId');
+      debugPrint('====================================');
+    } catch (e) {
+      debugPrint('⚠️ Failed to unregister FCM Device Token: $e');
+    }
   }
 }

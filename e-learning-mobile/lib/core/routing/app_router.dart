@@ -47,17 +47,37 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+class AppRouterNotifier extends ChangeNotifier {
+  AppRouterNotifier(this._ref) {
+    _ref.listen<SessionState>(
+      sessionControllerProvider,
+      (_, __) => notifyListeners(),
+    );
+    _ref.listen<AuthOtpChallenge?>(
+      authOtpChallengeControllerProvider,
+      (_, __) => notifyListeners(),
+    );
+    _ref.listen<ForgotPasswordChallenge?>(
+      forgotPasswordChallengeControllerProvider,
+      (_, __) => notifyListeners(),
+    );
+  }
+
+  final Ref _ref;
+}
+
+final appRouterNotifierProvider = Provider<AppRouterNotifier>((ref) {
+  return AppRouterNotifier(ref);
+});
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final sessionState = ref.watch(sessionControllerProvider);
-  final otpChallenge = ref.watch(authOtpChallengeControllerProvider);
-  final forgotPasswordChallenge = ref.watch(
-    forgotPasswordChallengeControllerProvider,
-  );
+  final notifier = ref.watch(appRouterNotifierProvider);
   final config = ref.watch(appConfigProvider);
   final deepLinks = DeepLinkConfig(config);
 
   return GoRouter(
     initialLocation: AppRoutes.appRoot,
+    refreshListenable: notifier,
     routes: [
       GoRoute(
         path: AppRoutes.welcome,
@@ -251,9 +271,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
     errorBuilder: (_, state) => UnknownRouteScreen(uri: state.uri),
     redirect: (_, state) => appRedirect(
-      sessionState: sessionState,
-      otpChallenge: otpChallenge,
-      forgotPasswordChallenge: forgotPasswordChallenge,
+      sessionState: ref.read(sessionControllerProvider),
+      otpChallenge: ref.read(authOtpChallengeControllerProvider),
+      forgotPasswordChallenge: ref.read(
+        forgotPasswordChallengeControllerProvider,
+      ),
       deepLinks: deepLinks,
       uri: state.uri,
       matchedLocation: state.matchedLocation,

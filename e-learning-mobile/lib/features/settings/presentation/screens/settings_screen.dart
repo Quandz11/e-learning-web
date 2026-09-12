@@ -2,6 +2,7 @@ import 'package:e_learning_mobile/core/network/cache_service.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/features/auth/data/auth_repository.dart';
 import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
+import 'package:e_learning_mobile/features/notifications/data/notifications_repository.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
@@ -417,6 +418,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           .session
           ?.refreshToken;
       try {
+        try {
+          await ref
+              .read(notificationsRepositoryProvider)
+              .unregisterCurrentDeviceToken();
+        } catch (_) {}
         await ref
             .read(authRepositoryProvider)
             .logout(LogoutRequest(refreshToken: refreshToken));

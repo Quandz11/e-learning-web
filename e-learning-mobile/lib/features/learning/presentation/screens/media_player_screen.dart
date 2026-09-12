@@ -570,60 +570,135 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
     final previous = currentIndex > 0 ? parts[currentIndex - 1] : null;
     final next = currentIndex < parts.length - 1 ? parts[currentIndex + 1] : null;
 
-    return Row(
+    void openPart(LearningLessonPart part) {
+      if (part.isVideo) {
+        context.pushReplacement(
+          AppRoutes.mediaPlayerPath(courseId: detail.course.id, lessonPartId: part.id),
+        );
+      } else if (part.isDocument) {
+        context.pushReplacement(
+          AppRoutes.documentReaderPath(courseId: detail.course.id, lessonPartId: part.id),
+        );
+      } else {
+        context.pushReplacement(
+          AppRoutes.lessonPath(courseId: detail.course.id, lessonPartId: part.id),
+        );
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (previous != null)
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                if (previous.isVideo) {
-                  context.pushReplacement(
-                    AppRoutes.mediaPlayerPath(courseId: detail.course.id, lessonPartId: previous.id),
-                  );
-                } else if (previous.isDocument) {
-                  context.pushReplacement(
-                    AppRoutes.documentReaderPath(courseId: detail.course.id, lessonPartId: previous.id),
-                  );
-                } else {
-                  context.pushReplacement(
-                    AppRoutes.lessonPath(courseId: detail.course.id, lessonPartId: previous.id),
-                  );
-                }
-              },
-              icon: const Icon(Icons.chevron_left_rounded),
-              label: const Text('Bài trước'),
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        Text(
+          'Điều hướng bài học',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
-            ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (previous != null)
+                Expanded(
+                  child: InkWell(
+                    onTap: () => openPart(previous),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFEAEFE9), width: 0.8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.chevron_left_rounded, size: 16, color: AppColors.textSecondary),
+                              SizedBox(width: 2),
+                              Text(
+                                'Bài trước',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            previous.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                              height: 1.25,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              if (previous != null && next != null) const SizedBox(width: AppSpacing.sm),
+              if (next != null)
+                Expanded(
+                  child: InkWell(
+                    onTap: () => openPart(next),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.2),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Bài tiếp theo',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.white70),
+                              ),
+                              SizedBox(width: 2),
+                              Icon(Icons.chevron_right_rounded, size: 16, color: Colors.white70),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            next.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              height: 1.25,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        if (previous != null && next != null) const SizedBox(width: AppSpacing.sm),
-        if (next != null)
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: () {
-                if (next.isVideo) {
-                  context.pushReplacement(
-                    AppRoutes.mediaPlayerPath(courseId: detail.course.id, lessonPartId: next.id),
-                  );
-                } else if (next.isDocument) {
-                  context.pushReplacement(
-                    AppRoutes.documentReaderPath(courseId: detail.course.id, lessonPartId: next.id),
-                  );
-                } else {
-                  context.pushReplacement(
-                    AppRoutes.lessonPath(courseId: detail.course.id, lessonPartId: next.id),
-                  );
-                }
-              },
-              icon: const Icon(Icons.chevron_right_rounded),
-              label: const Text('Bài tiếp theo'),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ),
+        ),
       ],
     );
   }

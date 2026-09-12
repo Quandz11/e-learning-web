@@ -2,6 +2,7 @@ import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/features/auth/data/auth_repository.dart';
 import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
+import 'package:e_learning_mobile/features/notifications/data/notifications_repository.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
@@ -605,6 +606,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         .session
         ?.refreshToken;
     try {
+      try {
+        await ref
+            .read(notificationsRepositoryProvider)
+            .unregisterCurrentDeviceToken();
+      } catch (_) {}
       await ref
           .read(authRepositoryProvider)
           .logout(LogoutRequest(refreshToken: refreshToken));

@@ -22,9 +22,9 @@ class MobileWidgetStateData {
       streakDays: 7,
       targetMinutes: 30,
       learnedMinutes: 25,
-      activeCourseTitle: 'Lập trình Flutter nâng cao',
+      activeCourseTitle: 'Khóa học Nhịn ăn Chữa lành SKVI',
       activeCourseProgress: 65,
-      nextLessonTitle: 'Bài 5: State Management với Riverpod',
+      nextLessonTitle: 'Bài 5: Cơ chế Tự thực Autophagy & Re-feeding',
       nextReminderTime: '20:00',
     );
   }
@@ -34,9 +34,9 @@ class MobileWidgetStateData {
       streakDays: map['streakDays'] as int? ?? 7,
       targetMinutes: map['targetMinutes'] as int? ?? 30,
       learnedMinutes: map['learnedMinutes'] as int? ?? 25,
-      activeCourseTitle: map['activeCourseTitle'] as String? ?? 'Lập trình Flutter nâng cao',
+      activeCourseTitle: map['activeCourseTitle'] as String? ?? 'Khóa học Nhịn ăn Chữa lành SKVI',
       activeCourseProgress: map['activeCourseProgress'] as int? ?? 65,
-      nextLessonTitle: map['nextLessonTitle'] as String? ?? 'Bài 5: State Management với Riverpod',
+      nextLessonTitle: map['nextLessonTitle'] as String? ?? 'Bài 5: Cơ chế Tự thực Autophagy & Re-feeding',
       nextReminderTime: map['nextReminderTime'] as String? ?? '20:00',
     );
   }

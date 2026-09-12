@@ -66,6 +66,19 @@ class _AppState extends ConsumerState<App> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('vi'), Locale('en')],
+      builder: (context, child) {
+        final mediaQuery = MediaQuery.of(context);
+        final clampedTextScaler = mediaQuery.textScaler.clamp(
+          minScaleFactor: 0.85,
+          maxScaleFactor: 1.20,
+        );
+        return MediaQuery(
+          data: mediaQuery.copyWith(
+            textScaler: clampedTextScaler,
+          ),
+          child: child ?? const SizedBox(),
+        );
+      },
     );
   }
 }

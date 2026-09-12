@@ -1,5 +1,6 @@
 import 'package:e_learning_mobile/core/network/cache_service.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
+import 'package:e_learning_mobile/core/services/home_widget_service.dart';
 import 'package:e_learning_mobile/features/auth/data/auth_repository.dart';
 import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
 import 'package:e_learning_mobile/features/notifications/data/notifications_repository.dart';
@@ -21,13 +22,28 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _notificationsEnabled = true;
+  bool _widgetSyncEnabled = true;
   String _selectedLanguage = 'Tiếng Việt';
   bool _isClearingCache = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWidgetSyncState();
+  }
+
+  Future<void> _loadWidgetSyncState() async {
+    final enabled = await HomeWidgetService.instance.isSyncEnabled();
+    if (mounted) {
+      setState(() => _widgetSyncEnabled = enabled);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = context.colorScheme;
+    final isDark = context.isDark;
     ref.watch(themeControllerProvider);
     final themeNotifier = ref.read(themeControllerProvider.notifier);
     final selectedTheme = themeNotifier.themeModeName;
@@ -104,7 +120,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBEB),
+                  color: isDark ? const Color(0xFFD97706).withValues(alpha: 0.18) : const Color(0xFFFFFBEB),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -133,7 +149,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F3FF),
+                  color: isDark ? const Color(0xFF7C3AED).withValues(alpha: 0.18) : const Color(0xFFF5F3FF),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -170,12 +186,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0FDF4),
+                  color: isDark ? const Color(0xFF16A34A).withValues(alpha: 0.18) : const Color(0xFFF0FDF4),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.language_rounded,
-                  color: Color(0xFF0F5B38),
+                  color: Color(0xFF16A34A),
                   size: 18,
                 ),
               ),
@@ -199,10 +215,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
             const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            SwitchListTile.adaptive(
+              secondary: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF0284C7).withValues(alpha: 0.18) : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.sync_outlined,
+                  color: Color(0xFF0284C7),
+                  size: 18,
+                ),
+              ),
+              title: const Text(
+                'Đồng bộ Widget di động',
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+              ),
+              subtitle: const Text(
+                'Tự động cập nhật dữ liệu ra màn hình khóa & chính',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w300),
+              ),
+              value: _widgetSyncEnabled,
+              activeColor: AppColors.primary,
+              onChanged: (val) async {
+                setState(() => _widgetSyncEnabled = val);
+                await HomeWidgetService.instance.setSyncEnabled(val);
+              },
+            ),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
               icon: Icons.widgets_outlined,
-              title: 'Thiết kế Widget di động',
-              subtitle: 'Xem trước & đồng bộ Widget màn hình chính & khóa',
+              title: 'Cấu hình mẫu Widget',
+              subtitle: 'Chọn mẫu & xem trước Widget màn hình khóa/chính',
               bgColor: const Color(0xFFEFF6FF),
               iconColor: const Color(0xFF0284C7),
               onTap: () => context.push('/app/settings/widgets'),
@@ -257,10 +303,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ]),
           const SizedBox(height: AppSpacing.lg),
 
-          // 4. Red Logout Row matching Screen 12
+          // 4. Red Logout Row
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: AppColors.error.withValues(alpha: 0.3),
@@ -357,15 +403,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Color iconColor = AppColors.primary,
   }) {
     final isDark = context.isDark;
+    final effectiveBgColor = isDark ? iconColor.withValues(alpha: 0.18) : bgColor;
+    final effectiveIconColor = isDark ? (iconColor == AppColors.primary ? const Color(0xFF4CAF50) : iconColor) : iconColor;
+
     return ListTile(
       leading: Container(
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: isDark ? context.colorScheme.surfaceContainerHighest : bgColor,
+          color: effectiveBgColor,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: isDark ? context.colorScheme.primary : iconColor, size: 18),
+        child: Icon(icon, color: effectiveIconColor, size: 18),
       ),
       title: Text(
         title,

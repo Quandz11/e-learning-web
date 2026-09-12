@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Giảm cân và khỏe mạnh"
+        android:text="Khóa học Nhịn ăn Chữa lành SKVI"
         android:textColor="#16251E"
         android:textSize="15sp"
         android:textStyle="bold"
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Bài 5: Tìm hiểu về Carbs"
+        android:text="Bài 5: Cơ chế Tự thực Autophagy &amp; Re-feeding"
         android:textColor="#55645B"
         android:textSize="12sp"
         android:maxLines="1"
@@ -88,6 +88,5 @@
         android:layout_width="match_parent"
         android:layout_height="6dp"
         android:max="100"
-        android:progress="65"
-        android:progressDrawable="@drawable/widget_progress_bar" />
+        android:progress="65" />
 </LinearLayout>

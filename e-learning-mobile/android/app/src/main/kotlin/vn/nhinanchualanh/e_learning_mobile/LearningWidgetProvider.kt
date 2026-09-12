@@ -4,11 +4,13 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.widget.RemoteViews
+import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
 
 class LearningWidgetProvider : HomeWidgetProvider() {
 
-    private fun safeGetInt(prefs: SharedPreferences, key: String, defaultVal: Int): Int {
+    private fun safeGetInt(prefs: SharedPreferences?, key: String, defaultVal: Int): Int {
+        if (prefs == null) return defaultVal
         return try {
             prefs.getInt(key, defaultVal)
         } catch (_: Exception) {
@@ -20,7 +22,8 @@ class LearningWidgetProvider : HomeWidgetProvider() {
         }
     }
 
-    private fun safeGetString(prefs: SharedPreferences, key: String, defaultVal: String): String {
+    private fun safeGetString(prefs: SharedPreferences?, key: String, defaultVal: String): String {
+        if (prefs == null) return defaultVal
         return try {
             prefs.getString(key, defaultVal) ?: defaultVal
         } catch (_: Exception) {
@@ -40,8 +43,8 @@ class LearningWidgetProvider : HomeWidgetProvider() {
                     val streak = safeGetInt(widgetData, "widget_streak_days", 7)
                     val learned = safeGetInt(widgetData, "widget_learned_minutes", 25)
                     val target = safeGetInt(widgetData, "widget_target_minutes", 30)
-                    val course = safeGetString(widgetData, "widget_active_course_title", "Lập trình Flutter nâng cao")
-                    val nextLesson = safeGetString(widgetData, "widget_next_lesson_title", "Bài 5: State Management")
+                    val course = safeGetString(widgetData, "widget_active_course_title", "Khóa học Nhịn ăn SKVI")
+                    val nextLesson = safeGetString(widgetData, "widget_next_lesson_title", "Bài 5: Autophagy tế bào")
 
                     val percent = if (target > 0) ((learned.toDouble() / target.toDouble()) * 100).toInt().coerceIn(0, 100) else 100
 
@@ -50,6 +53,9 @@ class LearningWidgetProvider : HomeWidgetProvider() {
                     setTextViewText(R.id.tv_course, course)
                     setTextViewText(R.id.tv_next_lesson, nextLesson)
                     setProgressBar(R.id.pb_goal, 100, percent, false)
+
+                    val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)
+                    setOnClickPendingIntent(R.id.widget_root, pendingIntent)
                 }
                 appWidgetManager.updateAppWidget(widgetId, views)
             } catch (e: Exception) {

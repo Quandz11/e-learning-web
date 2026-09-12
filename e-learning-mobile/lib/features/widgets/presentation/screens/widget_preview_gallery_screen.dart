@@ -17,12 +17,14 @@ class _WidgetPreviewGalleryScreenState
   late TabController _tabController;
   MobileWidgetStateData _widgetData = MobileWidgetStateData.defaultData();
   bool _isSyncing = false;
+  bool _isSyncEnabled = true;
+  String _selectedWidgetId = 'streak_small';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadData();
+    _loadState();
   }
 
   @override
@@ -31,11 +33,48 @@ class _WidgetPreviewGalleryScreenState
     super.dispose();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadState() async {
     final rawMap = await HomeWidgetService.instance.getWidgetData();
-    setState(() {
-      _widgetData = MobileWidgetStateData.fromMap(rawMap);
-    });
+    final enabled = await HomeWidgetService.instance.isSyncEnabled();
+    final selectedId = await HomeWidgetService.instance.getSelectedWidgetId();
+    if (mounted) {
+      setState(() {
+        _widgetData = MobileWidgetStateData.fromMap(rawMap);
+        _isSyncEnabled = enabled;
+        _selectedWidgetId = selectedId;
+      });
+    }
+  }
+
+  Future<void> _toggleSync(bool val) async {
+    setState(() => _isSyncEnabled = val);
+    await HomeWidgetService.instance.setSyncEnabled(val);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            val
+                ? '✅ Đã BẬT tự động đồng bộ Widget hệ thống.'
+                : '⏸ Đã TẮT tự động đồng bộ Widget hệ thống.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _selectWidget(String id, String name) async {
+    setState(() => _selectedWidgetId = id);
+    await HomeWidgetService.instance.setSelectedWidgetId(id);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🎯 Đã kích hoạt mẫu "$name" làm Widget chính!'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    }
   }
 
   Future<void> _syncToDevice() async {
@@ -56,7 +95,7 @@ class _WidgetPreviewGalleryScreenState
         SnackBar(
           content: Text(
             success
-                ? '✅ Đã đồng bộ dữ liệu ra Widget hệ thống!'
+                ? '✅ Đã đồng bộ dữ liệu mới nhất ra Widget hệ thống!'
                 : '❌ Đồng bộ Widget thất bại.',
           ),
           behavior: SnackBarBehavior.floating,
@@ -74,7 +113,7 @@ class _WidgetPreviewGalleryScreenState
       backgroundColor: surfaceColor,
       appBar: AppBar(
         title: const Text(
-          'Thiết kế Widget Mobile',
+          'Cấu hình & Chọn Widget',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -94,6 +133,28 @@ class _WidgetPreviewGalleryScreenState
       body: SafeArea(
         child: Column(
           children: [
+            // Top Toggle Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: isDark ? const Color(0xFF1B2B23) : AppColors.mint.withValues(alpha: 0.5),
+              child: Row(
+                children: [
+                  const Icon(Icons.sync, size: 20, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Tự động đồng bộ dữ liệu Widget',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  Switch.adaptive(
+                    value: _isSyncEnabled,
+                    activeColor: AppColors.primary,
+                    onChanged: _toggleSync,
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -117,32 +178,41 @@ class _WidgetPreviewGalleryScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('1. Widget Nhỏ (2x2) - Chuỗi học tập'),
+          _buildWidgetCardHeader('1. Widget Nhỏ (2x2) - Chuỗi học tập', 'streak_small'),
           const SizedBox(height: 10),
           Center(
             child: SmallStreakWidgetView(
               data: _widgetData,
-              onTap: () {},
+              onTap: () => _selectWidget('streak_small', 'Widget Nhỏ 2x2'),
             ),
           ),
+          const SizedBox(height: 8),
+          _buildSelectButton('streak_small', 'Widget Nhỏ 2x2'),
+
           const SizedBox(height: 24),
-          _buildSectionHeader('2. Widget Vừa (4x2) - Bài học dở dang'),
+          _buildWidgetCardHeader('2. Widget Vừa (4x2) - Bài học dở dang', 'course_medium'),
           const SizedBox(height: 10),
           Center(
             child: MediumCourseWidgetView(
               data: _widgetData,
-              onTap: () {},
+              onTap: () => _selectWidget('course_medium', 'Widget Vừa 4x2'),
             ),
           ),
+          const SizedBox(height: 8),
+          _buildSelectButton('course_medium', 'Widget Vừa 4x2'),
+
           const SizedBox(height: 24),
-          _buildSectionHeader('3. Widget Lớn (4x4) - Bảng tin học tập'),
+          _buildWidgetCardHeader('3. Widget Lớn (4x4) - Bảng tin học tập', 'dashboard_large'),
           const SizedBox(height: 10),
           Center(
             child: LargeDashboardWidgetView(
               data: _widgetData,
-              onTap: () {},
+              onTap: () => _selectWidget('dashboard_large', 'Widget Lớn 4x4'),
             ),
           ),
+          const SizedBox(height: 8),
+          _buildSelectButton('dashboard_large', 'Widget Lớn 4x4'),
+
           const SizedBox(height: 20),
         ],
       ),
@@ -155,23 +225,31 @@ class _WidgetPreviewGalleryScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('1. Circular (Khung tròn 1x1)'),
+          _buildWidgetCardHeader('1. Circular (Khung tròn 1x1)', 'lock_circular'),
           const SizedBox(height: 12),
           Center(
             child: LockScreenCircularWidgetView(data: _widgetData),
           ),
+          const SizedBox(height: 8),
+          _buildSelectButton('lock_circular', 'Widget Màn hình khóa Tròn 1x1'),
+
           const SizedBox(height: 24),
-          _buildSectionHeader('2. Inline (Dòng chữ sát giờ)'),
+          _buildWidgetCardHeader('2. Inline (Dòng chữ sát giờ)', 'lock_inline'),
           const SizedBox(height: 12),
           Center(
             child: LockScreenInlineWidgetView(data: _widgetData),
           ),
+          const SizedBox(height: 8),
+          _buildSelectButton('lock_inline', 'Widget Màn hình khóa Dòng đơn'),
+
           const SizedBox(height: 24),
-          _buildSectionHeader('3. Rectangular (Khung chữ nhật 2x1)'),
+          _buildWidgetCardHeader('3. Rectangular (Khung chữ nhật 2x1)', 'lock_rectangular'),
           const SizedBox(height: 12),
           Center(
             child: LockScreenRectangularWidgetView(data: _widgetData),
           ),
+          const SizedBox(height: 8),
+          _buildSelectButton('lock_rectangular', 'Widget Màn hình khóa Khung nhật 2x1'),
         ],
       ),
     );
@@ -183,10 +261,12 @@ class _WidgetPreviewGalleryScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Thẻ Thông báo Nhắc học Tương tác (Rich Notification)'),
+          _buildWidgetCardHeader('Thông báo Nhắc học Tương tác (Rich Notification Widget)', 'notification_banner'),
           const SizedBox(height: 12),
           RichNotificationPreviewView(data: _widgetData),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
+          _buildSelectButton('notification_banner', 'Thông báo Trung tâm Tương tác'),
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -199,7 +279,7 @@ class _WidgetPreviewGalleryScreenState
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Thông báo này cho phép người học bấm trực tiếp [Học ngay] để mở ứng dụng hoặc [Hoãn 15p] để hẹn lại giờ nhắc.',
+                    'Widget Thông báo cố định ở Trung tâm thông báo và Màn hình khóa giúp bấm chọn [Học ngay] hoặc [Hoãn 15p] tức thì.',
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark ? Colors.white70 : AppColors.textPrimary,
@@ -214,13 +294,61 @@ class _WidgetPreviewGalleryScreenState
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-        color: AppColors.primary,
+  Widget _buildWidgetCardHeader(String title, String id) {
+    final isSelected = _selectedWidgetId == id;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+        ),
+        if (isSelected)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.check_circle, size: 12, color: Colors.white),
+                SizedBox(width: 4),
+                Text(
+                  'ĐANG KÍCH HOẠT',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSelectButton(String id, String name) {
+    final isSelected = _selectedWidgetId == id;
+    return Center(
+      child: OutlinedButton.icon(
+        onPressed: isSelected ? null : () => _selectWidget(id, name),
+        icon: Icon(
+          isSelected ? Icons.check_circle : Icons.touch_app_outlined,
+          size: 16,
+          color: isSelected ? AppColors.primary : null,
+        ),
+        label: Text(isSelected ? 'Đã kích hoạt mẫu này' : 'Chọn mẫu này'),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: isSelected ? 1.5 : 1,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
       ),
     );
   }
@@ -252,10 +380,15 @@ class _WidgetPreviewGalleryScreenState
                   ),
                 ),
                 Text(
-                  'Bấm để đồng bộ dữ liệu mới nhất ra Widget thật',
+                  _isSyncEnabled
+                      ? 'Tự động đồng bộ đang BẬT'
+                      : 'Tự động đồng bộ đang TẮT',
                   style: TextStyle(
                     fontSize: 10,
-                    color: isDark ? Colors.white60 : AppColors.textSecondary,
+                    color: _isSyncEnabled
+                        ? (isDark ? const Color(0xFF4CAF50) : AppColors.primary)
+                        : Colors.red,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -270,7 +403,7 @@ class _WidgetPreviewGalleryScreenState
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : const Icon(Icons.sync, size: 16),
-            label: const Text('Đồng bộ'),
+            label: const Text('Đồng bộ ngay'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,

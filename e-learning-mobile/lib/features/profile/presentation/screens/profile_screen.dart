@@ -418,6 +418,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }) {
     final theme = Theme.of(context);
     final isDark = context.isDark;
+    final effectiveBgColor = isDark ? iconColor.withValues(alpha: 0.18) : bgColor;
+    final effectiveIconColor = isDark ? (iconColor == AppColors.primary ? const Color(0xFF4CAF50) : iconColor) : iconColor;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -432,10 +434,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: bgColor,
+                color: effectiveBgColor,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: iconColor, size: 18),
+              child: Icon(icon, color: effectiveIconColor, size: 18),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(

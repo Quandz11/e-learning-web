@@ -24,15 +24,15 @@ void main() {
         'streakDays': 12,
         'targetMinutes': 40,
         'learnedMinutes': 40,
-        'activeCourseTitle': 'Lập trình Dart cơ bản',
+        'activeCourseTitle': 'Khóa học Nhịn ăn Y khoa SKVI',
         'activeCourseProgress': 90,
-        'nextLessonTitle': 'Bài 10: Final Project',
+        'nextLessonTitle': 'Bài 10: Tổng kết lộ trình',
         'nextReminderTime': '21:00',
       };
 
       final state = MobileWidgetStateData.fromMap(map);
       expect(state.streakDays, 12);
-      expect(state.activeCourseTitle, 'Lập trình Dart cơ bản');
+      expect(state.activeCourseTitle, 'Khóa học Nhịn ăn Y khoa SKVI');
       expect(state.goalProgressRatio, 1.0);
 
       final exported = state.toMap();

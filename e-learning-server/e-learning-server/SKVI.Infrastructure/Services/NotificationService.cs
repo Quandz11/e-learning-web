@@ -146,18 +146,19 @@ public class NotificationService : INotificationService
 
     public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId)
     {
-        return await _context.Notifications
+        var notifications = await _context.Notifications
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
-            .Select(n => new NotificationDto
-            {
-                Id = n.Id,
-                Title = n.Title,
-                Content = n.Content,
-                IsRead = n.IsRead,
-                CreatedAt = n.CreatedAt
-            })
             .ToListAsync();
+
+        return notifications.Select(n => new NotificationDto
+        {
+            Id = n.Id,
+            Title = n.Title,
+            Content = n.Content,
+            IsRead = n.IsRead,
+            CreatedAt = DateTime.SpecifyKind(n.CreatedAt, DateTimeKind.Utc)
+        });
     }
 
     public async Task<int> GetUnreadCountAsync(Guid userId)

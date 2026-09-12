@@ -19,10 +19,18 @@ class NotificationItem {
       title: json['title']?.toString() ?? '',
       content: json['content']?.toString(),
       isRead: json['isRead'] as bool? ?? false,
-      createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
-          : DateTime.now(),
+      createdAt: _parseUtcToLocal(json['createdAt']?.toString()),
     );
+  }
+
+  static DateTime _parseUtcToLocal(String? rawStr) {
+    if (rawStr == null || rawStr.isEmpty) return DateTime.now();
+    var str = rawStr.trim();
+    if (!str.endsWith('Z') && !str.contains('+') && !str.contains('-')) {
+      str = '${str}Z';
+    }
+    final dt = DateTime.tryParse(str) ?? DateTime.now();
+    return dt.toLocal();
   }
 
   Map<String, dynamic> toJson() {

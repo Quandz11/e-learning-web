@@ -42,6 +42,13 @@ class NotificationService {
 
     try {
       tz.initializeTimeZones();
+      // Ensure tz.local uses Asia/Ho_Chi_Minh or location matching device offset
+      if (tz.local.name == 'UTC' || tz.local.name == 'NullLocation') {
+        const locationName = 'Asia/Ho_Chi_Minh';
+        if (tz.timeZoneDatabase.locations.containsKey(locationName)) {
+          tz.setLocalLocation(tz.getLocation(locationName));
+        }
+      }
     } catch (e) {
       debugPrint('Timezone initialization error: $e');
     }
@@ -231,13 +238,28 @@ class NotificationService {
         body,
         scheduledDate,
         details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
     } catch (e) {
-      debugPrint('Failed to zone schedule notification: $e');
+      debugPrint('Exact alarm failed, falling back to inexact: $e');
+      try {
+        await _plugin.zonedSchedule(
+          id,
+          title,
+          body,
+          scheduledDate,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      } catch (err) {
+        debugPrint('Failed to zone schedule notification: $err');
+      }
     }
   }
 

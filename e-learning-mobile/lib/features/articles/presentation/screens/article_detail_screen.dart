@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_learning_mobile/features/articles/presentation/controllers/articles_controller.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
@@ -35,11 +36,13 @@ class ArticleDetailScreen extends ConsumerWidget {
           IconButton(
             icon: Icon(Icons.share_outlined, size: 22, color: context.textPrimary()),
             onPressed: () {
-              // Share action
+              final shareUrl = 'https://nhinanchualanh.vn/bai-viet/$slug';
+              Clipboard.setData(ClipboardData(text: shareUrl));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Đã sao chép liên kết bài viết'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text('Đã sao chép liên kết bài viết:\n$shareUrl'),
+                  duration: const Duration(seconds: 3),
+                  behavior: SnackBarBehavior.floating,
                 ),
               );
             },

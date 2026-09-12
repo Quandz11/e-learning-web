@@ -224,8 +224,8 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
       children: [
         _HomeHeader(
           greeting: greeting.greeting,
-          displayName: greeting.displayName ?? 'Mai Dung',
-          avatarName: greeting.avatarName ?? 'Mai Dung',
+          displayName: greeting.displayName ?? 'Học viên',
+          avatarName: greeting.avatarName ?? 'Học viên',
           avatarUrl: greeting.avatarUrl,
         ),
         const SizedBox(height: AppSpacing.md),
@@ -554,6 +554,8 @@ class _HomeSearchBar extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              readOnly: true,
+              onTap: () => context.push(AppRoutes.appSearch),
               style: const TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w400,
@@ -562,7 +564,7 @@ class _HomeSearchBar extends StatelessWidget {
               decoration: const InputDecoration(
                 filled: false,
                 fillColor: Colors.transparent,
-                hintText: 'Tìm khóa học, bài học...',
+                hintText: 'Tìm khóa học, bài viết, thảo luận...',
                 hintStyle: TextStyle(
                   color: Color(0xFF8E9E94),
                   fontSize: 13,
@@ -576,7 +578,6 @@ class _HomeSearchBar extends StatelessWidget {
                 isDense: true,
                 contentPadding: EdgeInsets.symmetric(vertical: 12),
               ),
-              onChanged: onChanged,
             ),
           ),
           if (controller.text.isNotEmpty)

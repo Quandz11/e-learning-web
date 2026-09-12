@@ -2,9 +2,11 @@ import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/features/auth/data/auth_repository.dart';
 import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart';
+import 'package:e_learning_mobile/features/learning/presentation/controllers/learning_controller.dart';
 import 'package:e_learning_mobile/features/notifications/data/notifications_repository.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
+import 'package:e_learning_mobile/features/progress/presentation/controllers/progress_controller.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
@@ -31,6 +33,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(profileControllerProvider.notifier).load();
+      ref.read(progressControllerProvider.notifier).load();
+      ref.read(learningControllerProvider.notifier).load();
     });
   }
 
@@ -38,9 +42,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(profileControllerProvider);
     final controller = ref.read(profileControllerProvider.notifier);
+    final progressState = ref.watch(progressControllerProvider);
+    final learningState = ref.watch(learningControllerProvider);
+
     final theme = Theme.of(context);
     final isDark = context.isDark;
     final colorScheme = context.colorScheme;
+
+    final streakDays = progressState.summary?.currentStreakDays ?? 7;
+    final overallPercent = (progressState.summary?.overallProgressPercent ?? 60.0).toInt();
+    final courseCount = learningState.enrollments.isNotEmpty ? learningState.enrollments.length : 3;
+    final completedCount = progressState.summary?.completedLessonsCount ?? 5;
+    final rawName = state.profile?.fullName;
+    final fullName = (rawName != null && rawName.trim().isNotEmpty) ? rawName.trim() : 'Học viên';
+    final rawEmail = state.profile?.email;
+    final email = (rawEmail != null && rawEmail.trim().isNotEmpty) ? rawEmail.trim() : 'hocvien@nhinanchualanh.vn';
 
     return Scaffold(
       backgroundColor: isDark ? colorScheme.surface : AppColors.background,
@@ -59,7 +75,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         actions: [
           IconButton(
             tooltip: 'Làm mới hồ sơ',
-            onPressed: () => controller.refresh(),
+            onPressed: () {
+              controller.refresh();
+              ref.read(progressControllerProvider.notifier).refresh();
+              ref.read(learningControllerProvider.notifier).refresh();
+            },
             icon: Icon(
               Icons.refresh_rounded,
               color: context.textPrimary(),
@@ -112,7 +132,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ),
                         child: AppAvatar(
-                          name: state.profile?.fullName ?? 'Mai Dung',
+                          name: fullName,
                           imageUrl: state.profile?.avatarUrl,
                           size: 60,
                         ),
@@ -123,7 +143,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              state.profile?.fullName ?? 'Mai Dung',
+                              fullName,
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: -0.3,
@@ -132,7 +152,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              state.profile?.email ?? 'maidung@gmail.com',
+                              email,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w300,
                                 color: context.textSecondary(),
@@ -153,7 +173,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 ),
                               ),
                               child: Text(
-                                'Thành viên Kim Cương 💎',
+                                streakDays >= 7 ? 'Thành viên Tích cực 🔥' : 'Học viên Thường xuyên 🌟',
                                 style: TextStyle(
                                   color: isDark ? colorScheme.onPrimaryContainer : AppColors.primary,
                                   fontSize: 11,
@@ -190,11 +210,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStatColumn(context, '3', 'Khóa học', Icons.menu_book_rounded, isDark ? colorScheme.primary : const Color(0xFF0F5B38), isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2)),
+                      _buildStatColumn(context, '$courseCount', 'Khóa học', Icons.menu_book_rounded, isDark ? colorScheme.primary : const Color(0xFF0F5B38), isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2)),
                       Container(height: 32, width: 0.8, color: context.cardBorder()),
-                      _buildStatColumn(context, '60%', 'Tiến độ', Icons.pie_chart_outline_rounded, const Color(0xFF2563EB), isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF)),
+                      _buildStatColumn(context, '$overallPercent%', 'Tiến độ', Icons.pie_chart_outline_rounded, const Color(0xFF2563EB), isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF)),
                       Container(height: 32, width: 0.8, color: context.cardBorder()),
-                      _buildStatColumn(context, '7 ngày', 'Streak', Icons.local_fire_department_rounded, const Color(0xFFD97706), isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB)),
+                      _buildStatColumn(context, '$streakDays ngày', 'Streak', Icons.local_fire_department_rounded, const Color(0xFFD97706), isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB)),
                     ],
                   ),
                 ),
@@ -238,10 +258,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         context,
                         icon: Icons.emoji_events_outlined,
                         title: 'Thành tích & Huy hiệu',
-                        subtitle: 'Đã đạt 5 huy hiệu bài học & chuỗi 7 ngày',
+                        subtitle: 'Đã hoàn thành $completedCount bài học & chuỗi $streakDays ngày',
                         bgColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB),
                         iconColor: const Color(0xFFD97706),
-                        badge: '5 huy hiệu',
+                        badge: '$completedCount bài học',
                         onTap: () => _showAchievementsDialog(context),
                       ),
                       Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),

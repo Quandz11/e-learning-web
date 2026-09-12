@@ -4,6 +4,7 @@ import 'package:e_learning_mobile/core/config/app_config_loader.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/startup_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/startup_failure_screen.dart';
+import 'package:e_learning_mobile/core/notifications/local_notification_service.dart';
 import 'package:e_learning_mobile/features/notifications/services/notification_service.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -64,6 +65,7 @@ Future<ProviderContainer> bootstrap() async {
     await Firebase.initializeApp();
     await NotificationService.instance.initialize();
     await NotificationService.instance.setupFirebaseMessaging();
+    await LocalNotificationService.instance.initialize();
   } catch (e) {
     debugPrint('Firebase/Notification init warning (safe to ignore in test/offline): $e');
   }

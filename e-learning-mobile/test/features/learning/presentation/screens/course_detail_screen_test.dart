@@ -268,7 +268,13 @@ _Harness _buildAppHarness() {
         }) => Text('Fake player: $title'),
       ),
       documentReaderBuilderProvider.overrideWithValue(
-        ({required url, required title}) => Text('Fake reader: $title'),
+        ({
+          required url,
+          required title,
+          controller,
+          onDocumentLoaded,
+          onPageChanged,
+        }) => Text('Fake reader: $title'),
       ),
       homeRepositoryProvider.overrideWithValue(FakeHomeRepository()),
       profileControllerProvider.overrideWith((ref) => _TestProfileController()),

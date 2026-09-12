@@ -130,7 +130,7 @@ class AppShell extends StatelessWidget {
                         onTap: () {
                           HapticFeedback.lightImpact();
                           final target = dest.route;
-                          if (target != AppRoutes.shellDestinationForLocation(currentLocation)) {
+                          if (currentLocation != target) {
                             context.go(target);
                           }
                         },
@@ -153,7 +153,7 @@ class AppShell extends StatelessWidget {
                         onTap: () {
                           HapticFeedback.selectionClick();
                           final target = dest.route;
-                          if (target != AppRoutes.shellDestinationForLocation(currentLocation)) {
+                          if (currentLocation != target) {
                             context.go(target);
                           }
                         },

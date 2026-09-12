@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:e_learning_mobile/features/learning/data/learning_repository.dart';
+import '../../../../helpers/fake_learning_repository.dart';
 import '../../../../helpers/in_memory_session_storage.dart';
 
 void main() {
@@ -41,6 +43,7 @@ Widget _pumpProfileScreen() {
       ),
       sessionStorageProvider.overrideWithValue(InMemorySessionStorage()),
       profileControllerProvider.overrideWith((ref) => _TestProfileController()),
+      learningRepositoryProvider.overrideWithValue(FakeLearningRepository()),
     ],
   );
 

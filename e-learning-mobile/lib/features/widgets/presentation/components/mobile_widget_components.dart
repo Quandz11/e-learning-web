@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/features/widgets/domain/mobile_widget_models.dart';
 
@@ -730,7 +731,14 @@ class RichNotificationPreviewView extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('⏰ Đã hoãn lịch nhắc nhở học tập thêm 15 phút!'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     side: BorderSide(
@@ -752,7 +760,9 @@ class RichNotificationPreviewView extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    GoRouter.of(context).go('/app/learning');
+                  },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     backgroundColor: AppColors.primary,

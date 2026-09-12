@@ -16,6 +16,7 @@ import 'package:e_learning_mobile/features/foundation/presentation/app_shell.dar
 import 'package:e_learning_mobile/features/foundation/presentation/components_showcase_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/payment_cancel_placeholder_screen.dart';
 import 'package:e_learning_mobile/features/foundation/presentation/payment_return_placeholder_screen.dart';
+import 'package:e_learning_mobile/features/home/presentation/screens/global_search_screen.dart';
 import 'package:e_learning_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:e_learning_mobile/features/learning/presentation/screens/course_detail_screen.dart';
 import 'package:e_learning_mobile/features/learning/presentation/screens/document_reader_screen.dart';
@@ -43,6 +44,7 @@ import 'package:e_learning_mobile/features/forum/presentation/screens/forum_thre
 import 'package:e_learning_mobile/features/notifications/presentation/screens/notification_inbox_screen.dart';
 import 'package:e_learning_mobile/features/progress/presentation/screens/learning_progress_screen.dart';
 import 'package:e_learning_mobile/features/settings/presentation/screens/settings_screen.dart';
+import 'package:e_learning_mobile/features/settings/presentation/screens/terms_and_privacy_screen.dart';
 import 'package:e_learning_mobile/features/widgets/presentation/screens/widget_preview_gallery_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -119,6 +121,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.appHome,
             builder: (_, __) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.appSearch,
+            builder: (_, __) => const GlobalSearchScreen(),
           ),
           GoRoute(
             path: AppRoutes.appLearning,
@@ -208,6 +214,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'widgets',
                 builder: (_, __) => const WidgetPreviewGalleryScreen(),
+              ),
+              GoRoute(
+                path: 'terms-privacy',
+                builder: (_, state) {
+                  final tab = state.uri.queryParameters['tab'];
+                  final initialIndex = tab == 'privacy' ? 1 : 0;
+                  return TermsAndPrivacyScreen(initialIndex: initialIndex);
+                },
               ),
             ],
           ),

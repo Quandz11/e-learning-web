@@ -6,6 +6,7 @@ import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class WellnessResourcesScreen extends ConsumerStatefulWidget {
   const WellnessResourcesScreen({super.key});
@@ -320,14 +321,7 @@ class _WellnessResourcesScreenState
                   height: 40,
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Bắt đầu: ${item.title}',
-                          ),
-                          backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
-                        ),
-                      );
+                      GoRouter.of(context).push('/app/articles');
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),

@@ -9,17 +9,43 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 final documentReaderBuilderProvider = Provider<DocumentReaderBuilder>(
   (ref) =>
-      ({required url, required title}) =>
-          DocumentReaderPdfViewer(url: url, title: title),
+      ({
+        required url,
+        required title,
+        controller,
+        onDocumentLoaded,
+        onPageChanged,
+      }) => DocumentReaderPdfViewer(
+        url: url,
+        title: title,
+        controller: controller,
+        onDocumentLoaded: onDocumentLoaded,
+        onPageChanged: onPageChanged,
+      ),
 );
 
 typedef DocumentReaderBuilder =
-    Widget Function({required Uri url, required String title});
+    Widget Function({
+      required Uri url,
+      required String title,
+      PdfViewerController? controller,
+      void Function(PdfDocumentLoadedDetails details)? onDocumentLoaded,
+      void Function(PdfPageChangedDetails details)? onPageChanged,
+    });
 
 class DocumentReaderPanel extends ConsumerWidget {
-  const DocumentReaderPanel({required this.part, super.key});
+  const DocumentReaderPanel({
+    required this.part,
+    this.controller,
+    this.onDocumentLoaded,
+    this.onPageChanged,
+    super.key,
+  });
 
   final LearningLessonPart part;
+  final PdfViewerController? controller;
+  final void Function(PdfDocumentLoadedDetails details)? onDocumentLoaded;
+  final void Function(PdfPageChangedDetails details)? onPageChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +56,13 @@ class DocumentReaderPanel extends ConsumerWidget {
     }
 
     final builder = ref.watch(documentReaderBuilderProvider);
-    return builder(url: url, title: part.documentFileName ?? part.title);
+    return builder(
+      url: url,
+      title: part.documentFileName ?? part.title,
+      controller: controller,
+      onDocumentLoaded: onDocumentLoaded,
+      onPageChanged: onPageChanged,
+    );
   }
 }
 

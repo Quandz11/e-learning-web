@@ -115,17 +115,18 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                           constraints: const BoxConstraints(
                             maxWidth: AppSizes.contentMaxWidth,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(AppSpacing.md),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                // 1. Video Player Container
-                                MediaPlayerPanel(part: state.detail!.part),
-                                const SizedBox(height: AppSpacing.md),
-
-                                // 2. Video Title & Metadata Card
-                                AppCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // 1. Video Player Container (Full Width)
+                              MediaPlayerPanel(part: state.detail!.part),
+                              Padding(
+                                padding: const EdgeInsets.all(AppSpacing.md),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    // 2. Video Title & Metadata Card
+                                    AppCard(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -273,7 +274,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                           )
                                         else ...[
                                           Text(
-                                            'Trong bài học này, bạn sẽ nắm vững các bước thực hành trực tiếp cùng sự hướng dẫn chi tiết từ chuyên gia.',
+                                            'Hướng dẫn chi tiết và kỹ thuật thực hành cho bài học "${state.detail!.part.title}". Theo dõi kỹ video để đạt hiệu quả tối ưu nhất.',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium
@@ -297,9 +298,9 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                                 ),
                                           ),
                                           const SizedBox(height: AppSpacing.xs),
-                                          _buildTakeawayItem('Lắng nghe và thực hành chuẩn xác theo từng nhịp thở và chuyển động.'),
-                                          _buildTakeawayItem('Bổ sung nước lọc đầy đủ trong suốt quá trình học tập.'),
-                                          _buildTakeawayItem('Ghi chú lại những khúc mắc để thảo luận cùng chuyên gia.'),
+                                          _buildTakeawayItem('Thực hành bài học "${state.detail!.part.title}" đúng tư thế và trình tự.'),
+                                          _buildTakeawayItem('Bổ sung nước lọc và theo dõi sát sao phản ứng cơ thể.'),
+                                          _buildTakeawayItem('Lưu lại ghi chú quan trọng hoặc mở thảo luận nếu có thắc mắc.'),
                                         ],
                                       ],
                                     ),
@@ -379,11 +380,15 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                           alignment: Alignment.centerRight,
                                           child: ElevatedButton.icon(
                                             onPressed: () {
-                                              if (_noteController.text.trim().isNotEmpty) {
+                                              final noteText = _noteController.text.trim();
+                                              if (noteText.isNotEmpty) {
+                                                _noteController.clear();
+                                                FocusScope.of(context).unfocus();
                                                 ScaffoldMessenger.of(context).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text('Đã lưu ghi chú thành công!'),
-                                                    backgroundColor: Color(0xFF0F5B38),
+                                                  SnackBar(
+                                                    content: Text('✅ Đã lưu ghi chú: "$noteText"'),
+                                                    backgroundColor: const Color(0xFF0F5B38),
+                                                    behavior: SnackBarBehavior.floating,
                                                   ),
                                                 );
                                               }
@@ -466,10 +471,12 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                               ],
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
+                ),
+              ),
 
                   // 6. Bottom Mark as Completed Action Bar
                   Container(

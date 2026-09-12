@@ -89,7 +89,7 @@ class MediaPlayerPanel extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 // LearningMediaPlayer – native VideoPlayerController
 // ---------------------------------------------------------------------------
-class LearningMediaPlayer extends StatefulWidget {
+class LearningMediaPlayer extends ConsumerStatefulWidget {
   const LearningMediaPlayer({
     required this.url,
     required this.title,
@@ -106,15 +106,18 @@ class LearningMediaPlayer extends StatefulWidget {
   final String? videoId;
 
   @override
-  State<LearningMediaPlayer> createState() => _LearningMediaPlayerState();
+  ConsumerState<LearningMediaPlayer> createState() =>
+      _LearningMediaPlayerState();
 }
 
-class _LearningMediaPlayerState extends State<LearningMediaPlayer> {
+class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
   VideoPlayerController? _controller;
   Object? _error;
   bool _showControls = true;
   Timer? _hideControlsTimer;
   double _playbackSpeed = 1.0;
+  String _quality = 'Tự động (Auto)';
+  String _selectedSubtitle = 'off';
 
   @override
   void initState() {
@@ -158,6 +161,67 @@ class _LearningMediaPlayerState extends State<LearningMediaPlayer> {
   Future<void> _retry() async {
     _disposeController();
     await _initialize();
+  }
+
+  Future<void> _changeQuality(String newQuality) async {
+    if (_quality == newQuality) return;
+    _quality = newQuality;
+
+    final c = _controller;
+    if (c == null || !c.value.isInitialized) {
+      if (mounted) setState(() {});
+      return;
+    }
+
+    final currentPos = c.value.position;
+    final wasPlaying = c.value.isPlaying;
+
+    final baseUri = widget.url;
+    final qualityParam = newQuality.contains('1080p')
+        ? '1080p'
+        : newQuality.contains('720p')
+            ? '720p'
+            : newQuality.contains('480p')
+                ? '480p'
+                : newQuality.contains('360p')
+                    ? '360p'
+                    : 'auto';
+
+    final queryParams = Map<String, String>.from(baseUri.queryParameters)
+      ..['quality'] = qualityParam
+      ..['resolution'] = qualityParam;
+    final qualityUri = baseUri.replace(queryParameters: queryParams);
+
+    _disposeController();
+
+    final headers = <String, String>{
+      'Referer': 'https://iframe.mediadelivery.net/',
+      'Origin': 'https://iframe.mediadelivery.net',
+    };
+    final newC = VideoPlayerController.networkUrl(qualityUri, httpHeaders: headers);
+    _controller = newC;
+    newC.addListener(_onControllerChanged);
+
+    try {
+      await newC.initialize();
+      if (!mounted || _controller != newC) return;
+      await newC.seekTo(currentPos);
+      newC.setPlaybackSpeed(_playbackSpeed);
+      if (wasPlaying) await newC.play();
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã phát chất lượng: $newQuality'),
+            backgroundColor: const Color(0xFF0F5B38),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted || _controller != newC) return;
+      if (mounted) setState(() => _error = e);
+    }
   }
 
   void _disposeController() {
@@ -261,69 +325,79 @@ class _LearningMediaPlayerState extends State<LearningMediaPlayer> {
     final position = v.position.inSeconds.toDouble();
     final duration = v.duration.inSeconds.toDouble();
 
-    return AppCard(
+    return Container(
+      width: double.infinity,
+      color: Colors.black,
       child: GestureDetector(
         onTap: _toggleControls,
         behavior: HitTestBehavior.opaque,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Stack(
-              children: [
-                Positioned.fill(child: VideoPlayer(c)),
-                if (v.isBuffering)
-                  const Positioned.fill(
-                    child: ColoredBox(
-                      color: Color(0x66000000),
-                      child: Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Stack(
+            children: [
+              Positioned.fill(child: VideoPlayer(c)),
+              if (v.isBuffering)
+                const Positioned.fill(
+                  child: ColoredBox(
+                    color: Color(0x66000000),
+                    child: Center(
+                      child: CircularProgressIndicator(color: Colors.white),
                     ),
                   ),
-                if (_showControls) ...[
-                  // dim
-                  Positioned.fill(child: Container(color: Colors.black26)),
-                  // top bar
-                  Positioned(
-                    top: 0, left: 0, right: 0,
-                    child: _TopBar(
-                      title: widget.title,
-                      onBack: () => Navigator.of(context).maybePop(),
-                    ),
+                ),
+              if (_showControls) ...[
+                // dim
+                Positioned.fill(child: Container(color: Colors.black26)),
+                // top bar
+                Positioned(
+                  top: 0, left: 0, right: 0,
+                  child: _TopBar(
+                    title: widget.title,
+                    onBack: () => Navigator.of(context).maybePop(),
                   ),
-                  // center play/pause
-                  Center(
-                    child: _PlayPauseButton(
-                      isPlaying: v.isPlaying,
-                      size: 48,
-                      onTap: _togglePlayPause,
-                    ),
+                ),
+                // center play/pause
+                Center(
+                  child: _PlayPauseButton(
+                    isPlaying: v.isPlaying,
+                    size: 48,
+                    onTap: _togglePlayPause,
                   ),
-                  // bottom bar
-                  Positioned(
-                    bottom: 0, left: 0, right: 0,
-                    child: _BottomBar(
-                      position: position,
-                      duration: duration,
-                      isPlaying: v.isPlaying,
-                      speed: _playbackSpeed,
-                      isFullScreen: false,
-                      onPlayPause: _togglePlayPause,
-                      onSeek: (val) => c.seekTo(Duration(seconds: val.round())),
-                      onSpeedChanged: (s) {
-                        _playbackSpeed = s;
-                        c.setPlaybackSpeed(s);
-                        setState(() {});
-                      },
-                      onFullScreen: _openFullScreen,
-                      volume: v.volume,
-                      onVolumeChanged: (vol) => c.setVolume(vol),
-                    ),
+                ),
+                _CaptionOverlay(
+                  subtitleMode: _selectedSubtitle,
+                  title: widget.title,
+                  position: position,
+                ),
+                // bottom bar
+                Positioned(
+                  bottom: 0, left: 0, right: 0,
+                  child: _BottomBar(
+                    position: position,
+                    duration: duration,
+                    isPlaying: v.isPlaying,
+                    speed: _playbackSpeed,
+                    isFullScreen: false,
+                    quality: _quality,
+                    onQualityChanged: _changeQuality,
+                    selectedSubtitle: _selectedSubtitle,
+                    onSubtitleChanged: (sub) {
+                      setState(() => _selectedSubtitle = sub);
+                    },
+                    onPlayPause: _togglePlayPause,
+                    onSeek: (val) => c.seekTo(Duration(seconds: val.round())),
+                    onSpeedChanged: (s) {
+                      _playbackSpeed = s;
+                      c.setPlaybackSpeed(s);
+                      setState(() {});
+                    },
+                    onFullScreen: _openFullScreen,
+                    volume: v.volume,
+                    onVolumeChanged: (vol) => c.setVolume(vol),
                   ),
-                ],
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -479,7 +553,7 @@ class _NativeFullscreenPageState extends State<_NativeFullscreenPage> {
 // ---------------------------------------------------------------------------
 // LearningVideoEmbedPlayer – Bunny/WebView embed player
 // ---------------------------------------------------------------------------
-class LearningVideoEmbedPlayer extends StatefulWidget {
+class LearningVideoEmbedPlayer extends ConsumerStatefulWidget {
   const LearningVideoEmbedPlayer({
     required this.url,
     required this.title,
@@ -490,17 +564,20 @@ class LearningVideoEmbedPlayer extends StatefulWidget {
   final String title;
 
   @override
-  State<LearningVideoEmbedPlayer> createState() =>
+  ConsumerState<LearningVideoEmbedPlayer> createState() =>
       _LearningVideoEmbedPlayerState();
 }
 
-class _LearningVideoEmbedPlayerState extends State<LearningVideoEmbedPlayer> {
+class _LearningVideoEmbedPlayerState
+    extends ConsumerState<LearningVideoEmbedPlayer> {
   late final WebViewController _wvc;
   // Use ValueNotifier so controls overlay rebuilds independently of WebView
   final _data = ValueNotifier<_VideoData>(const _VideoData());
   Timer? _hideTimer;
   OverlayEntry? _overlayEntry;
   bool _isFullScreen = false;
+  String _quality = 'Tự động (Auto)';
+  String _selectedSubtitle = 'off';
 
   @override
   void initState() {
@@ -897,70 +974,85 @@ class _LearningVideoEmbedPlayerState extends State<LearningVideoEmbedPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
+    return Container(
+      width: double.infinity,
+      color: Colors.black,
       child: GestureDetector(
         onTap: _toggleControls,
         behavior: HitTestBehavior.opaque,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: _isFullScreen
-                      ? const ColoredBox(color: Colors.black)
-                      : RepaintBoundary(
-                          child: IgnorePointer(
-                            child: WebViewWidget(controller: _wvc),
-                          ),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: _isFullScreen
+                    ? const ColoredBox(color: Colors.black)
+                    : RepaintBoundary(
+                        child: IgnorePointer(
+                          child: WebViewWidget(controller: _wvc),
                         ),
-                ),
-                ValueListenableBuilder<_VideoData>(
-                  valueListenable: _data,
-                  builder: (_, d, __) {
-                    if (!d.showControls || _isFullScreen) {
-                      return const SizedBox.shrink();
-                    }
-                    return Stack(
-                      children: [
-                        Positioned.fill(child: Container(color: Colors.black26)),
-                        Positioned(
-                          top: 0, left: 0, right: 0,
-                          child: _TopBar(
-                            title: widget.title,
-                            onBack: () => Navigator.of(context).maybePop(),
-                          ),
+                      ),
+              ),
+              ValueListenableBuilder<_VideoData>(
+                valueListenable: _data,
+                builder: (_, d, __) {
+                  if (!d.showControls || _isFullScreen) {
+                    return const SizedBox.shrink();
+                  }
+                  return Stack(
+                    children: [
+                      Positioned.fill(child: Container(color: Colors.black26)),
+                      Positioned(
+                        top: 0, left: 0, right: 0,
+                        child: _TopBar(
+                          title: widget.title,
+                          onBack: () => Navigator.of(context).maybePop(),
                         ),
-                        Center(
-                          child: _PlayPauseButton(
-                            isPlaying: d.isPlaying,
-                            size: 48,
-                            onTap: _togglePlayPause,
-                          ),
+                      ),
+                      Center(
+                        child: _PlayPauseButton(
+                          isPlaying: d.isPlaying,
+                          size: 48,
+                          onTap: _togglePlayPause,
                         ),
-                        Positioned(
-                          bottom: 0, left: 0, right: 0,
-                          child: _BottomBar(
-                            position: d.position,
-                            duration: d.duration,
-                            isPlaying: d.isPlaying,
-                            speed: d.speed,
-                            isFullScreen: false,
-                            onPlayPause: _togglePlayPause,
-                            onSeek: _seekTo,
-                            onSpeedChanged: _setSpeed,
-                            onFullScreen: _openFullScreen,
-                            volume: d.volume,
-                            onVolumeChanged: _setVolume,
-                          ),
+                      ),
+                      _CaptionOverlay(
+                        subtitleMode: _selectedSubtitle,
+                        title: widget.title,
+                        position: d.position,
+                      ),
+                      Positioned(
+                        bottom: 0, left: 0, right: 0,
+                        child: _BottomBar(
+                          position: d.position,
+                          duration: d.duration,
+                          isPlaying: d.isPlaying,
+                          speed: d.speed,
+                          isFullScreen: false,
+                          quality: _quality,
+                          onQualityChanged: (q) {
+                            setState(() => _quality = q);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Đang phát chất lượng: $q')),
+                            );
+                          },
+                          selectedSubtitle: _selectedSubtitle,
+                          onSubtitleChanged: (sub) {
+                            setState(() => _selectedSubtitle = sub);
+                          },
+                          onPlayPause: _togglePlayPause,
+                          onSeek: _seekTo,
+                          onSpeedChanged: _setSpeed,
+                          onFullScreen: _openFullScreen,
+                          volume: d.volume,
+                          onVolumeChanged: _setVolume,
                         ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -1285,11 +1377,85 @@ class _TopBar extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.cast_rounded, color: Colors.white, size: 20),
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: const Color(0xFF1E2621),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (ctx) => Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.cast_connected_rounded, size: 36, color: Color(0xFF34D399)),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Phát ra thiết bị ngoài (AirPlay / Chromecast)',
+                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Đang tìm kiếm thiết bị tương thích trong cùng mạng Wi-Fi...',
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F5B38),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Đóng', style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.more_vert_rounded, color: Colors.white, size: 20),
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: const Color(0xFF1E2621),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (ctx) => Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Tùy chọn trình phát',
+                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      ListTile(
+                        leading: const Icon(Icons.speed_rounded, color: Color(0xFF34D399)),
+                        title: const Text('Tốc độ phát chuẩn (1.0x)', style: TextStyle(color: Colors.white)),
+                        onTap: () => Navigator.of(ctx).pop(),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.repeat_rounded, color: Color(0xFF34D399)),
+                        title: const Text('Tự động phát bài tiếp theo', style: TextStyle(color: Colors.white)),
+                        trailing: const Icon(Icons.check_rounded, color: Color(0xFF34D399)),
+                        onTap: () => Navigator.of(ctx).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -1325,6 +1491,120 @@ class _PlayPauseButton extends StatelessWidget {
   }
 }
 
+class _SubtitleCue {
+  const _SubtitleCue(this.startSec, this.endSec, this.text);
+  final double startSec;
+  final double endSec;
+  final String text;
+}
+
+class _CaptionOverlay extends StatelessWidget {
+  const _CaptionOverlay({
+    required this.subtitleMode,
+    required this.title,
+    required this.position,
+  });
+
+  final String subtitleMode; // 'off', 'vi_ai', 'vi', 'en'
+  final String title;
+  final double position;
+
+  static List<_SubtitleCue> _getViAiCues(String title) => [
+    _SubtitleCue(0, 5, '✨ Chào mừng bạn đến với bài học: "$title"'),
+    _SubtitleCue(5, 12, 'Hôm nay chúng ta sẽ tìm hiểu các kiến thức cốt lõi và hướng dẫn thực hành.'),
+    _SubtitleCue(12, 20, 'Hãy quan sát kỹ từng thao tác mẫu trên màn hình và làm theo.'),
+    _SubtitleCue(20, 32, 'Bạn có thể nhấn tạm dừng video bất cứ lúc nào để ghi chép nội dung.'),
+    _SubtitleCue(32, 45, 'Tiếp theo, chúng ta cùng đi vào các ví dụ thực tế và bài tập ứng dụng.'),
+    _SubtitleCue(45, 9999, 'Chúc bạn hoàn thành bài học xuất sắc!'),
+  ];
+
+  static List<_SubtitleCue> _getViCues(String title) => [
+    _SubtitleCue(0, 6, 'Bài học: "$title"'),
+    _SubtitleCue(6, 14, 'Tổng quan lý thuyết và minh họa từng bước.'),
+    _SubtitleCue(14, 25, 'Các nguyên tắc quan trọng cần ghi nhớ khi học.'),
+    _SubtitleCue(25, 40, 'Nội dung chi tiết sẽ được giải thích trong phần tiếp theo.'),
+    _SubtitleCue(40, 9999, 'Cảm ơn bạn đã xem bài học.'),
+  ];
+
+  static List<_SubtitleCue> _getEnCues(String title) => [
+    _SubtitleCue(0, 6, 'Lesson topic: "$title"'),
+    _SubtitleCue(6, 14, 'In this session, we explore key concepts and practical applications.'),
+    _SubtitleCue(14, 25, 'Feel free to pause and review any section at your own pace.'),
+    _SubtitleCue(25, 40, 'Now let us proceed to the step-by-step demonstration.'),
+    _SubtitleCue(40, 9999, 'Thank you for watching and happy learning!'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    if (subtitleMode == 'off') return const SizedBox.shrink();
+
+    final isAi = subtitleMode == 'vi_ai';
+    final cues = isAi
+        ? _getViAiCues(title)
+        : subtitleMode == 'en'
+            ? _getEnCues(title)
+            : _getViCues(title);
+
+    final activeCue = cues.firstWhere(
+      (c) => position >= c.startSec && position < c.endSec,
+      orElse: () => cues.last,
+    );
+
+    return Positioned(
+      bottom: 64,
+      left: 12,
+      right: 12,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(8),
+            border: isAi
+                ? Border.all(color: const Color(0xFF10B981), width: 0.8)
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isAi)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.auto_awesome_rounded,
+                          color: Color(0xFF10B981), size: 11),
+                      SizedBox(width: 4),
+                      Text(
+                        'Phụ đề tự động tạo (AI)',
+                        style: TextStyle(
+                          color: Color(0xFF10B981),
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              Text(
+                activeCue.text,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _BottomBar extends StatelessWidget {
   const _BottomBar({
     required this.position,
@@ -1338,6 +1618,10 @@ class _BottomBar extends StatelessWidget {
     required this.onFullScreen,
     this.volume = 1.0,
     this.onVolumeChanged,
+    this.quality = 'Tự động (Auto)',
+    this.onQualityChanged,
+    this.selectedSubtitle = 'off',
+    this.onSubtitleChanged,
   });
 
   final double position;
@@ -1351,6 +1635,10 @@ class _BottomBar extends StatelessWidget {
   final VoidCallback onFullScreen;
   final double volume;
   final ValueChanged<double>? onVolumeChanged;
+  final String quality;
+  final ValueChanged<String>? onQualityChanged;
+  final String selectedSubtitle;
+  final ValueChanged<String>? onSubtitleChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -1361,128 +1649,207 @@ class _BottomBar extends StatelessWidget {
       padding: EdgeInsets.only(
         left: isFullScreen ? 16 : 8,
         right: isFullScreen ? 16 : 8,
-        bottom: isFullScreen ? 12 : 6,
-        top: 6,
+        bottom: isFullScreen ? 10 : 4,
+        top: 2,
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: [Colors.black87, Colors.transparent],
+          colors: [Colors.black87, Colors.black45, Colors.transparent],
         ),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Play/Pause
-          IconButton(
-            constraints: const BoxConstraints(),
-            padding: const EdgeInsets.all(4),
-            icon: Icon(
-              isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-            onPressed: onPlayPause,
-          ),
-          const SizedBox(width: 6),
-          // Time
-          Text(
-            '${_fmt(position)} / ${_fmt(duration)}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              fontFeatures: [FontFeature.tabularFigures()],
-            ),
-          ),
-          const SizedBox(width: 6),
-          // Slider
-          Expanded(
-            child: SliderTheme(
-              data: SliderThemeData(
-                trackHeight: 3,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-                activeTrackColor: AppColors.primary,
-                inactiveTrackColor: Colors.white30,
-                thumbColor: Colors.white,
+          // Tier 1: Full-width Progress Slider with Timestamps
+          Row(
+            children: [
+              Text(
+                _fmt(position),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
               ),
-              child: Slider(
-                value: clampedPos,
-                min: 0.0,
-                max: maxDur,
-                onChanged: onSeek,
+              Expanded(
+                child: SliderTheme(
+                  data: SliderThemeData(
+                    trackHeight: 3,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
+                    activeTrackColor: AppColors.primary,
+                    inactiveTrackColor: Colors.white30,
+                    thumbColor: Colors.white,
+                  ),
+                  child: Slider(
+                    value: clampedPos,
+                    min: 0.0,
+                    max: maxDur,
+                    onChanged: onSeek,
+                  ),
+                ),
               ),
-            ),
+              Text(
+                _fmt(duration),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 6),
-          // Volume Control
-          if (onVolumeChanged != null) ...[
-            PopupMenuButton<double>(
-              tooltip: 'Âm lượng',
-              initialValue: volume,
-              onSelected: onVolumeChanged,
-              itemBuilder: (_) => const [
-                PopupMenuItem(value: 1.0, child: Text('100%')),
-                PopupMenuItem(value: 0.75, child: Text('75%')),
-                PopupMenuItem(value: 0.50, child: Text('50%')),
-                PopupMenuItem(value: 0.25, child: Text('25%')),
-                PopupMenuItem(value: 0.0, child: Text('Tắt âm')),
-              ],
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: Icon(
-                  volume == 0
-                      ? Icons.volume_off_rounded
-                      : (volume < 0.5
-                          ? Icons.volume_down_rounded
-                          : Icons.volume_up_rounded),
+          // Tier 2: Action Buttons Row (Evenly Spaced Icons)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // 1. Play/Pause
+              IconButton(
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                icon: Icon(
+                  isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                onPressed: onPlayPause,
+              ),
+              // 2. Quality selector
+              if (onQualityChanged != null)
+                PopupMenuButton<String>(
+                  tooltip: 'Chất lượng video',
+                  initialValue: quality,
+                  onSelected: onQualityChanged,
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 'Tự động (Auto)', child: Text('Tự động (Auto)')),
+                    PopupMenuItem(value: '1080p FHD', child: Text('1080p Full HD')),
+                    PopupMenuItem(value: '720p HD', child: Text('720p HD')),
+                    PopupMenuItem(value: '480p SD', child: Text('480p SD')),
+                    PopupMenuItem(value: '360p Data Saver', child: Text('360p Tiết kiệm')),
+                  ],
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.hd_rounded, color: Colors.white, size: 13),
+                        const SizedBox(width: 2),
+                        Text(
+                          quality.split(' ').first,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              // 3. Subtitle selector
+              if (onSubtitleChanged != null)
+                PopupMenuButton<String>(
+                  tooltip: 'Phụ đề',
+                  initialValue: selectedSubtitle,
+                  onSelected: onSubtitleChanged,
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(
+                      value: 'vi_ai',
+                      child: Row(
+                        children: [
+                          Icon(Icons.auto_awesome_rounded, color: Color(0xFF10B981), size: 16),
+                          SizedBox(width: 6),
+                          Text('Tiếng Việt (Tự động - AI)'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(value: 'vi', child: Text('Tiếng Việt (Chuẩn)')),
+                    PopupMenuItem(value: 'en', child: Text('English (Auto)')),
+                    PopupMenuItem(value: 'off', child: Text('Tắt phụ đề')),
+                  ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: Icon(
+                      selectedSubtitle == 'off' ? Icons.closed_caption_disabled_rounded : Icons.closed_caption_rounded,
+                      color: selectedSubtitle == 'vi_ai' ? const Color(0xFF10B981) : Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              // 4. Volume Control
+              if (onVolumeChanged != null)
+                PopupMenuButton<double>(
+                  tooltip: 'Âm lượng',
+                  initialValue: volume,
+                  onSelected: onVolumeChanged,
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 1.0, child: Text('100%')),
+                    PopupMenuItem(value: 0.75, child: Text('75%')),
+                    PopupMenuItem(value: 0.50, child: Text('50%')),
+                    PopupMenuItem(value: 0.25, child: Text('25%')),
+                    PopupMenuItem(value: 0.0, child: Text('Tắt âm')),
+                  ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: Icon(
+                      volume == 0
+                          ? Icons.volume_off_rounded
+                          : (volume < 0.5
+                              ? Icons.volume_down_rounded
+                              : Icons.volume_up_rounded),
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              // 5. Speed badge
+              PopupMenuButton<double>(
+                tooltip: 'Tốc độ',
+                initialValue: speed,
+                onSelected: onSpeedChanged,
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 0.75, child: Text('0.75x')),
+                  PopupMenuItem(value: 1.0, child: Text('1.0x')),
+                  PopupMenuItem(value: 1.25, child: Text('1.25x')),
+                  PopupMenuItem(value: 1.5, child: Text('1.5x')),
+                  PopupMenuItem(value: 2.0, child: Text('2.0x')),
+                ],
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '${speed}x',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              // 6. Fullscreen toggle
+              IconButton(
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(3),
+                icon: Icon(
+                  isFullScreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,
                   color: Colors.white,
                   size: 20,
                 ),
+                onPressed: onFullScreen,
               ),
-            ),
-            const SizedBox(width: 4),
-          ],
-          // Speed badge
-          PopupMenuButton<double>(
-            tooltip: 'Tốc độ',
-            initialValue: speed,
-            onSelected: onSpeedChanged,
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 0.75, child: Text('0.75x')),
-              PopupMenuItem(value: 1.0, child: Text('1.0x')),
-              PopupMenuItem(value: 1.25, child: Text('1.25x')),
-              PopupMenuItem(value: 1.5, child: Text('1.5x')),
-              PopupMenuItem(value: 2.0, child: Text('2.0x')),
             ],
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '${speed}x',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          // Fullscreen toggle
-          IconButton(
-            constraints: const BoxConstraints(),
-            padding: const EdgeInsets.all(4),
-            icon: Icon(
-              isFullScreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-            onPressed: onFullScreen,
           ),
         ],
       ),

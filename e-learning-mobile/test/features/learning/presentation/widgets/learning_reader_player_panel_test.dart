@@ -67,6 +67,9 @@ void main() {
           documentReaderBuilderProvider.overrideWithValue(({
             required url,
             required title,
+            controller,
+            onDocumentLoaded,
+            onPageChanged,
           }) {
             capturedUrl = url;
             return Text('Fake reader: $title');

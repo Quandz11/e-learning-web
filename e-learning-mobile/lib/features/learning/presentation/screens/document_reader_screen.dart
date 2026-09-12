@@ -10,6 +10,7 @@ import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -31,8 +32,8 @@ class DocumentReaderScreen extends ConsumerStatefulWidget {
 
 class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
   late final PdfViewerController _pdfController;
-  final int _currentPage = 1;
-  final int _totalPages = 8;
+  int _currentPage = 1;
+  int _totalPages = 1;
   double _zoomScale = 1.0;
 
   @override
@@ -100,8 +101,14 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
             tooltip: 'Tải tài liệu PDF',
             icon: Icon(Icons.download_rounded, color: context.colorScheme.primary),
             onPressed: () {
+              final pdfUrl = state.detail?.part.documentUrl ?? state.detail?.part.title ?? 'Tài liệu bài học';
+              Clipboard.setData(ClipboardData(text: pdfUrl));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đang tải xuống file PDF...')),
+                SnackBar(
+                  content: Text('📋 Đã sao chép liên kết tài liệu: $pdfUrl'),
+                  backgroundColor: const Color(0xFF0F5B38),
+                  behavior: SnackBarBehavior.floating,
+                ),
               );
             },
           ),
@@ -240,7 +247,27 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                               ],
                             ),
                             clipBehavior: Clip.antiAlias,
-                            child: DocumentReaderPanel(part: state.detail!.part),
+                            child: DocumentReaderPanel(
+                              part: state.detail!.part,
+                              controller: _pdfController,
+                              onDocumentLoaded: (details) {
+                                if (mounted) {
+                                  setState(() {
+                                    _totalPages = details.document.pages.count;
+                                    _currentPage = _pdfController.pageNumber == 0
+                                        ? 1
+                                        : _pdfController.pageNumber;
+                                  });
+                                }
+                              },
+                              onPageChanged: (details) {
+                                if (mounted) {
+                                  setState(() {
+                                    _currentPage = details.newPageNumber;
+                                  });
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ),

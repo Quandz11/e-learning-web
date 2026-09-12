@@ -1,4 +1,5 @@
 import 'package:e_learning_mobile/core/network/cache_service.dart';
+import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/core/services/home_widget_service.dart';
 import 'package:e_learning_mobile/features/auth/data/auth_repository.dart';
@@ -11,7 +12,6 @@ import 'package:e_learning_mobile/shared/theme/theme_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -276,13 +276,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: 'Kiểm soát chia sẻ dữ liệu thể trạng',
               bgColor: const Color(0xFFEFF6FF),
               iconColor: const Color(0xFF2563EB),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Dữ liệu thể trạng được mã hóa an toàn.'),
-                  ),
-                );
-              },
+              onTap: () => context.push('${AppRoutes.appSettingsTermsPrivacy}?tab=privacy'),
             ),
             const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
@@ -290,7 +284,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               title: 'Điều khoản sử dụng',
               bgColor: const Color(0xFFF8FAFC),
               iconColor: const Color(0xFF64748B),
-              onTap: () => _launchUrl('https://nhinanchualanh.vn/terms'),
+              onTap: () => context.push('${AppRoutes.appSettingsTermsPrivacy}?tab=terms'),
             ),
             const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
@@ -298,7 +292,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               title: 'Chính sách bảo mật',
               bgColor: const Color(0xFFF8FAFC),
               iconColor: const Color(0xFF64748B),
-              onTap: () => _launchUrl('https://nhinanchualanh.vn/privacy'),
+              onTap: () => context.push('${AppRoutes.appSettingsTermsPrivacy}?tab=privacy'),
             ),
           ]),
           const SizedBox(height: AppSpacing.lg),
@@ -497,13 +491,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       } finally {
         await ref.read(sessionControllerProvider.notifier).clearSession();
       }
-    }
-  }
-
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 }

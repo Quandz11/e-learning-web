@@ -1,5 +1,5 @@
+import 'package:e_learning_mobile/core/notifications/local_notification_service.dart';
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
-import 'package:e_learning_mobile/features/notifications/services/notification_service.dart';
 import 'package:e_learning_mobile/features/personalization/data/personalization_repository.dart';
 import 'package:e_learning_mobile/features/personalization/domain/reminder_model.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
@@ -61,12 +61,18 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
               color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
             ),
             onPressed: () async {
-              await NotificationService.instance.sendTestNotification();
+              await LocalNotificationService.instance.showImmediateNotification(
+                id: 8888,
+                title: '🌱 Nhắc nhở Sức khỏe & Học tập',
+                body: 'Đã đến giờ uống nước lọc và hoàn thành bài học hôm nay!',
+              );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Đã gửi thông báo nhắc nhở thử nghiệm đến thiết bị!'),
+                    content: Text('🔔 Đã kích hoạt thông báo nhắc nhở tức thì đến thiết bị!'),
+                    backgroundColor: Color(0xFF0F5B38),
                     duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
                   ),
                 );
               }

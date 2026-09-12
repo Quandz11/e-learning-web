@@ -54,6 +54,7 @@ abstract final class AppRoutes {
   static const forgotPasswordVerify = '/forgot-password/verify';
   static const appRoot = '/app';
   static const appHome = '/app/home';
+  static const appSearch = '/app/search';
   static const appLearning = '/app/learning';
   static const appCourses = '/app/courses';
   static const appLearningCoursePattern = '/app/learning/course/:courseId';
@@ -76,6 +77,7 @@ abstract final class AppRoutes {
   static const appProgress = '/app/progress';
   static const appSettings = '/app/settings';
   static const appMobileWidgets = '/app/settings/widgets';
+  static const appSettingsTermsPrivacy = '/app/settings/terms-privacy';
   static const appNotifications = '/app/notifications';
   static const appArticles = '/app/articles';
   static const appArticleDetailPattern = '/app/articles/:slug';

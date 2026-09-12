@@ -299,15 +299,20 @@ class _WidgetPreviewGalleryScreenState
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (isSelected)
+        if (isSelected) ...[
+          const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
@@ -315,6 +320,7 @@ class _WidgetPreviewGalleryScreenState
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.check_circle, size: 12, color: Colors.white),
                 SizedBox(width: 4),
@@ -325,6 +331,7 @@ class _WidgetPreviewGalleryScreenState
               ],
             ),
           ),
+        ],
       ],
     );
   }

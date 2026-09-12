@@ -568,12 +568,16 @@ class LockScreenInlineWidgetView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text('📚 ', style: TextStyle(fontSize: 12)),
-          Text(
-            '${data.learnedMinutes}/${data.targetMinutes} phút • Chuỗi ${data.streakDays} ngày 🔥',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              '${data.learnedMinutes}/${data.targetMinutes} phút • Chuỗi ${data.streakDays} ngày 🔥',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -672,15 +676,19 @@ class RichNotificationPreviewView extends StatelessWidget {
                 child: const Icon(Icons.notifications_active, size: 14, color: Colors.white),
               ),
               const SizedBox(width: 8),
-              Text(
-                'SKVI E-Learning • Nhắc học tập',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white70 : AppColors.textSecondary,
+              Expanded(
+                child: Text(
+                  'SKVI E-Learning • Nhắc học tập',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : AppColors.textSecondary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Text(
                 'Bây giờ',
                 style: TextStyle(

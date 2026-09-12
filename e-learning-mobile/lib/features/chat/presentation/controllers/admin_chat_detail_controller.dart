@@ -56,16 +56,19 @@ class AdminChatDetailController extends StateNotifier<AdminChatDetailState> {
     this.currentUserId,
   }) : super(AdminChatDetailState(conversation: conversation, isLoading: true)) {
     load();
-    _startPolling();
+    _setupSignalR();
   }
 
   final ChatRepository _repository;
   final String? currentUserId;
-  Timer? _pollingTimer;
+  StreamSubscription<ChatMessage>? _messageSubscription;
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    _messageSubscription?.cancel();
+    if (state.conversation.type != 'guest') {
+      _repository.signalR?.leaveConversation(state.conversation.id);
+    }
     super.dispose();
   }
 
@@ -86,6 +89,35 @@ class AdminChatDetailController extends StateNotifier<AdminChatDetailState> {
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  void _setupSignalR() {
+    final signalR = _repository.signalR;
+    if (signalR == null) return;
+
+    final convId = state.conversation.id;
+    if (state.conversation.type != 'guest') {
+      signalR.connect(currentUserId: currentUserId).then((_) {
+        signalR.joinConversation(convId);
+      });
+    } else {
+      signalR.connect();
+    }
+
+    _messageSubscription?.cancel();
+    _messageSubscription = signalR.onReceiveMessage.listen((incoming) {
+      final matchesConv = incoming.conversationId == convId ||
+          (state.conversation.type == 'guest' &&
+              incoming.conversationId == (state.conversation.guestId ?? convId));
+      if (!matchesConv) return;
+
+      final existing = state.messages.any((m) => m.id == incoming.id);
+      if (existing) return;
+
+      state = state.copyWith(
+        messages: [...state.messages, incoming],
+      );
+    });
   }
 
   Future<void> sendMessage(String text) async {
@@ -110,28 +142,5 @@ class AdminChatDetailController extends StateNotifier<AdminChatDetailState> {
     } catch (e) {
       state = state.copyWith(isSending: false, error: e.toString());
     }
-  }
-
-  void _startPolling() {
-    _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
-      if (!state.isLoading && !state.isSending) {
-        try {
-          final List<ChatMessage> msgs;
-          if (state.conversation.type == 'guest') {
-            final gId = state.conversation.guestId ?? state.conversation.id;
-            msgs = await _repository.getAdminGuestMessages(gId);
-          } else {
-            msgs = await _repository.getMessages(
-              state.conversation.id,
-              currentUserId: currentUserId,
-            );
-          }
-          if (msgs.length != state.messages.length) {
-            state = state.copyWith(messages: msgs);
-          }
-        } catch (_) {}
-      }
-    });
   }
 }

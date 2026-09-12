@@ -71,15 +71,15 @@ class AdminChatListController extends StateNotifier<AdminChatListState> {
   AdminChatListController(this._repository)
       : super(const AdminChatListState(isLoading: true)) {
     load();
-    _startPolling();
+    _setupSignalR();
   }
 
   final ChatRepository _repository;
-  Timer? _pollingTimer;
+  StreamSubscription? _updateSubscription;
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    _updateSubscription?.cancel();
     super.dispose();
   }
 
@@ -97,26 +97,29 @@ class AdminChatListController extends StateNotifier<AdminChatListState> {
     }
   }
 
+  void _setupSignalR() {
+    final signalR = _repository.signalR;
+    if (signalR == null) return;
+
+    signalR.connect();
+
+    _updateSubscription?.cancel();
+    _updateSubscription = signalR.onConversationUpdated.listen((_) async {
+      try {
+        final res = await _repository.getAdminConversations();
+        state = state.copyWith(
+          authenticatedConversations: res.authenticatedConversations,
+          guestConversations: res.guestConversations,
+        );
+      } catch (_) {}
+    });
+  }
+
   void setActiveTab(String tab) {
     state = state.copyWith(activeTab: tab);
   }
 
   void setSearchQuery(String query) {
     state = state.copyWith(searchQuery: query);
-  }
-
-  void _startPolling() {
-    _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(const Duration(seconds: 4), (_) async {
-      if (!state.isLoading) {
-        try {
-          final res = await _repository.getAdminConversations();
-          state = state.copyWith(
-            authenticatedConversations: res.authenticatedConversations,
-            guestConversations: res.guestConversations,
-          );
-        } catch (_) {}
-      }
-    });
   }
 }

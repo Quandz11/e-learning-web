@@ -19,7 +19,10 @@ class AppConfigLoader {
   }
 
   static AppConfig fromEnvironmentMap(Map<String, String> env) {
-    final rawApiBaseUrl = _readRequired(env, 'API_BASE_URL');
+    const dartDefineApiBaseUrl = String.fromEnvironment('API_BASE_URL');
+    final rawApiBaseUrl = dartDefineApiBaseUrl.isNotEmpty
+        ? dartDefineApiBaseUrl
+        : _readRequired(env, 'API_BASE_URL');
     final rawFlavor = _readRequired(env, 'APP_FLAVOR');
     final rawPaymentReturnUrl = _readRequired(env, 'PAYMENT_RETURN_URL');
     final rawPaymentCancelUrl = _readRequired(env, 'PAYMENT_CANCEL_URL');

@@ -264,27 +264,33 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Ban Cố Vấn Sống Khỏe',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621),
-                    letterSpacing: -0.3,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ban Cố Vấn Sống Khỏe',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621),
+                      letterSpacing: -0.3,
+                    ),
                   ),
-                ),
-                const Text(
-                  'Trực tuyến • Hỗ trợ học viên',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w300,
-                    color: Color(0xFF0F5B38),
+                  const Text(
+                    'Trực tuyến • Hỗ trợ học viên',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w300,
+                      color: Color(0xFF0F5B38),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

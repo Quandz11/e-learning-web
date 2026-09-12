@@ -1,15 +1,25 @@
 import 'package:e_learning_mobile/features/chat/data/chat_api.dart';
+import 'package:e_learning_mobile/features/chat/data/chat_signalr_service.dart';
 import 'package:e_learning_mobile/features/chat/data/models/chat_models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final chatRepositoryProvider = Provider<ChatRepository>((ref) {
-  return ChatRepository(ref.watch(chatApiProvider));
+  return ChatRepository(
+    ref.watch(chatApiProvider),
+    signalRService: ref.watch(chatSignalRServiceProvider),
+  );
 });
 
 class ChatRepository {
-  const ChatRepository(this._api);
+  const ChatRepository(
+    this._api, {
+    ChatSignalRService? signalRService,
+  }) : _signalRService = signalRService;
 
   final ChatApi _api;
+  final ChatSignalRService? _signalRService;
+
+  ChatSignalRService? get signalR => _signalRService;
 
   Future<ChatConversation> getOrCreateSupportConversation({String? currentUserId}) async {
     // 1. Get existing conversations

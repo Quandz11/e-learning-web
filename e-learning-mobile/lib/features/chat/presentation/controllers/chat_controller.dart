@@ -54,11 +54,14 @@ class ChatController extends StateNotifier<ChatState> {
 
   final ChatRepository _repository;
   final String? currentUserId;
-  Timer? _pollingTimer;
+  StreamSubscription<ChatMessage>? _messageSubscription;
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    _messageSubscription?.cancel();
+    if (state.conversation != null) {
+      _repository.signalR?.leaveConversation(state.conversation!.id);
+    }
     super.dispose();
   }
 
@@ -78,27 +81,36 @@ class ChatController extends StateNotifier<ChatState> {
         isLoading: false,
       );
       _repository.markAsRead(conversation.id).ignore();
-      _startPolling();
+      _setupSignalR(conversation.id);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
-  void _startPolling() {
-    _pollingTimer?.cancel();
-    _pollingTimer = Timer.periodic(const Duration(seconds: 4), (_) async {
-      if (state.conversation != null && !state.isLoading) {
-        try {
-          final messages = await _repository.getMessages(
-            state.conversation!.id,
-            currentUserId: currentUserId,
-          );
-          if (messages.length != state.messages.length) {
-            state = state.copyWith(messages: messages);
-            _repository.markAsRead(state.conversation!.id).ignore();
-          }
-        } catch (_) {}
+  void _setupSignalR(String conversationId) {
+    final signalR = _repository.signalR;
+    if (signalR == null) return;
+
+    signalR.connect(currentUserId: currentUserId).then((_) {
+      signalR.joinConversation(conversationId);
+    });
+
+    _messageSubscription?.cancel();
+    _messageSubscription = signalR.onReceiveMessage.listen((incoming) {
+      if (incoming.conversationId.isNotEmpty &&
+          incoming.conversationId != conversationId) {
+        return;
       }
+      final existingIndex = state.messages.indexWhere((m) => m.id == incoming.id);
+      if (existingIndex >= 0) return;
+
+      final isMe = incoming.senderId == currentUserId;
+      final newMsg = incoming.copyWith(isMe: isMe);
+
+      state = state.copyWith(
+        messages: [...state.messages, newMsg],
+      );
+      _repository.markAsRead(conversationId).ignore();
     });
   }
 
@@ -106,7 +118,6 @@ class ChatController extends StateNotifier<ChatState> {
     if (text.trim().isEmpty || state.conversation == null || state.isSending) return;
 
     final trimmed = text.trim();
-    // Optimistic message
     final tempMsg = ChatMessage(
       id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
       conversationId: state.conversation!.id,
@@ -135,7 +146,6 @@ class ChatController extends StateNotifier<ChatState> {
       }).toList();
       state = state.copyWith(messages: updated, isSending: false);
     } catch (e) {
-      // Keep optimistic message or mark error
       state = state.copyWith(isSending: false);
     }
   }

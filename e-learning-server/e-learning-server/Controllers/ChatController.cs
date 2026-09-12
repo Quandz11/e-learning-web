@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using SKVI.Application.DTOs.Chat;
 using SKVI.Application.Interfaces;
+using SKVI.Infrastructure.Hubs;
 using System.Security.Claims;
 
 namespace SKVI.Controllers;
@@ -12,10 +14,14 @@ namespace SKVI.Controllers;
 public class ChatController : ControllerBase
 {
     private readonly IChatService _chatService;
+    private readonly IHubContext<ChatHub> _hubContext;
 
-    public ChatController(IChatService chatService)
+    public ChatController(
+        IChatService chatService,
+        IHubContext<ChatHub> hubContext)
     {
         _chatService = chatService;
+        _hubContext = hubContext;
     }
 
     [HttpGet("conversations")]
@@ -81,6 +87,26 @@ public class ChatController : ControllerBase
         try
         {
             var message = await _chatService.SendMessageAsync(dto.ConversationId, userId, dto.Content);
+
+            // Broadcast to conversation group and care-group for real-time SignalR sync
+            await _hubContext.Clients.Group($"conversation-{dto.ConversationId}").SendAsync("ReceiveMessage", message);
+            await _hubContext.Clients.Group("care-group").SendAsync("ReceiveMessage", message);
+
+            // Broadcast to participant user groups for multi-device sync
+            try
+            {
+                var conv = await _chatService.GetConversationByIdAsync(dto.ConversationId, userId);
+                foreach (var p in conv.Participants)
+                {
+                    await _hubContext.Clients.Group($"user-{p.UserId}").SendAsync("ReceiveMessage", message);
+                    await _hubContext.Clients.Group($"user-{p.UserId}").SendAsync("ConversationUpdated", conv);
+                }
+            }
+            catch
+            {
+                // Silently ignore broadcast lookup errors
+            }
+
             return Ok(message);
         }
         catch (UnauthorizedAccessException)
@@ -97,6 +123,11 @@ public class ChatController : ControllerBase
         try
         {
             await _chatService.MarkMessagesAsReadAsync(id, userId);
+
+            // Broadcast "MessagesRead" to the conversation group so counterparty sees "Seen"
+            await _hubContext.Clients.Group($"conversation-{id}")
+                .SendAsync("MessagesRead", id, userId);
+
             return NoContent();
         }
         catch (UnauthorizedAccessException)

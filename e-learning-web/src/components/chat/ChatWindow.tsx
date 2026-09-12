@@ -73,8 +73,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
                     try {
                         const conversations = await chatApi.getConversations();
                         let adminConv = conversations.find(c =>
-                            c.participants.some(p => p.userId === supportId)
-                        );
+                            c.participants.some(p => p.userId === (supportUserId || FALLBACK_SUPPORT_ID))
+                        ) || conversations[0];
 
                         if (!adminConv) {
                             // Try to create conversation with admin
@@ -307,7 +307,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
                     const conversations = await chatApi.getConversations();
                     let adminConv = conversations.find(c =>
                         c.participants.some(p => p.userId === (supportUserId || FALLBACK_SUPPORT_ID))
-                    );
+                    ) || conversations[0];
 
                     if (!adminConv) {
                         // Create conversation if it doesn't exist

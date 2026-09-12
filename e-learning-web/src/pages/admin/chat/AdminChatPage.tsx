@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../store/store';
 import { adminChatApi, type AdminConversation, type GuestMessage } from '../../../services/admin/adminChatApi';
@@ -7,7 +6,6 @@ import { chatSignalR } from '../../../services/chat/chatSignalR';
 import AdminLayout from '../../../components/admin/AdminLayout';
 
 export default function AdminChatPage() {
-    const { t } = useTranslation();
     const { accessToken, user } = useSelector((state: RootState) => state.auth);
     const [conversations, setConversations] = useState<AdminConversation[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<AdminConversation | null>(null);
@@ -293,10 +291,16 @@ export default function AdminChatPage() {
             }
         } catch (error) {
             console.error('Failed to send message:', error);
-            alert(t('admin.chat.error') || 'Failed to send message');
         } finally {
             console.log('[AdminChat] Cleanup sending state');
             setSending(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
         }
     };
 
@@ -554,7 +558,7 @@ export default function AdminChatPage() {
                                             type="text"
                                             value={inputMessage}
                                             onChange={(e) => setInputMessage(e.target.value)}
-                                            onKeyPress={handleKeyPress}
+                                            onKeyDown={handleKeyDown}
                                             onFocus={() => {
                                                 if (selectedConversation?.id && selectedConversation.type === 'authenticated') {
                                                     chatSignalR.markAsRead(selectedConversation.id);

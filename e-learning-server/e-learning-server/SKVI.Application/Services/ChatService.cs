@@ -31,6 +31,7 @@ public class ChatService : IChatService
         foreach (var conv in conversations)
         {
             var participant = conv.Participants.FirstOrDefault(p => p.UserId == userId);
+            var otherParticipant = conv.Participants.FirstOrDefault(p => p.UserId != userId);
             var unreadCount = await _context.Messages
                 .Where(m => m.ConversationId == conv.Id 
                     && m.SenderId != userId 
@@ -41,16 +42,25 @@ public class ChatService : IChatService
             result.Add(new ConversationResponse
             {
                 Id = conv.Id,
-                Title = conv.Title,
+                Title = conv.Title ?? otherParticipant?.User?.FullName ?? "Trò chuyện",
                 CreatedAt = conv.CreatedAt,
                 LastMessageAt = conv.LastMessageAt,
                 Participants = conv.Participants.Select(p => new ParticipantResponse
                 {
                     UserId = p.UserId,
                     UserName = p.User?.FullName ?? "Unknown",
+                    Role = p.User?.Role ?? "USER",
                     AvatarUrl = p.User?.AvatarUrl,
                     LastReadAt = p.LastReadAt
                 }).ToList(),
+                OtherParticipant = otherParticipant != null ? new ParticipantResponse
+                {
+                    UserId = otherParticipant.UserId,
+                    UserName = otherParticipant.User?.FullName ?? "Unknown",
+                    Role = otherParticipant.User?.Role ?? "USER",
+                    AvatarUrl = otherParticipant.User?.AvatarUrl,
+                    LastReadAt = otherParticipant.LastReadAt
+                } : null,
                 LastMessage = conv.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault() != null
                     ? MapToMessageResponse(conv.Messages.OrderByDescending(m => m.SentAt).First())
                     : null,
@@ -76,25 +86,42 @@ public class ChatService : IChatService
 
         foreach (var conv in conversations)
         {
-            // For admin view, unread count typically refers to messages not read by support
-            // But simplifying, we just count messages that are Unread
             var unreadCount = await _context.Messages
                 .Where(m => m.ConversationId == conv.Id && !m.IsRead)
                 .CountAsync();
 
+            var firstParticipant = conv.Participants.FirstOrDefault();
+            var secondParticipant = conv.Participants.Skip(1).FirstOrDefault();
+
             result.Add(new ConversationResponse
             {
                 Id = conv.Id,
-                Title = conv.Title,
+                Title = conv.Title ?? string.Join(", ", conv.Participants.Select(p => p.User?.FullName ?? "Unknown")),
                 CreatedAt = conv.CreatedAt,
                 LastMessageAt = conv.LastMessageAt,
                 Participants = conv.Participants.Select(p => new ParticipantResponse
                 {
                     UserId = p.UserId,
                     UserName = p.User?.FullName ?? "Unknown",
+                    Role = p.User?.Role ?? "USER",
                     AvatarUrl = p.User?.AvatarUrl,
                     LastReadAt = p.LastReadAt
                 }).ToList(),
+                OtherParticipant = secondParticipant != null ? new ParticipantResponse
+                {
+                    UserId = secondParticipant.UserId,
+                    UserName = secondParticipant.User?.FullName ?? "Unknown",
+                    Role = secondParticipant.User?.Role ?? "USER",
+                    AvatarUrl = secondParticipant.User?.AvatarUrl,
+                    LastReadAt = secondParticipant.LastReadAt
+                } : (firstParticipant != null ? new ParticipantResponse
+                {
+                    UserId = firstParticipant.UserId,
+                    UserName = firstParticipant.User?.FullName ?? "Unknown",
+                    Role = firstParticipant.User?.Role ?? "USER",
+                    AvatarUrl = firstParticipant.User?.AvatarUrl,
+                    LastReadAt = firstParticipant.LastReadAt
+                } : null),
                 LastMessage = conv.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault() != null
                     ? MapToMessageResponse(conv.Messages.OrderByDescending(m => m.SentAt).First())
                     : null,
@@ -118,6 +145,7 @@ public class ChatService : IChatService
             throw new UnauthorizedAccessException("Not a participant of this conversation");
 
         var participant = conv.Participants.FirstOrDefault(p => p.UserId == userId);
+        var otherParticipant = conv.Participants.FirstOrDefault(p => p.UserId != userId);
         var unreadCount = await _context.Messages
             .Where(m => m.ConversationId == conv.Id 
                 && m.SenderId != userId 
@@ -128,16 +156,25 @@ public class ChatService : IChatService
         return new ConversationResponse
         {
             Id = conv.Id,
-            Title = conv.Title,
+            Title = conv.Title ?? otherParticipant?.User?.FullName ?? "Trò chuyện",
             CreatedAt = conv.CreatedAt,
             LastMessageAt = conv.LastMessageAt,
             Participants = conv.Participants.Select(p => new ParticipantResponse
             {
                 UserId = p.UserId,
                 UserName = p.User?.FullName ?? "Unknown",
+                Role = p.User?.Role ?? "USER",
                 AvatarUrl = p.User?.AvatarUrl,
                 LastReadAt = p.LastReadAt
             }).ToList(),
+            OtherParticipant = otherParticipant != null ? new ParticipantResponse
+            {
+                UserId = otherParticipant.UserId,
+                UserName = otherParticipant.User?.FullName ?? "Unknown",
+                Role = otherParticipant.User?.Role ?? "USER",
+                AvatarUrl = otherParticipant.User?.AvatarUrl,
+                LastReadAt = otherParticipant.LastReadAt
+            } : null,
             LastMessage = conv.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault() != null
                 ? MapToMessageResponse(conv.Messages.OrderByDescending(m => m.SentAt).First())
                 : null,

@@ -21,6 +21,7 @@ public class ConversationResponse
     public DateTime CreatedAt { get; set; }
     public DateTime LastMessageAt { get; set; }
     public List<ParticipantResponse> Participants { get; set; } = new();
+    public ParticipantResponse? OtherParticipant { get; set; }
     public MessageResponse? LastMessage { get; set; }
     public int UnreadCount { get; set; }
 }
@@ -29,6 +30,7 @@ public class ParticipantResponse
 {
     public Guid UserId { get; set; }
     public string UserName { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
     public string? AvatarUrl { get; set; }
     public DateTime? LastReadAt { get; set; }
 }

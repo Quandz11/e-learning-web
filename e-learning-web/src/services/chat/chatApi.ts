@@ -6,6 +6,7 @@ export interface ConversationResponse {
     createdAt: string;
     lastMessageAt: string;
     participants: ParticipantResponse[];
+    otherParticipant?: ParticipantResponse;
     lastMessage?: MessageResponse;
     unreadCount: number;
 }
@@ -13,6 +14,7 @@ export interface ConversationResponse {
 export interface ParticipantResponse {
     userId: string;
     userName: string;
+    role?: string;
     avatarUrl?: string;
     lastReadAt?: string;
 }

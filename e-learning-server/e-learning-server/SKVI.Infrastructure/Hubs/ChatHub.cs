@@ -229,8 +229,22 @@ public class ChatHub : Hub
         await Clients.Group($"conversation-{conversationId}").SendAsync("ReceiveMessage", message);
 
         // Notify Admins/Support (care-group) so they see the new message in their list immediately
-        // allowing realtime updates without joining every single conversation group
         await Clients.Group("care-group").SendAsync("ReceiveMessage", message);
+
+        // Broadcast to user groups of all participants for multi-device & conversation list real-time sync
+        try
+        {
+            var conv = await _chatService.GetConversationByIdAsync(conversationId, Guid.Parse(userId));
+            foreach (var p in conv.Participants)
+            {
+                await Clients.Group($"user-{p.UserId}").SendAsync("ReceiveMessage", message);
+                await Clients.Group($"user-{p.UserId}").SendAsync("ConversationUpdated", conv);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[ChatHub] Failed to broadcast ConversationUpdated to participant user groups");
+        }
     }
 
     [Authorize]

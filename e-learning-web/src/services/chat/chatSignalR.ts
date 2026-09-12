@@ -36,6 +36,7 @@ interface SignalRCallbacks {
     onGuestStoppedTyping: ((guestId: string) => void)[];
     onMessagesRead: ((data: { conversationId?: string, guestId?: string, readerId?: string }) => void)[];
     onReceiveNotification: ((notification: NotificationMessage) => void)[];
+    onConversationUpdated: ((conversation: any) => void)[];
 }
 
 class ChatSignalRService {
@@ -54,7 +55,8 @@ class ChatSignalRService {
         onGuestTyping: [],
         onGuestStoppedTyping: [],
         onMessagesRead: [],
-        onReceiveNotification: []
+        onReceiveNotification: [],
+        onConversationUpdated: []
     };
 
     private async ensureConnected(): Promise<signalR.HubConnection> {
@@ -101,7 +103,8 @@ class ChatSignalRService {
             onGuestTyping: [],
             onGuestStoppedTyping: [],
             onMessagesRead: [],
-            onReceiveNotification: []
+            onReceiveNotification: [],
+            onConversationUpdated: []
         };
     }
 
@@ -227,6 +230,10 @@ class ChatSignalRService {
 
             this.connection.on('ReceiveNotification', (notification: NotificationMessage) => {
                 this.callbacks.onReceiveNotification.forEach(cb => cb(notification));
+            });
+
+            this.connection.on('ConversationUpdated', (conversation: any) => {
+                this.callbacks.onConversationUpdated.forEach(cb => cb(conversation));
             });
 
             try {
@@ -393,6 +400,10 @@ class ChatSignalRService {
 
     public onReceiveNotification(callback: (notification: NotificationMessage) => void) {
         this.callbacks.onReceiveNotification.push(callback);
+    }
+
+    public onConversationUpdated(callback: (conversation: any) => void) {
+        this.callbacks.onConversationUpdated.push(callback);
     }
 
     getConnectionState() {

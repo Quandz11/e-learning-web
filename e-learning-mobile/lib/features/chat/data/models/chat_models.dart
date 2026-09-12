@@ -69,6 +69,7 @@ class ChatConversation {
     this.title,
     required this.createdAt,
     required this.lastMessageAt,
+    this.otherParticipant,
     this.lastMessage,
     required this.unreadCount,
   });
@@ -77,6 +78,7 @@ class ChatConversation {
   final String? title;
   final DateTime createdAt;
   final DateTime lastMessageAt;
+  final SupportUser? otherParticipant;
   final ChatMessage? lastMessage;
   final int unreadCount;
 
@@ -90,6 +92,9 @@ class ChatConversation {
       lastMessageAt: json['lastMessageAt'] != null
           ? DateTime.tryParse(json['lastMessageAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
+      otherParticipant: json['otherParticipant'] != null && json['otherParticipant'] is Map<String, dynamic>
+          ? SupportUser.fromJson(json['otherParticipant'] as Map<String, dynamic>)
+          : null,
       lastMessage: json['lastMessage'] != null && json['lastMessage'] is Map<String, dynamic>
           ? ChatMessage.fromJson(json['lastMessage'] as Map<String, dynamic>, currentUserId: currentUserId)
           : null,
@@ -112,9 +117,11 @@ class SupportUser {
   final String? role;
 
   factory SupportUser.fromJson(Map<String, dynamic> json) {
+    final id = json['id']?.toString() ?? json['userId']?.toString() ?? '';
+    final name = json['fullName']?.toString() ?? json['userName']?.toString() ?? 'Ban Cố Vấn Sống Khỏe';
     return SupportUser(
-      id: json['id']?.toString() ?? '',
-      fullName: json['fullName']?.toString() ?? 'Ban Cố Vấn Sống Khỏe',
+      id: id,
+      fullName: name,
       avatarUrl: json['avatarUrl']?.toString(),
       role: json['role']?.toString() ?? 'Chuyên viên Tư vấn',
     );

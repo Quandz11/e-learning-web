@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +17,50 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('🔥 FCM Background message received: ${message.messageId}');
 }
 
+class NotificationTapEvent {
+  const NotificationTapEvent({
+    required this.type,
+    this.conversationId,
+    this.targetRoute,
+    this.data = const {},
+  });
+
+  final String type; // 'chat' | 'notification' | 'reminder'
+  final String? conversationId;
+  final String? targetRoute;
+  final Map<String, dynamic> data;
+
+  factory NotificationTapEvent.fromData(Map<String, dynamic> data) {
+    final type = data['type']?.toString().toLowerCase() ?? '';
+    final convId = data['conversationId']?.toString() ?? data['guestId']?.toString();
+    final route = data['targetRoute']?.toString() ?? data['route']?.toString();
+
+    if (type == 'chat' || convId != null) {
+      return NotificationTapEvent(
+        type: 'chat',
+        conversationId: convId,
+        targetRoute: route ?? '/app/support-chat',
+        data: data,
+      );
+    }
+    return NotificationTapEvent(
+      type: 'notification',
+      conversationId: convId,
+      targetRoute: route ?? '/app/notifications',
+      data: data,
+    );
+  }
+
+  factory NotificationTapEvent.fromRemoteMessage(RemoteMessage message) {
+    final data = Map<String, dynamic>.from(message.data);
+    if (message.notification != null) {
+      data['title'] ??= message.notification!.title;
+      data['body'] ??= message.notification!.body;
+    }
+    return NotificationTapEvent.fromData(data);
+  }
+}
+
 class NotificationService {
   NotificationService._();
 
@@ -22,6 +68,17 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
+
+  final StreamController<RemoteMessage> _onMessageController =
+      StreamController<RemoteMessage>.broadcast();
+
+  Stream<RemoteMessage> get onMessageStream => _onMessageController.stream;
+
+  final StreamController<NotificationTapEvent> _onNotificationTapController =
+      StreamController<NotificationTapEvent>.broadcast();
+
+  Stream<NotificationTapEvent> get onNotificationTapStream =>
+      _onNotificationTapController.stream;
 
   static const String channelId = 'skvi_wellness_channel';
   static const String channelName = 'Nhắc nhở & Thông báo SKVI';
@@ -71,6 +128,21 @@ class NotificationService {
       initSettings,
       onDidReceiveNotificationResponse: (response) {
         debugPrint('Notification tapped: ${response.payload}');
+        if (response.payload != null && response.payload!.isNotEmpty) {
+          try {
+            final map = jsonDecode(response.payload!) as Map<String, dynamic>;
+            _onNotificationTapController.add(NotificationTapEvent.fromData(map));
+          } catch (_) {
+            final payloadStr = response.payload!;
+            if (payloadStr.contains('chat')) {
+              _onNotificationTapController.add(const NotificationTapEvent(type: 'chat'));
+            } else {
+              _onNotificationTapController.add(const NotificationTapEvent(type: 'notification'));
+            }
+          }
+        } else {
+          _onNotificationTapController.add(const NotificationTapEvent(type: 'notification'));
+        }
       },
     );
 
@@ -128,6 +200,10 @@ class NotificationService {
 
     final androidGranted =
         await androidImplementation?.requestNotificationsPermission() ?? true;
+
+    try {
+      await androidImplementation?.requestExactAlarmsPermission();
+    } catch (_) {}
 
     final darwinImplementation = _plugin
         .resolvePlatformSpecificImplementation<
@@ -313,18 +389,34 @@ class NotificationService {
           }
         });
 
+        messaging.getInitialMessage().then((RemoteMessage? message) {
+          if (message != null) {
+            _onMessageController.add(message);
+            _onNotificationTapController.add(NotificationTapEvent.fromRemoteMessage(message));
+          }
+        });
+
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           final notification = message.notification;
           final isChat = message.data['type'] == 'chat';
+          final dataMap = Map<String, dynamic>.from(message.data);
+          dataMap['type'] = message.data['type'] ?? (isChat ? 'chat' : 'notification');
+
           if (notification != null) {
             showImmediateNotification(
               id: message.hashCode,
               title: notification.title ?? (isChat ? 'Tin nhắn mới' : 'Thông báo mới'),
               body: notification.body ?? '',
-              payload: message.data.toString(),
+              payload: jsonEncode(dataMap),
               isChat: isChat,
             );
           }
+          _onMessageController.add(message);
+        });
+
+        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+          _onMessageController.add(message);
+          _onNotificationTapController.add(NotificationTapEvent.fromRemoteMessage(message));
         });
       }
     } catch (e) {

@@ -8,6 +8,7 @@ import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
@@ -61,9 +62,9 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_isValidId(widget.courseId) || !_isValidId(widget.lessonPartId)) {
-      return const Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
+      return Scaffold(
+        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+        body: const SafeArea(
           child: AppErrorView(message: 'Không tìm thấy video cần hiển thị.'),
         ),
       );
@@ -73,24 +74,24 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
     final controller = ref.read(_provider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textPrimary,
+            color: context.textPrimary(),
             size: 20,
           ),
           onPressed: () => context.pop(),
         ),
         title: Text(
           state.detail?.part.title ?? 'Xem Video Bài Học',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.textPrimary(),
           ),
         ),
       ),
@@ -132,7 +133,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                         state.detail!.course.title,
                                         style: Theme.of(context).textTheme.labelMedium
                                             ?.copyWith(
-                                              color: AppColors.primary,
+                                              color: context.colorScheme.primary,
                                               fontWeight: FontWeight.w600,
                                             ),
                                       ),
@@ -142,7 +143,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                         style: Theme.of(context).textTheme.titleLarge
                                             ?.copyWith(
                                               fontWeight: FontWeight.w700,
-                                              color: AppColors.textPrimary,
+                                              color: context.textPrimary(),
                                             ),
                                       ),
                                       const SizedBox(height: AppSpacing.xs),
@@ -154,10 +155,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                             Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                const Icon(
+                                                Icon(
                                                   Icons.access_time_rounded,
                                                   size: 14,
-                                                  color: AppColors.textSecondary,
+                                                  color: context.textSecondary(),
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
@@ -166,7 +167,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                                       .textTheme
                                                       .bodySmall
                                                       ?.copyWith(
-                                                        color: AppColors.textSecondary,
+                                                        color: context.textSecondary(),
                                                       ),
                                                 ),
                                               ],
@@ -175,10 +176,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFFF0FDF4),
+                                                color: context.isDark ? const Color(0xFF143823) : const Color(0xFFF0FDF4),
                                                 borderRadius: BorderRadius.circular(AppRadius.pill),
                                                 border: Border.all(
-                                                  color: const Color(0xFFBBF7D0),
+                                                  color: context.isDark ? const Color(0xFF1B5E33) : const Color(0xFFBBF7D0),
                                                   width: 0.8,
                                                 ),
                                               ),
@@ -209,7 +210,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(3),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFEFF5F1),
+                                    color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF5F1),
                                     borderRadius: BorderRadius.circular(AppRadius.pill),
                                   ),
                                   child: Row(
@@ -231,10 +232,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(AppSpacing.md),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: context.cardBg(),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
-                                        color: const Color(0xFFEAEFE9),
+                                        color: context.cardBorder(),
                                         width: 0.8,
                                       ),
                                       boxShadow: [
@@ -255,7 +256,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                               .titleMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w500,
-                                                color: AppColors.textPrimary,
+                                                color: context.textPrimary(),
                                               ),
                                         ),
                                         const SizedBox(height: AppSpacing.xs),
@@ -263,10 +264,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                             stripHtml(state.detail!.part.content!).isNotEmpty)
                                           HtmlWidget(
                                             state.detail!.part.content!,
-                                            textStyle: const TextStyle(
+                                            textStyle: TextStyle(
                                               fontSize: 13.5,
                                               height: 1.55,
-                                              color: Color(0xFF334138),
+                                              color: context.textPrimary(),
                                               fontWeight: FontWeight.w300,
                                             ),
                                           )
@@ -277,13 +278,13 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                                 .textTheme
                                                 .bodyMedium
                                                 ?.copyWith(
-                                                  color: AppColors.textSecondary,
+                                                  color: context.textSecondary(),
                                                   fontWeight: FontWeight.w300,
                                                   height: 1.5,
                                                 ),
                                           ),
                                           const SizedBox(height: AppSpacing.md),
-                                          const Divider(height: 1, thickness: 0.8, color: Color(0xFFEAEFE9)),
+                                          Divider(height: 1, thickness: 0.8, color: context.cardBorder()),
                                           const SizedBox(height: AppSpacing.md),
                                           Text(
                                             'Điểm cốt lõi cần nhớ',
@@ -292,7 +293,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                                 .labelMedium
                                                 ?.copyWith(
                                                   fontWeight: FontWeight.w500,
-                                                  color: AppColors.primary,
+                                                  color: context.colorScheme.primary,
                                                 ),
                                           ),
                                           const SizedBox(height: AppSpacing.xs),
@@ -307,10 +308,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(AppSpacing.md),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: context.cardBg(),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
-                                        color: const Color(0xFFEAEFE9),
+                                        color: context.cardBorder(),
                                         width: 0.8,
                                       ),
                                       boxShadow: [
@@ -331,43 +332,43 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                               .titleMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w500,
-                                                color: AppColors.textPrimary,
+                                                color: context.textPrimary(),
                                               ),
                                         ),
                                         const SizedBox(height: AppSpacing.xs),
                                         TextField(
                                           controller: _noteController,
                                           maxLines: 4,
-                                          style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 13),
+                                          style: TextStyle(fontWeight: FontWeight.w300, fontSize: 13, color: context.textPrimary()),
                                           decoration: InputDecoration(
                                             hintText:
                                                 'Nhập ghi chú quan trọng trong lúc xem video...',
-                                            hintStyle: const TextStyle(
-                                              color: AppColors.textSecondary,
+                                            hintStyle: TextStyle(
+                                              color: context.textMuted(),
                                               fontWeight: FontWeight.w300,
                                               fontSize: 13,
                                             ),
                                             filled: true,
-                                            fillColor: const Color(0xFFF9FBF9),
+                                            fillColor: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF9FBF9),
                                             contentPadding: const EdgeInsets.all(12),
                                             border: OutlineInputBorder(
                                               borderRadius: BorderRadius.circular(12),
-                                              borderSide: const BorderSide(
-                                                color: Color(0xFFEAEFE9),
+                                              borderSide: BorderSide(
+                                                color: context.cardBorder(),
                                                 width: 0.8,
                                               ),
                                             ),
                                             enabledBorder: OutlineInputBorder(
                                               borderRadius: BorderRadius.circular(12),
-                                              borderSide: const BorderSide(
-                                                color: Color(0xFFEAEFE9),
+                                              borderSide: BorderSide(
+                                                color: context.cardBorder(),
                                                 width: 0.8,
                                               ),
                                             ),
                                             focusedBorder: OutlineInputBorder(
                                               borderRadius: BorderRadius.circular(12),
-                                              borderSide: const BorderSide(
-                                                color: AppColors.primary,
+                                              borderSide: BorderSide(
+                                                color: context.colorScheme.primary,
                                                 width: 1,
                                               ),
                                             ),
@@ -390,7 +391,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                             icon: const Icon(Icons.bookmark_added_outlined, size: 16),
                                             label: const Text('Lưu ghi chú'),
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppColors.primary,
+                                              backgroundColor: context.colorScheme.primary,
                                               foregroundColor: Colors.white,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -405,10 +406,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(AppSpacing.md),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: context.cardBg(),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
-                                        color: const Color(0xFFEAEFE9),
+                                        color: context.cardBorder(),
                                         width: 0.8,
                                       ),
                                       boxShadow: [
@@ -429,7 +430,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                               .titleMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w500,
-                                                color: AppColors.textPrimary,
+                                                color: context.textPrimary(),
                                               ),
                                         ),
                                         const SizedBox(height: AppSpacing.xs),
@@ -437,7 +438,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                           'Bạn có thắc mắc về bài học này? Hãy gửi bài đăng trong diễn đàn cộng đồng để được trợ giúp.',
                                           style: Theme.of(context).textTheme.bodySmall
                                               ?.copyWith(
-                                                color: AppColors.textSecondary,
+                                                color: context.textSecondary(),
                                                 fontWeight: FontWeight.w300,
                                               ),
                                         ),
@@ -447,8 +448,8 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                           icon: const Icon(Icons.forum_outlined, size: 16),
                                           label: const Text('Mở Diễn đàn Cộng đồng'),
                                           style: OutlinedButton.styleFrom(
-                                            foregroundColor: AppColors.primary,
-                                            side: const BorderSide(color: AppColors.primary, width: 0.8),
+                                            foregroundColor: context.colorScheme.primary,
+                                            side: BorderSide(color: context.colorScheme.primary, width: 0.8),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(AppRadius.pill),
                                             ),
@@ -476,10 +477,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                       horizontal: AppSpacing.md,
                       vertical: AppSpacing.sm,
                     ),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: context.cardBg(),
                       border: Border(
-                        top: BorderSide(color: Color(0xFFEAEFE9), width: 0.8),
+                        top: BorderSide(color: context.cardBorder(), width: 0.8),
                       ),
                     ),
                     child: SafeArea(
@@ -491,10 +492,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                             ? Container(
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF0FDF4),
+                                  color: context.isDark ? const Color(0xFF143823) : const Color(0xFFF0FDF4),
                                   borderRadius: BorderRadius.circular(AppRadius.pill),
                                   border: Border.all(
-                                    color: const Color(0xFFBBF7D0),
+                                    color: context.isDark ? const Color(0xFF1B5E33) : const Color(0xFFBBF7D0),
                                     width: 0.8,
                                   ),
                                 ),
@@ -543,7 +544,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                   style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: context.colorScheme.primary,
                                   foregroundColor: Colors.white,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
@@ -593,7 +594,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
           'Điều hướng bài học',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: context.textPrimary(),
               ),
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -609,21 +610,21 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.cardBg(),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFEAEFE9), width: 0.8),
+                        border: Border.all(color: context.cardBorder(), width: 0.8),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.chevron_left_rounded, size: 16, color: AppColors.textSecondary),
-                              SizedBox(width: 2),
+                              Icon(Icons.chevron_left_rounded, size: 16, color: context.textSecondary()),
+                              const SizedBox(width: 2),
                               Text(
                                 'Bài trước',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: context.textSecondary()),
                               ),
                             ],
                           ),
@@ -632,10 +633,10 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                             previous.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: context.textPrimary(),
                               height: 1.25,
                             ),
                           ),
@@ -653,11 +654,11 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: context.colorScheme.primary,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.2),
+                            color: context.colorScheme.primary.withValues(alpha: 0.2),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -709,11 +710,11 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 2),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
             child: Icon(
               Icons.check_circle_rounded,
-              color: AppColors.primary,
+              color: context.colorScheme.primary,
               size: 15,
             ),
           ),
@@ -721,9 +722,9 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: AppColors.textPrimary,
+                color: context.textPrimary(),
                 fontWeight: FontWeight.w300,
                 height: 1.4,
               ),
@@ -746,7 +747,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 7),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected ? context.cardBg() : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.pill),
           boxShadow: isSelected
               ? [
@@ -763,7 +764,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-            color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            color: isSelected ? context.colorScheme.primary : context.textSecondary(),
             fontSize: 13,
           ),
         ),

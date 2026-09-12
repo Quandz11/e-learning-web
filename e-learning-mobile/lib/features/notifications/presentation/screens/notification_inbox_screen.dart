@@ -12,14 +12,17 @@ class NotificationInboxScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(notificationsControllerProvider);
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFA),
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFBFBFA),
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF1E2621)),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: colorScheme.onSurface),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -28,12 +31,12 @@ class NotificationInboxScreen extends ConsumerWidget {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Thông báo',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1E2621),
+            color: colorScheme.onSurface,
             letterSpacing: -0.5,
           ),
         ),
@@ -215,6 +218,17 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final unreadBg = isDark
+        ? colorScheme.surfaceContainerHighest
+        : const Color(0xFFF4F9F5);
+    final readBg = isDark
+        ? colorScheme.surfaceContainerLow
+        : Colors.white;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -223,16 +237,16 @@ class _NotificationCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: item.isRead ? Colors.white : const Color(0xFFF4F9F5),
+            color: item.isRead ? readBg : unreadBg,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: item.isRead
-                  ? const Color(0xFFE9EBEA)
-                  : const Color(0xFFD4E8DC),
+                  ? (isDark ? colorScheme.outlineVariant : const Color(0xFFE9EBEA))
+                  : (isDark ? colorScheme.primary.withValues(alpha: 0.5) : const Color(0xFFD4E8DC)),
               width: 1,
             ),
             boxShadow: [
-              if (!item.isRead)
+              if (!item.isRead && !isDark)
                 BoxShadow(
                   color: const Color(0xFF0F5B38).withValues(alpha: 0.04),
                   blurRadius: 10,
@@ -248,8 +262,8 @@ class _NotificationCard extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: item.isRead
-                      ? const Color(0xFFF1F3F2)
-                      : const Color(0xFF0F5B38).withValues(alpha: 0.12),
+                      ? (isDark ? colorScheme.surfaceContainerLowest : const Color(0xFFF1F3F2))
+                      : colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -258,8 +272,8 @@ class _NotificationCard extends StatelessWidget {
                       : Icons.notifications_active_rounded,
                   size: 20,
                   color: item.isRead
-                      ? const Color(0xFF717873)
-                      : const Color(0xFF0F5B38),
+                      ? (isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873))
+                      : (isDark ? colorScheme.onPrimaryContainer : const Color(0xFF0F5B38)),
                 ),
               ),
               const SizedBox(width: 14),
@@ -276,7 +290,7 @@ class _NotificationCard extends StatelessWidget {
                               fontSize: 15,
                               fontWeight:
                                   item.isRead ? FontWeight.w500 : FontWeight.w600,
-                              color: const Color(0xFF1E2621),
+                              color: colorScheme.onSurface,
                               letterSpacing: -0.3,
                             ),
                           ),

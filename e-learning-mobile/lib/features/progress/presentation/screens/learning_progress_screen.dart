@@ -4,6 +4,7 @@ import 'package:e_learning_mobile/features/progress/presentation/controllers/pro
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,21 +44,22 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
     final myEnrollments = learningState.enrollments;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Tiến độ học tập',
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 18,
             letterSpacing: -0.3,
-            color: AppColors.textPrimary,
+            color: context.textPrimary(),
           ),
         ),
         elevation: 0,
-        backgroundColor: AppColors.background,
+        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
       ),
       body: RefreshIndicator(
+        color: context.colorScheme.primary,
         onRefresh: () async {
           await ref.read(progressControllerProvider.notifier).refresh();
           await ref.read(learningControllerProvider.notifier).refresh();
@@ -72,10 +74,10 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
               Container(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg(),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFEAEFE9),
+                    color: context.cardBorder(),
                     width: 0.8,
                   ),
                   boxShadow: [
@@ -107,28 +109,28 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const Text(
+                        Text(
                           'TIẾN ĐỘ TÍCH CỰC',
                           style: TextStyle(
                             letterSpacing: 1.2,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF0F5B38),
+                            color: context.colorScheme.primary,
                           ),
                         ),
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF0F5F1),
+                            color: context.isDark ? const Color(0xFF143823) : const Color(0xFFF0F5F1),
                             borderRadius: BorderRadius.circular(AppRadius.pill),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Mục tiêu tuần',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF43544B),
+                              color: context.isDark ? context.colorScheme.primary : const Color(0xFF43544B),
                             ),
                           ),
                         ),
@@ -150,9 +152,9 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                               value: (overallPercent / 100.0).clamp(0.0, 1.0),
                               strokeWidth: 4.5,
                               strokeCap: StrokeCap.round,
-                              backgroundColor: const Color(0xFFEFF3EE),
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF0F5B38),
+                              backgroundColor: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF3EE),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                context.colorScheme.primary,
                               ),
                             ),
                           ),
@@ -164,7 +166,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                                 style: theme.textTheme.headlineLarge?.copyWith(
                                   fontWeight: FontWeight.w300,
                                   letterSpacing: -0.5,
-                                  color: const Color(0xFF1A2520),
+                                  color: context.textPrimary(),
                                   fontSize: 32,
                                 ),
                               ),
@@ -172,7 +174,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                                 'tổng tích lũy',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontWeight: FontWeight.w300,
-                                  color: const Color(0xFF8E9E94),
+                                  color: context.textMuted(),
                                   fontSize: 11,
                                 ),
                               ),
@@ -188,20 +190,23 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _buildMetricCol(
+                          context,
                           '$streakDays ngày',
                           'Chuỗi liên tục',
                           Icons.local_fire_department_rounded,
                           AppColors.warning,
                         ),
-                        Container(height: 32, width: 0.8, color: const Color(0xFFEAEFE9)),
+                        Container(height: 32, width: 0.8, color: context.cardBorder()),
                         _buildMetricCol(
+                          context,
                           '$completedLessons bài',
                           'Bài đã xong',
                           Icons.check_circle_outline_rounded,
-                          AppColors.primary,
+                          context.colorScheme.primary,
                         ),
-                        Container(height: 32, width: 0.8, color: const Color(0xFFEAEFE9)),
+                        Container(height: 32, width: 0.8, color: context.cardBorder()),
                         _buildMetricCol(
+                          context,
                           '$totalMinutes phút',
                           'Tổng giờ học',
                           Icons.timer_outlined,
@@ -210,7 +215,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                       ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    const Divider(height: 1, thickness: 0.8, color: Color(0xFFEAEFE9)),
+                    Divider(height: 1, thickness: 0.8, color: context.cardBorder()),
                     const SizedBox(height: AppSpacing.md),
 
                     // Weekly Learning Streak Chart
@@ -221,14 +226,14 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                           'Thời gian học tuần này',
                           style: theme.textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary(),
                           ),
                         ),
                         Text(
                           'Mục tiêu: 30p/ngày',
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w300,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary(),
                             fontSize: 11,
                           ),
                         ),
@@ -266,14 +271,16 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterChip(0, 'Tất cả (${myEnrollments.length})'),
+                    _buildFilterChip(context, 0, 'Tất cả (${myEnrollments.length})'),
                     const SizedBox(width: AppSpacing.xs),
                     _buildFilterChip(
+                      context,
                       1,
                       'Đang học (${myEnrollments.where((e) => !e.isCompleted).length})',
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     _buildFilterChip(
+                      context,
                       2,
                       'Hoàn thành (${myEnrollments.where((e) => e.isCompleted).length})',
                     ),
@@ -288,29 +295,29 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardBg(),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFEAEFE9), width: 0.8),
+                    border: Border.all(color: context.cardBorder(), width: 0.8),
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.school_outlined, size: 40, color: Color(0xFF8E9E94)),
+                      Icon(Icons.school_outlined, size: 40, color: context.textMuted()),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Chưa có khóa học nào',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF1A2520),
+                          color: context.textPrimary(),
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
+                      Text(
                         'Hãy khám phá các khóa học sức khỏe để bắt đầu!',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w300,
-                          color: Color(0xFF8E9E94),
+                          color: context.textMuted(),
                         ),
                       ),
                     ],
@@ -339,25 +346,25 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
     );
   }
 
-  Widget _buildFilterChip(int index, String label) {
+  Widget _buildFilterChip(BuildContext context, int index, String label) {
     final isSelected = _selectedFilterIndex == index;
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      selectedColor: AppColors.primary,
-      backgroundColor: Colors.white,
+      selectedColor: context.colorScheme.primary,
+      backgroundColor: context.cardBg(),
       elevation: 0,
       side: BorderSide(
         color: isSelected
-            ? AppColors.primary
-            : const Color(0xFFEAEFE9),
+            ? context.colorScheme.primary
+            : context.cardBorder(),
         width: 0.8,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : AppColors.textPrimary,
+        color: isSelected ? Colors.white : context.textPrimary(),
         fontWeight: FontWeight.w400,
         fontSize: 13,
       ),
@@ -372,6 +379,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
   }
 
   Widget _buildMetricCol(
+    BuildContext context,
     String value,
     String label,
     IconData icon,
@@ -383,16 +391,16 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: context.textPrimary(),
             fontWeight: FontWeight.w500,
             fontSize: 15,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
+          style: TextStyle(
+            color: context.textSecondary(),
             fontWeight: FontWeight.w300,
             fontSize: 11,
           ),
@@ -415,10 +423,10 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg(),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFEAEFE9),
+          color: context.cardBorder(),
           width: 0.8,
         ),
         boxShadow: [
@@ -440,14 +448,14 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     letterSpacing: -0.1,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary(),
                   ),
                 ),
               ),
               Text(
                 '$percent%',
-                style: const TextStyle(
-                  color: AppColors.primary,
+                style: TextStyle(
+                  color: context.colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -458,7 +466,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
             subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w300,
-              color: AppColors.textSecondary,
+              color: context.textSecondary(),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -467,8 +475,8 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: const Color(0xFFEFF5F1),
-              valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+              backgroundColor: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF5F1),
+              valueColor: AlwaysStoppedAnimation(context.colorScheme.primary),
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -484,7 +492,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                 style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
               ),
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
+                foregroundColor: context.colorScheme.primary,
                 padding: EdgeInsets.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
@@ -522,7 +530,7 @@ class _DayStreakBar extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: isToday ? FontWeight.w500 : FontWeight.w300,
-            color: isToday ? AppColors.primary : AppColors.textSecondary,
+            color: isToday ? context.colorScheme.primary : context.textSecondary(),
           ),
         ),
         const SizedBox(height: 4),
@@ -531,7 +539,7 @@ class _DayStreakBar extends StatelessWidget {
           height: 64,
           alignment: Alignment.bottomCenter,
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF5F1),
+            color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF5F1),
             borderRadius: BorderRadius.circular(AppRadius.pill),
           ),
           child: Container(
@@ -539,8 +547,8 @@ class _DayStreakBar extends StatelessWidget {
             height: barHeight,
             decoration: BoxDecoration(
               color: isToday
-                  ? AppColors.primary
-                  : (hasLearned ? const Color(0xFF68B28B) : Colors.transparent),
+                  ? context.colorScheme.primary
+                  : (hasLearned ? (context.isDark ? const Color(0xFF388E3C) : const Color(0xFF68B28B)) : Colors.transparent),
               borderRadius: BorderRadius.circular(AppRadius.pill),
             ),
           ),
@@ -551,7 +559,7 @@ class _DayStreakBar extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: isToday ? FontWeight.w500 : FontWeight.w400,
-            color: isToday ? AppColors.primary : AppColors.textPrimary,
+            color: isToday ? context.colorScheme.primary : context.textPrimary(),
           ),
         ),
       ],

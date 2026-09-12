@@ -9,6 +9,7 @@ import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_empty_view.dart';
@@ -40,36 +41,39 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
     final state = ref.watch(learningControllerProvider);
     final controller = ref.read(learningControllerProvider.notifier);
 
-    return SafeArea(
-      bottom: false,
-      child: RefreshIndicator(
-        onRefresh: controller.refresh,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.xl,
-          ),
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppSizes.contentMaxWidth,
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: _LearningContent(
-                    state: state,
-                    onRetry: controller.load,
-                    onSectionRetry: controller.refresh,
+    return Scaffold(
+      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+      body: SafeArea(
+        bottom: false,
+        child: RefreshIndicator(
+          onRefresh: controller.refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.xl,
+            ),
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppSizes.contentMaxWidth,
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: _LearningContent(
+                      state: state,
+                      onRetry: controller.load,
+                      onSectionRetry: controller.refresh,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -139,52 +143,57 @@ class _LearningContentState extends State<_LearningContent> {
             vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.cardBg(),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFFEAEFE9),
+              color: context.cardBorder(),
               width: 0.8,
             ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x04000000),
-                blurRadius: 12,
-                offset: Offset(0, 3),
-              ),
-            ],
+            boxShadow: context.isDark
+                ? null
+                : const [
+                    BoxShadow(
+                      color: Color(0x04000000),
+                      blurRadius: 12,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
           ),
           child: Row(
             children: [
               Expanded(
                 child: _buildBentoMetricCol(
+                  context: context,
                   label: 'Đang học',
                   value: '${allEnrollments.where((e) => !e.isCompleted).length}',
                   unit: 'khóa',
                   icon: Icons.auto_stories_outlined,
-                  color: const Color(0xFF0F5B38),
-                  bgColor: const Color(0xFFF0F7F2),
+                  color: context.isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
+                  bgColor: context.isDark ? context.colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2),
                 ),
               ),
-              Container(height: 36, width: 0.8, color: const Color(0xFFEAEFE9)),
+              Container(height: 36, width: 0.8, color: context.cardBorder()),
               Expanded(
                 child: _buildBentoMetricCol(
+                  context: context,
                   label: 'Hoàn thành',
                   value: '${allEnrollments.where((e) => e.isCompleted).length}',
                   unit: 'khóa',
                   icon: Icons.verified_outlined,
                   color: const Color(0xFF108A55),
-                  bgColor: const Color(0xFFEDF7F1),
+                  bgColor: context.isDark ? const Color(0xFF064E3B).withValues(alpha: 0.4) : const Color(0xFFEDF7F1),
                 ),
               ),
-              Container(height: 36, width: 0.8, color: const Color(0xFFEAEFE9)),
+              Container(height: 36, width: 0.8, color: context.cardBorder()),
               Expanded(
                 child: _buildBentoMetricCol(
+                  context: context,
                   label: 'Hiện có',
                   value: '${widget.state.courses.length}',
                   unit: 'khóa',
                   icon: Icons.explore_outlined,
                   color: const Color(0xFF2563EB),
-                  bgColor: const Color(0xFFEFF6FF),
+                  bgColor: context.isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.4) : const Color(0xFFEFF6FF),
                 ),
               ),
             ],
@@ -229,26 +238,29 @@ class _LearningContentState extends State<_LearningContent> {
 
   Widget _buildFilterChip(String label, int index) {
     final selected = _filterIndex == index;
+    final isDark = context.isDark;
     final colorScheme = Theme.of(context).colorScheme;
 
     return ChoiceChip(
       label: Text(label),
       selected: selected,
       selectedColor: AppColors.primary,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.pill),
         side: BorderSide(
           color: selected
               ? AppColors.primary
-              : const Color(0xFFEAEFE9),
+              : context.cardBorder(),
           width: 0.8,
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       labelStyle: TextStyle(
-        color: selected ? Colors.white : colorScheme.onSurfaceVariant,
+        color: selected
+            ? Colors.white
+            : (isDark ? colorScheme.onSurface : colorScheme.onSurfaceVariant),
         fontWeight: FontWeight.w400,
         fontSize: 13,
       ),
@@ -263,6 +275,7 @@ class _LearningContentState extends State<_LearningContent> {
   }
 
   Widget _buildBentoMetricCol({
+    required BuildContext context,
     required String label,
     required String value,
     required String unit,
@@ -291,20 +304,20 @@ class _LearningContentState extends State<_LearningContent> {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                   letterSpacing: -0.2,
                 ),
               ),
               const SizedBox(width: 2),
               Text(
                 unit,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w300,
-                  color: Color(0xFF8E9E94),
+                  color: context.textMuted(),
                 ),
               ),
             ],
@@ -314,10 +327,10 @@ class _LearningContentState extends State<_LearningContent> {
           fit: BoxFit.scaleDown,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w300,
-              color: Color(0xFF586B60),
+              color: context.textSecondary(),
             ),
           ),
         ),
@@ -331,14 +344,14 @@ class _LearningHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Text(
         'Khóa học',
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF1E2621),
+          color: context.textPrimary(),
           letterSpacing: -0.4,
         ),
       ),
@@ -513,20 +526,22 @@ class _EnrollmentCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isDone
-                          ? const Color(0xFFF0FDF4)
-                          : const Color(0xFFF0F7F2),
+                          ? (context.isDark ? const Color(0xFF064E3B).withValues(alpha: 0.4) : const Color(0xFFF0FDF4))
+                          : (context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2)),
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                       border: Border.all(
                         color: isDone
-                            ? const Color(0xFFBBF7D0)
-                            : const Color(0xFFD1E7DD),
+                            ? (context.isDark ? const Color(0xFF059669) : const Color(0xFFBBF7D0))
+                            : context.cardBorder(),
                         width: 0.8,
                       ),
                     ),
                     child: Text(
                       _enrollmentStatusLabel(enrollment),
                       style: textTheme.labelSmall?.copyWith(
-                        color: isDone ? const Color(0xFF16A34A) : AppColors.primary,
+                        color: isDone
+                            ? (context.isDark ? const Color(0xFF34D399) : const Color(0xFF16A34A))
+                            : (context.isDark ? context.colorScheme.primary : AppColors.primary),
                         fontWeight: FontWeight.w500,
                         fontSize: 11,
                       ),
@@ -540,7 +555,7 @@ class _EnrollmentCard extends StatelessWidget {
                       Icon(
                         Icons.schedule_rounded,
                         size: 13,
-                        color: const Color(0xFF8E9E94),
+                        color: context.textMuted(),
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -549,7 +564,7 @@ class _EnrollmentCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF6B7E74),
+                            color: context.textSecondary(),
                             fontWeight: FontWeight.w300,
                             fontSize: 11,
                           ),

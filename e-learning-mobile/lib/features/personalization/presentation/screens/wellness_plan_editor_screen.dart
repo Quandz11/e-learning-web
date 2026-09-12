@@ -2,6 +2,7 @@ import 'package:e_learning_mobile/features/personalization/data/models/wellness_
 import 'package:e_learning_mobile/features/personalization/presentation/controllers/wellness_controller.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -92,14 +93,16 @@ class _WellnessPlanEditorScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(wellnessControllerProvider);
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FBF9),
+      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
             size: 18,
           ),
           onPressed: () {
@@ -110,18 +113,18 @@ class _WellnessPlanEditorScreenState
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Thiết lập Kế hoạch Nhịn ăn',
           style: TextStyle(
             fontWeight: FontWeight.w400,
             fontSize: 18,
             letterSpacing: -0.3,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
           ),
         ),
         elevation: 0,
-        backgroundColor: const Color(0xFFF9FBF9),
-        iconTheme: const IconThemeData(color: Color(0xFF1A2520)),
+        backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
+        iconTheme: IconThemeData(color: context.textPrimary()),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
@@ -137,10 +140,10 @@ class _WellnessPlanEditorScreenState
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                   border: Border.all(
-                    color: const Color(0xFFEAEFE9),
+                    color: context.cardBorder(),
                     width: 0.8,
                   ),
                 ),
@@ -150,17 +153,17 @@ class _WellnessPlanEditorScreenState
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8F5E9),
+                        color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.tune_outlined,
-                        color: Color(0xFF0F5B38),
+                        color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                         size: 20,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -169,16 +172,16 @@ class _WellnessPlanEditorScreenState
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF1A2520),
+                              color: context.textPrimary(),
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             'Tùy chỉnh tỷ lệ nhịn ăn và mục tiêu cân nặng theo thể trạng và nhịp sinh hoạt của bạn.',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF6B7280),
+                              color: context.textSecondary(),
                               height: 1.4,
                             ),
                           ),
@@ -191,22 +194,22 @@ class _WellnessPlanEditorScreenState
               const SizedBox(height: AppSpacing.lg),
 
               // Section 1: Visual Fasting Ratio Selector
-              const Text(
+              Text(
                 '1. Chọn tỷ lệ Nhịn / Ăn',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                   letterSpacing: -0.2,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
-              const Text(
+              Text(
                 'Thanh biểu thị tỷ lệ thời gian nhịn (xanh lá) và thời gian nạp thức ăn (xám) trong ngày.',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w300,
-                  color: Color(0xFF6B7280),
+                  color: context.textSecondary(),
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -227,18 +230,19 @@ class _WellnessPlanEditorScreenState
                       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.cardBg(),
                         borderRadius: BorderRadius.circular(AppRadius.lg),
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFF0F5B38)
-                              : const Color(0xFFEAEFE9),
+                              ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                              : context.cardBorder(),
                           width: isSelected ? 1.5 : 0.8,
                         ),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: const Color(0xFF0F5B38).withValues(alpha: 0.05),
+                                  color: (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                                      .withValues(alpha: 0.1),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -258,26 +262,26 @@ class _WellnessPlanEditorScreenState
                                       ? FontWeight.w500
                                       : FontWeight.w400,
                                   color: isSelected
-                                      ? const Color(0xFF0F5B38)
-                                      : const Color(0xFF1A2520),
+                                      ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                                      : context.textPrimary(),
                                 ),
                               ),
                               const Spacer(),
                               if (isSelected)
-                                const Icon(
+                                Icon(
                                   Icons.check_circle_rounded,
                                   size: 18,
-                                  color: Color(0xFF0F5B38),
+                                  color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                                 ),
                             ],
                           ),
                           const SizedBox(height: 4),
                           Text(
                             ratio['desc'] as String,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF6B7280),
+                              color: context.textSecondary(),
                             ),
                           ),
                           const SizedBox(height: AppSpacing.sm),
@@ -292,14 +296,14 @@ class _WellnessPlanEditorScreenState
                                     flex: fH,
                                     child: Container(
                                       color: isSelected
-                                          ? const Color(0xFF0F5B38)
-                                          : const Color(0xFF7A9E88),
+                                          ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                                          : (isDark ? const Color(0xFF2E6F40) : const Color(0xFF7A9E88)),
                                     ),
                                   ),
                                   Expanded(
                                     flex: eH,
                                     child: Container(
-                                      color: const Color(0xFFE5E7EB),
+                                      color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFE5E7EB),
                                     ),
                                   ),
                                 ],
@@ -315,12 +319,12 @@ class _WellnessPlanEditorScreenState
               const SizedBox(height: AppSpacing.md),
 
               // Section 2: Daily Start Time Picker
-              const Text(
+              Text(
                 '2. Thời điểm bắt đầu nhịn mỗi ngày',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                   letterSpacing: -0.2,
                 ),
               ),
@@ -349,10 +353,10 @@ class _WellnessPlanEditorScreenState
                     vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardBg(),
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                     border: Border.all(
-                      color: const Color(0xFFEAEFE9),
+                      color: context.cardBorder(),
                       width: 0.8,
                     ),
                   ),
@@ -362,21 +366,21 @@ class _WellnessPlanEditorScreenState
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Khung giờ bắt đầu',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF6B7280),
+                              color: context.textSecondary(),
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${_fastingStartTime.hour.toString().padLeft(2, '0')}:${_fastingStartTime.minute.toString().padLeft(2, '0')}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF1A2520),
+                              color: context.textPrimary(),
                               letterSpacing: -0.5,
                             ),
                           ),
@@ -385,13 +389,13 @@ class _WellnessPlanEditorScreenState
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
+                          color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF3F4F6),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.access_time_rounded,
                           size: 20,
-                          color: Color(0xFF0F5B38),
+                          color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                         ),
                       ),
                     ],
@@ -401,12 +405,12 @@ class _WellnessPlanEditorScreenState
               const SizedBox(height: AppSpacing.lg),
 
               // Section 3: Weight Targets
-              const Text(
+              Text(
                 '3. Mục tiêu Cân nặng',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                   letterSpacing: -0.2,
                 ),
               ),
@@ -417,22 +421,22 @@ class _WellnessPlanEditorScreenState
                     child: Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.cardBg(),
                         borderRadius: BorderRadius.circular(AppRadius.lg),
                         border: Border.all(
-                          color: const Color(0xFFEAEFE9),
+                          color: context.cardBorder(),
                           width: 0.8,
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Cân nặng ban đầu (kg)',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF6B7280),
+                              color: context.textSecondary(),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -441,10 +445,10 @@ class _WellnessPlanEditorScreenState
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF1A2520),
+                              color: context.textPrimary(),
                             ),
                             decoration: const InputDecoration(
                               isDense: true,
@@ -465,22 +469,22 @@ class _WellnessPlanEditorScreenState
                     child: Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.cardBg(),
                         borderRadius: BorderRadius.circular(AppRadius.lg),
                         border: Border.all(
-                          color: const Color(0xFFEAEFE9),
+                          color: context.cardBorder(),
                           width: 0.8,
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Mục tiêu (kg)',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF6B7280),
+                              color: context.textSecondary(),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -489,10 +493,10 @@ class _WellnessPlanEditorScreenState
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF0F5B38),
+                              color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                             ),
                             decoration: const InputDecoration(
                               isDense: true,
@@ -546,11 +550,11 @@ class _WellnessPlanEditorScreenState
                               if (updatedState.status ==
                                   WellnessStatus.success) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
+                                  SnackBar(
+                                    content: const Text(
                                       'Lưu kế hoạch nhịn ăn thành công!',
                                     ),
-                                    backgroundColor: Color(0xFF0F5B38),
+                                    backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
                                   ),
                                 );
                                 Navigator.pop(context);
@@ -568,7 +572,7 @@ class _WellnessPlanEditorScreenState
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F5B38),
+                    backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

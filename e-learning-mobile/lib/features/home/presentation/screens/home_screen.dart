@@ -11,6 +11,7 @@ import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_avatar.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
@@ -685,9 +686,9 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
         20,
         20 + MediaQuery.of(context).padding.bottom,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: context.isDark ? context.colorScheme.surfaceContainerLow : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -698,7 +699,7 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0xFFE2EBE5),
+                color: context.isDark ? context.colorScheme.outlineVariant : const Color(0xFFE2EBE5),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -707,12 +708,12 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Bộ lọc tìm kiếm',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1E2621),
+                  color: context.textPrimary(),
                   letterSpacing: -0.3,
                 ),
               ),
@@ -725,12 +726,12 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
           const SizedBox(height: 12),
 
           // Categories section
-          const Text(
+          Text(
             'Chuyên mục',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F5B38),
+              color: context.isDark ? context.colorScheme.onSurface : const Color(0xFF0F5B38),
             ),
           ),
           const SizedBox(height: 8),
@@ -743,16 +744,16 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
                 label: Text(name),
                 selected: isSelected,
                 selectedColor: const Color(0xFF0F5B38),
-                backgroundColor: const Color(0xFFF4F6F5),
+                backgroundColor: context.chipBg(isSelected),
                 labelStyle: TextStyle(
                   fontSize: 12.5,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected ? Colors.white : const Color(0xFF334036),
+                  color: context.chipText(isSelected),
                 ),
                 side: BorderSide(
                   color: isSelected
                       ? const Color(0xFF0F5B38)
-                      : const Color(0xFFE2EBE5),
+                      : context.cardBorder(),
                   width: 0.8,
                 ),
                 shape: RoundedRectangleBorder(
@@ -1117,7 +1118,9 @@ class _HomeHeader extends ConsumerWidget {
           onPressed: () => context.push(AppRoutes.appNotifications),
           icon: Badge(
             isLabelVisible: unreadCount > 0,
-            smallSize: 8,
+            label: Text(
+              unreadCount > 99 ? '99+' : '$unreadCount',
+            ),
             child: Icon(
               Icons.notifications_outlined,
               color: colorScheme.onSurface,
@@ -1352,16 +1355,16 @@ class _CategoriesSection extends StatelessWidget {
                   label: Text(category.name),
                   selected: isSelected,
                   selectedColor: const Color(0xFF0F5B38),
-                  backgroundColor: const Color(0xFFF4F6F5),
+                  backgroundColor: context.chipBg(isSelected),
                   labelStyle: TextStyle(
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     fontSize: 13,
-                    color: isSelected ? Colors.white : const Color(0xFF334036),
+                    color: context.chipText(isSelected),
                   ),
                   side: BorderSide(
                     color: isSelected
                         ? const Color(0xFF0F5B38)
-                        : const Color(0xFFE2EBE5),
+                        : context.cardBorder(),
                     width: 0.8,
                   ),
                   shape: RoundedRectangleBorder(
@@ -1555,19 +1558,21 @@ class _QuickActionCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.cardBg(),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFFEAEFE9),
+              color: context.cardBorder(),
               width: 0.8,
             ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x04000000),
-                blurRadius: 10,
-                offset: Offset(0, 2),
-              ),
-            ],
+            boxShadow: context.isDark
+                ? null
+                : const [
+                    BoxShadow(
+                      color: Color(0x04000000),
+                      blurRadius: 10,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1579,10 +1584,18 @@ class _QuickActionCard extends StatelessWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: action.bgColor,
+                      color: context.isDark
+                          ? context.colorScheme.surfaceContainerHighest
+                          : action.bgColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(action.icon, color: action.iconColor, size: 21),
+                    child: Icon(
+                      action.icon,
+                      color: context.isDark
+                          ? context.colorScheme.primary
+                          : action.iconColor,
+                      size: 21,
+                    ),
                   ),
                   if (action.badge != null)
                     Positioned(
@@ -1611,10 +1624,10 @@ class _QuickActionCard extends StatelessWidget {
                 action.label,
                 textAlign: TextAlign.center,
                 maxLines: 1,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 12,
-                  color: Color(0xFF1E2621),
+                  color: context.textPrimary(),
                   letterSpacing: -0.2,
                 ),
               ),

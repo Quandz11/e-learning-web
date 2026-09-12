@@ -43,6 +43,7 @@ class AppTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final errMessage = errorText;
     final hasError = errMessage != null && errMessage.isNotEmpty;
 
@@ -52,9 +53,9 @@ class AppTextField extends StatelessWidget {
 
     final borderColor = hasError
         ? colorScheme.error
-        : const Color(0xFFE9EBEA);
+        : (isDark ? colorScheme.outlineVariant : const Color(0xFFE9EBEA));
     final fillColor = enabled
-        ? (theme.brightness == Brightness.dark
+        ? (isDark
             ? colorScheme.surfaceContainerHigh
             : const Color(0xFFF4F6F5))
         : colorScheme.surface.withValues(alpha: 0.5);
@@ -62,8 +63,8 @@ class AppTextField extends StatelessWidget {
       fontSize: 14,
       fontWeight: FontWeight.w400,
       color: enabled
-          ? const Color(0xFF1E2621)
-          : const Color(0xFF1E2621).withValues(alpha: 0.38),
+          ? (isDark ? colorScheme.onSurface : const Color(0xFF1E2621))
+          : (isDark ? colorScheme.onSurface : const Color(0xFF1E2621)).withValues(alpha: 0.38),
     );
 
     return Column(
@@ -97,8 +98,8 @@ class AppTextField extends StatelessWidget {
             children: [
               if (prefix != null) ...[
                 IconTheme(
-                  data: const IconThemeData(
-                    color: Color(0xFF717873),
+                  data: IconThemeData(
+                    color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873),
                     size: 20,
                   ),
                   child: prefix,
@@ -126,10 +127,10 @@ class AppTextField extends StatelessWidget {
                       filled: false,
                       fillColor: Colors.transparent,
                       hintText: hintText,
-                      hintStyle: const TextStyle(
+                      hintStyle: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w300,
-                        color: Color(0xFFA5A9A5),
+                        color: isDark ? colorScheme.onSurfaceVariant.withValues(alpha: 0.6) : const Color(0xFFA5A9A5),
                       ),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -145,8 +146,8 @@ class AppTextField extends StatelessWidget {
               if (suffix != null) ...[
                 const SizedBox(width: 8),
                 IconTheme(
-                  data: const IconThemeData(
-                    color: Color(0xFF717873),
+                  data: IconThemeData(
+                    color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873),
                     size: 20,
                   ),
                   child: suffix,

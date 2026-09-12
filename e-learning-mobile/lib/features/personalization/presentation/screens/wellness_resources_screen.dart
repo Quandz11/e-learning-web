@@ -3,6 +3,7 @@ import 'package:e_learning_mobile/features/personalization/presentation/controll
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,21 +51,24 @@ class _WellnessResourcesScreenState
             return title.contains(cat) || type.contains(cat);
           }).toList();
 
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FBF9),
+      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Thư viện Phục hồi & Sức khỏe',
           style: TextStyle(
             fontWeight: FontWeight.w400,
             fontSize: 18,
             letterSpacing: -0.3,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
           ),
         ),
         elevation: 0,
-        backgroundColor: const Color(0xFFF9FBF9),
-        iconTheme: const IconThemeData(color: Color(0xFF1A2520)),
+        backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
+        iconTheme: IconThemeData(color: context.textPrimary()),
       ),
       body: Column(
         children: [
@@ -91,17 +95,17 @@ class _WellnessResourcesScreenState
                       decoration: BoxDecoration(
                         color: isSelected
                             ? const Color(0xFF0F5B38)
-                            : Colors.white,
+                            : (isDark ? colorScheme.surfaceContainerHighest : Colors.white),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
                               ? const Color(0xFF0F5B38)
-                              : const Color(0xFFEAEFE9),
+                              : context.cardBorder(),
                           width: 0.8,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.02),
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                             blurRadius: 4,
                             offset: const Offset(0, 1),
                           ),
@@ -115,7 +119,7 @@ class _WellnessResourcesScreenState
                               isSelected ? FontWeight.w500 : FontWeight.w300,
                           color: isSelected
                               ? Colors.white
-                              : const Color(0xFF374151),
+                              : context.textPrimary(),
                         ),
                       ),
                     ),
@@ -144,31 +148,31 @@ class _WellnessResourcesScreenState
                               width: 56,
                               height: 56,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE8F5E9),
+                                color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9),
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.spa_outlined,
                                 size: 26,
-                                color: Color(0xFF0F5B38),
+                                color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                               ),
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            const Text(
+                            Text(
                               'Không có nội dung trong mục này',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w400,
-                                color: Color(0xFF1A2520),
+                                color: context.textPrimary(),
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
+                            Text(
                               'Vui lòng chọn danh mục khác hoặc kéo xuống để làm mới.',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w300,
-                                color: Color(0xFF6B7280),
+                                color: context.textSecondary(),
                               ),
                             ),
                           ],
@@ -205,17 +209,18 @@ class _WellnessResourcesScreenState
     BuildContext context,
     WellnessResourceItem item,
   ) {
+    final isDark = context.isDark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg(),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
-          color: const Color(0xFFEAEFE9),
+          color: context.cardBorder(),
           width: 0.8,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -228,9 +233,11 @@ class _WellnessResourcesScreenState
           // Magazine-style banner preview
           Container(
             height: 100,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
+                colors: isDark
+                    ? [context.colorScheme.surfaceContainerHighest, context.colorScheme.surfaceContainerHigh]
+                    : const [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -241,7 +248,7 @@ class _WellnessResourcesScreenState
                   child: Icon(
                     _getResourceIcon(item.resourceType),
                     size: 40,
-                    color: const Color(0xFF0F5B38).withValues(alpha: 0.4),
+                    color: isDark ? const Color(0xFF34D399).withValues(alpha: 0.5) : const Color(0xFF0F5B38).withValues(alpha: 0.4),
                   ),
                 ),
                 Positioned(
@@ -253,10 +260,10 @@ class _WellnessResourcesScreenState
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: context.chipBg(false),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFFEAEFE9),
+                        color: context.cardBorder(),
                         width: 0.8,
                       ),
                     ),
@@ -264,10 +271,10 @@ class _WellnessResourcesScreenState
                       item.resourceType.isNotEmpty
                           ? item.resourceType
                           : 'Sức khỏe',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF0F5B38),
+                        color: context.chipText(false),
                       ),
                     ),
                   ),
@@ -284,10 +291,10 @@ class _WellnessResourcesScreenState
               children: [
                 Text(
                   item.title.isNotEmpty ? item.title : 'Bài thực hành phục hồi',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF1A2520),
+                    color: context.textPrimary(),
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -295,10 +302,10 @@ class _WellnessResourcesScreenState
                   const SizedBox(height: 4),
                   Text(
                     item.description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w300,
-                      color: Color(0xFF6B7280),
+                      color: context.textSecondary(),
                       height: 1.45,
                     ),
                     maxLines: 2,
@@ -318,14 +325,14 @@ class _WellnessResourcesScreenState
                           content: Text(
                             'Bắt đầu: ${item.title}',
                           ),
-                          backgroundColor: const Color(0xFF0F5B38),
+                          backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
                         ),
                       );
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF0F5B38),
-                      side: const BorderSide(
-                        color: Color(0xFF0F5B38),
+                      foregroundColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                      side: BorderSide(
+                        color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                         width: 0.8,
                       ),
                       shape: RoundedRectangleBorder(

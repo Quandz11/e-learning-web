@@ -1,6 +1,7 @@
 import 'package:e_learning_mobile/features/forum/data/forum_repository.dart';
 import 'package:e_learning_mobile/features/forum/data/models/forum_models.dart';
 import 'package:e_learning_mobile/features/forum/presentation/controllers/forum_controller.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +17,7 @@ class ForumThreadDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScreen> {
-  final _commentController = TextEditingController();
+  final TextEditingController _commentController = TextEditingController();
   bool _isSubmitting = false;
 
   @override
@@ -27,25 +28,30 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
 
   Future<void> _submitComment() async {
     final text = _commentController.text.trim();
-    if (text.isEmpty || _isSubmitting) return;
+    if (text.isEmpty) return;
 
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+    });
+
     try {
       final repo = ref.read(forumRepositoryProvider);
       await repo.createPost(threadId: widget.threadId, content: text);
       _commentController.clear();
-      if (mounted) {
-        FocusScope.of(context).unfocus();
-        ref.invalidate(forumThreadPostsProvider(widget.threadId));
-      }
+      ref.invalidate(forumThreadPostsProvider(widget.threadId));
+      ref.invalidate(forumThreadDetailProvider(widget.threadId));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không thể gửi bình luận: $e')),
+          SnackBar(content: Text('Không thể gửi phản hồi: $e')),
         );
       }
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -53,15 +59,17 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
   Widget build(BuildContext context) {
     final threadAsync = ref.watch(forumThreadDetailProvider(widget.threadId));
     final postsAsync = ref.watch(forumThreadPostsProvider(widget.threadId));
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFA),
+      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFFBFBFA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFBFBFA),
+        backgroundColor: isDark ? colorScheme.surface : const Color(0xFFFBFBFA),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF1E2621)),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -70,12 +78,12 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Chi tiết Thảo luận',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1E2621),
+            color: context.textPrimary(),
             letterSpacing: -0.5,
           ),
         ),
@@ -85,10 +93,12 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
         children: [
           Expanded(
             child: threadAsync.when(
-              loading: () => const Center(
+              loading: () => Center(
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F5B38)),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                  ),
                 ),
               ),
               error: (error, _) => Center(
@@ -104,9 +114,9 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.cardBg(),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE9EBEA), width: 1),
+                        border: Border.all(color: context.cardBorder(), width: 1),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,13 +127,13 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF0F5B38).withValues(alpha: 0.1),
+                                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFF0F5B38).withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.person_outline_rounded,
                                   size: 20,
-                                  color: Color(0xFF0F5B38),
+                                  color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -133,19 +143,19 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                                   children: [
                                     Text(
                                       thread.authorName,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
-                                        color: Color(0xFF1E2621),
+                                        color: context.textPrimary(),
                                         letterSpacing: -0.2,
                                       ),
                                     ),
                                     Text(
                                       dateFormat.format(thread.createdAt.toLocal()),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w300,
-                                        color: Color(0xFFA5A9A5),
+                                        color: context.textMuted(),
                                       ),
                                     ),
                                   ],
@@ -156,10 +166,10 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                           const SizedBox(height: 14),
                           Text(
                             thread.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF1E2621),
+                              color: context.textPrimary(),
                               letterSpacing: -0.4,
                               height: 1.3,
                             ),
@@ -167,10 +177,10 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                           const SizedBox(height: 10),
                           Text(
                             thread.content,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w300,
-                              color: Color(0xFF334036),
+                              color: context.textSecondary(),
                               height: 1.6,
                               letterSpacing: -0.1,
                             ),
@@ -178,64 +188,54 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 20),
 
-                    // Section Title: Comments
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        'Phản hồi & Thảo luận',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1E2621),
-                          letterSpacing: -0.3,
-                        ),
+                    // Responses header
+                    Text(
+                      'Các câu trả lời',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: context.textPrimary(),
+                        letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(height: 12),
 
-                    // Posts list
                     postsAsync.when(
-                      loading: () => const Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F5B38)),
+                      loading: () => Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                           ),
                         ),
                       ),
-                      error: (err, _) => Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text('Lỗi tải bình luận: $err'),
-                      ),
+                      error: (error, _) => Text('Lỗi tải câu trả lời: $error'),
                       data: (posts) {
                         if (posts.isEmpty) {
-                          return Container(
-                            padding: const EdgeInsets.all(24),
-                            alignment: Alignment.center,
-                            child: const Text(
-                              'Chưa có phản hồi nào. Hãy chia sẻ suy nghĩ của bạn!',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w300,
-                                color: Color(0xFF717873),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Center(
+                              child: Text(
+                                'Chưa có câu trả lời nào. Hãy là người đầu tiên!',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w300,
+                                  color: context.textMuted(),
+                                ),
                               ),
                             ),
                           );
                         }
 
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: posts.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 10),
-                          itemBuilder: (context, index) {
-                            final post = posts[index];
-                            return _PostCard(post: post, dateFormat: dateFormat);
-                          },
+                        return Column(
+                          children: posts.map((post) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _PostCard(post: post, dateFormat: dateFormat),
+                            );
+                          }).toList(),
                         );
                       },
                     ),
@@ -245,7 +245,7 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
             ),
           ),
 
-          // Bottom comment input bar
+          // Bottom Reply Input Bar
           Container(
             padding: EdgeInsets.fromLTRB(
               16,
@@ -254,8 +254,8 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
               10 + MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: const Color(0xFFE9EBEA), width: 1)),
+              color: context.cardBg(),
+              border: Border(top: BorderSide(color: context.cardBorder(), width: 1)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -269,23 +269,23 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4F6F5),
+                      color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF4F6F5),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: TextField(
                       controller: _commentController,
-                      style: const TextStyle(fontSize: 14, color: Color(0xFF1E2621)),
+                      style: TextStyle(fontSize: 14, color: context.textPrimary()),
                       maxLines: 3,
                       minLines: 1,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         filled: false,
                         fillColor: Colors.transparent,
                         hintText: 'Nhập câu trả lời của bạn...',
                         hintStyle: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w300,
-                          color: Color(0xFFA5A9A5),
+                          color: context.textMuted(),
                         ),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -293,7 +293,7 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                         disabledBorder: InputBorder.none,
                         errorBorder: InputBorder.none,
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),
                   ),
@@ -307,7 +307,10 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.send_rounded, color: Color(0xFF0F5B38)),
+                      : Icon(
+                          Icons.send_rounded,
+                          color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                        ),
                 ),
               ],
             ),
@@ -326,12 +329,15 @@ class _PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg(),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE9EBEA), width: 1),
+        border: Border.all(color: context.cardBorder(), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,32 +348,32 @@ class _PostCard extends StatelessWidget {
                 width: 26,
                 height: 26,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F5B38).withValues(alpha: 0.08),
+                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFF0F5B38).withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_outline_rounded,
                   size: 15,
-                  color: Color(0xFF0F5B38),
+                  color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                 ),
               ),
               const SizedBox(width: 8),
               Text(
                 post.authorName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1E2621),
+                  color: context.textPrimary(),
                   letterSpacing: -0.2,
                 ),
               ),
               const Spacer(),
               Text(
                 dateFormat.format(post.createdAt.toLocal()),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w300,
-                  color: Color(0xFFA5A9A5),
+                  color: context.textMuted(),
                 ),
               ),
             ],
@@ -375,10 +381,10 @@ class _PostCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             post.content,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w300,
-              color: Color(0xFF334036),
+              color: context.textSecondary(),
               height: 1.5,
               letterSpacing: -0.1,
             ),

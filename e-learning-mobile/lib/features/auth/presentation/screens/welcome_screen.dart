@@ -2,6 +2,7 @@ import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -11,10 +12,12 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final textTheme = context.textTheme;
+    final colorScheme = context.colorScheme;
+    final isDark = context.isDark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FAF7),
+      backgroundColor: colorScheme.surface,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -22,123 +25,130 @@ class WelcomeScreen extends StatelessWidget {
           const Positioned.fill(child: _WelcomeBackgroundDecoration()),
 
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-              child: Column(
-                children: [
-                  const Spacer(flex: 2),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                        child: Column(
+                          children: [
+                            const Spacer(flex: 2),
 
-                  // Leaf Logo
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight.withValues(alpha: 0.5),
-                      shape: BoxShape.circle,
+                            // Brand Logo Image
+                            Image.asset(
+                              'assets/images/app_logo.png',
+                              width: 180,
+                              height: 180,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? colorScheme.primaryContainer.withValues(alpha: 0.5)
+                                      : AppColors.primaryLight.withValues(alpha: 0.5),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.spa_rounded,
+                                    size: 64,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+
+                            // Tagline / Slogan
+                            Text(
+                              'Lắng nghe để chữa lành',
+                              textAlign: TextAlign.center,
+                              style: textTheme.titleMedium?.copyWith(
+                                color: isDark ? colorScheme.onSurface : AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.3,
+                                fontSize: 20,
+                              ),
+                            ),
+                            const Spacer(flex: 2),
+
+                            // Dot Indicators (3 dots, 1st active)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 24,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.xs),
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: isDark ? colorScheme.outlineVariant : AppColors.border,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.xs),
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: isDark ? colorScheme.outlineVariant : AppColors.border,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
+
+                            // Primary CTA: Bắt đầu
+                            AppButton(
+                              buttonKey: const Key('welcome_start_button'),
+                              label: 'Bắt đầu',
+                              onPressed: () => context.go(AppRoutes.appHome),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+
+                            // Secondary Link: Đã có tài khoản? Đăng nhập
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Đã có tài khoản? ',
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: context.textSecondary(),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => context.go(AppRoutes.login),
+                                  child: Text(
+                                    'Đăng nhập',
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: isDark ? colorScheme.onSurface : AppColors.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Center(
-                      child: Icon(
-                        Icons.eco_rounded,
-                        size: 56,
-                        color: AppColors.primary,
-                      ),
-                    ),
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // App Title
-                  Text(
-                    'Nhịn Ăn\nChữa Lành',
-                    textAlign: TextAlign.center,
-                    style: textTheme.headlineMedium?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.5,
-                      height: 1.2,
-                      fontSize: 32,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-
-                  // Tagline
-                  Text(
-                    'Học để sống an lành hơn\nmỗi ngày',
-                    textAlign: TextAlign.center,
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w300,
-                      height: 1.4,
-                    ),
-                  ),
-                  const Spacer(flex: 2),
-
-                  // Dot Indicators (3 dots, 1st active)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: AppColors.border,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: AppColors.border,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Primary CTA: Bắt đầu
-                  AppButton(
-                    buttonKey: const Key('welcome_start_button'),
-                    label: 'Bắt đầu',
-                    onPressed: () => context.go(AppRoutes.appHome),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-
-                  // Secondary Link: Đã có tài khoản? Đăng nhập
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Đã có tài khoản? ',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.go(AppRoutes.login),
-                        child: Text(
-                          'Đăng nhập',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],

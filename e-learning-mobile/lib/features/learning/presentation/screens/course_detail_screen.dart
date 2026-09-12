@@ -8,6 +8,7 @@ import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_empty_view.dart';
@@ -43,9 +44,12 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_isValidId(widget.courseId)) {
-      return const SafeArea(
-        bottom: false,
-        child: AppErrorView(message: 'Không tìm thấy khóa học cần hiển thị.'),
+      return Scaffold(
+        backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+        body: const SafeArea(
+          bottom: false,
+          child: AppErrorView(message: 'Không tìm thấy khóa học cần hiển thị.'),
+        ),
       );
     }
 
@@ -53,33 +57,36 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
 
-    return SafeArea(
-      bottom: false,
-      child: RefreshIndicator(
-        onRefresh: controller.refresh,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.sm,
-            AppSpacing.lg,
-            AppSpacing.xl,
-          ),
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppSizes.contentMaxWidth,
-                ),
-                child: _CourseDetailContent(
-                  state: state,
-                  courseId: widget.courseId,
-                  onRetry: controller.load,
-                  onRefreshRetry: controller.refresh,
+    return Scaffold(
+      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+      body: SafeArea(
+        bottom: false,
+        child: RefreshIndicator(
+          onRefresh: controller.refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              AppSpacing.xl,
+            ),
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppSizes.contentMaxWidth,
+                  ),
+                  child: _CourseDetailContent(
+                    state: state,
+                    courseId: widget.courseId,
+                    onRetry: controller.load,
+                    onRefreshRetry: controller.refresh,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -226,13 +233,16 @@ class _CourseHeroState extends State<_CourseHero> {
   @override
   Widget build(BuildContext context) {
     final url = widget.course.thumbnailUrl;
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
+
     return Stack(
       children: [
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFFEAEFE9),
+              color: context.cardBorder(),
               width: 0.8,
             ),
             boxShadow: const [
@@ -267,10 +277,10 @@ class _CourseHeroState extends State<_CourseHero> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.9),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFFEAEFE9),
+                color: context.cardBorder(),
                 width: 0.8,
               ),
               boxShadow: const [
@@ -284,7 +294,7 @@ class _CourseHeroState extends State<_CourseHero> {
             child: IconButton(
               tooltip: 'Quay lại',
               padding: EdgeInsets.zero,
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 16),
+              icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary(), size: 16),
               onPressed: () => context.pop(),
             ),
           ),
@@ -296,10 +306,10 @@ class _CourseHeroState extends State<_CourseHero> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.9),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFFEAEFE9),
+                color: context.cardBorder(),
                 width: 0.8,
               ),
               boxShadow: const [
@@ -317,7 +327,7 @@ class _CourseHeroState extends State<_CourseHero> {
                 _isBookmarked
                     ? Icons.favorite_rounded
                     : Icons.favorite_border_rounded,
-                color: _isBookmarked ? const Color(0xFFE11D48) : AppColors.textPrimary,
+                color: _isBookmarked ? const Color(0xFFE11D48) : context.textPrimary(),
                 size: 18,
               ),
               onPressed: () {
@@ -349,6 +359,8 @@ class _CourseSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
     final lessonCount = course.lessons.isNotEmpty
         ? course.lessons.length
         : 12;
@@ -356,10 +368,10 @@ class _CourseSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md + 2),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg(),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFEAEFE9),
+          color: context.cardBorder(),
           width: 0.8,
         ),
         boxShadow: const [
@@ -381,7 +393,7 @@ class _CourseSummary extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 fontSize: 20,
                 letterSpacing: -0.4,
-                color: AppColors.textPrimary,
+                color: context.textPrimary(),
               ),
             ),
           ),
@@ -392,21 +404,21 @@ class _CourseSummary extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F7F2),
+                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.spa_outlined,
                   size: 14,
-                  color: Color(0xFF0F5B38),
+                  color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   course.instructorName ?? 'Hiểu cơ thể – Nuôi dưỡng tâm trí',
-                  style: const TextStyle(
-                    color: Color(0xFF5A6E63),
+                  style: TextStyle(
+                    color: context.textSecondary(),
                     fontWeight: FontWeight.w300,
                     fontSize: 13,
                   ),
@@ -420,10 +432,10 @@ class _CourseSummary extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FBF9),
+              color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF9FBF9),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: const Color(0xFFEAEFE9),
+                color: context.cardBorder(),
                 width: 0.8,
               ),
             ),
@@ -431,31 +443,34 @@ class _CourseSummary extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildBentoPod(
+                    context: context,
                     icon: Icons.auto_stories_outlined,
                     value: '$lessonCount bài học',
                     label: 'Nội dung',
                     iconColor: const Color(0xFF2563EB),
-                    bgColor: const Color(0xFFEFF6FF),
+                    bgColor: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
                   ),
                 ),
-                Container(height: 28, width: 0.8, color: const Color(0xFFEAEFE9)),
+                Container(height: 28, width: 0.8, color: context.cardBorder()),
                 Expanded(
                   child: _buildBentoPod(
+                    context: context,
                     icon: Icons.schedule_rounded,
                     value: '2 giờ 30 phút',
                     label: 'Thời lượng',
-                    iconColor: const Color(0xFF0F5B38),
-                    bgColor: const Color(0xFFF0F7F2),
+                    iconColor: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                    bgColor: isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2),
                   ),
                 ),
-                Container(height: 28, width: 0.8, color: const Color(0xFFEAEFE9)),
+                Container(height: 28, width: 0.8, color: context.cardBorder()),
                 Expanded(
                   child: _buildBentoPod(
+                    context: context,
                     icon: Icons.spa_outlined,
                     value: 'Trung cấp',
                     label: 'Cấp độ',
                     iconColor: const Color(0xFFD97706),
-                    bgColor: const Color(0xFFFFFBEB),
+                    bgColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB),
                   ),
                 ),
               ],
@@ -467,14 +482,14 @@ class _CourseSummary extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0F4F1),
+              color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F4F1),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
               children: [
-                Expanded(child: _buildSegmentedTab('Nội dung', 0)),
-                Expanded(child: _buildSegmentedTab('Giới thiệu', 1)),
-                Expanded(child: _buildSegmentedTab('Đánh giá', 2)),
+                Expanded(child: _buildSegmentedTab(context, 'Nội dung', 0)),
+                Expanded(child: _buildSegmentedTab(context, 'Giới thiệu', 1)),
+                Expanded(child: _buildSegmentedTab(context, 'Đánh giá', 2)),
               ],
             ),
           ),
@@ -484,6 +499,7 @@ class _CourseSummary extends StatelessWidget {
   }
 
   Widget _buildBentoPod({
+    required BuildContext context,
     required IconData icon,
     required String value,
     required String label,
@@ -506,10 +522,10 @@ class _CourseSummary extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF1A2520),
+              color: context.textPrimary(),
             ),
           ),
         ),
@@ -517,10 +533,10 @@ class _CourseSummary extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w300,
-              color: Color(0xFF8E9E94),
+              color: context.textMuted(),
             ),
           ),
         ),
@@ -528,8 +544,10 @@ class _CourseSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildSegmentedTab(String label, int index) {
+  Widget _buildSegmentedTab(BuildContext context, String label, int index) {
     final isSelected = selectedTab == index;
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
     return GestureDetector(
       onTap: () => onTabChanged(index),
       child: AnimatedContainer(
@@ -537,7 +555,9 @@ class _CourseSummary extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected
+              ? (isDark ? colorScheme.surfaceContainerLow : Colors.white)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           boxShadow: isSelected
               ? const [
@@ -556,8 +576,8 @@ class _CourseSummary extends StatelessWidget {
               fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
               fontSize: 13,
               color: isSelected
-                  ? const Color(0xFF0F5B38)
-                  : const Color(0xFF6B7E74),
+                  ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
+                  : context.textSecondary(),
             ),
           ),
         ),
@@ -578,10 +598,10 @@ class _LearningOutcomesSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardBg(),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFFEAEFE9),
+            color: context.cardBorder(),
             width: 0.8,
           ),
           boxShadow: const [
@@ -611,10 +631,10 @@ class _LearningOutcomesSection extends StatelessWidget {
                   Expanded(
                     child: Text(
                       outcome,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w300,
-                        color: Color(0xFF334138),
+                        color: context.textPrimary(),
                         height: 1.45,
                       ),
                     ),
@@ -641,10 +661,10 @@ class _CourseReviewsSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardBg(),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFFEAEFE9),
+            color: context.cardBorder(),
             width: 0.8,
           ),
           boxShadow: const [
@@ -678,12 +698,12 @@ class _CourseReviewsSection extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    const Text(
+                    Text(
                       'Dựa trên 128 đánh giá thực tế',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w300,
-                        color: Color(0xFF8E9E94),
+                        color: context.textMuted(),
                       ),
                     ),
                   ],
@@ -691,15 +711,17 @@ class _CourseReviewsSection extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            const Divider(height: 1, thickness: 0.8, color: Color(0xFFEAEFE9)),
+            Divider(height: 1, thickness: 0.8, color: context.cardBorder()),
             const SizedBox(height: AppSpacing.md),
             _buildReviewItem(
+              context: context,
               name: 'Trần Thị Thu Trang',
               time: '2 ngày trước',
               comment: 'Bài học rất chi tiết và dễ hiểu, video nét và tài liệu hướng dẫn rất thực tế. Rất khuyên mọi người nên học!',
             ),
             const SizedBox(height: AppSpacing.sm),
             _buildReviewItem(
+              context: context,
               name: 'Nguyễn Văn Minh',
               time: '1 tuần trước',
               comment: 'Kiến thức chuẩn y khoa, phương pháp nhịn ăn gián đoạn giúp mình nhẹ nhõm và tràn đầy năng lượng hơn hẳn.',
@@ -710,11 +732,18 @@ class _CourseReviewsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildReviewItem({required String name, required String time, required String comment}) {
+  Widget _buildReviewItem({
+    required BuildContext context,
+    required String name,
+    required String time,
+    required String comment,
+  }) {
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FBF9),
+        color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF9FBF9),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -725,18 +754,18 @@ class _CourseReviewsSection extends StatelessWidget {
             children: [
               Text(
                 name,
-                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: Color(0xFF1A2520)),
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: context.textPrimary()),
               ),
               Text(
                 time,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w300, color: Color(0xFF8E9E94)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w300, color: context.textMuted()),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             comment,
-            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w300, color: Color(0xFF4B5563), height: 1.4),
+            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w300, color: context.textSecondary(), height: 1.4),
           ),
         ],
       ),
@@ -761,10 +790,10 @@ class _CourseDescription extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardBg(),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFFEAEFE9),
+            color: context.cardBorder(),
             width: 0.8,
           ),
           boxShadow: const [
@@ -777,10 +806,10 @@ class _CourseDescription extends StatelessWidget {
         ),
         child: HtmlWidget(
           description,
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 14,
             height: 1.6,
-            color: Color(0xFF334138),
+            color: context.textPrimary(),
             fontWeight: FontWeight.w300,
           ),
         ),
@@ -843,13 +872,15 @@ class _LessonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg(),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFEAEFE9),
+          color: context.cardBorder(),
           width: 0.8,
         ),
         boxShadow: const [
@@ -868,13 +899,13 @@ class _LessonGroup extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F7F2),
+                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Text(
+                child: Text(
                   'CHƯƠNG HỌC',
                   style: TextStyle(
-                    color: Color(0xFF0F5B38),
+                    color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                     fontWeight: FontWeight.w600,
                     fontSize: 10,
                     letterSpacing: 0.4,
@@ -890,7 +921,7 @@ class _LessonGroup extends StatelessWidget {
               fontWeight: FontWeight.w500,
               fontSize: 16,
               letterSpacing: -0.2,
-              color: AppColors.textPrimary,
+              color: context.textPrimary(),
             ),
           ),
           if (lesson.description != null &&
@@ -899,17 +930,17 @@ class _LessonGroup extends StatelessWidget {
             Text(
               stripHtml(lesson.description!),
               style: textTheme.bodySmall?.copyWith(
-                color: const Color(0xFF6B7E74),
+                color: context.textSecondary(),
                 fontWeight: FontWeight.w300,
               ),
             ),
           ],
           const SizedBox(height: AppSpacing.sm),
           if (lesson.parts.isEmpty)
-            const Text(
+            Text(
               'Bài học chưa có nội dung.',
               style: TextStyle(
-                color: Color(0xFF8E9E94),
+                color: context.textMuted(),
                 fontWeight: FontWeight.w300,
                 fontSize: 13,
               ),
@@ -945,6 +976,8 @@ class _LessonPartTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final completed = progress?.isCompleted == true;
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
     final subtitle = [
       _typeLabel(part),
       if (part.videoDuration > 0) _durationLabel(part.videoDuration),
@@ -954,17 +987,17 @@ class _LessonPartTile extends StatelessWidget {
     ].join(' • ');
 
     final podBg = completed
-        ? const Color(0xFFF0FDF4)
+        ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFF0FDF4))
         : part.isVideo
-            ? const Color(0xFFF0F7F2)
+            ? (isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2))
             : part.isDocument
-                ? const Color(0xFFEFF6FF)
-                : const Color(0xFFF5F3FF);
+                ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF))
+                : (isDark ? const Color(0xFF4C1D95) : const Color(0xFFF5F3FF));
 
     final podColor = completed
         ? const Color(0xFF16A34A)
         : part.isVideo
-            ? const Color(0xFF0F5B38)
+            ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
             : part.isDocument
                 ? const Color(0xFF2563EB)
                 : const Color(0xFF7C3AED);
@@ -1032,8 +1065,8 @@ class _LessonPartTile extends StatelessWidget {
                           fontSize: 14,
                           letterSpacing: -0.1,
                           color: canOpen
-                              ? AppColors.textPrimary
-                              : const Color(0xFF9EABA3),
+                              ? context.textPrimary()
+                              : context.textMuted(),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -1044,7 +1077,7 @@ class _LessonPartTile extends StatelessWidget {
                           fontWeight: FontWeight.w300,
                           color: completed
                               ? const Color(0xFF16A34A)
-                              : const Color(0xFF8E9E94),
+                              : context.textMuted(),
                         ),
                       ),
                     ],
@@ -1054,7 +1087,7 @@ class _LessonPartTile extends StatelessWidget {
                   canOpen
                       ? Icons.chevron_right_rounded
                       : Icons.lock_outline_rounded,
-                  color: const Color(0xFF9EABA3),
+                  color: context.textMuted(),
                   size: 18,
                 ),
               ],
@@ -1112,7 +1145,7 @@ class _Section extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 letterSpacing: -0.3,
                 fontSize: 18,
-                color: AppColors.textPrimary,
+                color: context.textPrimary(),
               ),
         ),
         const SizedBox(height: AppSpacing.md),

@@ -2,6 +2,7 @@ import 'package:e_learning_mobile/features/profile/presentation/controllers/prof
 import 'package:e_learning_mobile/features/profile/presentation/controllers/security_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/security_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_page.dart';
@@ -55,10 +56,10 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFEAEFE9),
+                color: context.cardBorder(),
                 width: 0.8,
               ),
             ),
@@ -69,8 +70,8 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   height: 36,
                   decoration: BoxDecoration(
                     color: isEnabled
-                        ? const Color(0xFFF0FDF4)
-                        : const Color(0xFFF8FAFC),
+                        ? (context.isDark ? const Color(0xFF143823) : const Color(0xFFF0FDF4))
+                        : (context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF8FAFC)),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -79,7 +80,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                         : Icons.security_outlined,
                     color: isEnabled
                         ? const Color(0xFF16A34A)
-                        : const Color(0xFF64748B),
+                        : context.textSecondary(),
                     size: 18,
                   ),
                 ),
@@ -88,12 +89,12 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Trạng thái bảo vệ',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w300,
-                          color: Color(0xFF8E9E94),
+                          color: context.textMuted(),
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -104,7 +105,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                           fontWeight: FontWeight.w500,
                           color: isEnabled
                               ? const Color(0xFF16A34A)
-                              : const Color(0xFF64748B),
+                              : context.textSecondary(),
                         ),
                       ),
                     ],
@@ -116,7 +117,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   decoration: BoxDecoration(
                     color: isEnabled
                         ? const Color(0xFF16A34A)
-                        : const Color(0xFF9EABA3),
+                        : context.textMuted(),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -142,12 +143,12 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
+                    Text(
                       'Quét mã QR bằng ứng dụng Authenticator',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1E2621),
+                        color: context.textPrimary(),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -158,7 +159,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE9EBEA)),
+                          border: Border.all(color: context.cardBorder()),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.04),
@@ -176,11 +177,11 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    const Text(
+                    Text(
                       'Hoặc nhập mã bí mật thủ công:',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF717873),
+                        color: context.textSecondary(),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),

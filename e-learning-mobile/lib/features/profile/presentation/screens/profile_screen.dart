@@ -8,6 +8,7 @@ import 'package:e_learning_mobile/features/profile/presentation/controllers/prof
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_avatar.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
@@ -38,28 +39,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final state = ref.watch(profileControllerProvider);
     final controller = ref.read(profileControllerProvider.notifier);
     final theme = Theme.of(context);
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? colorScheme.surface : AppColors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Cá nhân',
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 18,
             letterSpacing: -0.3,
-            color: AppColors.textPrimary,
+            color: context.textPrimary(),
           ),
         ),
         elevation: 0,
-        backgroundColor: AppColors.background,
+        backgroundColor: isDark ? colorScheme.surface : AppColors.background,
         actions: [
           IconButton(
             tooltip: 'Làm mới hồ sơ',
             onPressed: () => controller.refresh(),
-            icon: const Icon(
+            icon: Icon(
               Icons.refresh_rounded,
-              color: AppColors.textPrimary,
+              color: context.textPrimary(),
             ),
           ),
         ],
@@ -83,10 +86,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardBg(),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFFEAEFE9),
+                      color: context.cardBorder(),
                       width: 0.8,
                     ),
                     boxShadow: [
@@ -124,7 +127,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: -0.3,
-                                color: AppColors.textPrimary,
+                                color: context.textPrimary(),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -132,7 +135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               state.profile?.email ?? 'maidung@gmail.com',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w300,
-                                color: AppColors.textSecondary,
+                                color: context.textSecondary(),
                               ),
                             ),
                             const SizedBox(height: AppSpacing.xs),
@@ -142,17 +145,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.mint,
+                                color: isDark ? colorScheme.primaryContainer : AppColors.mint,
                                 borderRadius: BorderRadius.circular(AppRadius.pill),
                                 border: Border.all(
-                                  color: const Color(0xFFD3E6DC),
+                                  color: isDark ? colorScheme.outlineVariant : const Color(0xFFD3E6DC),
                                   width: 0.8,
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Thành viên Kim Cương 💎',
                                 style: TextStyle(
-                                  color: AppColors.primary,
+                                  color: isDark ? colorScheme.onPrimaryContainer : AppColors.primary,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -170,10 +173,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardBg(),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: const Color(0xFFEAEFE9),
+                      color: context.cardBorder(),
                       width: 0.8,
                     ),
                     boxShadow: const [
@@ -187,11 +190,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStatColumn('3', 'Khóa học', Icons.menu_book_rounded, const Color(0xFF0F5B38), const Color(0xFFF0F7F2)),
-                      Container(height: 32, width: 0.8, color: const Color(0xFFEAEFE9)),
-                      _buildStatColumn('60%', 'Tiến độ', Icons.pie_chart_outline_rounded, const Color(0xFF2563EB), const Color(0xFFEFF6FF)),
-                      Container(height: 32, width: 0.8, color: const Color(0xFFEAEFE9)),
-                      _buildStatColumn('7 ngày', 'Streak', Icons.local_fire_department_rounded, const Color(0xFFD97706), const Color(0xFFFFFBEB)),
+                      _buildStatColumn(context, '3', 'Khóa học', Icons.menu_book_rounded, isDark ? colorScheme.primary : const Color(0xFF0F5B38), isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2)),
+                      Container(height: 32, width: 0.8, color: context.cardBorder()),
+                      _buildStatColumn(context, '60%', 'Tiến độ', Icons.pie_chart_outline_rounded, const Color(0xFF2563EB), isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF)),
+                      Container(height: 32, width: 0.8, color: context.cardBorder()),
+                      _buildStatColumn(context, '7 ngày', 'Streak', Icons.local_fire_department_rounded, const Color(0xFFD97706), isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB)),
                     ],
                   ),
                 ),
@@ -203,7 +206,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Text(
                     'HỌC TẬP & THÀNH TÍCH',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary(),
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.5,
                       fontSize: 11,
@@ -212,10 +215,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardBg(),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFFEAEFE9),
+                      color: context.cardBorder(),
                       width: 0.8,
                     ),
                   ),
@@ -226,29 +229,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         icon: Icons.person_outline_rounded,
                         title: 'Hồ sơ của tôi',
                         subtitle: 'Cập nhật thông tin cá nhân & ảnh đại diện',
-                        bgColor: const Color(0xFFEFF6FF),
+                        bgColor: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
                         iconColor: const Color(0xFF2563EB),
                         onTap: () => context.push(AppRoutes.appProfileEdit),
                       ),
-                      const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+                      Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),
                       _buildListTileItem(
                         context,
                         icon: Icons.emoji_events_outlined,
                         title: 'Thành tích & Huy hiệu',
                         subtitle: 'Đã đạt 5 huy hiệu bài học & chuỗi 7 ngày',
-                        bgColor: const Color(0xFFFFFBEB),
+                        bgColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB),
                         iconColor: const Color(0xFFD97706),
                         badge: '5 huy hiệu',
                         onTap: () => _showAchievementsDialog(context),
                       ),
-                      const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+                      Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),
                       _buildListTileItem(
                         context,
                         icon: Icons.history_edu_rounded,
                         title: 'Lịch sử học tập',
                         subtitle: 'Xem danh sách bài đã xem & tiến độ tích lũy',
-                        bgColor: const Color(0xFFF0F7F2),
-                        iconColor: const Color(0xFF0F5B38),
+                        bgColor: isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2),
+                        iconColor: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                         onTap: () => context.push(AppRoutes.appProgress),
                       ),
                     ],
@@ -262,7 +265,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Text(
                     'HỆ THỐNG & TRỢ GIÚP',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary(),
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.5,
                       fontSize: 11,
@@ -271,10 +274,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardBg(),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFFEAEFE9),
+                      color: context.cardBorder(),
                       width: 0.8,
                     ),
                   ),
@@ -285,28 +288,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         icon: Icons.settings_outlined,
                         title: 'Cài đặt ứng dụng',
                         subtitle: 'Thông báo, bảo mật & bộ nhớ đệm',
-                        bgColor: const Color(0xFFF5F3FF),
+                        bgColor: isDark ? const Color(0xFF4C1D95) : const Color(0xFFF5F3FF),
                         iconColor: const Color(0xFF7C3AED),
                         badge: '120MB',
                         onTap: () => context.push(AppRoutes.appSettings),
                       ),
-                      const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+                      Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),
                       _buildListTileItem(
                         context,
                         icon: Icons.help_outline_rounded,
                         title: 'Trung tâm trợ giúp',
                         subtitle: 'Hỏi đáp bác sĩ & hỗ trợ kỹ thuật',
-                        bgColor: const Color(0xFFF0F9FF),
+                        bgColor: isDark ? const Color(0xFF075985) : const Color(0xFFF0F9FF),
                         iconColor: const Color(0xFF0284C7),
                         onTap: () => _showSupportDialog(context),
                       ),
-                      const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+                      Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),
                       _buildListTileItem(
                         context,
                         icon: Icons.info_outline_rounded,
                         title: 'Về ứng dụng Nhìn Ăn Chữa Lành',
                         subtitle: 'Phiên bản 1.0.0 (Build 100)',
-                        bgColor: const Color(0xFFF8FAFC),
+                        bgColor: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF8FAFC),
                         iconColor: const Color(0xFF64748B),
                         onTap: () => _showAboutDialog(context),
                       ),
@@ -363,6 +366,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildStatColumn(
+    BuildContext context,
     String value,
     String label,
     IconData icon,
@@ -383,8 +387,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         const SizedBox(height: 6),
         Text(
           value,
-          style: const TextStyle(
-            color: Color(0xFF1A2520),
+          style: TextStyle(
+            color: context.textPrimary(),
             fontWeight: FontWeight.w500,
             fontSize: 15,
             letterSpacing: -0.2,
@@ -392,8 +396,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFF8E9E94),
+          style: TextStyle(
+            color: context.textMuted(),
             fontWeight: FontWeight.w300,
             fontSize: 11,
           ),
@@ -413,6 +417,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     String? badge,
   }) {
     final theme = Theme.of(context);
+    final isDark = context.isDark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -444,7 +449,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                           letterSpacing: -0.1,
-                          color: const Color(0xFF1A2520),
+                          color: context.textPrimary(),
                           fontSize: 14,
                         ),
                       ),
@@ -453,15 +458,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF2F6F3),
+                            color: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF2F6F3),
                             borderRadius: BorderRadius.circular(AppRadius.pill),
                           ),
                           child: Text(
                             badge,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF0F5B38),
+                              color: isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
                             ),
                           ),
                         ),
@@ -473,16 +478,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w300,
-                      color: const Color(0xFF8E9E94),
+                      color: context.textMuted(),
                       fontSize: 12,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: Color(0xFF9EABA3),
+              color: context.textMuted(),
               size: 20,
             ),
           ],

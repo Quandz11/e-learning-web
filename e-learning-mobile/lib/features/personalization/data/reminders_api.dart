@@ -1,4 +1,4 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:e_learning_mobile/core/errors/app_failure.dart';
 import 'package:e_learning_mobile/core/errors/dio_error_mapper.dart';
 import 'package:e_learning_mobile/core/network/api_client.dart';
@@ -76,7 +76,7 @@ class RemindersApi {
 
   Future<void> deleteReminder(String id) async {
     try {
-      await _apiClient.delete<Object?>('/user/reminders/');
+      await _apiClient.delete<Object?>('/user/reminders/$id');
     } on DioException catch (e) {
       final mapped = e.error;
       if (mapped is AppFailure) throw mapped;
@@ -86,7 +86,7 @@ class RemindersApi {
 
   Future<void> toggleReminder(String id, bool enabled) async {
     try {
-      await _apiClient.patch<Object?>('/user/reminders//toggle', data: enabled);
+      await _apiClient.patch<Object?>('/user/reminders/$id/toggle', data: enabled);
     } on DioException catch (e) {
       final mapped = e.error;
       if (mapped is AppFailure) throw mapped;

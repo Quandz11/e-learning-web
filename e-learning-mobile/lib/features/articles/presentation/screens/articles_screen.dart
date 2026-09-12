@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_learning_mobile/features/articles/data/models/article_models.dart';
 import 'package:e_learning_mobile/features/articles/presentation/controllers/articles_controller.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -28,13 +29,13 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
     final controller = ref.read(articlesControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFA),
+      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFBFBFA),
+        backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF1E2621)),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -43,12 +44,12 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Kiến thức Sống khỏe',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1E2621),
+            color: context.textPrimary(),
             letterSpacing: -0.5,
           ),
         ),
@@ -61,9 +62,9 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cardBg(),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE9EBEA), width: 1),
+                border: Border.all(color: context.cardBorder(), width: 1),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.02),
@@ -80,15 +81,15 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(fontSize: 14, color: Color(0xFF1E2621)),
-                      decoration: const InputDecoration(
+                      style: TextStyle(fontSize: 14, color: context.textPrimary()),
+                      decoration: InputDecoration(
                         filled: false,
                         fillColor: Colors.transparent,
                         hintText: 'Tìm kiếm bài viết, cẩm nang...',
                         hintStyle: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w300,
-                          color: Color(0xFFA5A9A5),
+                          color: context.textMuted(),
                         ),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -96,7 +97,7 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                         disabledBorder: InputBorder.none,
                         errorBorder: InputBorder.none,
                         isDense: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       onSubmitted: (val) => controller.search(val),
                     ),
@@ -107,7 +108,7 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                         _searchController.clear();
                         controller.search('');
                       },
-                      child: const Icon(Icons.close_rounded, size: 18, color: Color(0xFF717873)),
+                      child: Icon(Icons.close_rounded, size: 18, color: context.textSecondary()),
                     ),
                 ],
               ),
@@ -160,14 +161,14 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.cloud_off_rounded, size: 48, color: Color(0xFFA5A9A5)),
+                              Icon(Icons.cloud_off_rounded, size: 48, color: context.textMuted()),
                               const SizedBox(height: 16),
-                              const Text(
+                              Text(
                                 'Không thể tải danh sách bài viết',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF1E2621),
+                                  color: context.textPrimary(),
                                   letterSpacing: -0.3,
                                 ),
                               ),
@@ -175,8 +176,8 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                               OutlinedButton(
                                 onPressed: () => controller.load(),
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: const Color(0xFF0F5B38),
-                                  side: const BorderSide(color: Color(0xFF0F5B38)),
+                                  foregroundColor: context.colorScheme.primary,
+                                  side: BorderSide(color: context.colorScheme.primary),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 child: const Text('Thử lại'),
@@ -194,22 +195,22 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                                   width: 64,
                                   height: 64,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFEBF5EE),
+                                    color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEBF5EE),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.article_outlined,
                                     size: 32,
-                                    color: Color(0xFF0F5B38),
+                                    color: context.colorScheme.primary,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                const Text(
+                                Text(
                                   'Chưa có bài viết nào phù hợp',
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFF1E2621),
+                                    color: context.textPrimary(),
                                     letterSpacing: -0.3,
                                   ),
                                 ),
@@ -217,7 +218,7 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                             ),
                           )
                         : RefreshIndicator(
-                            color: const Color(0xFF0F5B38),
+                            color: context.colorScheme.primary,
                             onRefresh: () => controller.refresh(),
                             child: ListView.separated(
                               physics: const AlwaysScrollableScrollPhysics(),
@@ -263,10 +264,10 @@ class _CategoryChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0F5B38) : Colors.white,
+            color: isSelected ? context.colorScheme.primary : context.cardBg(),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? const Color(0xFF0F5B38) : const Color(0xFFE9EBEA),
+              color: isSelected ? context.colorScheme.primary : context.cardBorder(),
               width: 1,
             ),
           ),
@@ -275,7 +276,7 @@ class _CategoryChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-              color: isSelected ? Colors.white : const Color(0xFF4C544F),
+              color: isSelected ? Colors.white : context.textSecondary(),
               letterSpacing: -0.2,
             ),
           ),
@@ -309,9 +310,9 @@ class _ArticleCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.cardBg(),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE9EBEA), width: 1),
+            border: Border.all(color: context.cardBorder(), width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -329,22 +330,22 @@ class _ArticleCard extends StatelessWidget {
                 child: Container(
                   width: 96,
                   height: 84,
-                  color: const Color(0xFFF1F3F2),
+                  color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF1F3F2),
                   child: article.featuredImageUrl != null &&
                           article.featuredImageUrl!.isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: article.featuredImageUrl!,
                           fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => const Icon(
+                          errorWidget: (_, __, ___) => Icon(
                             Icons.image_outlined,
                             size: 28,
-                            color: Color(0xFFA5A9A5),
+                            color: context.textMuted(),
                           ),
                         )
-                      : const Icon(
+                      : Icon(
                           Icons.article_outlined,
                           size: 28,
-                          color: Color(0xFFA5A9A5),
+                          color: context.textMuted(),
                         ),
                 ),
               ),
@@ -359,15 +360,15 @@ class _ArticleCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEBF5EE),
+                          color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEBF5EE),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           article.categoryName!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF0F5B38),
+                            color: context.colorScheme.primary,
                             letterSpacing: -0.1,
                           ),
                         ),
@@ -378,10 +379,10 @@ class _ArticleCard extends StatelessWidget {
                       article.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1E2621),
+                        color: context.textPrimary(),
                         height: 1.3,
                         letterSpacing: -0.3,
                       ),
@@ -389,25 +390,25 @@ class _ArticleCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.access_time_rounded, size: 12, color: Color(0xFFA5A9A5)),
+                        Icon(Icons.access_time_rounded, size: 12, color: context.textMuted()),
                         const SizedBox(width: 4),
                         Text(
                           dateStr,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w300,
-                            color: Color(0xFFA5A9A5),
+                            color: context.textMuted(),
                           ),
                         ),
                         const SizedBox(width: 10),
-                        const Icon(Icons.visibility_outlined, size: 12, color: Color(0xFFA5A9A5)),
+                        Icon(Icons.visibility_outlined, size: 12, color: context.textMuted()),
                         const SizedBox(width: 4),
                         Text(
                           '${article.viewCount}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w300,
-                            color: Color(0xFFA5A9A5),
+                            color: context.textMuted(),
                           ),
                         ),
                       ],

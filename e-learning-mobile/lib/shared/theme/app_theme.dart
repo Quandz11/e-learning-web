@@ -18,16 +18,20 @@ class AppTheme {
       brightness: brightness,
       primary: AppColors.primary,
       onPrimary: Colors.white,
-      primaryContainer: AppColors.primaryLight,
-      onPrimaryContainer: AppColors.primaryDark,
+      primaryContainer: isLight ? AppColors.primaryLight : const Color(0xFF184230),
+      onPrimaryContainer: isLight ? AppColors.primaryDark : const Color(0xFFA8F5CB),
       surface: isLight ? AppColors.background : const Color(0xFF121B16),
       onSurface: isLight ? AppColors.textPrimary : const Color(0xFFE4EAE6),
+      onSurfaceVariant: isLight ? AppColors.textSecondary : const Color(0xFFA0B2A6),
       surfaceContainerLow: isLight
           ? AppColors.surface
           : const Color(0xFF1A2620),
       surfaceContainerLowest: isLight
           ? AppColors.surface
           : const Color(0xFF14201A),
+      surfaceContainerHighest: isLight
+          ? const Color(0xFFEEF7F2)
+          : const Color(0xFF22322A),
       outline: isLight ? AppColors.sage : const Color(0xFF4A5C52),
       outlineVariant: isLight ? AppColors.border : const Color(0xFF2E3D35),
       error: AppColors.error,

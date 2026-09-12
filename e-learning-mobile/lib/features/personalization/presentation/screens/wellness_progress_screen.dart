@@ -3,6 +3,7 @@ import 'package:e_learning_mobile/features/personalization/presentation/controll
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,22 +30,24 @@ class _WellnessProgressScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(wellnessControllerProvider);
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FBF9),
+      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Nhật ký & Tiến trình',
           style: TextStyle(
             fontWeight: FontWeight.w400,
             fontSize: 18,
             letterSpacing: -0.3,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
           ),
         ),
         elevation: 0,
-        backgroundColor: const Color(0xFFF9FBF9),
-        iconTheme: const IconThemeData(color: Color(0xFF1A2520)),
+        backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
+        iconTheme: IconThemeData(color: context.textPrimary()),
       ),
       body: Column(
         children: [
@@ -57,7 +60,7 @@ class _WellnessProgressScreenState
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFEFEF),
+                color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFEFEFEF),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Row(
@@ -107,18 +110,21 @@ class _WellnessProgressScreenState
     required bool isActive,
     required VoidCallback onTap,
   }) {
+    final isDark = context.isDark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.transparent,
+          color: isActive
+              ? (isDark ? context.colorScheme.surfaceContainerHigh : Colors.white)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -131,7 +137,9 @@ class _WellnessProgressScreenState
             Icon(
               icon,
               size: 15,
-              color: isActive ? const Color(0xFF0F5B38) : const Color(0xFF6B7280),
+              color: isActive
+                  ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                  : context.textSecondary(),
             ),
             const SizedBox(width: 6),
             Text(
@@ -139,7 +147,7 @@ class _WellnessProgressScreenState
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
-                color: isActive ? const Color(0xFF1A2520) : const Color(0xFF6B7280),
+                color: isActive ? context.textPrimary() : context.textSecondary(),
               ),
             ),
           ],
@@ -150,6 +158,7 @@ class _WellnessProgressScreenState
 
   Widget _buildTimelineView(BuildContext context, WellnessState state) {
     final timelineItems = state.timeline?.items ?? [];
+    final isDark = context.isDark;
 
     if (timelineItems.isEmpty) {
       return Center(
@@ -160,31 +169,31 @@ class _WellnessProgressScreenState
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: const Color(0xFFE8F5E9),
+                color: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.calendar_today_outlined,
                 size: 26,
-                color: Color(0xFF0F5B38),
+                color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            const Text(
+            Text(
               'Chưa có dữ liệu nhật ký',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFF1A2520),
+                color: context.textPrimary(),
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Hãy check-in hằng ngày để hệ thống theo dõi lộ trình của bạn.',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w300,
-                color: Color(0xFF6B7280),
+                color: context.textSecondary(),
               ),
             ),
           ],
@@ -213,6 +222,7 @@ class _WellnessProgressScreenState
   ) {
     final formattedDate =
         '${item.logDate.day.toString().padLeft(2, '0')}/${item.logDate.month.toString().padLeft(2, '0')}';
+    final isDark = context.isDark;
 
     return IntrinsicHeight(
       child: Row(
@@ -229,10 +239,10 @@ class _WellnessProgressScreenState
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: item.hasCheckin
-                        ? const Color(0xFF0F5B38)
-                        : const Color(0xFFD1D5DB),
+                        ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                        : (isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFD1D5DB)),
                     border: Border.all(
-                      color: Colors.white,
+                      color: isDark ? context.colorScheme.surface : Colors.white,
                       width: 2,
                     ),
                   ),
@@ -241,7 +251,7 @@ class _WellnessProgressScreenState
                   Expanded(
                     child: Container(
                       width: 1.5,
-                      color: const Color(0xFFE5E7EB),
+                      color: isDark ? context.colorScheme.outlineVariant : const Color(0xFFE5E7EB),
                     ),
                   ),
               ],
@@ -255,15 +265,15 @@ class _WellnessProgressScreenState
               margin: const EdgeInsets.only(bottom: AppSpacing.md),
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cardBg(),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 border: Border.all(
-                  color: const Color(0xFFEAEFE9),
+                  color: context.cardBorder(),
                   width: 0.8,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                     blurRadius: 6,
                     offset: const Offset(0, 1),
                   ),
@@ -277,10 +287,10 @@ class _WellnessProgressScreenState
                     children: [
                       Text(
                         formattedDate,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF1A2520),
+                          color: context.textPrimary(),
                         ),
                       ),
                       Container(
@@ -290,8 +300,8 @@ class _WellnessProgressScreenState
                         ),
                         decoration: BoxDecoration(
                           color: item.hasCheckin
-                              ? const Color(0xFFE8F5E9)
-                              : const Color(0xFFF3F4F6),
+                              ? context.chipBg(false)
+                              : (isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF3F4F6)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -300,8 +310,8 @@ class _WellnessProgressScreenState
                             fontSize: 11,
                             fontWeight: FontWeight.w400,
                             color: item.hasCheckin
-                                ? const Color(0xFF0F5B38)
-                                : const Color(0xFF6B7280),
+                                ? context.chipText(false)
+                                : context.textMuted(),
                           ),
                         ),
                       ),
@@ -311,12 +321,14 @@ class _WellnessProgressScreenState
                   Row(
                     children: [
                       _buildMiniMetric(
+                        context,
                         icon: Icons.local_drink_rounded,
                         color: const Color(0xFF0284C7),
                         value: '${item.waterMl} ml',
                       ),
                       const SizedBox(width: AppSpacing.md),
                       _buildMiniMetric(
+                        context,
                         icon: Icons.directions_run_rounded,
                         color: const Color(0xFFD97706),
                         value: '${item.workoutMinutes}p',
@@ -324,8 +336,9 @@ class _WellnessProgressScreenState
                       if (item.currentWeightKg != null) ...[
                         const SizedBox(width: AppSpacing.md),
                         _buildMiniMetric(
+                          context,
                           icon: Icons.scale_rounded,
-                          color: const Color(0xFF0F5B38),
+                          color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                           value: '${item.currentWeightKg} kg',
                         ),
                       ],
@@ -335,10 +348,10 @@ class _WellnessProgressScreenState
                     const SizedBox(height: 6),
                     Text(
                       '${item.phase} • Ngày ${item.phaseDayIndex}/${item.phaseTotalDays}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w300,
-                        color: Color(0xFF9CA3AF),
+                        color: context.textMuted(),
                       ),
                     ),
                   ],
@@ -351,7 +364,8 @@ class _WellnessProgressScreenState
     );
   }
 
-  Widget _buildMiniMetric({
+  Widget _buildMiniMetric(
+    BuildContext context, {
     required IconData icon,
     required Color color,
     required String value,
@@ -362,10 +376,10 @@ class _WellnessProgressScreenState
         const SizedBox(width: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w300,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
           ),
         ),
       ],
@@ -379,6 +393,7 @@ class _WellnessProgressScreenState
     final targetWeight = weightProg?.targetWeightKg ?? 60.0;
     final progressPercent = weightProg?.progressPercent ?? 0.0;
     final delta = currentWeight - startWeight;
+    final isDark = context.isDark;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
@@ -392,15 +407,15 @@ class _WellnessProgressScreenState
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardBg(),
               borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(
-                color: const Color(0xFFEAEFE9),
+                color: context.cardBorder(),
                 width: 0.8,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -412,12 +427,12 @@ class _WellnessProgressScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Lộ trình Cân nặng',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF1A2520),
+                        color: context.textPrimary(),
                       ),
                     ),
                     Container(
@@ -427,8 +442,8 @@ class _WellnessProgressScreenState
                       ),
                       decoration: BoxDecoration(
                         color: delta <= 0
-                            ? const Color(0xFFE8F5E9)
-                            : const Color(0xFFFEE2E2),
+                            ? context.chipBg(false)
+                            : (isDark ? const Color(0xFF451A1A) : const Color(0xFFFEE2E2)),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -439,8 +454,8 @@ class _WellnessProgressScreenState
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                           color: delta <= 0
-                              ? const Color(0xFF0F5B38)
-                              : Colors.red[700],
+                              ? context.chipText(false)
+                              : (isDark ? const Color(0xFFF87171) : Colors.red[700]),
                         ),
                       ),
                     ),
@@ -450,13 +465,14 @@ class _WellnessProgressScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildWeightStatColumn('Bắt đầu', '$startWeight kg'),
+                    _buildWeightStatColumn(context, 'Bắt đầu', '$startWeight kg'),
                     Container(
                       width: 1,
                       height: 32,
-                      color: const Color(0xFFEAEFE9),
+                      color: context.cardBorder(),
                     ),
                     _buildWeightStatColumn(
+                      context,
                       'Hiện tại',
                       '$currentWeight kg',
                       isHighlight: true,
@@ -464,9 +480,9 @@ class _WellnessProgressScreenState
                     Container(
                       width: 1,
                       height: 32,
-                      color: const Color(0xFFEAEFE9),
+                      color: context.cardBorder(),
                     ),
-                    _buildWeightStatColumn('Mục tiêu', '$targetWeight kg'),
+                    _buildWeightStatColumn(context, 'Mục tiêu', '$targetWeight kg'),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -475,9 +491,9 @@ class _WellnessProgressScreenState
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: (progressPercent / 100).clamp(0.0, 1.0),
-                    backgroundColor: const Color(0xFFF3F4F6),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFF0F5B38),
+                    backgroundColor: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF3F4F6),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                     ),
                     minHeight: 6,
                   ),
@@ -487,10 +503,10 @@ class _WellnessProgressScreenState
                   alignment: Alignment.centerRight,
                   child: Text(
                     'Đạt ${progressPercent.toStringAsFixed(0)}% mục tiêu',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w300,
-                      color: Color(0xFF6B7280),
+                      color: context.textSecondary(),
                     ),
                   ),
                 ),
@@ -503,28 +519,28 @@ class _WellnessProgressScreenState
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FBF9),
+              color: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF9FBF9),
               borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(
-                color: const Color(0xFFEAEFE9),
+                color: context.cardBorder(),
                 width: 0.8,
               ),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Icon(
                   Icons.spa_outlined,
                   size: 20,
-                  color: Color(0xFF0F5B38),
+                  color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                 ),
-                SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     'Cân nặng có thể dao động 0.5 - 1kg mỗi ngày do lượng nước. Hãy kiên trì đo vào cùng một khung giờ mỗi sáng sau khi thức dậy.',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w300,
-                      color: Color(0xFF586B60),
+                      color: context.textSecondary(),
                       height: 1.4,
                     ),
                   ),
@@ -538,18 +554,20 @@ class _WellnessProgressScreenState
   }
 
   Widget _buildWeightStatColumn(
+    BuildContext context,
     String label,
     String value, {
     bool isHighlight = false,
   }) {
+    final isDark = context.isDark;
     return Column(
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w300,
-            color: Color(0xFF6B7280),
+            color: context.textSecondary(),
           ),
         ),
         const SizedBox(height: 2),
@@ -559,8 +577,8 @@ class _WellnessProgressScreenState
             fontSize: 18,
             fontWeight: FontWeight.w300,
             color: isHighlight
-                ? const Color(0xFF0F5B38)
-                : const Color(0xFF1A2520),
+                ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                : context.textPrimary(),
             letterSpacing: -0.3,
           ),
         ),

@@ -6,6 +6,7 @@ import 'package:e_learning_mobile/features/profile/presentation/controllers/prof
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
@@ -329,10 +330,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFEAEFE9),
+                color: context.cardBorder(),
                 width: 0.8,
               ),
             ),
@@ -342,12 +343,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.mail_outline_rounded,
-                    color: Color(0xFF2563EB),
+                    color: context.isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
                     size: 18,
                   ),
                 ),
@@ -356,30 +357,30 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Địa chỉ Email (Không đổi)',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w300,
-                          color: Color(0xFF8E9E94),
+                          color: context.textMuted(),
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         profile.email,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF1A2520),
+                          color: context.textPrimary(),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.lock_outline_rounded,
                   size: 16,
-                  color: Color(0xFF9EABA3),
+                  color: context.textMuted(),
                 ),
               ],
             ),

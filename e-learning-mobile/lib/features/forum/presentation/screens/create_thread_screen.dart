@@ -1,5 +1,6 @@
 import 'package:e_learning_mobile/features/forum/data/forum_repository.dart';
 import 'package:e_learning_mobile/features/forum/presentation/controllers/forum_controller.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -91,13 +92,13 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
     final forumState = ref.watch(forumControllerProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFA),
+      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFBFBFA),
+        backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF1E2621)),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -106,12 +107,12 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Tạo thảo luận mới',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1E2621),
+            color: context.textPrimary(),
             letterSpacing: -0.5,
           ),
         ),
@@ -127,12 +128,12 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text(
+                  : Text(
                       'Đăng bài',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F5B38),
+                        color: context.isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -144,12 +145,12 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           // Category selector
-          const Text(
+          Text(
             'Danh mục thảo luận',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E2621),
+              color: context.textPrimary(),
               letterSpacing: -0.2,
             ),
           ),
@@ -157,24 +158,25 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardBg(),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE9EBEA)),
+              border: Border.all(color: context.cardBorder()),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _selectedCategoryId,
+                dropdownColor: context.cardBg(),
                 isExpanded: true,
-                hint: const Text('Chọn chuyên mục'),
+                hint: Text('Chọn chuyên mục', style: TextStyle(color: context.textMuted())),
                 items: forumState.categories.map((cat) {
                   return DropdownMenuItem(
                     value: cat.id,
                     child: Text(
                       cat.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xFF1E2621),
+                        color: context.textPrimary(),
                       ),
                     ),
                   );
@@ -189,39 +191,39 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
           const SizedBox(height: 20),
 
           // Title field
-          const Text(
+          Text(
             'Tiêu đề câu hỏi / chia sẻ',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E2621),
+              color: context.textPrimary(),
               letterSpacing: -0.2,
             ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _titleController,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary()),
             decoration: InputDecoration(
               hintText: 'Ví dụ: Cần chuẩn bị gì trước khi bắt đầu nhịn ăn?',
-              hintStyle: const TextStyle(
+              hintStyle: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w300,
-                color: Color(0xFFA5A9A5),
+                color: context.textMuted(),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: context.cardBg(),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE9EBEA)),
+                borderSide: BorderSide(color: context.cardBorder()),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE9EBEA)),
+                borderSide: BorderSide(color: context.cardBorder()),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF0F5B38)),
+                borderSide: BorderSide(color: context.colorScheme.primary),
               ),
             ),
           ),
@@ -229,40 +231,40 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
           const SizedBox(height: 20),
 
           // Content field
-          const Text(
+          Text(
             'Nội dung chi tiết',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E2621),
+              color: context.textPrimary(),
               letterSpacing: -0.2,
             ),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: _contentController,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300, color: context.textPrimary()),
             maxLines: 8,
             decoration: InputDecoration(
               hintText: 'Mô tả chi tiết thắc mắc, trải nghiệm hoặc các câu hỏi cần được hỗ trợ...',
-              hintStyle: const TextStyle(
+              hintStyle: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w300,
-                color: Color(0xFFA5A9A5),
+                color: context.textMuted(),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: context.cardBg(),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE9EBEA)),
+                borderSide: BorderSide(color: context.cardBorder()),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE9EBEA)),
+                borderSide: BorderSide(color: context.cardBorder()),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF0F5B38)),
+                borderSide: BorderSide(color: context.colorScheme.primary),
               ),
             ),
           ),

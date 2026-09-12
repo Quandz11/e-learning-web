@@ -5,6 +5,8 @@ import 'package:e_learning_mobile/features/auth/data/models/logout_request.dart'
 import 'package:e_learning_mobile/features/notifications/data/notifications_repository.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
+import 'package:e_learning_mobile/shared/theme/theme_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,21 +21,24 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _notificationsEnabled = true;
-  String _selectedTheme = 'Sáng';
   String _selectedLanguage = 'Tiếng Việt';
   bool _isClearingCache = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = context.colorScheme;
+    ref.watch(themeControllerProvider);
+    final themeNotifier = ref.read(themeControllerProvider.notifier);
+    final selectedTheme = themeNotifier.themeModeName;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
             size: 20,
           ),
           onPressed: () {
@@ -44,17 +49,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Cài đặt ứng dụng',
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 18,
             letterSpacing: -0.3,
-            color: AppColors.textPrimary,
+            color: colorScheme.onSurface,
           ),
         ),
         elevation: 0,
-        backgroundColor: AppColors.background,
+        backgroundColor: colorScheme.surface,
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -142,18 +147,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
               ),
               trailing: DropdownButton<String>(
-                value: _selectedTheme,
+                value: selectedTheme,
                 underline: const SizedBox(),
                 items: const [
                   DropdownMenuItem(
                     value: 'Sáng',
-                    child: Text('Sáng (Default)'),
+                    child: Text('Sáng (Light)'),
                   ),
                   DropdownMenuItem(value: 'Tối', child: Text('Tối (Dark)')),
-                  DropdownMenuItem(value: 'Hệ thống', child: Text('Tự động')),
+                  DropdownMenuItem(value: 'Hệ thống', child: Text('Tự động (System)')),
                 ],
                 onChanged: (val) {
-                  if (val != null) setState(() => _selectedTheme = val);
+                  if (val != null) {
+                    themeNotifier.setThemeModeByName(val);
+                  }
                 },
               ),
             ),
@@ -312,19 +319,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildSettingContainer(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg(),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFEAEFE9),
+          color: context.cardBorder(),
           width: 0.8,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: context.isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Column(children: children),
     );
@@ -338,37 +347,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Color bgColor = const Color(0xFFF0F7F2),
     Color iconColor = AppColors.primary,
   }) {
+    final isDark = context.isDark;
     return ListTile(
       leading: Container(
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: bgColor,
+          color: isDark ? context.colorScheme.surfaceContainerHighest : bgColor,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: iconColor, size: 18),
+        child: Icon(icon, color: isDark ? context.colorScheme.primary : iconColor, size: 18),
       ),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
+          color: context.textPrimary(),
           fontSize: 14,
         ),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: context.textSecondary(),
                 fontWeight: FontWeight.w300,
                 fontSize: 12,
               ),
             )
           : null,
-      trailing: const Icon(
+      trailing: Icon(
         Icons.chevron_right_rounded,
-        color: Color(0xFF9EABA3),
+        color: isDark ? context.colorScheme.onSurfaceVariant : const Color(0xFF9EABA3),
         size: 20,
       ),
       onTap: onTap,

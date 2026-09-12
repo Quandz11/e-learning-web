@@ -5,6 +5,7 @@ import 'package:e_learning_mobile/features/personalization/domain/reminder_model
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,14 +23,16 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(personalizationStateProvider);
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FBF9),
+      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
             size: 18,
           ),
           onPressed: () {
@@ -40,22 +43,22 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Danh sách nhắc nhở',
           style: TextStyle(
             fontWeight: FontWeight.w400,
             fontSize: 18,
             letterSpacing: -0.3,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
           ),
         ),
         actions: [
           IconButton(
             tooltip: 'Thử nghiệm thông báo',
-            icon: const Icon(
+            icon: Icon(
               Icons.notifications_active_outlined,
               size: 22,
-              color: Color(0xFF0F5B38),
+              color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
             ),
             onPressed: () async {
               await NotificationService.instance.sendTestNotification();
@@ -72,7 +75,7 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
           const SizedBox(width: 8),
         ],
         elevation: 0,
-        backgroundColor: const Color(0xFFF9FBF9),
+        backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
       ),
       body: state.when(
         loading: () => const Center(
@@ -103,7 +106,7 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFEFEF),
+                    color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFEFEFEF),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Row(
@@ -116,13 +119,13 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
                               color: _selectedTabIndex == 0
-                                  ? Colors.white
+                                  ? (isDark ? colorScheme.surfaceContainerHigh : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: _selectedTabIndex == 0
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.04),
+                                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                                         blurRadius: 6,
                                         offset: const Offset(0, 2),
                                       ),
@@ -137,8 +140,8 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                                     ? FontWeight.w500
                                     : FontWeight.w400,
                                 color: _selectedTabIndex == 0
-                                    ? const Color(0xFF1A2520)
-                                    : const Color(0xFF6B7280),
+                                    ? context.textPrimary()
+                                    : context.textSecondary(),
                                 fontSize: 13,
                               ),
                             ),
@@ -153,13 +156,13 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
                               color: _selectedTabIndex == 1
-                                  ? Colors.white
+                                  ? (isDark ? colorScheme.surfaceContainerHigh : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: _selectedTabIndex == 1
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.04),
+                                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
                                         blurRadius: 6,
                                         offset: const Offset(0, 2),
                                       ),
@@ -174,8 +177,8 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                                     ? FontWeight.w500
                                     : FontWeight.w400,
                                 color: _selectedTabIndex == 1
-                                    ? const Color(0xFF1A2520)
-                                    : const Color(0xFF6B7280),
+                                    ? context.textPrimary()
+                                    : context.textSecondary(),
                                 fontSize: 13,
                               ),
                             ),
@@ -197,31 +200,31 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                               width: 56,
                               height: 56,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE8F5E9),
+                                color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9),
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.notifications_off_outlined,
                                 size: 26,
-                                color: Color(0xFF0F5B38),
+                                color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                               ),
                             ),
                             const SizedBox(height: AppSpacing.sm),
-                            const Text(
+                            Text(
                               'Chưa có lịch nhắc nhở nào',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
-                                color: Color(0xFF1A2520),
+                                color: context.textPrimary(),
                               ),
                             ),
                             const SizedBox(height: 2),
-                            const Text(
+                            Text(
                               'Tạo nhắc nhở uống nước hoặc vào bữa ăn để giữ nhịp sinh học.',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w300,
-                                color: Color(0xFF6B7280),
+                                color: context.textSecondary(),
                               ),
                             ),
                           ],
@@ -258,7 +261,7 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F5B38),
+                        backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -279,20 +282,21 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
   Widget _buildReminderCard(BuildContext context, WidgetRef ref, Reminder rem) {
     final timeStr =
         '${rem.startTimeHour.toString().padLeft(2, '0')}:${rem.startTimeMinute.toString().padLeft(2, '0')}';
+    final isDark = context.isDark;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg(),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(
-          color: const Color(0xFFEAEFE9),
+          color: context.cardBorder(),
           width: 0.8,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 6,
             offset: const Offset(0, 1),
           ),
@@ -306,11 +310,15 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
               Container(
                 width: 36,
                 height: 36,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE8F5E9),
+                decoration: BoxDecoration(
+                  color: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(rem.type.icon, color: const Color(0xFF0F5B38), size: 18),
+                child: Icon(
+                  rem.type.icon,
+                  color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                  size: 18,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -319,19 +327,19 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
                   children: [
                     Text(
                       rem.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF1A2520),
+                        color: context.textPrimary(),
                       ),
                     ),
                     if (rem.message.isNotEmpty)
                       Text(
                         rem.message,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w300,
-                          color: Color(0xFF6B7280),
+                          color: context.textSecondary(),
                         ),
                       ),
                   ],
@@ -339,7 +347,7 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
               ),
               Switch.adaptive(
                 value: rem.enabled,
-                activeColor: const Color(0xFF0F5B38),
+                activeColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                 onChanged: (val) {
                   ref
                       .read(personalizationStateProvider.notifier)
@@ -349,50 +357,50 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          const Divider(
-            color: Color(0xFFEAEFE9),
+          Divider(
+            color: context.cardBorder(),
             thickness: 0.8,
             height: 1,
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.access_time_rounded,
                 size: 15,
-                color: Color(0xFF9CA3AF),
+                color: context.textMuted(),
               ),
               const SizedBox(width: 4),
               Text(
                 timeStr,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              const Icon(
+              Icon(
                 Icons.repeat_rounded,
                 size: 15,
-                color: Color(0xFF9CA3AF),
+                color: context.textMuted(),
               ),
               const SizedBox(width: 4),
               Text(
                 rem.repeatDays.length == 7 ? 'Hằng ngày' : 'T2 - CN',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w300,
-                  color: Color(0xFF6B7280),
+                  color: context.textSecondary(),
                 ),
               ),
               const Spacer(),
               IconButton(
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(
+                icon: Icon(
                   Icons.edit_outlined,
                   size: 18,
-                  color: Color(0xFF586B60),
+                  color: context.textSecondary(),
                 ),
                 onPressed: () {
                   context.push(AppRoutes.reminderEditPath(rem.id));

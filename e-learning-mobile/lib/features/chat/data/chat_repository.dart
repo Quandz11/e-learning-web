@@ -48,4 +48,16 @@ class ChatRepository {
   Future<void> markAsRead(String conversationId) async {
     await _api.markAsRead(conversationId);
   }
+
+  Future<AdminConversationsResponse> getAdminConversations() async {
+    return _api.getAdminConversations();
+  }
+
+  Future<List<ChatMessage>> getAdminGuestMessages(String guestId) async {
+    return _api.getAdminGuestMessages(guestId);
+  }
+
+  Future<ChatMessage> sendAdminGuestMessage(String guestId, String content) async {
+    return _api.sendAdminGuestMessage(guestId, content);
+  }
 }

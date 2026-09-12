@@ -1,6 +1,7 @@
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/features/forum/data/models/forum_models.dart';
 import 'package:e_learning_mobile/features/forum/presentation/controllers/forum_controller.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,15 +14,17 @@ class ForumHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(forumControllerProvider);
     final controller = ref.read(forumControllerProvider.notifier);
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFA),
+      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFFBFBFA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFBFBFA),
+        backgroundColor: isDark ? colorScheme.surface : const Color(0xFFFBFBFA),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF1E2621)),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -30,12 +33,12 @@ class ForumHomeScreen extends ConsumerWidget {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Cộng đồng Chia sẻ',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1E2621),
+            color: context.textPrimary(),
             letterSpacing: -0.5,
           ),
         ),
@@ -45,7 +48,7 @@ class ForumHomeScreen extends ConsumerWidget {
         onPressed: () {
           context.push(AppRoutes.appCommunityCreateThread);
         },
-        backgroundColor: const Color(0xFF0F5B38),
+        backgroundColor: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
         icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.white),
         label: const Text(
           'Đặt câu hỏi',
@@ -80,10 +83,14 @@ class ForumHomeScreen extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF0F5B38) : Colors.white,
+                            color: isSelected
+                                ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
+                                : context.cardBg(),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: isSelected ? const Color(0xFF0F5B38) : const Color(0xFFE9EBEA),
+                              color: isSelected
+                                  ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
+                                  : context.cardBorder(),
                               width: 1,
                             ),
                           ),
@@ -92,7 +99,7 @@ class ForumHomeScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-                              color: isSelected ? Colors.white : const Color(0xFF4C544F),
+                              color: isSelected ? Colors.white : context.textSecondary(),
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -109,10 +116,12 @@ class ForumHomeScreen extends ConsumerWidget {
           // Thread list
           Expanded(
             child: state.isLoading && state.threads.isEmpty
-                ? const Center(
+                ? Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F5B38)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                      ),
                     ),
                   )
                 : state.error != null && state.threads.isEmpty
@@ -122,14 +131,14 @@ class ForumHomeScreen extends ConsumerWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.cloud_off_rounded, size: 48, color: Color(0xFFA5A9A5)),
+                              Icon(Icons.cloud_off_rounded, size: 48, color: context.textMuted()),
                               const SizedBox(height: 16),
-                              const Text(
+                              Text(
                                 'Không thể tải các chủ đề thảo luận',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF1E2621),
+                                  color: context.textPrimary(),
                                   letterSpacing: -0.3,
                                 ),
                               ),
@@ -137,8 +146,8 @@ class ForumHomeScreen extends ConsumerWidget {
                               OutlinedButton(
                                 onPressed: () => controller.refresh(),
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: const Color(0xFF0F5B38),
-                                  side: const BorderSide(color: Color(0xFF0F5B38)),
+                                  foregroundColor: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                                  side: BorderSide(color: isDark ? colorScheme.primary : const Color(0xFF0F5B38)),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 child: const Text('Thử lại'),
@@ -156,39 +165,39 @@ class ForumHomeScreen extends ConsumerWidget {
                                   width: 64,
                                   height: 64,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFEBF5EE),
+                                    color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFEBF5EE),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.forum_outlined,
                                     size: 32,
-                                    color: Color(0xFF0F5B38),
+                                    color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                const Text(
+                                Text(
                                   'Chưa có bài thảo luận nào',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF1E2621),
+                                    color: context.textPrimary(),
                                     letterSpacing: -0.3,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                const Text(
+                                Text(
                                   'Hãy là người đầu tiên đặt câu hỏi trong chuyên mục này!',
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w300,
-                                    color: Color(0xFF717873),
+                                    color: context.textSecondary(),
                                   ),
                                 ),
                               ],
                             ),
                           )
                         : RefreshIndicator(
-                            color: const Color(0xFF0F5B38),
+                            color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                             onRefresh: () => controller.refresh(),
                             child: ListView.separated(
                               physics: const AlwaysScrollableScrollPhysics(),
@@ -226,6 +235,8 @@ class _ThreadCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy');
     final dateStr = dateFormat.format(thread.createdAt.toLocal());
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
 
     return Material(
       color: Colors.transparent,
@@ -235,9 +246,9 @@ class _ThreadCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.cardBg(),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE9EBEA), width: 1),
+            border: Border.all(color: context.cardBorder(), width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -256,32 +267,32 @@ class _ThreadCard extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F5B38).withValues(alpha: 0.1),
+                      color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFF0F5B38).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.person_outline_rounded,
                       size: 16,
-                      color: Color(0xFF0F5B38),
+                      color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     thread.authorName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF1E2621),
+                      color: context.textPrimary(),
                       letterSpacing: -0.2,
                     ),
                   ),
                   const Spacer(),
                   Text(
                     dateStr,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w300,
-                      color: Color(0xFFA5A9A5),
+                      color: context.textMuted(),
                     ),
                   ),
                 ],
@@ -291,10 +302,10 @@ class _ThreadCard extends StatelessWidget {
               // Title
               Text(
                 thread.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1E2621),
+                  color: context.textPrimary(),
                   letterSpacing: -0.3,
                   height: 1.3,
                 ),
@@ -306,10 +317,10 @@ class _ThreadCard extends StatelessWidget {
                 thread.content,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w300,
-                  color: Color(0xFF717873),
+                  color: context.textSecondary(),
                   height: 1.4,
                   letterSpacing: -0.1,
                 ),
@@ -319,25 +330,29 @@ class _ThreadCard extends StatelessWidget {
               // Footer stats
               Row(
                 children: [
-                  const Icon(Icons.mode_comment_outlined, size: 14, color: Color(0xFF0F5B38)),
+                  Icon(
+                    Icons.mode_comment_outlined,
+                    size: 14,
+                    color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${thread.postCount} phản hồi',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF0F5B38),
+                      color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                     ),
                   ),
                   const SizedBox(width: 14),
-                  const Icon(Icons.visibility_outlined, size: 14, color: Color(0xFFA5A9A5)),
+                  Icon(Icons.visibility_outlined, size: 14, color: context.textMuted()),
                   const SizedBox(width: 4),
                   Text(
                     '${thread.viewCount} xem',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w300,
-                      color: Color(0xFFA5A9A5),
+                      color: context.textMuted(),
                     ),
                   ),
                 ],

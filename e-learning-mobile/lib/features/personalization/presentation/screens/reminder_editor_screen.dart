@@ -2,6 +2,7 @@ import 'package:e_learning_mobile/features/personalization/data/personalization_
 import 'package:e_learning_mobile/features/personalization/domain/reminder_model.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -145,14 +146,16 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.reminderId != null;
+    final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FBF9),
+      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
             size: 18,
           ),
           onPressed: () {
@@ -165,15 +168,15 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
         ),
         title: Text(
           isEditing ? 'Chỉnh sửa nhắc nhở' : 'Tạo nhắc nhở mới',
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w400,
             fontSize: 18,
             letterSpacing: -0.3,
-            color: Color(0xFF1A2520),
+            color: context.textPrimary(),
           ),
         ),
         elevation: 0,
-        backgroundColor: const Color(0xFFF9FBF9),
+        backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
@@ -185,12 +188,12 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Loại nhắc nhở',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -204,13 +207,15 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                     avatar: Icon(
                       type.icon,
                       size: 16,
-                      color: selected ? Colors.white : const Color(0xFF0F5B38),
+                      color: selected
+                          ? Colors.white
+                          : (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38)),
                     ),
                     selected: selected,
-                    selectedColor: const Color(0xFF0F5B38),
-                    backgroundColor: Colors.white,
+                    selectedColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
+                    backgroundColor: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : const Color(0xFF1A2520),
+                      color: selected ? Colors.white : context.textPrimary(),
                       fontWeight: selected ? FontWeight.w500 : FontWeight.w300,
                       fontSize: 12,
                     ),
@@ -218,8 +223,8 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
                         color: selected
-                            ? const Color(0xFF0F5B38)
-                            : const Color(0xFFEAEFE9),
+                            ? (isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38))
+                            : context.cardBorder(),
                         width: 0.8,
                       ),
                     ),
@@ -239,38 +244,38 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
               const SizedBox(height: AppSpacing.lg),
 
               // Title input
-              const Text(
+              Text(
                 'Tên nhắc nhở',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
-                    color: const Color(0xFFEAEFE9),
+                    color: context.cardBorder(),
                     width: 0.8,
                   ),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 child: TextFormField(
                   controller: _titleController,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xFF1A2520),
+                    color: context.textPrimary(),
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'VD: Uống 1 ly nước ấm',
                     hintStyle: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w300,
-                      color: Color(0xFF9CA3AF),
+                      color: context.textMuted(),
                     ),
                     border: InputBorder.none,
                   ),
@@ -285,38 +290,38 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
               const SizedBox(height: AppSpacing.md),
 
               // Message input
-              const Text(
+              Text(
                 'Nội dung lời nhắn',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
-                    color: const Color(0xFFEAEFE9),
+                    color: context.cardBorder(),
                     width: 0.8,
                   ),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                 child: TextFormField(
                   controller: _messageController,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xFF1A2520),
+                    color: context.textPrimary(),
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'VD: Đã đến lúc tiếp nước cho cơ thể rồi!',
                     hintStyle: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w300,
-                      color: Color(0xFF9CA3AF),
+                      color: context.textMuted(),
                     ),
                     border: InputBorder.none,
                   ),
@@ -325,12 +330,12 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
               const SizedBox(height: AppSpacing.lg),
 
               // Time picker section
-              const Text(
+              Text(
                 'Khung giờ nhắc nhở',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2520),
+                  color: context.textPrimary(),
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
@@ -345,10 +350,10 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.cardBg(),
                           borderRadius: BorderRadius.circular(AppRadius.md),
                           border: Border.all(
-                            color: const Color(0xFFEAEFE9),
+                            color: context.cardBorder(),
                             width: 0.8,
                           ),
                         ),
@@ -357,16 +362,16 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                           children: [
                             Text(
                               'Từ: ${_startTime.format(context)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w300,
-                                color: Color(0xFF1A2520),
+                                color: context.textPrimary(),
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.access_time_rounded,
                               size: 16,
-                              color: Color(0xFF0F5B38),
+                              color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                             ),
                           ],
                         ),
@@ -383,10 +388,10 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.cardBg(),
                           borderRadius: BorderRadius.circular(AppRadius.md),
                           border: Border.all(
-                            color: const Color(0xFFEAEFE9),
+                            color: context.cardBorder(),
                             width: 0.8,
                           ),
                         ),
@@ -395,16 +400,16 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                           children: [
                             Text(
                               'Đến: ${_endTime.format(context)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w300,
-                                color: Color(0xFF1A2520),
+                                color: context.textPrimary(),
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.access_time_rounded,
                               size: 16,
-                              color: Color(0xFF0F5B38),
+                              color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                             ),
                           ],
                         ),
@@ -418,44 +423,44 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
               // Switches card
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                   border: Border.all(
-                    color: const Color(0xFFEAEFE9),
+                    color: context.cardBorder(),
                     width: 0.8,
                   ),
                 ),
                 child: Column(
                   children: [
                     SwitchListTile.adaptive(
-                      title: const Text(
+                      title: Text(
                         'Âm thanh thông báo',
                         style: TextStyle(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF1A2520),
+                          color: context.textPrimary(),
                         ),
                       ),
                       value: _soundEnabled,
-                      activeColor: const Color(0xFF0F5B38),
+                      activeColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                       onChanged: (val) => setState(() => _soundEnabled = val),
                     ),
-                    const Divider(
-                      color: Color(0xFFEAEFE9),
+                    Divider(
+                      color: context.cardBorder(),
                       thickness: 0.8,
                       height: 1,
                     ),
                     SwitchListTile.adaptive(
-                      title: const Text(
+                      title: Text(
                         'Rung thiết bị',
                         style: TextStyle(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF1A2520),
+                          color: context.textPrimary(),
                         ),
                       ),
                       value: _vibrationEnabled,
-                      activeColor: const Color(0xFF0F5B38),
+                      activeColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                       onChanged: (val) => setState(() => _vibrationEnabled = val),
                     ),
                   ],
@@ -470,7 +475,7 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                 child: ElevatedButton(
                   onPressed: _save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F5B38),
+                    backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

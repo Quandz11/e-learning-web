@@ -6,6 +6,7 @@ import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_sizes.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
 import 'package:flutter/material.dart';
@@ -62,9 +63,9 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_isValidId(widget.courseId) || !_isValidId(widget.lessonPartId)) {
-      return const Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
+      return Scaffold(
+        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+        body: const SafeArea(
           child: AppErrorView(message: 'Không tìm thấy tài liệu cần hiển thị.'),
         ),
       );
@@ -74,30 +75,30 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
     final controller = ref.read(_provider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textPrimary,
+            color: context.textPrimary(),
             size: 20,
           ),
           onPressed: () => context.pop(),
         ),
         title: Text(
           state.detail?.part.title ?? 'Đọc Tài Liệu',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.textPrimary(),
           ),
         ),
         actions: [
           IconButton(
             tooltip: 'Tải tài liệu PDF',
-            icon: const Icon(Icons.download_rounded, color: AppColors.primary),
+            icon: Icon(Icons.download_rounded, color: context.colorScheme.primary),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Đang tải xuống file PDF...')),
@@ -131,10 +132,10 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.cardBg(),
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                         border: Border.all(
-                          color: const Color(0xFFEAEFE9),
+                          color: context.cardBorder(),
                           width: 0.8,
                         ),
                         boxShadow: [
@@ -150,24 +151,24 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEFF5F1),
+                              color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEFF5F1),
                               borderRadius: BorderRadius.circular(AppRadius.pill),
                             ),
                             child: Text(
                               'Trang $_currentPage / $_totalPages',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w500,
-                                color: AppColors.primary,
+                                color: context.colorScheme.primary,
                                 fontSize: 12,
                               ),
                             ),
                           ),
                           const Spacer(),
                           IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.remove_circle_outline_rounded,
                               size: 18,
-                              color: AppColors.textPrimary,
+                              color: context.textPrimary(),
                             ),
                             onPressed: () {
                               if (_zoomScale > 0.75) {
@@ -181,17 +182,17 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                           ),
                           Text(
                             '${(_zoomScale * 100).toInt()}%',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 12,
-                              color: AppColors.textPrimary,
+                              color: context.textPrimary(),
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.add_circle_outline_rounded,
                               size: 18,
-                              color: AppColors.textPrimary,
+                              color: context.textPrimary(),
                             ),
                             onPressed: () {
                               if (_zoomScale < 3.0) {
@@ -224,10 +225,10 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                           ),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: context.cardBg(),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: const Color(0xFFEAEFE9),
+                                color: context.cardBorder(),
                                 width: 0.8,
                               ),
                               boxShadow: [
@@ -252,10 +253,10 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                       horizontal: AppSpacing.md,
                       vertical: AppSpacing.sm,
                     ),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: context.cardBg(),
                       border: Border(
-                        top: BorderSide(color: Color(0xFFEAEFE9), width: 0.8),
+                        top: BorderSide(color: context.cardBorder(), width: 0.8),
                       ),
                     ),
                     child: SafeArea(
@@ -278,7 +279,7 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: context.colorScheme.primary,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(

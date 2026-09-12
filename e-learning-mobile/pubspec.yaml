@@ -82,3 +82,4 @@ flutter:
     - assets/env/.env.prod
     - assets/i18n/en.json
     - assets/i18n/vi.json
+    - assets/images/

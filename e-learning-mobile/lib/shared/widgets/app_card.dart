@@ -22,7 +22,7 @@ class AppCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: isDark ? colorScheme.surfaceContainerLow : colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: selected

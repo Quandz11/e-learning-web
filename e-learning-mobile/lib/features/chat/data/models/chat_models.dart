@@ -127,3 +127,102 @@ class SupportUser {
     );
   }
 }
+
+class AdminConversationItem {
+  const AdminConversationItem({
+    required this.id,
+    required this.type,
+    this.guestId,
+    this.userId,
+    required this.userName,
+    this.lastMessage,
+    this.lastActivity,
+    required this.unreadCount,
+    required this.isActive,
+  });
+
+  final String id;
+  final String type; // "authenticated" | "guest"
+  final String? guestId;
+  final String? userId;
+  final String userName;
+  final String? lastMessage;
+  final DateTime? lastActivity;
+  final int unreadCount;
+  final bool isActive;
+
+  factory AdminConversationItem.fromJson(Map<String, dynamic> json) {
+    return AdminConversationItem(
+      id: json['id']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'authenticated',
+      guestId: json['guestId']?.toString(),
+      userId: json['userId']?.toString(),
+      userName: json['userName']?.toString() ?? 'Người dùng',
+      lastMessage: json['lastMessage']?.toString(),
+      lastActivity: json['lastActivity'] != null
+          ? DateTime.tryParse(json['lastActivity'].toString())
+          : null,
+      unreadCount: json['unreadCount'] as int? ?? 0,
+      isActive: json['isActive'] as bool? ?? true,
+    );
+  }
+
+  AdminConversationItem copyWith({
+    String? id,
+    String? type,
+    String? guestId,
+    String? userId,
+    String? userName,
+    String? lastMessage,
+    DateTime? lastActivity,
+    int? unreadCount,
+    bool? isActive,
+  }) {
+    return AdminConversationItem(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      guestId: guestId ?? this.guestId,
+      userId: userId ?? this.userId,
+      userName: userName ?? this.userName,
+      lastMessage: lastMessage ?? this.lastMessage,
+      lastActivity: lastActivity ?? this.lastActivity,
+      unreadCount: unreadCount ?? this.unreadCount,
+      isActive: isActive ?? this.isActive,
+    );
+  }
+}
+
+class AdminConversationsResponse {
+  const AdminConversationsResponse({
+    required this.authenticatedConversations,
+    required this.guestConversations,
+  });
+
+  final List<AdminConversationItem> authenticatedConversations;
+  final List<AdminConversationItem> guestConversations;
+
+  factory AdminConversationsResponse.fromJson(Map<String, dynamic> json) {
+    final authList = <AdminConversationItem>[];
+    if (json['authenticatedConversations'] is List) {
+      for (final item in json['authenticatedConversations']) {
+        if (item is Map<String, dynamic>) {
+          authList.add(AdminConversationItem.fromJson(item));
+        }
+      }
+    }
+
+    final guestList = <AdminConversationItem>[];
+    if (json['guestConversations'] is List) {
+      for (final item in json['guestConversations']) {
+        if (item is Map<String, dynamic>) {
+          guestList.add(AdminConversationItem.fromJson(item));
+        }
+      }
+    }
+
+    return AdminConversationsResponse(
+      authenticatedConversations: authList,
+      guestConversations: guestList,
+    );
+  }
+}

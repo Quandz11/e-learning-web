@@ -92,13 +92,17 @@ class AppShell extends StatelessWidget {
             top: false,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: brightness == Brightness.dark
+                    ? colorScheme.surfaceContainerLow
+                    : Colors.white,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(24),
                 ),
                 border: Border(
                   top: BorderSide(
-                    color: const Color(0xFFEAEFE9),
+                    color: brightness == Brightness.dark
+                        ? colorScheme.outlineVariant
+                        : const Color(0xFFEAEFE9),
                     width: 1.0,
                   ),
                 ),
@@ -133,6 +137,17 @@ class AppShell extends StatelessWidget {
                       );
                     }
 
+                    final isDark = brightness == Brightness.dark;
+                    final activeColor = isDark
+                        ? colorScheme.onPrimaryContainer
+                        : const Color(0xFF0F5B38);
+                    final inactiveColor = isDark
+                        ? colorScheme.onSurfaceVariant
+                        : const Color(0xFF8E9E94);
+                    final activeBg = isDark
+                        ? colorScheme.primaryContainer.withValues(alpha: 0.3)
+                        : const Color(0xFFEBF5EE);
+
                     return Expanded(
                       child: InkWell(
                         onTap: () {
@@ -155,17 +170,13 @@ class AppShell extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? const Color(0xFFEBF5EE)
-                                      : Colors.transparent,
+                                  color: isSelected ? activeBg : Colors.transparent,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
                                   isSelected ? dest.selectedIcon : dest.icon,
                                   size: 22,
-                                  color: isSelected
-                                      ? const Color(0xFF0F5B38)
-                                      : const Color(0xFF8E9E94),
+                                  color: isSelected ? activeColor : inactiveColor,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -178,9 +189,7 @@ class AppShell extends StatelessWidget {
                                   fontWeight: isSelected
                                       ? FontWeight.w600
                                       : FontWeight.w400,
-                                  color: isSelected
-                                      ? const Color(0xFF0F5B38)
-                                      : const Color(0xFF8E9E94),
+                                  color: isSelected ? activeColor : inactiveColor,
                                   letterSpacing: -0.2,
                                 ),
                               ),
@@ -213,6 +222,26 @@ class _CenterNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final unselectedBg = isDark
+        ? colorScheme.surfaceContainerHighest
+        : const Color(0xFFF0FDF4);
+    final unselectedBorder = isDark
+        ? colorScheme.outlineVariant
+        : const Color(0xFFD4E8DC);
+    final unselectedIcon = isDark
+        ? colorScheme.onSurface
+        : const Color(0xFF0F5B38);
+    final unselectedLabel = isDark
+        ? colorScheme.onSurfaceVariant
+        : const Color(0xFF717873);
+    final activeColor = isDark
+        ? colorScheme.onPrimaryContainer
+        : const Color(0xFF0F5B38);
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -233,12 +262,12 @@ class _CenterNavButton extends StatelessWidget {
                         end: Alignment.bottomRight,
                       )
                     : null,
-                color: isSelected ? null : const Color(0xFFF0FDF4),
+                color: isSelected ? null : unselectedBg,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
                       ? const Color(0xFF0F5B38)
-                      : const Color(0xFFD4E8DC),
+                      : unselectedBorder,
                   width: 1.5,
                 ),
                 boxShadow: [
@@ -256,7 +285,7 @@ class _CenterNavButton extends StatelessWidget {
                   isSelected
                       ? destination.selectedIcon
                       : destination.icon,
-                  color: isSelected ? Colors.white : const Color(0xFF0F5B38),
+                  color: isSelected ? Colors.white : unselectedIcon,
                   size: 22,
                 ),
               ),
@@ -267,9 +296,7 @@ class _CenterNavButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected
-                    ? const Color(0xFF0F5B38)
-                    : const Color(0xFF717873),
+                color: isSelected ? activeColor : unselectedLabel,
                 letterSpacing: -0.2,
               ),
             ),

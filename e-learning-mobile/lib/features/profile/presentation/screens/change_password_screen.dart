@@ -1,6 +1,7 @@
 import 'package:e_learning_mobile/features/profile/presentation/controllers/change_password_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/change_password_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
+import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_page.dart';
@@ -47,21 +48,14 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFEAEFE9),
+                color: context.cardBorder(),
                 width: 0.8,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
             child: Row(
               children: [
@@ -69,17 +63,17 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F3FF),
+                    color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF5F3FF),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lock_reset_rounded,
-                    color: Color(0xFF7C3AED),
+                    color: context.isDark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED),
                     size: 20,
                   ),
                 ),
                 const SizedBox(width: 14),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -89,16 +83,16 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                           letterSpacing: -0.3,
-                          color: Color(0xFF1A2520),
+                          color: context.textPrimary(),
                         ),
                       ),
-                      SizedBox(height: 3),
+                      const SizedBox(height: 3),
                       Text(
                         'Mật khẩu mới phải có ít nhất 8 ký tự.',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w300,
-                          color: Color(0xFF6B7280),
+                          color: context.textSecondary(),
                           height: 1.3,
                         ),
                       ),

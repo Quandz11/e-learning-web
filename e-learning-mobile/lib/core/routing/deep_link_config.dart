@@ -75,6 +75,7 @@ abstract final class AppRoutes {
       '/app/personalization/reminders/:reminderId/edit';
   static const appProgress = '/app/progress';
   static const appSettings = '/app/settings';
+  static const appMobileWidgets = '/app/settings/widgets';
   static const appNotifications = '/app/notifications';
   static const appArticles = '/app/articles';
   static const appArticleDetailPattern = '/app/articles/:slug';

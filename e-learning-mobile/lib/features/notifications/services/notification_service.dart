@@ -339,6 +339,54 @@ class NotificationService {
     }
   }
 
+  Future<void> showOngoingNotificationCenterWidget({
+    required int streakDays,
+    required int learnedMinutes,
+    required int targetMinutes,
+    required String activeCourseTitle,
+  }) async {
+    await initialize();
+
+    final percent = targetMinutes > 0 ? ((learnedMinutes / targetMinutes) * 100).toInt() : 100;
+
+    final androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDesc,
+      importance: Importance.low,
+      priority: Priority.low,
+      ongoing: true,
+      autoCancel: false,
+      showWhen: true,
+      visibility: NotificationVisibility.public,
+      styleInformation: BigTextStyleInformation(
+        'Đã học $learnedMinutes/$targetMinutes phút hôm nay ($percent%)\nKhóa học: $activeCourseTitle',
+        contentTitle: '🔥 Chuỗi học tập: $streakDays ngày liên tục',
+        summaryText: 'SKVI E-Learning Widget',
+      ),
+    );
+    const darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: false,
+    );
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+    );
+
+    try {
+      await _plugin.show(
+        8888,
+        '🔥 Chuỗi học tập: $streakDays ngày liên tục',
+        'Đã học $learnedMinutes/$targetMinutes phút hôm nay ($percent%) • $activeCourseTitle',
+        details,
+      );
+    } catch (e) {
+      debugPrint('Failed to show ongoing notification center widget: $e');
+    }
+  }
+
   Future<void> sendTestNotification() async {
     await showImmediateNotification(
       id: 9999,

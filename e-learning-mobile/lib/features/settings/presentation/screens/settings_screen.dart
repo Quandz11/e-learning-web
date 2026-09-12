@@ -198,6 +198,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 },
               ),
             ),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            _buildSettingRow(
+              icon: Icons.widgets_outlined,
+              title: 'Thiết kế Widget di động',
+              subtitle: 'Xem trước & đồng bộ Widget màn hình chính & khóa',
+              bgColor: const Color(0xFFEFF6FF),
+              iconColor: const Color(0xFF0284C7),
+              onTap: () => context.push('/app/settings/widgets'),
+            ),
           ]),
           const SizedBox(height: AppSpacing.lg),
 

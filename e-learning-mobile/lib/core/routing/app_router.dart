@@ -43,6 +43,7 @@ import 'package:e_learning_mobile/features/forum/presentation/screens/forum_thre
 import 'package:e_learning_mobile/features/notifications/presentation/screens/notification_inbox_screen.dart';
 import 'package:e_learning_mobile/features/progress/presentation/screens/learning_progress_screen.dart';
 import 'package:e_learning_mobile/features/settings/presentation/screens/settings_screen.dart';
+import 'package:e_learning_mobile/features/widgets/presentation/screens/widget_preview_gallery_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -203,6 +204,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.appSettings,
             builder: (_, __) => const SettingsScreen(),
+            routes: [
+              GoRoute(
+                path: 'widgets',
+                builder: (_, __) => const WidgetPreviewGalleryScreen(),
+              ),
+            ],
           ),
           GoRoute(
             path: AppRoutes.appNotifications,

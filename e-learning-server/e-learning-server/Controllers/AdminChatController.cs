@@ -45,9 +45,9 @@ public class AdminChatController : ControllerBase
                 {
                     Id = c.Id.ToString(),
                     Type = "authenticated",
-                    UserId = c.Participants.FirstOrDefault()?.UserId.ToString(), 
-                    // Display name: Join all participant names
-                    UserName = string.Join(", ", c.Participants.Select(p => p.UserName)),
+                    UserId = c.OtherParticipant?.UserId.ToString() ?? c.Participants.FirstOrDefault()?.UserId.ToString(), 
+                    // Display name: Show student/member name or other participant name
+                    UserName = c.OtherParticipant?.UserName ?? c.Title ?? c.Participants.FirstOrDefault()?.UserName ?? "Thành viên",
                     LastMessage = c.LastMessage?.Content,
                     LastActivity = c.LastMessage?.SentAt ?? c.CreatedAt,
                     UnreadCount = c.UnreadCount,

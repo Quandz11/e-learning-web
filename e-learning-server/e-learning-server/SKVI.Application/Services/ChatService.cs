@@ -139,10 +139,21 @@ public class ChatService : IChatService
                 .ThenInclude(p => p.User)
             .Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1))
                 .ThenInclude(m => m.Sender)
-            .FirstOrDefaultAsync(c => c.Id == conversationId && c.Participants.Any(p => p.UserId == userId));
+            .FirstOrDefaultAsync(c => c.Id == conversationId);
 
         if (conv == null)
-            throw new UnauthorizedAccessException("Not a participant of this conversation");
+            throw new InvalidOperationException("Conversation not found");
+
+        var isParticipant = conv.Participants.Any(p => p.UserId == userId);
+        if (!isParticipant)
+        {
+            var requestingUser = await _context.Users.FindAsync(userId);
+            var isStaff = requestingUser != null && (requestingUser.Role == "ADMIN" || requestingUser.Role == "CARE" || requestingUser.Role == "AGENT");
+            if (!isStaff)
+            {
+                throw new UnauthorizedAccessException("Not a participant of this conversation");
+            }
+        }
 
         var participant = conv.Participants.FirstOrDefault(p => p.UserId == userId);
         var otherParticipant = conv.Participants.FirstOrDefault(p => p.UserId != userId);
@@ -184,12 +195,19 @@ public class ChatService : IChatService
 
     public async Task<List<MessageResponse>> GetConversationMessagesAsync(Guid conversationId, Guid userId)
     {
-        // Verify user is participant
+        // Verify user is participant or staff
         var isParticipant = await _context.ConversationParticipants
             .AnyAsync(p => p.ConversationId == conversationId && p.UserId == userId);
 
         if (!isParticipant)
-            throw new UnauthorizedAccessException("Not a participant of this conversation");
+        {
+            var requestingUser = await _context.Users.FindAsync(userId);
+            var isStaff = requestingUser != null && (requestingUser.Role == "ADMIN" || requestingUser.Role == "CARE" || requestingUser.Role == "AGENT");
+            if (!isStaff)
+            {
+                throw new UnauthorizedAccessException("Not a participant of this conversation");
+            }
+        }
 
         var messages = await _context.Messages
             .Include(m => m.Sender)
@@ -270,12 +288,33 @@ public class ChatService : IChatService
 
     public async Task<MessageResponse> SendMessageAsync(Guid conversationId, Guid userId, string content)
     {
-        // Verify user is participant
+        // Verify user is participant or staff
         var isParticipant = await _context.ConversationParticipants
             .AnyAsync(p => p.ConversationId == conversationId && p.UserId == userId);
 
         if (!isParticipant)
-            throw new UnauthorizedAccessException("Not a participant of this conversation");
+        {
+            var senderUser = await _context.Users.FindAsync(userId);
+            var isStaff = senderUser != null && (senderUser.Role == "ADMIN" || senderUser.Role == "CARE" || senderUser.Role == "AGENT");
+            if (!isStaff)
+            {
+                throw new UnauthorizedAccessException("Not a participant of this conversation");
+            }
+
+            // Auto-join staff to conversation so they become a participant
+            var convToJoin = await _context.Conversations.FindAsync(conversationId);
+            if (convToJoin != null)
+            {
+                _context.ConversationParticipants.Add(new ConversationParticipant
+                {
+                    Id = Guid.NewGuid(),
+                    ConversationId = conversationId,
+                    UserId = userId,
+                    JoinedAt = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+            }
+        }
 
         var message = new Message
         {

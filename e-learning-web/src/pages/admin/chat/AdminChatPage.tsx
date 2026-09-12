@@ -13,12 +13,13 @@ export default function AdminChatPage() {
     const [selectedConversation, setSelectedConversation] = useState<AdminConversation | null>(null);
     const [messages, setMessages] = useState<GuestMessage[]>([]);
     const [inputMessage, setInputMessage] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
     // Offline/Disconnected state: key = guestId
     const [disconnectedGuests, setDisconnectedGuests] = useState<Set<string>>(new Set());
-    const [activeTab, setActiveTab] = useState<'guest' | 'authenticated'>('guest');
+    const [activeTab, setActiveTab] = useState<'guest' | 'authenticated'>('authenticated');
     const [isConversationListOpen, setIsConversationListOpen] = useState(false);
 
     // Use ref to avoid stale closure in SignalR callbacks
@@ -299,213 +300,245 @@ export default function AdminChatPage() {
         }
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    };
+    const filteredConversations = conversations
+        .filter(c => c.type === activeTab)
+        .filter(c => searchQuery.trim() === '' || c.userName.toLowerCase().includes(searchQuery.toLowerCase()));
 
     return (
         <AdminLayout>
-            <div className="h-full min-h-0 flex flex-col bg-gray-50 -m-3 sm:-m-4 lg:-m-8">
-                {/* Header */}
-                <div className="bg-white border-b border-gray-200 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
-                    <div className="flex items-center justify-between gap-2">
-                        <div>
-                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{t('admin.chat.title')}</h1>
-                            <p className="mt-1 text-xs sm:text-sm text-gray-600">{t('admin.chat.subtitle')}</p>
-                        </div>
-
-                        <button
-                            onClick={() => setIsConversationListOpen(true)}
-                            className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-200 px-3 text-sm text-gray-700 lg:hidden"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">chat</span>
-                            {activeTab === 'guest' ? t('admin.chat.guestConversations') : t('admin.chat.memberConversations')}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Main Content */}
-                <div className="relative flex-1 min-h-0 flex overflow-hidden">
+            <div className="h-full min-h-0 flex flex-col bg-gray-100 -m-3 sm:-m-4 lg:-m-8">
+                {/* Main Messenger Container */}
+                <div className="relative flex-1 min-h-0 flex overflow-hidden bg-white shadow-sm">
                     <div
                         className={`absolute inset-0 z-20 bg-black/40 transition-opacity lg:hidden ${isConversationListOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
                         onClick={() => setIsConversationListOpen(false)}
                     />
 
-                    {/* Conversation List */}
+                    {/* Left Sidebar: Messenger Conversation List */}
                     <div
-                        className={`absolute lg:static inset-y-0 left-0 z-30 w-[86vw] max-w-sm lg:w-80 bg-white border-r border-gray-200 transform transition-transform duration-200 ${isConversationListOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col`}
+                        className={`absolute lg:static inset-y-0 left-0 z-30 w-[88vw] max-w-sm lg:w-96 bg-white border-r border-gray-200 transform transition-transform duration-200 ${isConversationListOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} flex flex-col`}
                     >
-                        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 lg:hidden">
-                            <h2 className="text-sm font-semibold text-gray-900">{t('admin.chat.title')}</h2>
-                            <button
-                                onClick={() => setIsConversationListOpen(false)}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700"
-                                aria-label="Close conversations"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">close</span>
-                            </button>
+                        {/* Sidebar Header & Search */}
+                        <div className="p-4 border-b border-gray-200">
+                            <div className="flex items-center justify-between mb-3">
+                                <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-primary text-2xl">forum</span>
+                                    Tin nhắn
+                                </h1>
+                                <button
+                                    onClick={() => setIsConversationListOpen(false)}
+                                    className="lg:hidden p-1 rounded-lg border border-gray-200 text-gray-500"
+                                >
+                                    <span className="material-symbols-outlined text-xl">close</span>
+                                </button>
+                            </div>
+
+                            {/* Search Bar */}
+                            <div className="relative">
+                                <span className="material-symbols-outlined absolute left-3 top-2.5 text-gray-400 text-lg">search</span>
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Tìm kiếm người dùng..."
+                                    className="w-full pl-9 pr-4 py-2 bg-gray-100 border border-transparent rounded-full text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:border-primary focus:outline-none transition-all"
+                                />
+                            </div>
                         </div>
 
-                        {/* Tabs */}
-                        <div className="flex border-b border-gray-200">
-                            <button
-                                onClick={() => { setActiveTab('guest'); setSelectedConversation(null); }}
-                                className={`flex-1 py-3 text-sm font-medium text-center ${activeTab === 'guest'
-                                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                                    }`}
-                            >
-                                {t('admin.chat.guest')}
-                            </button>
+                        {/* Tabs: Thành viên / Khách */}
+                        <div className="flex border-b border-gray-200 bg-gray-50/50 p-1">
                             <button
                                 onClick={() => { setActiveTab('authenticated'); setSelectedConversation(null); }}
-                                className={`flex-1 py-3 text-sm font-medium text-center ${activeTab === 'authenticated'
-                                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg text-center transition-all flex items-center justify-center gap-1.5 ${activeTab === 'authenticated'
+                                    ? 'bg-white text-primary shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
-                                {t('admin.chat.member')}
+                                <span className="material-symbols-outlined text-base">person</span>
+                                Thành viên
+                                <span className="ml-1 px-1.5 py-0.2 bg-primary/10 text-primary text-[10px] rounded-full">
+                                    {conversations.filter(c => c.type === 'authenticated').length}
+                                </span>
+                            </button>
+                            <button
+                                onClick={() => { setActiveTab('guest'); setSelectedConversation(null); }}
+                                className={`flex-1 py-2 px-3 text-xs font-semibold rounded-lg text-center transition-all flex items-center justify-center gap-1.5 ${activeTab === 'guest'
+                                    ? 'bg-white text-primary shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                <span className="material-symbols-outlined text-base">support_agent</span>
+                                Khách vãng lai
+                                <span className="ml-1 px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[10px] rounded-full">
+                                    {conversations.filter(c => c.type === 'guest').length}
+                                </span>
                             </button>
                         </div>
 
-                        <div className="p-4 border-b border-gray-200 bg-gray-50/50">
-                            <h2 className="font-semibold text-gray-900">
-                                {activeTab === 'guest' ? t('admin.chat.guestConversations') : t('admin.chat.memberConversations')}
-                            </h2>
-                            <p className="text-xs text-gray-500 mt-1">
-                                {conversations.filter(c => c.type === activeTab).length} {t('admin.chat.active')}
-                            </p>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto">
+                        {/* Conversation Item List */}
+                        <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
                             {loading ? (
-                                <div className="p-4 text-center text-gray-500">{t('admin.chat.loading')}</div>
-                            ) : conversations.filter(c => c.type === activeTab).length === 0 ? (
-                                <div className="p-4 text-center text-gray-500">{t('admin.chat.noConversations')}</div>
+                                <div className="p-8 text-center text-gray-400 text-sm">
+                                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                                    Đang tải cuộc trò chuyện...
+                                </div>
+                            ) : filteredConversations.length === 0 ? (
+                                <div className="p-8 text-center text-gray-400 text-sm">
+                                    Không tìm thấy cuộc trò chuyện nào
+                                </div>
                             ) : (
-                                conversations
-                                    .filter(c => c.type === activeTab)
-                                    .map(conv => (
+                                filteredConversations.map(conv => {
+                                    const isSelected = selectedConversation?.id === conv.id;
+                                    const isTyping = typingUsers[conv.guestId!] || typingUsers[conv.userId!];
+                                    const isOffline = conv.type === 'guest' && disconnectedGuests.has(conv.guestId!);
+
+                                    return (
                                         <div
                                             key={conv.id}
                                             onClick={() => handleSelectConversation(conv)}
-                                            className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${selectedConversation?.id === conv.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                                            className={`p-3.5 cursor-pointer transition-all flex items-center gap-3 ${isSelected ? 'bg-emerald-50/70 border-l-4 border-primary' : 'hover:bg-gray-50'
                                                 }`}
                                         >
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium text-gray-900 truncate">
-                                                            {conv.userName}
-                                                        </span>
-                                                        {conv.type === 'guest' && (
-                                                            <span className="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">
-                                                                {t('admin.chat.guest')}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-sm text-gray-600 truncate mt-1">
-                                                        {conv.lastMessage || t('admin.chat.noMessages')}
-                                                    </p>
-                                                    <p className="text-xs text-gray-400 mt-1">
-                                                        {new Date(conv.lastActivity).toLocaleString()}
-                                                    </p>
+                                            {/* Avatar */}
+                                            <div className="relative shrink-0">
+                                                <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-white shadow-sm ${conv.type === 'guest' ? 'bg-amber-500' : 'bg-primary'
+                                                    }`}>
+                                                    {conv.userName.charAt(0).toUpperCase()}
                                                 </div>
-                                                <div className="flex flex-col items-end gap-1">
+                                                <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${isOffline ? 'bg-gray-300' : 'bg-green-500'
+                                                    }`} />
+                                            </div>
+
+                                            {/* Info */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-1 mb-0.5">
+                                                    <span className="font-semibold text-sm text-gray-900 truncate">
+                                                        {conv.userName}
+                                                    </span>
+                                                    <span className="text-[11px] text-gray-400 shrink-0">
+                                                        {new Date(conv.lastActivity).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center justify-between gap-1">
+                                                    <p className={`text-xs truncate ${conv.unreadCount > 0 ? 'font-semibold text-gray-900' : 'text-gray-500'}`}>
+                                                        {isTyping ? (
+                                                            <span className="text-primary italic font-medium">Đang nhập...</span>
+                                                        ) : (
+                                                            conv.lastMessage || 'Chưa có tin nhắn'
+                                                        )}
+                                                    </p>
                                                     {conv.unreadCount > 0 && (
-                                                        <span className="px-2 py-1 text-xs font-bold bg-blue-500 text-white rounded-full">
+                                                        <span className="px-2 py-0.5 text-[11px] font-bold bg-primary text-white rounded-full shrink-0 shadow-sm">
                                                             {conv.unreadCount}
                                                         </span>
-                                                    )}
-                                                    {(typingUsers[conv.guestId!] || typingUsers[conv.userId!]) && (
-                                                        <span className="text-xs text-green-600 font-medium animate-pulse">
-                                                            Typing...
-                                                        </span>
-                                                    )}
-                                                    {conv.type === 'guest' && disconnectedGuests.has(conv.guestId!) && (
-                                                        <span className="text-xs text-gray-400">Offline</span>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
-                                    ))
+                                    );
+                                })
                             )}
                         </div>
                     </div>
 
-                    {/* Chat Panel */}
-                    <div className="flex-1 min-w-0 flex flex-col bg-white">
+                    {/* Right Panel: Chat Room / Messenger Thread */}
+                    <div className="flex-1 min-w-0 flex flex-col bg-gray-50/50">
                         {selectedConversation ? (
                             <>
                                 {/* Chat Header */}
-                                <div className="px-3 py-3 sm:px-4 sm:py-4 lg:px-6 border-b border-gray-200">
-                                    <div className="flex items-center justify-between gap-3">
+                                <div className="px-4 py-3 bg-white border-b border-gray-200 flex items-center justify-between shadow-xs">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <button
+                                            onClick={() => setIsConversationListOpen(true)}
+                                            className="lg:hidden p-1.5 rounded-lg border border-gray-200 text-gray-600"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">arrow_back</span>
+                                        </button>
+
+                                        <div className="relative shrink-0">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-xs ${selectedConversation.type === 'guest' ? 'bg-amber-500' : 'bg-primary'
+                                                }`}>
+                                                {selectedConversation.userName.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white" />
+                                        </div>
+
                                         <div className="min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => setIsConversationListOpen(true)}
-                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-600 lg:hidden"
-                                                    aria-label="Back to conversations"
-                                                >
-                                                    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                                                </button>
-                                                <h3 className="truncate font-semibold text-gray-900">{selectedConversation.userName}</h3>
+                                                <h2 className="font-bold text-gray-900 text-base truncate">
+                                                    {selectedConversation.userName}
+                                                </h2>
+                                                <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full ${selectedConversation.type === 'guest' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-primary'
+                                                    }`}>
+                                                    {selectedConversation.type === 'guest' ? 'Khách hàng' : 'Thành viên'}
+                                                </span>
                                             </div>
-                                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                                                {selectedConversation.type === 'guest' ? t('admin.chat.guest') : t('admin.chat.member')}
+                                            <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                                Trực tuyến
                                                 {(typingUsers[selectedConversation.guestId!] || typingUsers[selectedConversation.userId!]) && (
-                                                    <span className="ml-2 text-xs text-green-600 font-medium animate-pulse">
-                                                        is typing...
-                                                    </span>
-                                                )}
-                                                {selectedConversation.type === 'guest' && disconnectedGuests.has(selectedConversation.guestId!) && (
-                                                    <span className="ml-2 text-xs text-gray-400">
-                                                        (Offline)
+                                                    <span className="ml-1 text-primary font-medium italic animate-pulse">
+                                                        • đang nhập...
                                                     </span>
                                                 )}
                                             </p>
                                         </div>
-                                        {selectedConversation.type === 'guest' && (
-                                            <button
-                                                onClick={() => {
-                                                    if (selectedConversation.guestId && accessToken) {
-                                                    adminChatApi.closeGuestConversation(selectedConversation.guestId);
-                                                        setSelectedConversation(null);
-                                                        loadConversations();
-                                                    }
-                                                }}
-                                                className="h-9 shrink-0 px-3 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                            >
-                                                {t('admin.chat.close')}
-                                            </button>
-                                        )}
                                     </div>
+
+                                    {selectedConversation.type === 'guest' && (
+                                        <button
+                                            onClick={() => {
+                                                if (selectedConversation.guestId && accessToken) {
+                                                    adminChatApi.closeGuestConversation(selectedConversation.guestId);
+                                                    setSelectedConversation(null);
+                                                    loadConversations();
+                                                }
+                                            }}
+                                            className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                                        >
+                                            Kết thúc chat
+                                        </button>
+                                    )}
                                 </div>
 
-                                {/* Messages */}
-                                <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
-                                    {messages.map(msg => {
+                                {/* Messages Area */}
+                                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#F8FAFC]">
+                                    {messages.map((msg, idx) => {
                                         const isMe = selectedConversation.type === 'guest'
                                             ? !msg.isFromGuest
                                             : msg.senderId === user?.id;
 
                                         return (
                                             <div
-                                                key={msg.id}
-                                                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                                                key={msg.id || idx}
+                                                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
                                             >
-                                                <div className={`max-w-[85%] sm:max-w-md rounded-2xl px-4 py-2 ${!isMe
-                                                    ? 'bg-white text-gray-900 border border-gray-200 rounded-bl-sm'
-                                                    : 'bg-primary text-white rounded-br-sm'
-                                                    }`}>
-                                                    {!isMe && <p className="text-xs text-gray-500 mb-1">{msg.senderName}</p>}
-                                                    <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                                                    <p className={`text-xs mt-1 ${msg.isFromGuest ? 'text-gray-400' : 'text-white/70'}`}>
-                                                        {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </p>
+                                                <div className={`flex gap-2 max-w-[85%] sm:max-w-lg ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                    {!isMe && (
+                                                        <div className="w-7 h-7 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 shrink-0 mt-1">
+                                                            {msg.senderName ? msg.senderName.charAt(0).toUpperCase() : 'U'}
+                                                        </div>
+                                                    )}
+
+                                                    <div className={`rounded-2xl px-4 py-2.5 shadow-2xs ${isMe
+                                                        ? 'bg-primary text-white rounded-br-xs'
+                                                        : 'bg-white text-gray-900 rounded-bl-xs border border-gray-200/80'
+                                                        }`}>
+                                                        {!isMe && (
+                                                            <p className="text-[11px] font-bold text-primary mb-0.5">
+                                                                {msg.senderName}
+                                                            </p>
+                                                        )}
+                                                        <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                                                            {msg.content}
+                                                        </p>
+                                                        <div className={`text-[10px] mt-1 text-right ${isMe ? 'text-white/75' : 'text-gray-400'
+                                                            }`}>
+                                                            {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
@@ -514,9 +547,9 @@ export default function AdminChatPage() {
                                     <div ref={messagesEndRef} />
                                 </div>
 
-                                {/* Input */}
-                                <div className="p-3 sm:p-4 border-t border-gray-200">
-                                    <div className="flex flex-col sm:flex-row gap-2">
+                                {/* Input Bar */}
+                                <div className="p-3 bg-white border-t border-gray-200">
+                                    <div className="flex items-center gap-2">
                                         <input
                                             type="text"
                                             value={inputMessage}
@@ -531,33 +564,35 @@ export default function AdminChatPage() {
                                                     loadConversations();
                                                 }
                                             }}
-                                            placeholder="Type your message..."
-                                            className="h-11 w-full flex-1 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Nhập tin nhắn..."
+                                            className="flex-1 px-4 py-2.5 bg-gray-100 border border-transparent rounded-full text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:border-primary focus:outline-none transition-all"
                                             disabled={sending}
                                         />
                                         <button
                                             onClick={handleSendMessage}
                                             disabled={!inputMessage.trim() || sending}
-                                            className="h-11 w-full sm:w-auto px-5 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                            className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shrink-0"
                                         >
-                                            {sending ? t('admin.chat.sending') : t('admin.chat.send')}
+                                            <span className="material-symbols-outlined text-xl">send</span>
                                         </button>
                                     </div>
                                 </div>
                             </>
                         ) : (
-                            <div className="flex-1 flex items-center justify-center text-gray-500 p-6">
-                                <div className="text-center">
-                                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                    <h3 className="mt-2 text-sm font-medium text-gray-900">{t('admin.chat.selectTitle')}</h3>
-                                    <p className="mt-1 text-sm text-gray-500">{t('admin.chat.selectDesc')}</p>
+                            <div className="flex-1 flex items-center justify-center text-gray-400 p-6">
+                                <div className="text-center max-w-sm">
+                                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+                                        <span className="material-symbols-outlined text-3xl">chat</span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800">Trung tâm Tin nhắn SKVI</h3>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Chọn một cuộc trò chuyện từ danh sách bên trái để bắt đầu trao đổi trực tiếp với học viên hoặc khách hàng.
+                                    </p>
                                     <button
                                         onClick={() => setIsConversationListOpen(true)}
-                                        className="mt-4 inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 px-4 text-sm text-gray-700 lg:hidden"
+                                        className="mt-4 px-4 py-2 bg-primary text-white text-xs font-semibold rounded-lg lg:hidden"
                                     >
-                                        {activeTab === 'guest' ? t('admin.chat.guestConversations') : t('admin.chat.memberConversations')}
+                                        Mở danh sách cuộc trò chuyện
                                     </button>
                                 </div>
                             </div>

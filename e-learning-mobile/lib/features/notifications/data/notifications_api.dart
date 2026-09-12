@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:e_learning_mobile/core/network/api_client.dart';
 import 'package:e_learning_mobile/core/network/network_providers.dart';
 import 'package:e_learning_mobile/features/notifications/data/models/notification_item.dart';
@@ -29,18 +30,23 @@ class NotificationsApi {
     required String deviceToken,
     required String deviceType,
     required String deviceId,
+    String? appVersion,
   }) async {
     await _apiClient.post<dynamic>(
       '/notifications/device-tokens',
       data: {
-        'deviceToken': deviceToken,
-        'deviceType': deviceType,
+        'token': deviceToken,
+        'platform': deviceType,
         'deviceId': deviceId,
+        if (appVersion != null) 'appVersion': appVersion,
       },
     );
   }
 
   Future<void> unregisterDeviceToken(String deviceId) async {
-    await _apiClient.delete<dynamic>('/notifications/device-tokens/$deviceId');
+    await _apiClient.delete<dynamic>(
+      '/notifications/device-tokens/$deviceId',
+      options: Options(extra: {'auth_retry_attempted': true}),
+    );
   }
 }

@@ -9,6 +9,7 @@ import 'package:e_learning_mobile/features/chat/presentation/controllers/chat_co
 import 'package:e_learning_mobile/features/forum/presentation/controllers/forum_controller.dart';
 import 'package:e_learning_mobile/features/home/presentation/controllers/home_controller.dart';
 import 'package:e_learning_mobile/features/learning/presentation/controllers/learning_controller.dart';
+import 'package:e_learning_mobile/features/notifications/data/notifications_repository.dart';
 import 'package:e_learning_mobile/features/notifications/presentation/controllers/notifications_controller.dart';
 import 'package:e_learning_mobile/features/personalization/presentation/controllers/wellness_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
@@ -26,6 +27,7 @@ class SessionController extends StateNotifier<SessionState> {
 
   final SessionRepository _repository;
   final Ref? _ref;
+  bool _isClearingSession = false;
 
   Future<void> restore() async {
     state = const SessionState.restoring();
@@ -36,6 +38,7 @@ class SessionController extends StateNotifier<SessionState> {
         return;
       }
       state = SessionState.authenticated(restored);
+      _ref?.read(notificationsRepositoryProvider).syncCurrentDeviceToken();
     } catch (_) {
       try {
         await _repository.clear();
@@ -47,31 +50,45 @@ class SessionController extends StateNotifier<SessionState> {
   Future<void> setSession(AppSession session) async {
     await _repository.writeSession(session);
     state = SessionState.authenticated(session);
+    _ref?.read(notificationsRepositoryProvider).syncCurrentDeviceToken();
   }
 
   Future<void> clearSession() async {
-    await _repository.clear();
-    final ref = _ref;
-    if (ref != null) {
-      try {
-        await ref.read(cacheServiceProvider).clear();
-      } catch (_) {}
-      ref.invalidate(homeControllerProvider);
-      ref.invalidate(learningControllerProvider);
-      ref.invalidate(profileControllerProvider);
-      ref.invalidate(progressControllerProvider);
-      ref.invalidate(chatControllerProvider);
-      ref.invalidate(wellnessControllerProvider);
-      ref.invalidate(forumControllerProvider);
-      ref.invalidate(notificationsControllerProvider);
-      ref.invalidate(articlesControllerProvider);
-      ref.invalidate(authOtpChallengeControllerProvider);
-      ref.invalidate(forgotPasswordChallengeControllerProvider);
+    if (_isClearingSession) return;
+    _isClearingSession = true;
+
+    // Fire-and-forget background unregister (non-blocking for 100% instant logout)
+    try {
+      _ref?.read(notificationsRepositoryProvider).unregisterCurrentDeviceToken();
+    } catch (_) {}
+
+    try {
+      await _repository.clear();
+      final ref = _ref;
+      if (ref != null) {
+        try {
+          await ref.read(cacheServiceProvider).clear();
+        } catch (_) {}
+        ref.invalidate(homeControllerProvider);
+        ref.invalidate(learningControllerProvider);
+        ref.invalidate(profileControllerProvider);
+        ref.invalidate(progressControllerProvider);
+        ref.invalidate(chatControllerProvider);
+        ref.invalidate(wellnessControllerProvider);
+        ref.invalidate(forumControllerProvider);
+        ref.invalidate(notificationsControllerProvider);
+        ref.invalidate(articlesControllerProvider);
+        ref.invalidate(authOtpChallengeControllerProvider);
+        ref.invalidate(forgotPasswordChallengeControllerProvider);
+      }
+    } finally {
+      state = const SessionState.unauthenticated();
+      _isClearingSession = false;
     }
-    state = const SessionState.unauthenticated();
   }
 
   void syncSession(AppSession session) {
     state = SessionState.authenticated(session);
+    _ref?.read(notificationsRepositoryProvider).syncCurrentDeviceToken();
   }
 }

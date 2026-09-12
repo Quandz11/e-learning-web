@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SKVI.Application.DTOs.Notification;
 using SKVI.Application.Interfaces;
@@ -208,6 +208,18 @@ public class NotificationService : INotificationService
         }
 
         var now = DateTime.UtcNow;
+
+        // Self-healing: Deactivate any active tokens for the same physical device registered under other users
+        var oldUserTokens = await _context.UserDeviceTokens
+            .Where(t => t.DeviceId == deviceId && t.UserId != userId && t.IsActive)
+            .ToListAsync();
+
+        foreach (var oldToken in oldUserTokens)
+        {
+            oldToken.IsActive = false;
+            oldToken.UpdatedAt = now;
+        }
+
         var existing = await _context.UserDeviceTokens
             .FirstOrDefaultAsync(t => t.UserId == userId && t.DeviceId == deviceId);
 
@@ -307,7 +319,7 @@ public class NotificationService : INotificationService
                         Priority = FirebaseAdmin.Messaging.Priority.High,
                         Notification = new FirebaseAdmin.Messaging.AndroidNotification
                         {
-                            ChannelId = "skvi_notifications",
+                            ChannelId = "skvi_wellness_channel",
                             Sound = "default"
                         }
                     },

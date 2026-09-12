@@ -5,6 +5,16 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp();
+    }
+  } catch (_) {}
+  debugPrint('🔥 FCM Background message received: ${message.messageId}');
+}
+
 class NotificationService {
   NotificationService._();
 
@@ -17,6 +27,8 @@ class NotificationService {
   static const String channelName = 'Nhắc nhở & Thông báo SKVI';
   static const String channelDesc =
       'Thông báo nhắc nhở uống nước, nhịn ăn, vận động và tin tức hệ thống';
+
+  static const String fallbackChannelId = 'skvi_notifications';
 
   bool _isInitialized = false;
 
@@ -59,6 +71,17 @@ class NotificationService {
       await androidImplementation.createNotificationChannel(
         const AndroidNotificationChannel(
           channelId,
+          channelName,
+          description: channelDesc,
+          importance: Importance.max,
+          playSound: true,
+          enableVibration: true,
+          showBadge: true,
+        ),
+      );
+      await androidImplementation.createNotificationChannel(
+        const AndroidNotificationChannel(
+          fallbackChannelId,
           channelName,
           description: channelDesc,
           importance: Importance.max,
@@ -215,6 +238,14 @@ class NotificationService {
         badge: true,
         sound: true,
       );
+
+      await messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         final token = await messaging.getToken();

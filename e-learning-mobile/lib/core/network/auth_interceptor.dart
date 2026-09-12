@@ -71,7 +71,7 @@ class AuthInterceptor extends Interceptor {
     if (options.extra['auth_retry_attempted'] == true) {
       return false;
     }
-    if (path.contains('/auth/')) {
+    if (path.contains('/auth/') || path.contains('/notifications/device-tokens')) {
       return false;
     }
     if (_isNonRepeatableMultipart(options)) {

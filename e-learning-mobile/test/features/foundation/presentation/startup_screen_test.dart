@@ -22,8 +22,8 @@ void main() {
           .getSemantics(find.byType(StartupScreen))
           .toStringDeep();
 
-      expect(semanticsTree, contains('Starting ${StartupScreen.appName}'));
-      expect(semanticsTree, contains('Startup in progress'));
+      expect(semanticsTree, contains('Đang khởi động ${StartupScreen.appName}'));
+      expect(semanticsTree, contains('Đang tải dữ liệu khởi động'));
     } finally {
       semantics.dispose();
     }

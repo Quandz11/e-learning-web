@@ -1,3 +1,5 @@
+import 'package:e_learning_mobile/core/session/session_controller.dart';
+import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/security_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/security_state.dart';
@@ -260,9 +262,84 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
               loading: state.status == SecurityStatus.disabling,
             ),
           ],
+          const SizedBox(height: AppSpacing.xl),
+          const AppSectionHeader(
+            title: 'Xóa tài khoản',
+            subtitle: 'Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu học tập của bạn.',
+          ),
+          const SizedBox(height: AppSpacing.md),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Vùng nguy hiểm',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFDC2626),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Sau khi xóa, tất cả tiến trình học tập, thông tin cá nhân và dữ liệu nhịn ăn của bạn sẽ bị xóa vĩnh viễn và không thể phục hồi.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: context.textSecondary(),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                AppButton(
+                  buttonKey: const Key('security_delete_account_button'),
+                  label: 'Xóa tài khoản vĩnh viễn',
+                  variant: AppButtonVariant.destructive,
+                  onPressed: () => _confirmDeleteAccount(context, ref),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Xác nhận xóa tài khoản'),
+        content: const Text(
+          'Bạn có CHẮC CHẮN muốn xóa vĩnh viễn tài khoản này không?\n\n'
+          'Tất cả dữ liệu hồ sơ, kết quả học tập và nhật ký nhịn ăn sẽ bị xóa hoàn toàn khỏi hệ thống và KHÔNG THỂ KHÔI PHỤC.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Xóa vĩnh viễn'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(profileRepositoryProvider).deleteAccount();
+      await ref.read(sessionControllerProvider.notifier).clearSession();
+    } catch (e) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Không thể xóa tài khoản: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _copyValue(String value) async {

@@ -1,5 +1,7 @@
+import 'package:e_learning_mobile/features/learning/data/models/offline_download_model.dart';
 import 'package:e_learning_mobile/features/learning/presentation/controllers/lesson_controller.dart';
 import 'package:e_learning_mobile/features/learning/presentation/controllers/lesson_state.dart';
+import 'package:e_learning_mobile/features/learning/presentation/controllers/offline_download_controller.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
 import 'package:e_learning_mobile/features/learning/presentation/widgets/document_reader_panel.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
@@ -10,7 +12,6 @@ import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -97,18 +98,84 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            tooltip: 'Tải tài liệu PDF',
-            icon: Icon(Icons.download_rounded, color: context.colorScheme.primary),
-            onPressed: () {
-              final pdfUrl = state.detail?.part.documentUrl ?? state.detail?.part.title ?? 'Tài liệu bài học';
-              Clipboard.setData(ClipboardData(text: pdfUrl));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('📋 Đã sao chép liên kết tài liệu: $pdfUrl'),
-                  backgroundColor: const Color(0xFF0F5B38),
-                  behavior: SnackBarBehavior.floating,
-                ),
+          Consumer(
+            builder: (context, ref, _) {
+              if (state.detail == null) return const SizedBox.shrink();
+              final offlineState = ref.watch(offlineDownloadControllerProvider);
+              final offlineController = ref.read(offlineDownloadControllerProvider.notifier);
+              final partId = state.detail!.part.id;
+              final isDownloaded = offlineState.isDownloaded(partId);
+              final isDownloading = offlineState.isDownloading(partId);
+
+              if (isDownloaded) {
+                return IconButton(
+                  tooltip: 'Đã tải tài liệu (Offline)',
+                  icon: const Icon(Icons.offline_pin_rounded, color: Color(0xFF16A34A)),
+                  onPressed: () async {
+                    await offlineController.deleteDownload(partId);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Đã xóa bản tải offline.')),
+                      );
+                    }
+                  },
+                );
+              }
+
+              if (isDownloading) {
+                final progress = offlineState.getProgress(partId) ?? 0.0;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Center(
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        value: progress > 0 ? progress : null,
+                        strokeWidth: 2,
+                        color: context.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return IconButton(
+                tooltip: 'Tải tài liệu xem Offline',
+                icon: Icon(Icons.download_for_offline_outlined, color: context.colorScheme.primary),
+                onPressed: () async {
+                  final docUrl = state.detail!.part.documentUrl?.trim() ?? '';
+                  if (docUrl.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Tài liệu chưa có liên kết để tải về.')),
+                    );
+                    return;
+                  }
+
+                  final success = await offlineController.startDownload(
+                    id: state.detail!.part.id,
+                    courseId: state.detail!.course.id,
+                    courseTitle: state.detail!.course.title,
+                    title: state.detail!.part.title,
+                    type: OfflineDownloadType.document,
+                    remoteUrl: docUrl,
+                  );
+
+                  if (context.mounted) {
+                    if (success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('✅ Đã tải tài liệu xem offline thành công!'),
+                          backgroundColor: Color(0xFF0F5B38),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Không thể tải tài liệu lúc này.')),
+                      );
+                    }
+                  }
+                },
               );
             },
           ),

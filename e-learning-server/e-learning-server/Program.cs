@@ -170,7 +170,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // Set true in production
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -225,8 +225,7 @@ builder.Services.AddCors(options =>
                 "https://lemon-water-0b4792900.2.azurestaticapps.net",
                 "https://zealous-cliff-04c819000.7.azurestaticapps.net",
                 "https://www.nhinanchualanh.vn",
-                "https://nhinanchualanh.vn",
-                "nhinanchualanh.vn"
+                "https://nhinanchualanh.vn"
               )
               .AllowAnyHeader()
               .AllowAnyMethod()
@@ -321,12 +320,25 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "SKVI E-Learning API v1");
-    options.RoutePrefix = "swagger";
-    options.DocumentTitle = "SKVI E-Learning API Documentation";
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "SKVI E-Learning API v1");
+        options.RoutePrefix = "swagger";
+        options.DocumentTitle = "SKVI E-Learning API Documentation";
+    });
+}
+
+// Security Headers Middleware
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    await next();
 });
 
 app.UseCors("StrictPolicy");

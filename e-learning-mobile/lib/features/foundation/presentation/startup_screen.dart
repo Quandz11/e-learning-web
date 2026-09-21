@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 class StartupScreen extends StatelessWidget {
   const StartupScreen({super.key});
 
-  static const appName = 'SKVI Mobile';
-  static const message = 'Preparing your learning space.';
+  static const appName = 'Nhìn Ăn Chữa Lành';
+  static const message = 'Đang chuẩn bị không gian học tập và chữa lành...';
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class StartupScreen extends StatelessWidget {
                     constraints: const BoxConstraints(maxWidth: 440),
                     child: Semantics(
                       container: true,
-                      label: 'Starting $appName',
+                      label: 'Đang khởi động $appName',
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -39,16 +39,60 @@ class StartupScreen extends StatelessWidget {
                           const SizedBox(height: AppSpacing.lg),
                           Text(
                             appName,
-                            style: textTheme.headlineMedium,
+                            style: textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                            ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: AppSpacing.sm),
+                          const SizedBox(height: AppSpacing.xs),
                           Text(
                             message,
                             style: textTheme.bodyLarge?.copyWith(
                               color: colorScheme.onSurfaceVariant,
+                              height: 1.4,
                             ),
                             textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.2,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.auto_awesome_rounded,
+                                  size: 16,
+                                  color: colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    'Lắng nghe cơ thể • Thân khỏe Tâm an',
+                                    style: textTheme.labelMedium?.copyWith(
+                                      color: colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.2,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.xl),
                           AppCard(
@@ -59,8 +103,8 @@ class StartupScreen extends StatelessWidget {
                               child: Row(
                                 children: [
                                   Semantics(
-                                    label: 'Startup in progress',
-                                    value: 'Loading',
+                                    label: 'Đang tải dữ liệu khởi động',
+                                    value: 'Đang xử lý',
                                     child: const SizedBox(
                                       width: AppSizes.controlHeight,
                                       height: AppSizes.controlHeight,
@@ -80,14 +124,18 @@ class StartupScreen extends StatelessWidget {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
-                                          'Starting the app',
-                                          style: textTheme.titleMedium,
+                                          'Đang khởi động ứng dụng',
+                                          style: textTheme.titleMedium
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                         const SizedBox(height: AppSpacing.xs),
                                         Text(
-                                          'Checking configuration and restoring your session.',
+                                          'Đang kiểm tra cấu hình hệ thống và khôi phục phiên học của bạn.',
                                           style: textTheme.bodyMedium?.copyWith(
                                             color: colorScheme.onSurfaceVariant,
+                                            height: 1.3,
                                           ),
                                         ),
                                       ],
@@ -122,16 +170,27 @@ class _StartupMark extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       image: true,
-      label: '${StartupScreen.appName} app mark',
-      child: DecoratedBox(
+      label: 'Biểu tượng ${StartupScreen.appName}',
+      child: Container(
+        width: 104,
+        height: 104,
         decoration: BoxDecoration(
           color: background,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: foreground.withValues(alpha: 0.15),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-        child: SizedBox(
-          width: 96,
-          height: 96,
-          child: Icon(Icons.school_outlined, size: 48, color: foreground),
+        child: Center(
+          child: Icon(
+            Icons.spa_rounded,
+            size: 52,
+            color: foreground,
+          ),
         ),
       ),
     );

@@ -310,7 +310,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         subtitle: 'Thông báo, bảo mật & bộ nhớ đệm',
                         bgColor: isDark ? const Color(0xFF4C1D95) : const Color(0xFFF5F3FF),
                         iconColor: const Color(0xFF7C3AED),
-                        badge: '120MB',
                         onTap: () => context.push(AppRoutes.appSettings),
                       ),
                       Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),

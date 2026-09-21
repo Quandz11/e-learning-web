@@ -169,6 +169,17 @@ public class ProfileController : ControllerBase
              return BadRequest(new { message = "File size exceeds 5MB limit" });
         }
 
+        // Validate image magic bytes to prevent renamed script attacks
+        var headerBuffer = new byte[12];
+        using (var peekStream = file.OpenReadStream())
+        {
+            var bytesRead = await peekStream.ReadAsync(headerBuffer, 0, headerBuffer.Length, cancellationToken);
+            if (bytesRead < 4 || !IsValidImageHeader(headerBuffer))
+            {
+                return BadRequest(new { message = "Invalid image content format" });
+            }
+        }
+
         try
         {
             using var stream = file.OpenReadStream();
@@ -182,5 +193,64 @@ public class ProfileController : ControllerBase
         {
             return BadRequest(new { message = "Failed to upload avatar: " + ex.Message });
         }
+    }
+
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteAccount(CancellationToken cancellationToken = default)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+        {
+            return Unauthorized();
+        }
+
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == userGuid && !u.IsDeleted, cancellationToken);
+
+        if (user == null)
+        {
+            return NotFound(new { message = "Không tìm thấy tài khoản." });
+        }
+
+        // Soft delete user
+        user.IsDeleted = true;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        // Revoke all active refresh tokens
+        var refreshTokens = await _dbContext.RefreshTokens
+            .Where(rt => rt.UserId == userGuid && rt.RevokedAt == null)
+            .ToListAsync(cancellationToken);
+
+        foreach (var token in refreshTokens)
+        {
+            token.RevokedAt = DateTime.UtcNow;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(new { message = "Tài khoản của bạn đã được xóa thành công." });
+    }
+
+    private static bool IsValidImageHeader(byte[] bytes)
+    {
+        // JPEG: FF D8 FF
+        if (bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF)
+            return true;
+
+        // PNG: 89 50 4E 47
+        if (bytes.Length >= 4 && bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47)
+            return true;
+
+        // GIF: GIF8
+        if (bytes.Length >= 4 && bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x38)
+            return true;
+
+        // WEBP: starts with "RIFF" (52 49 46 46) and bytes 8..11 are "WEBP" (57 45 42 50)
+        if (bytes.Length >= 12 &&
+            bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46 &&
+            bytes[8] == 0x57 && bytes[9] == 0x45 && bytes[10] == 0x42 && bytes[11] == 0x50)
+            return true;
+
+        return false;
     }
 }

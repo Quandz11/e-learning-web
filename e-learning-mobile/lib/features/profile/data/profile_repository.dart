@@ -29,4 +29,6 @@ class ProfileRepository {
   }) {
     return _api.uploadAvatar(bytes: bytes, fileName: fileName);
   }
+
+  Future<String> deleteAccount() => _api.deleteAccount();
 }

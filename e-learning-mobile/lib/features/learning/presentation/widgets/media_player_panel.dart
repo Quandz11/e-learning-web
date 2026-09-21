@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:e_learning_mobile/features/learning/data/models/learning_models.dart';
 import 'package:e_learning_mobile/features/learning/data/learning_api.dart';
+import 'package:e_learning_mobile/features/learning/presentation/controllers/offline_download_controller.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
@@ -49,6 +51,18 @@ class MediaPlayerPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final offlineState = ref.watch(offlineDownloadControllerProvider);
+    final localItem = offlineState.getItem(part.id);
+
+    if (localItem != null) {
+      final builder = ref.watch(learningMediaPlayerBuilderProvider);
+      return builder(
+        url: Uri.file(localItem.localPath),
+        title: part.title,
+        duration: part.videoDuration,
+      );
+    }
+
     final videoId = part.videoId?.trim();
     final directUrl = resolveDirectPlaybackUri(part);
     final embedUrl = part.embedUrl?.trim();
@@ -139,8 +153,15 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
     final headers = <String, String>{
       'Referer': 'https://iframe.mediadelivery.net/',
       'Origin': 'https://iframe.mediadelivery.net',
+      'User-Agent':
+          'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     };
-    final c = VideoPlayerController.networkUrl(widget.url, httpHeaders: headers);
+    final targetUri = widget.url.scheme == 'file'
+        ? widget.url
+        : Uri.parse(Uri.encodeFull(widget.url.toString().trim()));
+    final c = targetUri.scheme == 'file'
+        ? VideoPlayerController.file(File(targetUri.toFilePath()))
+        : VideoPlayerController.networkUrl(targetUri, httpHeaders: headers);
     _controller = c;
     c.addListener(_onControllerChanged);
     try {
@@ -197,6 +218,8 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
     final headers = <String, String>{
       'Referer': 'https://iframe.mediadelivery.net/',
       'Origin': 'https://iframe.mediadelivery.net',
+      'User-Agent':
+          'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     };
     final newC = VideoPlayerController.networkUrl(qualityUri, httpHeaders: headers);
     _controller = newC;
@@ -587,7 +610,14 @@ class _LearningVideoEmbedPlayerState
       ..setBackgroundColor(Colors.black)
       ..setUserAgent(
         'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
-      )
+      );
+
+    if (_wvc.platform is AndroidWebViewController) {
+      (_wvc.platform as AndroidWebViewController)
+          .setMediaPlaybackRequiresUserGesture(false);
+    }
+
+    _wvc
       ..addJavaScriptChannel(
         'FlutterVideoPlayer',
         onMessageReceived: (msg) {
@@ -614,11 +644,6 @@ class _LearningVideoEmbedPlayerState
           'Origin': 'https://iframe.mediadelivery.net',
         },
       );
-
-    if (_wvc.platform is AndroidWebViewController) {
-      (_wvc.platform as AndroidWebViewController)
-          .setMediaPlaybackRequiresUserGesture(false);
-    }
 
     _startHideTimer();
   }
@@ -1962,12 +1987,17 @@ bool _isSupportedNetworkUrl(Uri uri) =>
     uri.hasScheme && (uri.scheme == 'https' || uri.scheme == 'http');
 
 bool _isEmbedUrl(Uri uri) {
-  final host = uri.host.toLowerCase();
   final path = uri.path.toLowerCase();
-  return host.contains('mediadelivery.net') ||
-      host.contains('b-cdn.net') ||
-      path.contains('/embed/') ||
-      path.endsWith('.html');
+  if (path.endsWith('.mp4') ||
+      path.endsWith('.m3u8') ||
+      path.endsWith('.m4v') ||
+      path.endsWith('.webm')) {
+    return false;
+  }
+  final host = uri.host.toLowerCase();
+  return path.contains('/embed/') ||
+      path.endsWith('.html') ||
+      (host.contains('mediadelivery.net') && !path.contains('/play/'));
 }
 
 Uri? resolveDirectPlaybackUri(LearningLessonPart part) {

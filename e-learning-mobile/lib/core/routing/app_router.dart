@@ -43,6 +43,7 @@ import 'package:e_learning_mobile/features/forum/presentation/screens/forum_home
 import 'package:e_learning_mobile/features/forum/presentation/screens/forum_thread_detail_screen.dart';
 import 'package:e_learning_mobile/features/notifications/presentation/screens/notification_inbox_screen.dart';
 import 'package:e_learning_mobile/features/progress/presentation/screens/learning_progress_screen.dart';
+import 'package:e_learning_mobile/features/settings/presentation/screens/offline_downloads_screen.dart';
 import 'package:e_learning_mobile/features/settings/presentation/screens/settings_screen.dart';
 import 'package:e_learning_mobile/features/settings/presentation/screens/terms_and_privacy_screen.dart';
 import 'package:e_learning_mobile/features/widgets/presentation/screens/widget_preview_gallery_screen.dart';
@@ -211,6 +212,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: AppRoutes.appSettings,
             builder: (_, __) => const SettingsScreen(),
             routes: [
+              GoRoute(
+                path: 'downloads',
+                builder: (_, __) => const OfflineDownloadsScreen(),
+              ),
               GoRoute(
                 path: 'widgets',
                 builder: (_, __) => const WidgetPreviewGalleryScreen(),
@@ -393,6 +398,10 @@ AuthOtpChallenge? otpChallengeFromRouteState(GoRouterState state) {
   return otpChallengeFromRoute(uri: state.uri, extra: state.extra);
 }
 
+final _deepLinkEmailRegex = RegExp(
+  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+);
+
 AuthOtpChallenge? otpChallengeFromRoute({required Uri uri, Object? extra}) {
   final challengeFromExtra = extra is AuthOtpChallenge && extra.isValid
       ? extra
@@ -403,7 +412,11 @@ AuthOtpChallenge? otpChallengeFromRoute({required Uri uri, Object? extra}) {
 
   final handoffType = uri.queryParameters['type']?.trim().toLowerCase();
   final email = uri.queryParameters['email']?.trim();
-  if (handoffType == 'registration' && email != null && email.isNotEmpty) {
+  if (handoffType == 'registration' &&
+      email != null &&
+      email.isNotEmpty &&
+      email.length <= 254 &&
+      _deepLinkEmailRegex.hasMatch(email)) {
     final challenge = AuthOtpChallenge.registration(email: email);
     return challenge.isValid ? challenge : null;
   }

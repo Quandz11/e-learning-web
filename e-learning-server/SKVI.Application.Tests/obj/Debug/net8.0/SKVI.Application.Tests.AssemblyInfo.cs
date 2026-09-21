@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SKVI.Application.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9506b2dbf88d0051e2cf02520c2bff9a72e478f1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bae5a5a3075a8a6d5a34e44ba4e288ca64b986d9")]
 [assembly: System.Reflection.AssemblyProductAttribute("SKVI.Application.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SKVI.Application.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

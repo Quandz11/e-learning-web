@@ -228,3 +228,13 @@ C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\
 C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\zh-TW\Hangfire.Core.resources.dll
 C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\zh\Hangfire.Core.resources.dll
 C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\firebase-service-account.json
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\FirebaseAdmin.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\Google.Api.Gax.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\Google.Api.Gax.Rest.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\Google.Apis.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\Google.Apis.Auth.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\Google.Apis.Core.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\System.CodeDom.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\System.Management.dll
+C:\Users\Quan\Documents\e-learning-web\e-learning-server\SKVI.Application.Tests\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll

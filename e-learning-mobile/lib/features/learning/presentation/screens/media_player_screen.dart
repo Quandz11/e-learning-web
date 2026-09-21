@@ -1,7 +1,10 @@
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
+import 'package:e_learning_mobile/features/learning/data/learning_api.dart';
 import 'package:e_learning_mobile/features/learning/data/models/learning_models.dart';
+import 'package:e_learning_mobile/features/learning/data/models/offline_download_model.dart';
 import 'package:e_learning_mobile/features/learning/presentation/controllers/lesson_controller.dart';
 import 'package:e_learning_mobile/features/learning/presentation/controllers/lesson_state.dart';
+import 'package:e_learning_mobile/features/learning/presentation/controllers/offline_download_controller.dart';
 import 'package:e_learning_mobile/features/learning/presentation/learning_error_messages.dart';
 import 'package:e_learning_mobile/features/learning/presentation/widgets/media_player_panel.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
@@ -34,6 +37,7 @@ class MediaPlayerScreen extends ConsumerStatefulWidget {
 class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
   int _selectedTabIndex = 0;
   final TextEditingController _noteController = TextEditingController();
+  final Set<String> _resolvingUrls = {};
 
   @override
   void initState() {
@@ -200,6 +204,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                                                 ],
                                               ),
                                             ),
+                                          _buildDownloadAction(context, ref, state.detail!),
                                         ],
                                       ),
                                     ],
@@ -738,6 +743,183 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDownloadAction(BuildContext context, WidgetRef ref, LessonDetailResult detail) {
+    final offlineState = ref.watch(offlineDownloadControllerProvider);
+    final offlineController = ref.read(offlineDownloadControllerProvider.notifier);
+    final partId = detail.part.id;
+
+    final isDownloaded = offlineState.isDownloaded(partId);
+    final isDownloading = offlineState.isDownloading(partId);
+    final progress = offlineState.getProgress(partId) ?? 0.0;
+
+    if (isDownloaded) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEFF5F1),
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(
+            color: context.isDark ? const Color(0xFF1B5E33) : const Color(0xFFD4E8DC),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.offline_pin_rounded, size: 13, color: Color(0xFF16A34A)),
+            const SizedBox(width: 4),
+            const Text(
+              'Đã tải xem Offline',
+              style: TextStyle(color: Color(0xFF16A34A), fontSize: 11, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: () async {
+                await offlineController.deleteDownload(partId);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Đã xóa bản tải offline.')),
+                  );
+                }
+              },
+              child: Icon(Icons.close_rounded, size: 13, color: context.textMuted()),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final isResolving = _resolvingUrls.contains(partId);
+
+    if (isResolving || isDownloading) {
+      final progVal = isResolving ? null : (progress > 0 ? progress : null);
+      final labelText = isResolving ? 'Đang chuẩn bị...' : 'Đang tải ${(progress * 100).toInt()}%';
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: context.isDark ? const Color(0xFF1C2D24) : const Color(0xFFF0FDF4),
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(color: context.colorScheme.primary.withValues(alpha: 0.3), width: 0.8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                value: progVal,
+                strokeWidth: 2.0,
+                color: context.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              labelText,
+              style: TextStyle(
+                color: context.colorScheme.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          if (_resolvingUrls.contains(partId)) return;
+          setState(() => _resolvingUrls.add(partId));
+          try {
+            var rawUrl = resolveDirectPlaybackUri(detail.part)?.toString() ??
+                detail.part.playbackUrl ??
+                detail.part.embedUrl ??
+                '';
+            if (rawUrl.isEmpty && detail.part.videoId != null && detail.part.videoId!.isNotEmpty) {
+              final fetchedUri = await ref.read(learningApiProvider).getVideoEmbedUrl(detail.part.videoId!);
+              if (fetchedUri != null) {
+                rawUrl = fetchedUri.toString();
+              }
+            }
+            if (rawUrl.contains('mediadelivery.net')) {
+              final match = RegExp(r'(?:embed|play)\/([^\/]+)\/([^\/\?]+)').firstMatch(rawUrl);
+              if (match != null) {
+                final libId = match.group(1);
+                final vId = match.group(2);
+                rawUrl = 'https://video.mediadelivery.net/play/$libId/$vId/720p/video.mp4';
+              } else if (rawUrl.contains('/embed/')) {
+                rawUrl = rawUrl.replaceAll('/embed/', '/play/');
+              }
+            }
+            if (rawUrl.isEmpty) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Chưa có đường dẫn tệp để tải về.')),
+                );
+              }
+              return;
+            }
+
+            final success = await offlineController.startDownload(
+              id: detail.part.id,
+              courseId: detail.course.id,
+              courseTitle: detail.course.title,
+              title: detail.part.title,
+              type: OfflineDownloadType.video,
+              remoteUrl: rawUrl,
+            );
+
+            if (context.mounted) {
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('✅ Đã tải video xem offline thành công!'),
+                    backgroundColor: Color(0xFF0F5B38),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Không thể tải video lúc này. Vui lòng thử lại.')),
+                );
+              }
+            }
+          } finally {
+            if (mounted) {
+              setState(() => _resolvingUrls.remove(partId));
+            }
+          }
+        },
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF0FDF4),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            border: Border.all(color: context.colorScheme.primary.withValues(alpha: 0.3), width: 0.8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.download_for_offline_outlined, size: 15, color: context.colorScheme.primary),
+              const SizedBox(width: 4),
+              Text(
+                'Tải xem Offline',
+                style: TextStyle(
+                  color: context.colorScheme.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

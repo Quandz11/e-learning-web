@@ -205,9 +205,19 @@ public class AuthService : IAuthService
 
     public async Task RegisterAsync(RegisterRequest request)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+        var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        if (existingUser != null)
         {
-            throw new InvalidOperationException("Email is already registered.");
+            if (!existingUser.IsDeleted)
+            {
+                throw new InvalidOperationException("Email is already registered.");
+            }
+
+            // If the account was previously soft-deleted, anonymize the old record's email
+            // so the user can re-register cleanly with this email without conflict.
+            existingUser.Email = $"deleted_{Guid.NewGuid():N}_{existingUser.Email}";
+            existingUser.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
         }
 
         var otp = Random.Shared.Next(100000, 999999).ToString();

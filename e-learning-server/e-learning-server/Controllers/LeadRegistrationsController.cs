@@ -1,5 +1,7 @@
+using System.Net.Mail;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using SKVI.Application.DTOs.Leads;
 using SKVI.Domain.Entities;
@@ -9,6 +11,7 @@ namespace e_learning_server.Controllers;
 
 [ApiController]
 [Route("api/lead-registrations")]
+[EnableRateLimiting("AuthRateLimit")]
 public class LeadRegistrationsController : ControllerBase
 {
     private static readonly string[] AllowedStatuses =
@@ -56,7 +59,7 @@ public class LeadRegistrationsController : ControllerBase
                 return BadRequest(new { message = "Source is invalid." });
             }
 
-            if (!email.Contains('@'))
+            if (!MailAddress.TryCreate(email, out var parsedEmail) || parsedEmail.Address != email)
             {
                 return BadRequest(new { message = "Email is invalid." });
             }

@@ -260,6 +260,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildSectionTitle(theme, 'Bộ nhớ & Pháp lý'),
           _buildSettingContainer([
             _buildSettingRow(
+              icon: Icons.download_for_offline_rounded,
+              title: 'Quản lý nội dung đã tải',
+              subtitle: 'Xem, phát và xóa video/tài liệu offline',
+              bgColor: const Color(0xFFEBF5EE),
+              iconColor: AppColors.primary,
+              onTap: () => context.push(AppRoutes.appSettingsDownloads),
+            ),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            _buildSettingRow(
               icon: Icons.cleaning_services_outlined,
               title: 'Xóa bộ nhớ đệm (Cache)',
               subtitle: _isClearingCache

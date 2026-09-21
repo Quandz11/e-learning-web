@@ -42,10 +42,12 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light(),
-        home: Scaffold(
-          body: MediaPlayerPanel(part: fakeLessonPart(playbackUrl: null)),
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: MediaPlayerPanel(part: fakeLessonPart(playbackUrl: null)),
+          ),
         ),
       ),
     );
@@ -93,10 +95,12 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light(),
-        home: Scaffold(
-          body: DocumentReaderPanel(part: fakeDocumentPart(documentUrl: null)),
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: DocumentReaderPanel(part: fakeDocumentPart(documentUrl: null)),
+          ),
         ),
       ),
     );

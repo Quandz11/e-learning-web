@@ -84,6 +84,16 @@ class ProfileApi {
     }
   }
 
+  Future<String> deleteAccount() async {
+    try {
+      final data = await _apiClient.delete<Object?>('/profile/me');
+      final json = _coerceJson(data);
+      return json['message'] as String? ?? 'Tài khoản đã được xóa.';
+    } on DioException catch (error) {
+      throw _map(error);
+    }
+  }
+
   Future<Map<String, dynamic>> _getJson(String path) async {
     try {
       final data = await _apiClient.get<Object?>(path);

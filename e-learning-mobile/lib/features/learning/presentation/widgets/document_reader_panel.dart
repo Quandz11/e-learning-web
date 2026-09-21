@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:e_learning_mobile/features/learning/data/models/learning_models.dart';
+import 'package:e_learning_mobile/features/learning/presentation/controllers/offline_download_controller.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
@@ -49,8 +51,17 @@ class DocumentReaderPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final documentUrl = part.documentUrl?.trim();
-    final url = documentUrl == null ? null : Uri.tryParse(documentUrl);
+    final offlineState = ref.watch(offlineDownloadControllerProvider);
+    final localItem = offlineState.getItem(part.id);
+
+    final Uri? url;
+    if (localItem != null) {
+      url = Uri.file(localItem.localPath);
+    } else {
+      final documentUrl = part.documentUrl?.trim();
+      url = documentUrl == null ? null : Uri.tryParse(documentUrl);
+    }
+
     if (url == null || !_isSupportedDocumentUrl(url)) {
       return const _InvalidDocumentUrlCard();
     }
@@ -116,32 +127,59 @@ class _DocumentReaderPdfViewerState extends State<DocumentReaderPdfViewer> {
             children: [
               KeyedSubtree(
                 key: ValueKey(_reloadToken),
-                child: SfPdfViewer.network(
-                  widget.url.toString(),
-                  controller: widget.controller,
-                  canShowScrollHead: true,
-                  canShowScrollStatus: true,
-                  enableDoubleTapZooming: true,
-                  pageLayoutMode: PdfPageLayoutMode.continuous,
-                  onPageChanged: widget.onPageChanged,
-                  onDocumentLoaded: (details) {
-                    if (mounted) {
-                      setState(() {
-                        _isLoading = false;
-                        _errorMessage = null;
-                      });
-                    }
-                    widget.onDocumentLoaded?.call(details);
-                  },
-                  onDocumentLoadFailed: (details) {
-                    if (mounted) {
-                      setState(() {
-                        _isLoading = false;
-                        _errorMessage = details.description;
-                      });
-                    }
-                  },
-                ),
+                child: widget.url.scheme == 'file'
+                    ? SfPdfViewer.file(
+                        File(widget.url.toFilePath()),
+                        controller: widget.controller,
+                        canShowScrollHead: true,
+                        canShowScrollStatus: true,
+                        enableDoubleTapZooming: true,
+                        pageLayoutMode: PdfPageLayoutMode.continuous,
+                        onPageChanged: widget.onPageChanged,
+                        onDocumentLoaded: (details) {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                              _errorMessage = null;
+                            });
+                          }
+                          widget.onDocumentLoaded?.call(details);
+                        },
+                        onDocumentLoadFailed: (details) {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                              _errorMessage = details.description;
+                            });
+                          }
+                        },
+                      )
+                    : SfPdfViewer.network(
+                        widget.url.toString(),
+                        controller: widget.controller,
+                        canShowScrollHead: true,
+                        canShowScrollStatus: true,
+                        enableDoubleTapZooming: true,
+                        pageLayoutMode: PdfPageLayoutMode.continuous,
+                        onPageChanged: widget.onPageChanged,
+                        onDocumentLoaded: (details) {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                              _errorMessage = null;
+                            });
+                          }
+                          widget.onDocumentLoaded?.call(details);
+                        },
+                        onDocumentLoadFailed: (details) {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                              _errorMessage = details.description;
+                            });
+                          }
+                        },
+                      ),
               ),
               if (_isLoading)
                 const Positioned.fill(
@@ -188,5 +226,6 @@ class _InvalidDocumentUrlCard extends StatelessWidget {
 }
 
 bool _isSupportedDocumentUrl(Uri uri) {
-  return uri.hasScheme && (uri.scheme == 'https' || uri.scheme == 'http');
+  return uri.scheme == 'file' ||
+      (uri.hasScheme && (uri.scheme == 'https' || uri.scheme == 'http'));
 }

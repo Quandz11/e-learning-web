@@ -347,6 +347,7 @@ app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseDefaultFiles();
 app.UseStaticFiles();
 
 var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");

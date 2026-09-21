@@ -87,6 +87,7 @@ const PricingPage = lazy(() => import('./pages/PricingPage'));
 const AmbassadorPage = lazy(() => import('./pages/AmbassadorPage'));
 const Challenge10DayPage = lazy(() => import('./pages/Challenge10DayPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const DeleteAccountPage = lazy(() => import('./pages/DeleteAccountPage'));
 const ContactUsPage = lazy(() => import('./pages/ContactUsPage'));
 const MissionVisionPage = lazy(() => import('./pages/MissionVisionPage'));
 
@@ -182,6 +183,22 @@ function App() {
                 {
                   path: 'privacy-policy',
                   element: <PrivacyPolicyPage />
+                },
+                {
+                  path: 'chinh-sach-bao-mat',
+                  element: <PrivacyPolicyPage />
+                },
+                {
+                  path: 'privacy',
+                  element: <PrivacyPolicyPage />
+                },
+                {
+                  path: 'xoa-tai-khoan',
+                  element: <DeleteAccountPage />
+                },
+                {
+                  path: 'delete-account',
+                  element: <DeleteAccountPage />
                 },
                 {
                   path: 'contact',

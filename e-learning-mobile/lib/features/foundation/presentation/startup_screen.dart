@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class StartupScreen extends StatelessWidget {
   const StartupScreen({super.key});
 
-  static const appName = 'Nhìn Ăn Chữa Lành';
+  static const appName = 'Nhịn Ăn Chữa Lành';
   static const message = 'Đang chuẩn bị không gian học tập và chữa lành...';
 
   @override

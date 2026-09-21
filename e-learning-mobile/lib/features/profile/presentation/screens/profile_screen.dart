@@ -326,7 +326,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       _buildListTileItem(
                         context,
                         icon: Icons.info_outline_rounded,
-                        title: 'Về ứng dụng Nhìn Ăn Chữa Lành',
+                        title: 'Về ứng dụng Nhịn Ăn Chữa Lành',
                         subtitle: 'Phiên bản 1.0.0 (Build 100)',
                         bgColor: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF8FAFC),
                         iconColor: const Color(0xFF64748B),
@@ -581,7 +581,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Về Nhìn Ăn Chữa Lành'),
+        title: const Text('Về Nhịn Ăn Chữa Lành'),
         content: const Text(
           'Ứng dụng hướng dẫn nhịn ăn khoa học, cân bằng sức khỏe & phục hồi tự nhiên cho người Việt Nam.\n\nPhiên bản: 1.0.0 (Build 100)',
         ),

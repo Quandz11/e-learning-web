@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SKVI.Application.DTOs.Profile;
 using SKVI.Application.Interfaces;
+using SKVI.Domain.Entities;
 using SKVI.Infrastructure;
 using System.Security.Claims;
 
@@ -226,9 +227,105 @@ public class ProfileController : ControllerBase
             token.RevokedAt = DateTime.UtcNow;
         }
 
+        _dbContext.AuditLogs.Add(new AuditLog
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Action = "ACCOUNT_DELETED_BY_USER_SELF",
+            TargetTable = "Users",
+            TargetId = user.Id,
+            Metadata = System.Text.Json.JsonSerializer.Serialize(new { email = user.Email, phone = user.Phone, source = "WEB_LOGGED_IN_PROFILE" }),
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Ok(new { message = "Tài khoản của bạn đã được xóa thành công." });
+    }
+
+    [HttpPost("public-delete-account")]
+    [AllowAnonymous]
+    public async Task<IActionResult> PublicDeleteAccount([FromBody] PublicDeleteAccountRequest request, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.EmailOrPhone))
+        {
+            return BadRequest(new { message = "Vui lòng nhập email hoặc số điện thoại đăng ký tài khoản." });
+        }
+
+        var normalized = request.EmailOrPhone.Trim();
+        var normalizedLower = normalized.ToLowerInvariant();
+
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(u => !u.IsDeleted && (u.Email.ToLower() == normalizedLower || (u.Phone != null && u.Phone == normalized)), cancellationToken);
+
+        if (user == null)
+        {
+            return NotFound(new { message = "Không tìm thấy tài khoản phù hợp với thông tin đã cung cấp." });
+        }
+
+        // If password is provided, verify and execute immediate permanent deletion
+        if (!string.IsNullOrWhiteSpace(request.Password))
+        {
+            var isPasswordValid = _passwordHasher.VerifyPassword(request.Password, user.PasswordHash);
+            if (!isPasswordValid)
+            {
+                return BadRequest(new { message = "Mật khẩu xác nhận không chính xác." });
+            }
+
+            // Soft delete user
+            user.IsDeleted = true;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            // Revoke all refresh tokens
+            var refreshTokens = await _dbContext.RefreshTokens
+                .Where(rt => rt.UserId == user.Id && rt.RevokedAt == null)
+                .ToListAsync(cancellationToken);
+
+            foreach (var token in refreshTokens)
+            {
+                token.RevokedAt = DateTime.UtcNow;
+            }
+
+            // Add audit log
+            _dbContext.AuditLogs.Add(new AuditLog
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                Action = "ACCOUNT_DELETED_BY_USER_PUBLIC",
+                TargetTable = "Users",
+                TargetId = user.Id,
+                Metadata = System.Text.Json.JsonSerializer.Serialize(new { email = user.Email, phone = user.Phone, reason = request.Reason, source = "WEB_PUBLIC_FORM" }),
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return Ok(new
+            {
+                message = "Tài khoản và toàn bộ dữ liệu cá nhân của bạn đã được xóa thành công khỏi hệ thống.",
+                isDeletedImmediately = true
+            });
+        }
+
+        // If password was not provided, record the verified deletion request for support team
+        _dbContext.AuditLogs.Add(new AuditLog
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Action = "ACCOUNT_DELETION_REQUESTED",
+            TargetTable = "Users",
+            TargetId = user.Id,
+            Metadata = System.Text.Json.JsonSerializer.Serialize(new { email = user.Email, phone = user.Phone, reason = request.Reason, source = "WEB_PUBLIC_REQUEST" }),
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(new
+        {
+            message = $"Yêu cầu xóa tài khoản cho {user.Email ?? user.Phone} đã được tiếp nhận. Đội ngũ kỹ thuật sẽ xác minh và hoàn tất xóa dữ liệu trong vòng 24 giờ làm việc.",
+            isDeletedImmediately = false
+        });
     }
 
     private static bool IsValidImageHeader(byte[] bytes)

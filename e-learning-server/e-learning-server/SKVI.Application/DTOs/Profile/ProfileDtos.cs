@@ -33,3 +33,14 @@ public class ChangePasswordRequest
     [Required, MinLength(8)]
     public string NewPassword { get; set; } = string.Empty;
 }
+
+public class PublicDeleteAccountRequest
+{
+    [Required]
+    public string EmailOrPhone { get; set; } = string.Empty;
+
+    public string? Password { get; set; }
+
+    public string? Reason { get; set; }
+}
+

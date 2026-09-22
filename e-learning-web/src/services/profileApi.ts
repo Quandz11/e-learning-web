@@ -56,5 +56,18 @@ export const profileApi = {
             method: 'POST',
             body: formData,
         });
+    },
+
+    async deleteMyAccount(): Promise<{ message: string }> {
+        return apiClient('/profile/me', {
+            method: 'DELETE',
+        });
+    },
+
+    async requestPublicDeleteAccount(payload: { emailOrPhone: string; password?: string; reason?: string }): Promise<{ message: string; isDeletedImmediately: boolean }> {
+        return apiClient('/profile/public-delete-account', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
     }
 };

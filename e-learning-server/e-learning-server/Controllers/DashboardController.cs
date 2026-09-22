@@ -35,4 +35,40 @@ public class DashboardController : ControllerBase
             return StatusCode(500, new { message = "Failed to retrieve dashboard statistics" });
         }
     }
+
+    /// <summary>
+    /// Get recent orders for admin dashboard
+    /// </summary>
+    [HttpGet("recent-orders")]
+    public async Task<IActionResult> GetRecentOrders([FromQuery] int limit = 10, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var orders = await _dashboardService.GetRecentOrdersAsync(limit, cancellationToken);
+            return Ok(orders);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving recent orders");
+            return StatusCode(500, new { message = "Failed to retrieve recent orders" });
+        }
+    }
+
+    /// <summary>
+    /// Get top agents/cabins for admin dashboard
+    /// </summary>
+    [HttpGet("top-agents")]
+    public async Task<IActionResult> GetTopAgents([FromQuery] int limit = 5, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var agents = await _dashboardService.GetTopAgentsAsync(limit, cancellationToken);
+            return Ok(agents);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving top agents");
+            return StatusCode(500, new { message = "Failed to retrieve top agents" });
+        }
+    }
 }

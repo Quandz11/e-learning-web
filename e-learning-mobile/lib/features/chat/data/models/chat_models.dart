@@ -9,6 +9,8 @@ class ChatMessage {
     required this.sentAt,
     required this.isRead,
     this.isMe = false,
+    this.clientMessageId,
+    this.delivery = 'sent',
   });
 
   final String id;
@@ -20,10 +22,13 @@ class ChatMessage {
   final DateTime sentAt;
   final bool isRead;
   final bool isMe;
+  final String? clientMessageId;
+  final String delivery;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json, {String? currentUserId}) {
     final senderId = json['senderId']?.toString() ?? '';
     return ChatMessage(
+      clientMessageId: json['clientMessageId']?.toString(),
       id: json['id']?.toString() ?? '',
       conversationId: json['conversationId']?.toString() ?? '',
       senderId: senderId,
@@ -38,6 +43,15 @@ class ChatMessage {
     );
   }
 
+  factory ChatMessage.fromGuestJson(Map<String, dynamic> json, String guestId) {
+    final guest = json['isFromGuest'] == true;
+    return ChatMessage(id: json['id']?.toString() ?? '', conversationId: guestId,
+      senderId: guest ? guestId : 'support', senderName: json['senderName']?.toString() ?? '',
+      senderRole: guest ? 'Guest' : 'Admin', content: json['content']?.toString() ?? '',
+      sentAt: DateTime.tryParse((json['sentAt'] ?? json['timestamp'])?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0),
+      isRead: json['isRead'] == true, isMe: !guest);
+  }
+
   ChatMessage copyWith({
     String? id,
     String? conversationId,
@@ -48,8 +62,12 @@ class ChatMessage {
     DateTime? sentAt,
     bool? isRead,
     bool? isMe,
+    String? clientMessageId,
+    String? delivery,
   }) {
     return ChatMessage(
+      clientMessageId: clientMessageId ?? this.clientMessageId,
+      delivery: delivery ?? this.delivery,
       id: id ?? this.id,
       conversationId: conversationId ?? this.conversationId,
       senderId: senderId ?? this.senderId,

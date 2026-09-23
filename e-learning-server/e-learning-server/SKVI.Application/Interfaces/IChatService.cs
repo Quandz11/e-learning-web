@@ -10,7 +10,7 @@ public interface IChatService
     Task<ConversationResponse> GetConversationByIdAsync(Guid conversationId, Guid userId);
     Task<List<MessageResponse>> GetConversationMessagesAsync(Guid conversationId, Guid userId);
     Task<ConversationResponse> CreateConversationAsync(Guid userId, Guid recipientId);
-    Task<MessageResponse> SendMessageAsync(Guid conversationId, Guid userId, string content);
+    Task<MessageResponse> SendMessageAsync(Guid conversationId, Guid userId, string content, Guid? clientMessageId = null);
     Task MarkMessagesAsReadAsync(Guid conversationId, Guid userId);
     Task<int> GetUnreadCountAsync(Guid userId);
 

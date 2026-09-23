@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
 using System.Text;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -32,6 +34,11 @@ builder.Services.Configure<WellnessSecuritySettings>(builder.Configuration.GetSe
 
 // Services
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserSessionService>();
+builder.Services.AddSingleton<SessionConnections>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<SessionConnections>());
+builder.Services.Configure<HubOptions>(options => options.AddFilter<SessionConnections>());
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -187,6 +194,30 @@ builder.Services.AddAuthentication(options =>
     // Allow SignalR to read tokens from the query string when using WebSockets
     options.Events = new JwtBearerEvents
     {
+        OnTokenValidated = async context =>
+        {
+            var user = context.Principal!;
+            if (user.IsInRole("PRE_AUTH")) {
+                if (context.Request.Path != "/api/auth/2fa/login-verify") context.Fail("PRE_AUTH_NOT_ALLOWED");
+                return;
+            }
+            var sessions = context.HttpContext.RequestServices.GetRequiredService<UserSessionService>();
+            if (!Guid.TryParse(user.FindFirstValue("sid"), out var sid) ||
+                !Guid.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ||
+                !await sessions.IsActiveAsync(uid, sid, context.HttpContext.RequestAborted)) {
+                context.HttpContext.Items["SessionRevoked"] = true;
+                context.Fail("AUTH_SESSION_REVOKED");
+                return;
+            }
+            await sessions.TouchAsync(sid, context.HttpContext.RequestAborted);
+        },
+        OnChallenge = async context => {
+            if (context.HttpContext.Items.ContainsKey("SessionRevoked")) {
+                context.HandleResponse();
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsJsonAsync(new { code = "AUTH_SESSION_REVOKED", message = "Phi?n ??ng nh?p ?? h?t hi?u l?c." });
+            }
+        },
         OnMessageReceived = context =>
         {
             var accessToken = context.Request.Query["access_token"];

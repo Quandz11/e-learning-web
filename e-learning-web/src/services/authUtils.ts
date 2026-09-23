@@ -1,3 +1,4 @@
+import { tokenService } from './tokenService';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://skvi-api.azurewebsites.net/api';
 
 export interface AuthResponse {
@@ -15,18 +16,30 @@ export interface User {
   phone?: string;
 }
 
+let inFlight: Promise<AuthResponse> | null = null;
+
 export const authUtils = {
   async refreshToken(): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      throw new Error('Token refresh failed');
-    }
-
-    return response.json();
+    if (inFlight) return inFlight;
+    const generation = tokenService.getGeneration();
+    const run = async () => {
+      if (generation !== tokenService.getGeneration()) throw new Error('Session changed');
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, { method: 'POST', credentials: 'include' });
+      if (generation !== tokenService.getGeneration()) throw new Error('Session changed');
+      if (!response.ok) {
+        if (response.status === 401) tokenService.clearToken();
+        throw new Error('Token refresh failed');
+      }
+      const result: AuthResponse = await response.json();
+      if (generation !== tokenService.getGeneration()) throw new Error('Session changed');
+      return result;
+    };
+    // Serialize cookie rotation across tabs, as well as within this tab.
+    const promise = typeof navigator !== 'undefined' && navigator.locks
+      ? navigator.locks.request('skvi-token-refresh', run) : run();
+    inFlight = promise;
+    try { return await promise; }
+    finally { if (inFlight === promise) inFlight = null; }
   },
 
   decodeToken(token: string): User | null {

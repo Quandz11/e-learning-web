@@ -1,3 +1,4 @@
+import 'device_metadata.dart';
 import 'package:dio/dio.dart';
 import 'package:e_learning_mobile/core/session/app_session.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
@@ -23,6 +24,8 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    options.extra['session_generation'] = _sessionRepository.generation;
+    options.headers.addAll(await DeviceMetadata.headers());
     final session = await _sessionRepository.readStoredSession();
     if (session != null && session.accessToken.trim().isNotEmpty) {
       options.headers['Authorization'] = 'Bearer ${session.accessToken}';
@@ -31,20 +34,45 @@ class AuthInterceptor extends Interceptor {
   }
 
   @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    if (response.requestOptions.extra['session_generation'] != _sessionRepository.generation) {
+      handler.reject(DioException(requestOptions: response.requestOptions, type: DioExceptionType.cancel));
+      return;
+    }
+    handler.next(response);
+  }
+
+  @override
   Future<void> onError(
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
+    final requestGeneration = err.requestOptions.extra['session_generation'];
+    if (requestGeneration != null && requestGeneration != _sessionRepository.generation) {
+      handler.next(err);
+      return;
+    }
+    final body = err.response?.data;
+    if (err.response?.statusCode == 401 && body is Map && body['code'] == 'AUTH_SESSION_REVOKED') {
+      await _sessionController.clearSession();
+      handler.next(err);
+      return;
+    }
     if (!_shouldRefresh(err)) {
       handler.next(err);
       return;
     }
 
+    final generation = _sessionRepository.generation;
     final activeRefresh = _inFlightRefresh ??= _sessionRepository
         .refreshStoredSession();
 
     try {
       final refreshed = await activeRefresh;
+      if (_sessionRepository.generation != generation) {
+        handler.next(err);
+        return;
+      }
       _sessionController.syncSession(refreshed);
       final retryResponse = await _retry(
         err.requestOptions,
@@ -52,7 +80,7 @@ class AuthInterceptor extends Interceptor {
       );
       handler.resolve(retryResponse);
     } catch (_) {
-      await _sessionController.clearSession();
+      if (_sessionRepository.generation == generation) await _sessionController.clearSession();
       handler.next(err);
     } finally {
       if (identical(_inFlightRefresh, activeRefresh)) {
@@ -71,7 +99,7 @@ class AuthInterceptor extends Interceptor {
     if (options.extra['auth_retry_attempted'] == true) {
       return false;
     }
-    if (path.contains('/auth/') || path.contains('/notifications/device-tokens')) {
+    if ((path.contains('/auth/') && !path.contains('/auth/sessions')) || path.contains('/notifications/device-tokens')) {
       return false;
     }
     if (_isNonRepeatableMultipart(options)) {

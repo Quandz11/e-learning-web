@@ -1,3 +1,4 @@
+import DeviceSessionsPanel from '../../../components/DeviceSessionsPanel';
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -35,7 +36,7 @@ const UserDetailPage: React.FC = () => {
     const [showResetModal, setShowResetModal] = useState(false);
 
     // Tabs state
-    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'wellness' | 'activity'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'wellness' | 'sessions' | 'activity'>('overview');
 
     // Enrollment management
     const [enrollments, setEnrollments] = useState<AdminEnrollmentResponse[]>([]);
@@ -319,10 +320,11 @@ const UserDetailPage: React.FC = () => {
         }
     };
 
-    const tabItems: Array<{ key: 'overview' | 'courses' | 'wellness' | 'activity'; label: string }> = [
+    const tabItems: Array<{ key: 'overview' | 'courses' | 'wellness' | 'sessions' | 'activity'; label: string }> = [
         { key: 'overview', label: t('admin.users.detail.tabs.overview', { defaultValue: 'Overview' }) },
         { key: 'courses', label: t('admin.users.detail.tabs.courses', { defaultValue: 'Courses' }) },
         { key: 'wellness', label: t('admin.users.detail.tabs.wellness', { defaultValue: 'Wellness Packages' }) },
+        { key: 'sessions', label: 'Phi?n ??ng nh?p' },
         { key: 'activity', label: t('admin.users.detail.tabs.activity', { defaultValue: 'Activity' }) },
     ];
 
@@ -774,6 +776,7 @@ const UserDetailPage: React.FC = () => {
                                     </div>
                                 </div>
                             )}
+                            {activeTab === 'sessions' && id && <DeviceSessionsPanel key={id} userId={id} />}
                             {activeTab === 'activity' && (
                                 <div className="text-center py-8 text-slate-500 dark:text-slate-400">
                                     <p>{t('admin.users.detail.activityEmpty')}</p>

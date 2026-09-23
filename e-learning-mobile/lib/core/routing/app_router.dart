@@ -1,3 +1,4 @@
+import 'package:e_learning_mobile/features/profile/presentation/screens/device_sessions_screen.dart';
 import 'package:e_learning_mobile/core/config/app_config.dart';
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
@@ -281,6 +282,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'security',
                 builder: (_, __) => const SecurityScreen(),
+                routes: [GoRoute(path: 'devices', builder: (_, __) => const DeviceSessionsScreen())],
               ),
             ],
           ),

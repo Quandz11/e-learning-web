@@ -1,3 +1,4 @@
+import 'volume_control.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -37,8 +38,8 @@ typedef LearningMediaPlayerBuilder =
       String? videoId,
     });
 
-final _videoEmbedUrlProvider = FutureProvider.family<Uri?, String>(
-  (ref, videoId) => ref.read(learningApiProvider).getVideoEmbedUrl(videoId),
+final _videoEmbedUrlProvider = FutureProvider.autoDispose.family<Map<String, dynamic>, String>(
+  (ref, videoId) => ref.read(learningApiProvider).getVideoPlayback(videoId),
 );
 
 // ---------------------------------------------------------------------------
@@ -127,8 +128,15 @@ class LearningMediaPlayer extends ConsumerStatefulWidget {
 class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
   VideoPlayerController? _controller;
   Object? _error;
+  Uri? _refreshedUrl;
+  Uri? _refreshedEmbed;
+  bool _refreshAttempted = false;
+  bool _recovering = false;
+  _VideoData _resume = const _VideoData(isPlaying: false);
+
   bool _showControls = true;
   Timer? _hideControlsTimer;
+  bool _volumeOpen = false;
   double _playbackSpeed = 1.0;
   String _quality = 'Tự động (Auto)';
   String _selectedSubtitle = 'off';
@@ -156,9 +164,10 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
       'User-Agent':
           'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     };
-    final targetUri = widget.url.scheme == 'file'
-        ? widget.url
-        : Uri.parse(Uri.encodeFull(widget.url.toString().trim()));
+    final playbackUri = _refreshedUrl ?? widget.url;
+    final targetUri = playbackUri.scheme == 'file'
+        ? playbackUri
+        : playbackUri;
     final c = targetUri.scheme == 'file'
         ? VideoPlayerController.file(File(targetUri.toFilePath()))
         : VideoPlayerController.networkUrl(targetUri, httpHeaders: headers);
@@ -167,20 +176,61 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
     try {
       await c.initialize();
       if (!mounted || _controller != c) return;
+      await c.setVolume(_resume.volume);
+      await c.setPlaybackSpeed(_resume.speed);
+      await c.seekTo(Duration(milliseconds: (_resume.position * 1000).round()));
+      if (_resume.isPlaying) await c.play();
       _startHideTimer();
       setState(() {});
     } catch (e) {
       if (!mounted || _controller != c) return;
-      setState(() => _error = e);
+      await _recover(e);
     }
   }
 
   void _onControllerChanged() {
+    final c = _controller;
+    if (c != null && c.value.isInitialized && !c.value.hasError) {
+      _resume = _resume.copyWith(position: c.value.position.inMilliseconds / 1000,
+        isPlaying: c.value.isPlaying, speed: c.value.playbackSpeed, volume: c.value.volume);
+    }
+    if (c?.value.hasError == true && !_recovering) {
+      unawaited(_recover(StateError('Playback failed')));
+    }
     if (mounted) setState(() {});
   }
 
+  Future<void> _recover(Object error) async {
+    if (_recovering || !mounted) return;
+    _recovering = true;
+    _disposeController();
+    if (!_refreshAttempted && widget.videoId != null) {
+      _refreshAttempted = true;
+      try {
+        final source = await ref.read(learningApiProvider).getVideoPlayback(widget.videoId!);
+        if (!mounted) return;
+        _refreshedUrl = Uri.tryParse(source['playbackUrl']?.toString() ?? '');
+        _refreshedEmbed = Uri.tryParse(source['embedUrl']?.toString() ?? '');
+        _recovering = false;
+        await _initialize();
+        return;
+      } catch (_) {
+        // No fallback after an API failure: access may have been revoked.
+        if (mounted) setState(() { _error = error; _sourceDenied = true; });
+        _recovering = false;
+        return;
+      }
+    }
+    if (mounted) setState(() => _error = error);
+    _recovering = false;
+  }
+
+  bool _sourceDenied = false;
+
   Future<void> _retry() async {
     _disposeController();
+    _refreshAttempted = false;
+    _sourceDenied = false;
     await _initialize();
   }
 
@@ -265,7 +315,7 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
   void _startHideTimer() {
     _hideControlsTimer?.cancel();
     _hideControlsTimer = Timer(const Duration(seconds: 4), () {
-      if (mounted && (_controller?.value.isPlaying ?? false)) {
+      if (mounted && !_volumeOpen && (_controller?.value.isPlaying ?? false)) {
         setState(() => _showControls = false);
       }
     });
@@ -326,12 +376,14 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
     final c = _controller;
 
     if (_error != null) {
-      final embedUrl = widget.embedUrl;
+      final embedUrl = _sourceDenied ? null : (_refreshedEmbed ?? widget.embedUrl);
       if (embedUrl != null) {
-        return LearningVideoEmbedPlayer(url: embedUrl, title: widget.title);
+        return LearningVideoEmbedPlayer(url: embedUrl, title: widget.title,
+          initialPosition: _resume.position, initialVolume: _resume.volume,
+          initialSpeed: _resume.speed, initiallyPlaying: _resume.isPlaying);
       }
       final videoId = widget.videoId;
-      if (videoId != null) {
+      if (videoId != null && !_sourceDenied && !_refreshAttempted) {
         return LearningVideoEmbedFallback(videoId: videoId, title: widget.title);
       }
       return AppErrorView(
@@ -417,6 +469,7 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
                     onFullScreen: _openFullScreen,
                     volume: v.volume,
                     onVolumeChanged: (vol) => c.setVolume(vol),
+                    onVolumeInteractionChanged: (open) => _volumeOpen = open,
                   ),
                 ),
               ],
@@ -449,6 +502,7 @@ class _NativeFullscreenPage extends StatefulWidget {
 class _NativeFullscreenPageState extends State<_NativeFullscreenPage> {
   bool _showControls = true;
   Timer? _hideTimer;
+  bool _volumeOpen = false;
   late double _speed;
 
   @override
@@ -473,7 +527,7 @@ class _NativeFullscreenPageState extends State<_NativeFullscreenPage> {
   void _startHideTimer() {
     _hideTimer?.cancel();
     _hideTimer = Timer(const Duration(seconds: 4), () {
-      if (mounted && widget.controller.value.isPlaying) {
+      if (mounted && !_volumeOpen && widget.controller.value.isPlaying) {
         setState(() => _showControls = false);
       }
     });
@@ -561,6 +615,7 @@ class _NativeFullscreenPageState extends State<_NativeFullscreenPage> {
                       onFullScreen: () => Navigator.of(context).pop(),
                       volume: v.volume,
                       onVolumeChanged: (vol) => c.setVolume(vol),
+                    onVolumeInteractionChanged: (open) => _volumeOpen = open,
                     ),
                   ),
                 ),
@@ -580,9 +635,12 @@ class LearningVideoEmbedPlayer extends ConsumerStatefulWidget {
   const LearningVideoEmbedPlayer({
     required this.url,
     required this.title,
-    super.key,
+    this.initialPosition = 0, this.initialVolume = 1,
+    this.initialSpeed = 1, this.initiallyPlaying = true, super.key,
   });
 
+  final double initialPosition, initialVolume, initialSpeed;
+  final bool initiallyPlaying;
   final Uri url;
   final String title;
 
@@ -597,6 +655,7 @@ class _LearningVideoEmbedPlayerState
   // Use ValueNotifier so controls overlay rebuilds independently of WebView
   final _data = ValueNotifier<_VideoData>(const _VideoData());
   Timer? _hideTimer;
+  bool _volumeOpen = false;
   OverlayEntry? _overlayEntry;
   bool _isFullScreen = false;
   String _quality = 'Tự động (Auto)';
@@ -625,6 +684,8 @@ class _LearningVideoEmbedPlayerState
             final map = jsonDecode(msg.message) as Map<String, dynamic>;
             final cur = _data.value;
             _data.value = cur.copyWith(
+              volume: (map['muted'] == true) ? 0 : ((map['volume'] as num?)?.toDouble() ?? cur.volume),
+              speed: (map['playbackRate'] as num?)?.toDouble() ?? cur.speed,
               position: (map['currentTime'] as num?)?.toDouble() ?? cur.position,
               duration: (map['duration'] as num?)?.toDouble() ?? cur.duration,
               isPlaying: map['paused'] != null
@@ -657,6 +718,7 @@ class _LearningVideoEmbedPlayerState
   }
 
   void _injectJS() {
+    _wvc.runJavaScript('window.flutterInitial = ${jsonEncode({'position': widget.initialPosition, 'volume': widget.initialVolume, 'speed': widget.initialSpeed, 'playing': widget.initiallyPlaying})};');
     _wvc.runJavaScript(r'''
 (function() {
   function injectStyle() {
@@ -694,7 +756,7 @@ class _LearningVideoEmbedPlayerState
       JSON.stringify({
         currentTime: v.currentTime || 0,
         duration: v.duration || 0,
-        paused: v.paused
+        paused: v.paused, volume: v.volume, muted: v.muted, playbackRate: v.playbackRate
       })
     );
   }
@@ -709,18 +771,24 @@ class _LearningVideoEmbedPlayerState
     }
     if (v._flutter) return;
     v._flutter = true;
-    v.autoplay = true;
+    var initial = window.flutterInitial;
+    v.autoplay = initial.playing;
+    v.volume = initial.volume;
+    v.muted = initial.volume === 0;
+    v.playbackRate = initial.speed;
+    var restore = function() { v.currentTime = initial.position; if (initial.playing) v.play().catch(function(){}); else v.pause(); send(v); };
+    if (v.readyState >= 1) restore(); else v.addEventListener('loadedmetadata', restore, {once:true});
 
-    v.muted = false;
-    if (v.volume === 0) v.volume = 1.0;
+    
+    
 
-    if (v.readyState >= 2 && v.paused) {
+    if (initial.playing && v.readyState >= 2 && v.paused) {
       var p = v.play();
       if (p && p.catch) p.catch(function() {});
-    } else if (v.paused) {
+    } else if (initial.playing && v.paused) {
       v.addEventListener('canplay', function() {
         if (v.paused) {
-          v.muted = false;
+          
           var p = v.play();
           if (p && p.catch) p.catch(function() {});
         }
@@ -734,20 +802,14 @@ class _LearningVideoEmbedPlayerState
     v.addEventListener('ended',       function() { send(v); });
     v.addEventListener('error',       function() {
       setTimeout(function() {
-        v.muted = false;
-        if (v.volume === 0) v.volume = 1.0;
+        
+        
         var p = v.play();
         if (p && p.catch) p.catch(function(){});
       }, 1000);
     });
-    v.addEventListener('volumechange', function() {
-      if (v.muted) {
-        v.muted = false;
-      }
-      if (v.volume === 0) {
-        v.volume = 1.0;
-      }
-    });
+    v.addEventListener('volumechange', function() { send(v); });
+    v.addEventListener('ratechange', function() { send(v); });
 
     if (!window._flutterHlsHandled) {
       window._flutterHlsHandled = true;
@@ -760,8 +822,8 @@ class _LearningVideoEmbedPlayerState
             var v = document.querySelector('video');
             if (v && v.paused) {
               setTimeout(function() {
-                v.muted = false;
-                if (v.volume === 0) v.volume = 1.0;
+                
+                
                 var p = v.play();
                 if (p && p.catch) p.catch(function(){});
               }, 500);
@@ -801,7 +863,7 @@ class _LearningVideoEmbedPlayerState
   void _startHideTimer() {
     _hideTimer?.cancel();
     _hideTimer = Timer(const Duration(seconds: 4), () {
-      if (_data.value.isPlaying) {
+      if (!_volumeOpen && _data.value.isPlaying) {
         _data.value = _data.value.copyWith(showControls: false);
       }
     });
@@ -819,7 +881,7 @@ class _LearningVideoEmbedPlayerState
   var v = document.querySelector('video');
   if (!v) return;
   if (v.paused) {
-    v.muted = false;
+    
     var p = v.play(); if (p && p.catch) p.catch(function(){});
   } else {
     v.pause();
@@ -847,11 +909,17 @@ class _LearningVideoEmbedPlayerState
     );
   }
 
-  void _setVolume(double vol) {
-    _data.value = _data.value.copyWith(volume: vol);
-    _wvc.runJavaScript(
-      '(function(){var v=document.querySelector("video");if(v){v.volume=$vol;v.muted=(${vol == 0});}})();',
+  Future<void> _setVolume(double vol) async {
+    final target = vol.clamp(0.0, 1.0);
+    final result = await _wvc.runJavaScriptReturningResult(
+      '(function(){var v=document.querySelector("video");if(!v)return false;'
+      'v.volume=$target;v.muted=(${target == 0});'
+      'return Math.abs(v.volume-$target)<0.01 && v.muted===(${target == 0});})();',
     );
+    if (result != true && result.toString() != 'true') {
+      throw StateError('Player did not accept volume');
+    }
+    if (mounted) _data.value = _data.value.copyWith(volume: target);
   }
 
   void _reinjectAndResume() {
@@ -860,8 +928,8 @@ class _LearningVideoEmbedPlayerState
 (function(){
   var v = document.querySelector('video');
   if (v) {
-    v.muted = false;
-    if (v.volume === 0) v.volume = 1.0;
+    
+    
     if (v.paused && v.readyState >= 2) {
       var p = v.play();
       if (p && p.catch) p.catch(function(){});
@@ -954,6 +1022,7 @@ class _LearningVideoEmbedPlayerState
                               onFullScreen: _closeFullScreen,
                               volume: d.volume,
                               onVolumeChanged: _setVolume,
+                              onVolumeInteractionChanged: (open) => _volumeOpen = open,
                             ),
                           ),
                         ),
@@ -1071,6 +1140,7 @@ class _LearningVideoEmbedPlayerState
                           onFullScreen: _openFullScreen,
                           volume: d.volume,
                           onVolumeChanged: _setVolume,
+                              onVolumeInteractionChanged: (open) => _volumeOpen = open,
                         ),
                       ),
                     ],
@@ -1643,6 +1713,7 @@ class _BottomBar extends StatelessWidget {
     required this.onFullScreen,
     this.volume = 1.0,
     this.onVolumeChanged,
+    this.onVolumeInteractionChanged,
     this.quality = 'Tự động (Auto)',
     this.onQualityChanged,
     this.selectedSubtitle = 'off',
@@ -1659,7 +1730,8 @@ class _BottomBar extends StatelessWidget {
   final ValueChanged<double> onSpeedChanged;
   final VoidCallback onFullScreen;
   final double volume;
-  final ValueChanged<double>? onVolumeChanged;
+  final Future<void> Function(double)? onVolumeChanged;
+  final ValueChanged<bool>? onVolumeInteractionChanged;
   final String quality;
   final ValueChanged<String>? onQualityChanged;
   final String selectedSubtitle;
@@ -1811,29 +1883,10 @@ class _BottomBar extends StatelessWidget {
                 ),
               // 4. Volume Control
               if (onVolumeChanged != null)
-                PopupMenuButton<double>(
-                  tooltip: 'Âm lượng',
-                  initialValue: volume,
-                  onSelected: onVolumeChanged,
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 1.0, child: Text('100%')),
-                    PopupMenuItem(value: 0.75, child: Text('75%')),
-                    PopupMenuItem(value: 0.50, child: Text('50%')),
-                    PopupMenuItem(value: 0.25, child: Text('25%')),
-                    PopupMenuItem(value: 0.0, child: Text('Tắt âm')),
-                  ],
-                  child: Padding(
-                    padding: const EdgeInsets.all(3),
-                    child: Icon(
-                      volume == 0
-                          ? Icons.volume_off_rounded
-                          : (volume < 0.5
-                              ? Icons.volume_down_rounded
-                              : Icons.volume_up_rounded),
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
+                VolumeControl(
+                  volume: volume,
+                  onChanged: onVolumeChanged!,
+                  onInteractionChanged: onVolumeInteractionChanged,
                 ),
               // 5. Speed badge
               PopupMenuButton<double>(
@@ -1951,11 +2004,15 @@ class LearningVideoEmbedFallback extends ConsumerWidget {
         message: 'Không thể mở trình phát. Vui lòng thử lại.',
         onRetry: () => ref.invalidate(_videoEmbedUrlProvider(videoId)),
       ),
-      data: (embedUrl) {
-        if (embedUrl == null || !_isSupportedNetworkUrl(embedUrl)) {
-          return const _InvalidMediaUrlCard();
+      data: (source) {
+        final direct = Uri.tryParse(source['playbackUrl']?.toString() ?? '');
+        final embed = Uri.tryParse(source['embedUrl']?.toString() ?? '');
+        if (direct != null && _isSupportedNetworkUrl(direct)) {
+          return LearningMediaPlayer(url: direct, title: title, duration: 0,
+            embedUrl: embed, videoId: videoId);
         }
-        return LearningVideoEmbedPlayer(url: embedUrl, title: title);
+        if (embed == null || !_isSupportedNetworkUrl(embed)) return const _InvalidMediaUrlCard();
+        return LearningVideoEmbedPlayer(url: embed, title: title);
       },
     );
   }

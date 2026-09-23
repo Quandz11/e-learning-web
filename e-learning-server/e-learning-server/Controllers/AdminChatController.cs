@@ -28,6 +28,25 @@ public class AdminChatController : ControllerBase
         _hubContext = hubContext;
     }
 
+    [HttpPost("guest/{guestId}/send")]
+    public async Task<IActionResult> SendGuestReply(string guestId, [FromBody] GuestReplyRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Content) || request.Content.Length > 1000)
+            return BadRequest(new { message = "Invalid message content" });
+        if (_guestConversationService.GetConversation(guestId) == null) return NotFound();
+        var message = new GuestMessage {
+            SenderId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value,
+            SenderName = User.FindFirst("fullName")?.Value ?? "SKVI Support",
+            Content = request.Content.Trim(), IsFromGuest = false
+        };
+        _guestConversationService.AddOrUpdateConversation(guestId, message);
+        await _hubContext.Clients.Group($"guest-{guestId}").SendAsync("ReceiveMessage", message);
+        await _hubContext.Clients.Group("care-group").SendAsync("ReceiveGuestMessage", guestId, message);
+        return Ok(message);
+    }
+
+    public record GuestReplyRequest(string Content);
+
     [HttpGet("conversations")]
     public async Task<ActionResult<AdminConversationsResponse>> GetAllConversations()
     {

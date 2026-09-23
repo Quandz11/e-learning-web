@@ -47,11 +47,13 @@ class ChatRepository {
     required String conversationId,
     required String content,
     String? currentUserId,
+    String? clientMessageId,
   }) async {
     return _api.sendMessage(
       conversationId: conversationId,
       content: content,
       currentUserId: currentUserId,
+      clientMessageId: clientMessageId,
     );
   }
 

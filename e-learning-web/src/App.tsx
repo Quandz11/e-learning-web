@@ -1,8 +1,11 @@
+import { tokenService, sessionId } from './services/tokenService';
+import { apiClient } from './services/apiClient';
+import { chatSignalR } from './services/chat/chatSignalR';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from './store/store';
-import { setAuthState, updateUser } from './store/authSlice';
+import { setAuthState, updateUser, logout } from './store/authSlice';
 import { authApi } from './services/authApi';
 import { loadAuth, saveAuth, clearAuth } from './services/authStorage';
 import { profileApi } from './services/profileApi';
@@ -648,6 +651,33 @@ function App() {
     []
   );
 
+  useEffect(() => {
+    const ended = () => { dispatch(logout()); void chatSignalR.disconnect(); };
+    const storage = (event: StorageEvent) => {
+      if (event.key !== 'session-logout' || !event.newValue) return;
+      try {
+        if (JSON.parse(event.newValue).sid === sessionId(tokenService.getAccessToken())) tokenService.clearToken(false);
+      } catch { /* Ignore malformed cross-tab events. */ }
+    };
+    const verify = () => {
+      if (document.visibilityState === 'visible' && tokenService.getAccessToken()) {
+        void apiClient('/auth/sessions').catch(() => undefined);
+      }
+    };
+    window.addEventListener('session-ended', ended);
+    window.addEventListener('storage', storage);
+    window.addEventListener('online', verify);
+    document.addEventListener('visibilitychange', verify);
+    const timer = window.setInterval(verify, 30000);
+    return () => {
+      window.removeEventListener('session-ended', ended);
+      window.removeEventListener('storage', storage);
+      window.removeEventListener('online', verify);
+      document.removeEventListener('visibilitychange', verify);
+      window.clearInterval(timer);
+    };
+  }, [dispatch]);
+
   // On app load, always try to refresh token using HTTP-only cookie
   useEffect(() => {
     const initAuth = async () => {
@@ -662,6 +692,7 @@ function App() {
             isAuthenticated: true,
           })
         );
+        await apiClient('/auth/sessions').catch(() => undefined);
         setIsInitializing(false);
         return;
       }

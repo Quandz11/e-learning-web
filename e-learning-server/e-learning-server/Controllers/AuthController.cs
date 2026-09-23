@@ -316,7 +316,7 @@ public class AuthController : ControllerBase
                 return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
             }
 
-            var currentRefreshToken = Request.Cookies["refreshToken"];
+            var currentRefreshToken = User.FindFirst("sid")?.Value;
             var sessions = await _authService.GetActiveSessionsAsync(Guid.Parse(userId), currentRefreshToken);
             return Ok(sessions);
         }
@@ -365,7 +365,7 @@ public class AuthController : ControllerBase
                 return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
             }
 
-            var currentRefreshToken = Request.Cookies["refreshToken"];
+            var currentRefreshToken = User.FindFirst("sid")?.Value;
             await _authService.RevokeAllSessionsAsync(Guid.Parse(userId), currentRefreshToken);
             return Ok(new { message = "All other sessions revoked successfully" });
         }
@@ -389,26 +389,7 @@ public class AuthController : ControllerBase
         Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
     }
 
-    private string GetClientIpAddress()
-    {
-        var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(forwardedFor))
-        {
-            var ips = forwardedFor.Split(',');
-            if (ips.Length > 0)
-            {
-                return ips[0].Trim();
-            }
-        }
-
-        var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(realIp))
-        {
-            return realIp;
-        }
-
-        return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
-    }
+    private string GetClientIpAddress() => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 
     private IActionResult ApiError(int statusCode, string code, string message, object? errors = null)
     {

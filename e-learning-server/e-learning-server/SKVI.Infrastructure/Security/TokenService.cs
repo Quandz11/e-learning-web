@@ -17,7 +17,7 @@ public class TokenService : ITokenService
         _jwtSettings = jwtSettings.Value;
     }
 
-    public string GenerateAccessToken(Guid userId, string email, string role, string? fullName = null)
+    public string GenerateAccessToken(Guid userId, string email, string role, string? fullName = null, Guid? sessionId = null)
     {
         var claims = new List<Claim>
         {
@@ -26,6 +26,8 @@ public class TokenService : ITokenService
             new Claim(ClaimTypes.Role, role),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        if (sessionId != null) claims.Add(new Claim("sid", sessionId.Value.ToString()));
 
         if (!string.IsNullOrEmpty(fullName))
         {

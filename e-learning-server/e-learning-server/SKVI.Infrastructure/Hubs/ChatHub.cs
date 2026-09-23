@@ -204,7 +204,7 @@ public class ChatHub : Hub
 
     // Authenticated user chat (persistent)
     [Authorize]
-    public async Task SendMessage(Guid conversationId, string content)
+    public async Task SendMessage(Guid conversationId, string content, Guid? clientMessageId = null)
     {
         var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId)) return;
@@ -223,7 +223,7 @@ public class ChatHub : Hub
             return;
         }
 
-        var message = await _chatService.SendMessageAsync(conversationId, Guid.Parse(userId), content);
+        var message = await _chatService.SendMessageAsync(conversationId, Guid.Parse(userId), content, clientMessageId);
         
         // Send to all participants in conversation
         await Clients.Group($"conversation-{conversationId}").SendAsync("ReceiveMessage", message);

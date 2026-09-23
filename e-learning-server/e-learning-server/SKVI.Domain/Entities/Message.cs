@@ -4,6 +4,7 @@ namespace SKVI.Domain.Entities;
 
 public class Message
 {
+    public Guid? ClientMessageId { get; set; }
     public Guid Id { get; set; }
     public Guid ConversationId { get; set; }
     public Guid SenderId { get; set; }

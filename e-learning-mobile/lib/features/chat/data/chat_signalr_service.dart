@@ -7,10 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
 final chatSignalRServiceProvider = Provider<ChatSignalRService>((ref) {
-  return ChatSignalRService(
+  final service = ChatSignalRService(
     config: ref.watch(appConfigProvider),
     sessionRepository: ref.watch(sessionRepositoryProvider),
   );
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 class ChatSignalRService {
@@ -24,7 +26,12 @@ class ChatSignalRService {
   final SessionRepository _sessionRepository;
 
   HubConnection? _hubConnection;
-  bool _isConnecting = false;
+  Future<void>? _connecting;
+  bool _disposed = false;
+  int _generation = 0;
+  final Set<String> _groups = {};
+  final _reconnected = StreamController<void>.broadcast();
+  Stream<void> get onReconnected => _reconnected.stream;
 
   final _messageController = StreamController<ChatMessage>.broadcast();
   final _conversationUpdatedController = StreamController<void>.broadcast();
@@ -38,51 +45,47 @@ class ChatSignalRService {
       _hubConnection?.state ?? HubConnectionState.Disconnected;
 
   Future<void> connect({String? currentUserId}) async {
-    if (_hubConnection?.state == HubConnectionState.Connected) return;
-    if (_isConnecting) return;
+    if (_disposed || _hubConnection?.state == HubConnectionState.Connected) return;
+    final pending = _connecting ??= _connect();
+    try { await pending; } finally { if (identical(_connecting, pending)) _connecting = null; }
+  }
 
-    _isConnecting = true;
+  Future<void> _connect() async {
+    final generation = _generation;
+    final previous = _hubConnection;
+    _hubConnection = null;
+    await previous?.stop();
+    if (_disposed || generation != _generation) return;
+    final hubUrl = '${_config.apiBaseUrl.toString().replaceFirst(RegExp(r'/api/?$'), '')}/hubs/chat';
+    final connection = HubConnectionBuilder().withUrl(hubUrl, options: HttpConnectionOptions(
+      accessTokenFactory: () async {
+        var session = await _sessionRepository.readStoredSession();
+        if (session == null || _disposed || generation != _generation) throw StateError('No active session');
+        if (session.isExpiredAt(DateTime.now())) session = await _sessionRepository.refreshStoredSession();
+        return session.accessToken;
+      },
+    )).withAutomaticReconnect().build();
+    _hubConnection = connection;
+    connection.on('ReceiveMessage', _handleReceiveMessage);
+    connection.on('ReceiveGuestMessage', _handleReceiveGuestMessage);
+    connection.on('ConversationUpdated', _handleConversationUpdated);
+    connection.on('UserTyping', _handleUserTyping);
+    connection.onreconnected(({connectionId}) async {
+      if (_disposed || generation != _generation) return;
+      for (final group in _groups.toList()) { await joinConversation(group); }
+      if (!_reconnected.isClosed) _reconnected.add(null);
+    });
     try {
-      final session = await _sessionRepository.readStoredSession();
-      final token = session?.accessToken ?? '';
-
-      var baseUrl = _config.apiBaseUrl.toString();
-      if (baseUrl.endsWith('/')) {
-        baseUrl = baseUrl.substring(0, baseUrl.length - 1);
-      }
-      if (baseUrl.endsWith('/api')) {
-        baseUrl = baseUrl.substring(0, baseUrl.length - 4);
-      }
-
-      final hubUrl = '$baseUrl/hubs/chat';
-
-      final httpOptions = HttpConnectionOptions(
-        accessTokenFactory: () async => token,
-        transport: HttpTransportType.WebSockets,
-        skipNegotiation: true,
-      );
-
-      _hubConnection = HubConnectionBuilder()
-          .withUrl(hubUrl, options: httpOptions)
-          .withAutomaticReconnect()
-          .build();
-
-      _hubConnection!.on('ReceiveMessage', _handleReceiveMessage);
-      _hubConnection!.on('ReceiveGuestMessage', _handleReceiveGuestMessage);
-      _hubConnection!.on('ConversationUpdated', _handleConversationUpdated);
-      _hubConnection!.on('UserTyping', _handleUserTyping);
-
-      await _hubConnection!.start();
-      debugPrint('[SignalR] Connected successfully to $hubUrl');
-    } catch (e) {
-      debugPrint('[SignalR] Connection error: $e');
-    } finally {
-      _isConnecting = false;
+      await connection.start();
+      if (_disposed || generation != _generation) await connection.stop();
+    } catch (_) {
+      // HTTP history and sending remain usable while realtime is unavailable.
+      debugPrint('[SignalR] Chat connection unavailable');
     }
   }
 
   void _handleReceiveMessage(List<dynamic>? args) {
-    if (args == null || args.isEmpty) return;
+    if (_disposed || args == null || args.isEmpty) return;
     try {
       final data = args[0];
       if (data is Map<String, dynamic>) {
@@ -95,11 +98,11 @@ class ChatSignalRService {
   }
 
   void _handleReceiveGuestMessage(List<dynamic>? args) {
-    if (args == null || args.length < 2) return;
+    if (_disposed || args == null || args.length < 2) return;
     try {
       final data = args[1];
       if (data is Map<String, dynamic>) {
-        final message = ChatMessage.fromJson(data);
+        final message = ChatMessage.fromGuestJson(data, args[0].toString());
         _messageController.add(message);
       }
     } catch (e) {
@@ -108,7 +111,7 @@ class ChatSignalRService {
   }
 
   void _handleConversationUpdated(List<dynamic>? args) {
-    _conversationUpdatedController.add(null);
+    if (!_disposed) _conversationUpdatedController.add(null);
   }
 
   void _handleUserTyping(List<dynamic>? args) {
@@ -118,6 +121,7 @@ class ChatSignalRService {
   }
 
   Future<void> joinConversation(String conversationId) async {
+    _groups.add(conversationId);
     if (_hubConnection?.state == HubConnectionState.Connected) {
       try {
         await _hubConnection!.invoke('JoinConversation', args: [conversationId]);
@@ -128,6 +132,7 @@ class ChatSignalRService {
   }
 
   Future<void> leaveConversation(String conversationId) async {
+    _groups.remove(conversationId);
     if (_hubConnection?.state == HubConnectionState.Connected) {
       try {
         await _hubConnection!.invoke('LeaveConversation', args: [conversationId]);
@@ -138,19 +143,19 @@ class ChatSignalRService {
   }
 
   Future<void> disconnect() async {
-    if (_hubConnection != null &&
-        _hubConnection!.state != HubConnectionState.Disconnected) {
-      try {
-        await _hubConnection!.stop();
-      } catch (_) {}
-      _hubConnection = null;
-    }
+    _generation++;
+    _groups.clear();
+    final connection = _hubConnection;
+    _hubConnection = null;
+    await connection?.stop();
   }
 
   void dispose() {
-    disconnect();
+    _disposed = true;
+    unawaited(disconnect());
     _messageController.close();
     _conversationUpdatedController.close();
     _typingController.close();
+    _reconnected.close();
   }
 }

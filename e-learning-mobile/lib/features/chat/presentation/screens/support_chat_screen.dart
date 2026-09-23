@@ -202,7 +202,15 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                           itemCount: state.messages.length,
                           itemBuilder: (context, index) {
                             final msg = state.messages[index];
-                            return _ChatBubble(message: msg);
+                            return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                            _ChatBubble(message: msg),
+                            if (msg.delivery == 'sending') const Text('?ang g?i?'),
+                            if (msg.delivery == 'failed') TextButton(
+                              onPressed: state.isSending ? null : () => ref.read(chatControllerProvider.notifier)
+                                .sendMessage(msg.content, clientMessageId: msg.clientMessageId),
+                              child: const Text('G?i th?t b?i ? Th? l?i'),
+                            ),
+                          ]);
                           },
                         ),
             ),
@@ -375,7 +383,15 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                           }
 
                           final msg = state.messages[index - 1];
-                          return _ChatBubble(message: msg);
+                          return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                            _ChatBubble(message: msg),
+                            if (msg.delivery == 'sending') const Text('?ang g?i?'),
+                            if (msg.delivery == 'failed') TextButton(
+                              onPressed: state.isSending ? null : () => ref.read(chatControllerProvider.notifier)
+                                .sendMessage(msg.content, clientMessageId: msg.clientMessageId),
+                              child: const Text('G?i th?t b?i ? Th? l?i'),
+                            ),
+                          ]);
                         },
                       ),
           ),

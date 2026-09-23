@@ -1,3 +1,7 @@
+import 'package:e_learning_mobile/features/chat/data/chat_signalr_service.dart';
+import 'package:e_learning_mobile/features/chat/presentation/controllers/admin_chat_controller.dart';
+import 'package:e_learning_mobile/features/chat/presentation/controllers/admin_chat_detail_controller.dart';
+import 'package:e_learning_mobile/features/profile/data/device_sessions_repository.dart';
 import 'package:e_learning_mobile/core/network/cache_service.dart';
 import 'package:e_learning_mobile/core/session/app_session.dart';
 import 'package:e_learning_mobile/core/session/session_repository.dart';
@@ -64,8 +68,13 @@ class SessionController extends StateNotifier<SessionState> {
 
     try {
       await _repository.clear();
+      state = const SessionState.unauthenticated();
       final ref = _ref;
       if (ref != null) {
+        await ref.read(chatSignalRServiceProvider).disconnect();
+        ref.invalidate(adminChatListControllerProvider);
+        ref.invalidate(adminChatDetailProvider);
+        ref.invalidate(deviceSessionsProvider);
         try {
           await ref.read(cacheServiceProvider).clear();
         } catch (_) {}

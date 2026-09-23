@@ -129,6 +129,15 @@ class LearningApi {
     }
   }
 
+  Future<Map<String, dynamic>> getVideoPlayback(String videoId) async {
+    try {
+      final data = await _apiClient.get<Object?>('/videos/$videoId/playback');
+      return _coerceJsonMap(data);
+    } on DioException catch (error) {
+      throw _map(error);
+    }
+  }
+
   Future<Uri?> getVideoEmbedUrl(String videoId) async {
     try {
       final data = await _apiClient.get<Object?>('/videos/$videoId/embed-url');

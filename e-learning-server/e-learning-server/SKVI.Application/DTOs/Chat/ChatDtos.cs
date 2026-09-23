@@ -4,6 +4,7 @@ namespace SKVI.Application.DTOs.Chat;
 
 public class MessageResponse
 {
+    public Guid? ClientMessageId { get; set; }
     public Guid Id { get; set; }
     public Guid ConversationId { get; set; }
     public Guid SenderId { get; set; }
@@ -42,6 +43,7 @@ public class CreateConversationDto
 
 public class SendMessageDto
 {
+    public Guid? ClientMessageId { get; set; }
     public Guid ConversationId { get; set; }
     public string Content { get; set; } = string.Empty;
 }

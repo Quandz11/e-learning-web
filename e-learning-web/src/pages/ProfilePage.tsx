@@ -1,3 +1,4 @@
+import DeviceSessionsPanel from '../components/DeviceSessionsPanel';
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -181,6 +182,7 @@ const ProfilePage: React.FC = () => {
 
     return (
         <div className="container mx-auto max-w-5xl">
+            <DeviceSessionsPanel />
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('profile.title')}</h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t('profile.subtitle')}</p>

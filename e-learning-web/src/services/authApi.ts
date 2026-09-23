@@ -85,6 +85,7 @@ class AuthApi {
   }
 
   async logout(): Promise<void> {
+    tokenService.invalidatePending();
     try {
       await apiClient('/auth/logout', {
         method: 'POST',

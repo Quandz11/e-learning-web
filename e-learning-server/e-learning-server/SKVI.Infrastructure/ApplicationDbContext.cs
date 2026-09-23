@@ -11,6 +11,7 @@ public class ApplicationDbContext : DbContext
 
     // Auth & User
     public DbSet<User> Users { get; set; }
+    public DbSet<UserSession> UserSessions { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
     public DbSet<UserReferral> UserReferrals { get; set; }
@@ -110,6 +111,12 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Message>().HasIndex(m => new { m.SenderId, m.ConversationId, m.ClientMessageId })
+            .IsUnique().HasFilter("[ClientMessageId] IS NOT NULL");
+        modelBuilder.Entity<UserSession>().HasIndex(s => new { s.UserId, s.RevokedAt });
+        modelBuilder.Entity<UserSession>().HasOne(s => s.User).WithMany().HasForeignKey(s => s.UserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<RefreshToken>().HasOne(t => t.Session).WithMany().HasForeignKey(t => t.SessionId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<RefreshToken>().Property(t => t.RevokedAt).IsConcurrencyToken();
 
         // Configure indexes and constraints as per requirements
 

@@ -1,3 +1,4 @@
+import 'package:e_learning_mobile/core/session/session_lifecycle.dart';
 import 'dart:async';
 import 'package:e_learning_mobile/core/routing/app_router.dart';
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
@@ -76,7 +77,7 @@ class _AppState extends ConsumerState<App> {
           data: mediaQuery.copyWith(
             textScaler: clampedTextScaler,
           ),
-          child: child ?? const SizedBox(),
+          child: SessionLifecycle(child: child ?? const SizedBox()),
         );
       },
     );

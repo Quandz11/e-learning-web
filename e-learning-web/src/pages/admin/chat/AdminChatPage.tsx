@@ -1,3 +1,4 @@
+import { mergeMessages } from '../../../services/chat/mergeMessages';
 import { useEffect, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../store/store';
@@ -143,8 +144,7 @@ export default function AdminChatPage() {
                         if (current.type === 'guest') {
                             console.log('[Admin Chat] Adding admin message to GUEST conversation');
                             setMessages(prev => {
-                                if (prev.some(m => m.id === message.id)) return prev;
-                                return [...prev, message as unknown as GuestMessage];
+                                return mergeMessages(prev, [message as unknown as GuestMessage]);
                             });
                         }
                         // If it's an authenticated user conversation
@@ -154,8 +154,7 @@ export default function AdminChatPage() {
 
                             console.log('[Admin Chat] Adding admin message to AUTH conversation');
                             setMessages(prev => {
-                                if (prev.some(m => m.id === message.id)) return prev;
-                                return [...prev, message as unknown as GuestMessage];
+                                return mergeMessages(prev, [message as unknown as GuestMessage]);
                             });
                         }
                     }
@@ -236,7 +235,7 @@ export default function AdminChatPage() {
         try {
             if (conversation.type === 'guest' && conversation.guestId) {
                 const msgs = await adminChatApi.getGuestMessages(conversation.guestId);
-                setMessages(msgs);
+                setMessages(prev => mergeMessages(msgs, prev));
 
                 // Mark as read
                 await adminChatApi.markGuestAsRead(conversation.guestId);
@@ -246,7 +245,7 @@ export default function AdminChatPage() {
                 loadConversations(); // Refresh to update unread count
             } else if (conversation.type === 'authenticated') {
                 const msgs = await adminChatApi.getConversationMessages(conversation.id);
-                setMessages(msgs);
+                setMessages(prev => mergeMessages(msgs, prev));
 
                 // Mark as read backend
                 // Calling API to mark read (which should also trigger SignalR event to user)

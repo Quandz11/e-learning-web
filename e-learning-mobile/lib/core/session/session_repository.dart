@@ -68,11 +68,28 @@ class SessionRepository {
   final AppConfig _config;
   final Dio _refreshDio;
 
-  Future<void> clear() => _storage.clear();
+  int _generation = 0;
+  int get generation => _generation;
+  Future<void> _writes = Future.value();
+  Future<AppSession>? _refresh;
+
+  Future<void> _write(Future<void> Function() action) {
+    final next = _writes.then((_) => action());
+    _writes = next.catchError((Object _) {});
+    return next;
+  }
+
+  Future<void> clear() {
+    _generation++;
+    return _write(_storage.clear);
+  }
 
   Future<AppSession?> readStoredSession() => _storage.read();
 
-  Future<void> writeSession(AppSession session) => _storage.write(session);
+  Future<void> writeSession(AppSession session) {
+    _generation++;
+    return _write(() => _storage.write(session));
+  }
 
   Future<AppSession?> restoreSession() async {
     final stored = await _storage.read();
@@ -97,10 +114,13 @@ class SessionRepository {
     if (current == null) {
       throw const SessionRefreshException('No stored session.');
     }
-    return refreshSession(current);
+    final pending = _refresh ??= refreshSession(current);
+    try { return await pending; }
+    finally { if (identical(_refresh, pending)) _refresh = null; }
   }
 
   Future<AppSession> refreshSession(AppSession session) async {
+    final generation = _generation;
     final response = await _refreshDio.post<Map<String, dynamic>>(
       '/auth/refresh',
       data: {'refreshToken': session.refreshToken},
@@ -127,7 +147,11 @@ class SessionRepository {
       refreshToken: refreshToken,
       expiresAt: expiresAt,
     );
-    await _storage.write(refreshed);
+    await _write(() async {
+      if (_generation != generation) throw const SessionRefreshException('Session changed during refresh.');
+      await _storage.write(refreshed);
+    });
+    if (_generation != generation) throw const SessionRefreshException('Session changed during refresh.');
     return refreshed;
   }
 

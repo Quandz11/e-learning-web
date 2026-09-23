@@ -1,3 +1,4 @@
+import { mergeMessages } from '../../services/chat/mergeMessages';
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -118,8 +119,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
                 chatSignalR.onReceiveMessage((message) => {
                     setMessages(prev => {
                         // avoid duplicate ids causing React key warnings
-                        if (prev.some(m => m.id === message.id)) return prev;
-                        return [...prev, message];
+                        return mergeMessages(prev, [message]);
                     });
                     scrollToBottom();
                     const isFromMe = isAuthenticated
@@ -197,8 +197,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isOpen, onClose, onUnreadCountC
         if (isConnected) {
             chatSignalR.onReceiveMessage((message) => {
                 setMessages(prev => {
-                    if (prev.some(m => m.id === message.id)) return prev;
-                    return [...prev, message];
+                    return mergeMessages(prev, [message]);
                 });
 
                 // Logic for unread count

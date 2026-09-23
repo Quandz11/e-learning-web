@@ -30,7 +30,7 @@ public interface IAuthService
 
 public interface ITokenService
 {
-    string GenerateAccessToken(Guid userId, string email, string role, string? fullName = null);
+    string GenerateAccessToken(Guid userId, string email, string role, string? fullName = null, Guid? sessionId = null);
     string GenerateRefreshToken();
 }
 

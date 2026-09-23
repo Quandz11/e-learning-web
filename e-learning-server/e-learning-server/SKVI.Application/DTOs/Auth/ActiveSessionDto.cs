@@ -2,6 +2,8 @@ namespace SKVI.Application.DTOs.Auth;
 
 public class ActiveSessionDto
 {
+    public string Platform { get; set; } = "Web";
+    public DateTime LastActiveAt { get; set; }
     public Guid SessionId { get; set; }
     public string DeviceName { get; set; } = string.Empty;
     public string Browser { get; set; } = string.Empty;

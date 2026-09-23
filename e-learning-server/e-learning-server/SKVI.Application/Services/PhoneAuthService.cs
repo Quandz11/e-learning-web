@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SKVI.Application.DTOs.Auth;
@@ -13,6 +13,7 @@ public class PhoneAuthService : IPhoneAuthService
 {
     private const int OtpExpirationMinutes = 10;
 
+    private readonly UserSessionService _sessions;
     private readonly ApplicationDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
@@ -26,9 +27,10 @@ public class PhoneAuthService : IPhoneAuthService
         ITokenService tokenService,
         IOptions<JwtSettings> jwtSettings,
         IUserReferralService userReferralService,
-        IPhoneOtpSender phoneOtpSender
+        IPhoneOtpSender phoneOtpSender, UserSessionService sessions
     )
     {
+        _sessions = sessions;
         _context = context;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
@@ -385,36 +387,8 @@ public class PhoneAuthService : IPhoneAuthService
         return candidates.Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
-    private async Task<AuthResponse> GenerateTokensForUserAsync(
-        User user,
-        string ipAddress,
-        string userAgent,
-        CancellationToken cancellationToken
-    )
-    {
-        var accessToken = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Role, user.FullName);
-        var refreshToken = _tokenService.GenerateRefreshToken();
-
-        var refreshTokenEntity = new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            TokenHash = refreshToken,
-            IpAddress = ipAddress,
-            UserAgent = userAgent,
-            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _context.RefreshTokens.Add(refreshTokenEntity);
-        await _context.SaveChangesAsync(cancellationToken);
-
-        return new AuthResponse(
-            accessToken,
-            refreshToken,
-            DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
-        );
-    }
+    private Task<AuthResponse> GenerateTokensForUserAsync(User user, string ipAddress, string userAgent, CancellationToken cancellationToken) =>
+        _sessions.CreateAsync(user, ipAddress, userAgent, cancellationToken);
 
     private static string GenerateOtp()
     {

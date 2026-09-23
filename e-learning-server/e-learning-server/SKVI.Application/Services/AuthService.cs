@@ -12,6 +12,7 @@ namespace SKVI.Application.Services;
 
 public class AuthService : IAuthService
 {
+    private readonly UserSessionService _sessions;
     private readonly ApplicationDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
@@ -26,8 +27,9 @@ public class AuthService : IAuthService
         ITokenService tokenService,
         IOptions<JwtSettings> jwtSettings,
         IUserReferralService userReferralService,
-        IEmailService emailService)
+        IEmailService emailService, UserSessionService sessions)
     {
+        _sessions = sessions;
         _context = context;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
@@ -326,89 +328,13 @@ public class AuthService : IAuthService
 
     }
 
-    private async Task<AuthResponse> GenerateTokensForUser(User user, string ipAddress, string userAgent)
-    {
-        var accessToken = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Role, user.FullName);
-        var refreshToken = _tokenService.GenerateRefreshToken();
-        
-        var refreshTokenEntity = new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            TokenHash = refreshToken,
-            IpAddress = ipAddress,
-            UserAgent = userAgent,
-            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
-            CreatedAt = DateTime.UtcNow
-        };
-        
-        _context.RefreshTokens.Add(refreshTokenEntity);
-        await _context.SaveChangesAsync();
+    private Task<AuthResponse> GenerateTokensForUser(User user, string ipAddress, string userAgent) =>
+        _sessions.CreateAsync(user, ipAddress, userAgent);
 
-        return new AuthResponse(accessToken, refreshToken, DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes));
-    }
+    public Task<AuthResponse> RefreshTokenAsync(string refreshToken, string ipAddress, string userAgent) =>
+        _sessions.RefreshAsync(refreshToken);
 
-    public async Task<AuthResponse> RefreshTokenAsync(string refreshToken, string ipAddress, string userAgent)
-    {
-        var tokenEntity = await _context.RefreshTokens
-            .Include(t => t.User)
-            .FirstOrDefaultAsync(t => t.TokenHash == refreshToken);
-
-        if (tokenEntity == null)
-        {
-            throw new UnauthorizedAccessException("Invalid refresh token.");
-        }
-
-        if (tokenEntity.RevokedAt != null)
-        {
-            // Token Reuse Detected! Security Alert!
-            // Revoke all tokens for this user family?
-            // For now, just fail.
-            throw new UnauthorizedAccessException("Token already revoked.");
-        }
-
-        if (tokenEntity.ExpiresAt < DateTime.UtcNow)
-        {
-            throw new UnauthorizedAccessException("Token expired.");
-        }
-
-        // Rotate Token
-        // 1. Revoke old token
-        tokenEntity.RevokedAt = DateTime.UtcNow;
-        
-        // 2. Generate new tokens
-        var user = tokenEntity.User;
-        var newAccessToken = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Role, user.FullName);
-        var newRefreshToken = _tokenService.GenerateRefreshToken();
-        
-        var newRefreshTokenEntity = new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            TokenHash = newRefreshToken,
-            IpAddress = ipAddress,
-            UserAgent = userAgent,
-            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
-            CreatedAt = DateTime.UtcNow
-        };
-        
-        _context.RefreshTokens.Add(newRefreshTokenEntity);
-        await _context.SaveChangesAsync();
-        
-        return new AuthResponse(newAccessToken, newRefreshToken, DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes));
-    }
-
-    public async Task LogoutAsync(string refreshToken)
-    {
-        var tokenEntity = await _context.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == refreshToken);
-        if (tokenEntity != null)
-        {
-            tokenEntity.RevokedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    // 2FA Implementations
+    public Task LogoutAsync(string refreshToken) => _sessions.LogoutAsync(refreshToken);
 
     public async Task<(string Secret, string QrCodeUri)> GenerateTwoFactorSetupAsync(Guid userId)
     {
@@ -484,53 +410,16 @@ public class AuthService : IAuthService
     }
 
     // Session Management Methods
-    public async Task<List<ActiveSessionDto>> GetActiveSessionsAsync(Guid userId, string? currentRefreshToken)
+    public Task<List<ActiveSessionDto>> GetActiveSessionsAsync(Guid userId, string? currentRefreshToken) =>
+        _sessions.ListAsync(userId, Guid.TryParse(currentRefreshToken, out var sid) ? sid : null);
+
+    public Task RevokeSessionAsync(Guid userId, Guid sessionId) =>
+        _sessions.RevokeAsync(userId, sessionId, null, "revoked");
+
+    public Task RevokeAllSessionsAsync(Guid userId, string? currentRefreshToken)
     {
-        var sessions = await _context.RefreshTokens
-            .Where(rt => rt.UserId == userId && 
-                         rt.RevokedAt == null && 
-                         rt.ExpiresAt > DateTime.UtcNow)
-            .OrderByDescending(rt => rt.CreatedAt)
-            .ToListAsync();
-
-        return sessions.Select(s => new ActiveSessionDto
-        {
-            SessionId = s.Id,
-            DeviceName = ParseDeviceName(s.UserAgent),
-            Browser = ParseBrowser(s.UserAgent),
-            IpAddress = s.IpAddress ?? "Unknown",
-            LoginTime = s.CreatedAt,
-            ExpiresAt = s.ExpiresAt,
-            IsCurrentSession = !string.IsNullOrEmpty(currentRefreshToken) && s.TokenHash == currentRefreshToken
-        }).ToList();
-    }
-
-    public async Task RevokeSessionAsync(Guid userId, Guid sessionId)
-    {
-        var session = await _context.RefreshTokens
-            .FirstOrDefaultAsync(rt => rt.Id == sessionId && rt.UserId == userId);
-        
-        if (session == null)
-            throw new KeyNotFoundException("Session not found");
-        
-        session.RevokedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task RevokeAllSessionsAsync(Guid userId, string? currentRefreshToken)
-    {
-        var sessions = await _context.RefreshTokens
-            .Where(rt => rt.UserId == userId && 
-                         rt.RevokedAt == null && 
-                         (!string.IsNullOrEmpty(currentRefreshToken) ? rt.TokenHash != currentRefreshToken : true))
-            .ToListAsync();
-
-        foreach (var session in sessions)
-        {
-            session.RevokedAt = DateTime.UtcNow;
-        }
-
-        await _context.SaveChangesAsync();
+        if (!Guid.TryParse(currentRefreshToken, out var sid)) throw new UnauthorizedAccessException("AUTH_SESSION_REVOKED");
+        return _sessions.RevokeAsync(userId, null, sid, "revoked");
     }
 
     // Helper methods for parsing UserAgent

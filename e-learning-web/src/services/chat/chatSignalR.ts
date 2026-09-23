@@ -1,9 +1,11 @@
+import { tokenService } from '../tokenService';
 import * as signalR from '@microsoft/signalr';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://localhost:7145';
 
 export interface ChatMessage {
     id: string;
+    clientMessageId?: string;
     conversationId?: string;
     senderId: string;
     senderName: string;
@@ -153,7 +155,7 @@ class ChatSignalRService {
 
             const connectionBuilder = new signalR.HubConnectionBuilder()
                 .withUrl(`${API_BASE_URL}/hubs/chat`, {
-                    accessTokenFactory: () => token || '',
+                    accessTokenFactory: () => tokenService.getAccessToken() || '',
                     skipNegotiation: true, // go straight to WebSockets to avoid negotiate aborts
                     transport: signalR.HttpTransportType.WebSockets,
                 })
@@ -315,9 +317,9 @@ class ChatSignalRService {
     }
 
     // Authenticated user chat methods
-    async sendMessage(conversationId: string, content: string) {
+    async sendMessage(conversationId: string, content: string, clientMessageId = crypto.randomUUID()) {
         const conn = await this.ensureConnected();
-        await conn.invoke('SendMessage', conversationId, content);
+        await conn.invoke('SendMessage', conversationId, content, clientMessageId);
     }
 
     async joinConversation(conversationId: string) {

@@ -54,11 +54,20 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
         config.credentials = 'include';
     }
 
+    const generation = tokenService.getGeneration();
     try {
         const response = await fetch(url, config);
+        if (generation !== tokenService.getGeneration()) throw new ApiError('Session changed', 401);
+        if (response.status === 401) {
+            const body = await response.clone().json().catch(() => null);
+            if (body?.code === 'AUTH_SESSION_REVOKED') {
+                tokenService.clearToken();
+                throw new ApiError(body.message || 'Session revoked', 401, undefined, body.code);
+            }
+        }
 
         // 401 Interceptor
-        if (response.status === 401 && !config._retry) {
+        if (response.status === 401 && !config._retry && !/^\/auth\/(login|refresh|register|verify-otp|2fa\/login-verify|logout)/.test(endpoint)) {
             if (isRefreshing) {
                 // If already refreshing, queue this request
                 try {
@@ -68,6 +77,7 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
                     // Retry with new token
                     const retryOptions = {
                         ...options,
+                        _retry: true,
                         headers: {
                             ...options.headers,
                             'Authorization': `Bearer ${newToken}`
@@ -84,6 +94,7 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
 
             try {
                 const refreshData = await authUtils.refreshToken();
+                if (generation !== tokenService.getGeneration()) throw new ApiError('Session changed', 401);
                 tokenService.setAccessToken(refreshData.accessToken);
                 processQueue(null, refreshData.accessToken);
 
@@ -91,7 +102,6 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
                 return apiClient<T>(endpoint, { ...options, _retry: true });
             } catch (refreshError) {
                 processQueue(refreshError, null);
-                tokenService.clearToken();
                 throw refreshError;
             } finally {
                 isRefreshing = false;

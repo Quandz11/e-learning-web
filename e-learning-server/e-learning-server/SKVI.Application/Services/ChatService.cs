@@ -290,7 +290,7 @@ public class ChatService : IChatService
         return await GetConversationByIdAsync(conversation.Id, userId);
     }
 
-    public async Task<MessageResponse> SendMessageAsync(Guid conversationId, Guid userId, string content)
+    public async Task<MessageResponse> SendMessageAsync(Guid conversationId, Guid userId, string content, Guid? clientMessageId = null)
     {
         // Verify user is participant or staff
         var isParticipant = await _context.ConversationParticipants
@@ -320,8 +320,19 @@ public class ChatService : IChatService
             }
         }
 
+        if (string.IsNullOrWhiteSpace(content) || content.Length > 1000) throw new ArgumentException("Invalid message content");
+        if (clientMessageId != null) {
+            var existing = await _context.Messages.Include(m => m.Sender).FirstOrDefaultAsync(m =>
+                m.ConversationId == conversationId && m.SenderId == userId && m.ClientMessageId == clientMessageId);
+            if (existing != null) {
+                if (existing.Content != content) throw new ArgumentException("clientMessageId already used");
+                return MapToMessageResponse(existing);
+            }
+        }
+
         var message = new Message
         {
+            ClientMessageId = clientMessageId,
             Id = Guid.NewGuid(),
             ConversationId = conversationId,
             SenderId = userId,
@@ -340,7 +351,15 @@ public class ChatService : IChatService
             conversation.LastMessageAt = DateTime.UtcNow;
         }
 
-        await _context.SaveChangesAsync();
+        try { await _context.SaveChangesAsync(); }
+        catch (DbUpdateException) when (clientMessageId != null) {
+            _context.Entry(message).State = EntityState.Detached;
+            var existing = await _context.Messages.Include(m => m.Sender).FirstOrDefaultAsync(m =>
+                m.ConversationId == conversationId && m.SenderId == userId && m.ClientMessageId == clientMessageId);
+            if (existing == null) throw;
+            if (existing.Content != content) throw new ArgumentException("clientMessageId already used");
+            return MapToMessageResponse(existing);
+        }
 
         // Load sender info
         var messageWithSender = await _context.Messages
@@ -435,6 +454,7 @@ public class ChatService : IChatService
     {
         return new MessageResponse
         {
+            ClientMessageId = message.ClientMessageId,
             Id = message.Id,
             ConversationId = message.ConversationId,
             SenderId = message.SenderId,

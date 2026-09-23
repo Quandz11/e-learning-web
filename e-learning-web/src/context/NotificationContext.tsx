@@ -1,3 +1,5 @@
+import { tokenService, sessionId } from '../services/tokenService';
+import { apiClient } from '../services/apiClient';
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { useSelector } from 'react-redux';
@@ -63,12 +65,18 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         const newConnection = new HubConnectionBuilder()
             .withUrl(hubUrl, {
-                accessTokenFactory: () => token
+                accessTokenFactory: () => tokenService.getAccessToken() || ''
             })
             .withAutomaticReconnect()
             .configureLogging(LogLevel.None)
             .build();
 
+        newConnection.on('SessionRevoked', (event: { sessionId: string }) => {
+            if (event.sessionId === sessionId(tokenService.getAccessToken())) tokenService.clearToken();
+        });
+        const verify = () => { if (tokenService.getAccessToken()) void apiClient('/auth/sessions').catch(() => undefined); };
+        newConnection.onreconnected(verify);
+        newConnection.onclose(verify);
         setConnection(newConnection);
 
         return () => {

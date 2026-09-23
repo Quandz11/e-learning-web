@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
@@ -48,6 +49,10 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (ref.watch(sessionControllerProvider.select((s) => s.session?.role)) != 'ADMIN')
+            ListTile(leading: const Icon(Icons.devices), title: const Text('Thi?t b? ??ng nh?p'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/app/profile/security/devices')),
           AppSectionHeader(
             title: 'Xác thực hai lớp',
             subtitle: isEnabled

@@ -86,7 +86,7 @@ public class ChatController : ControllerBase
         
         try
         {
-            var message = await _chatService.SendMessageAsync(dto.ConversationId, userId, dto.Content);
+            var message = await _chatService.SendMessageAsync(dto.ConversationId, userId, dto.Content, dto.ClientMessageId);
 
             // Broadcast to conversation group and care-group for real-time SignalR sync
             await _hubContext.Clients.Group($"conversation-{dto.ConversationId}").SendAsync("ReceiveMessage", message);

@@ -19,24 +19,52 @@ class AuthInterceptor extends Interceptor {
 
   Future<AppSession>? _inFlightRefresh;
 
+  bool _isPublicAuthEndpoint(String path) {
+    final lower = path.toLowerCase();
+    if (!lower.contains('/auth/')) return false;
+    if (lower.contains('/auth/sessions')) return false;
+    if (lower.contains('/auth/logout')) return false;
+    if (lower.contains('/auth/2fa/setup')) return false;
+    if (lower.contains('/auth/2fa/enable')) return false;
+    if (lower.contains('/auth/2fa/disable')) return false;
+    return true;
+  }
+
   @override
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    options.extra['session_generation'] = _sessionRepository.generation;
     options.headers.addAll(await DeviceMetadata.headers());
-    final session = await _sessionRepository.readStoredSession();
-    if (session != null && session.accessToken.trim().isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer ${session.accessToken}';
+    final isPublicAuth = _isPublicAuthEndpoint(options.path);
+
+    if (!isPublicAuth) {
+      final session = await _sessionRepository.readStoredSession();
+      if (session != null && session.accessToken.trim().isNotEmpty) {
+        options.extra['session_bound'] = true;
+        options.extra['session_generation'] = _sessionRepository.generation;
+        if (!options.headers.containsKey('Authorization')) {
+          options.headers['Authorization'] = 'Bearer ${session.accessToken}';
+        }
+      }
     }
+
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    if (response.requestOptions.extra['session_generation'] != _sessionRepository.generation) {
-      handler.reject(DioException(requestOptions: response.requestOptions, type: DioExceptionType.cancel));
+    final isSessionBound =
+        response.requestOptions.extra['session_bound'] == true;
+    if (isSessionBound &&
+        response.requestOptions.extra['session_generation'] !=
+            _sessionRepository.generation) {
+      handler.reject(
+        DioException(
+          requestOptions: response.requestOptions,
+          type: DioExceptionType.cancel,
+        ),
+      );
       return;
     }
     handler.next(response);
@@ -47,13 +75,18 @@ class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
+    final isSessionBound = err.requestOptions.extra['session_bound'] == true;
     final requestGeneration = err.requestOptions.extra['session_generation'];
-    if (requestGeneration != null && requestGeneration != _sessionRepository.generation) {
+    if (isSessionBound &&
+        requestGeneration != null &&
+        requestGeneration != _sessionRepository.generation) {
       handler.next(err);
       return;
     }
     final body = err.response?.data;
-    if (err.response?.statusCode == 401 && body is Map && body['code'] == 'AUTH_SESSION_REVOKED') {
+    if (err.response?.statusCode == 401 &&
+        body is Map &&
+        body['code'] == 'AUTH_SESSION_REVOKED') {
       await _sessionController.clearSession();
       handler.next(err);
       return;

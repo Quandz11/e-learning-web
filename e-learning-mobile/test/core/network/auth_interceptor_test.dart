@@ -167,6 +167,36 @@ void main() {
     expect(adapter.lastBodyFor('/protected'), {'hello': 'world'});
     expect(adapter.lastCustomHeaderFor('/protected', 'X-Test'), 'true');
   });
+
+  test('session-bound request is cancelled if generation changes in-flight', () async {
+    storage.storedSession = _session();
+    adapter.queueSuccess('/protected');
+    adapter.onFetch = (_) async {
+      await sessionRepository.clear();
+    };
+
+    final future = dio.get('/protected');
+    await expectLater(
+      future,
+      throwsA(
+        isA<DioException>().having(
+          (e) => e.type,
+          'type',
+          DioExceptionType.cancel,
+        ),
+      ),
+    );
+  });
+
+  test('public auth request is not cancelled if generation changes in-flight', () async {
+    adapter.queueSuccess('/auth/login');
+    adapter.onFetch = (_) async {
+      await sessionRepository.clear();
+    };
+
+    final response = await dio.post('/auth/login');
+    expect(response.statusCode, 200);
+  });
 }
 
 class InMemorySessionStorage implements SessionStorage {
@@ -211,6 +241,7 @@ class FakeAdapter implements HttpClientAdapter {
   int refreshStatusCode = 200;
   int refreshCallCount = 0;
   String? lastAuthorizationHeader;
+  Future<void> Function(RequestOptions options)? onFetch;
 
   void queueSuccess(String path) {
     _statusQueues[path] = [200];
@@ -253,6 +284,10 @@ class FakeAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     final path = options.path;
+
+    if (onFetch != null) {
+      await onFetch!(options);
+    }
 
     _requestCounts[path] = (_requestCounts[path] ?? 0) + 1;
     _lastMethods[path] = options.method;

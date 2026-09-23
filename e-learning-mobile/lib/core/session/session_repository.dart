@@ -81,6 +81,7 @@ class SessionRepository {
 
   Future<void> clear() {
     _generation++;
+    _refresh = null;
     return _write(_storage.clear);
   }
 

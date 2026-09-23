@@ -66,9 +66,11 @@ class DioErrorMapper {
       _ => 'Không thể hoàn thành yêu cầu. Vui lòng thử lại sau.',
     };
 
-    final resolvedMessage = (envelope.message != null && envelope.message!.trim().isNotEmpty)
-        ? envelope.message!
-        : (_mapBackendCode(envelope.code) ?? fallbackMessage);
+    final resolvedMessage = _localizeMessage(
+      envelope.code,
+      envelope.message,
+      fallbackMessage,
+    );
 
     return AppFailure(
       type: _mapStatusToType(

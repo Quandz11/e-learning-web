@@ -66,6 +66,16 @@ void main() {
       expect(await storage.read(), isNull);
     });
 
+    test('clearSession when unauthenticated does not re-clear', () async {
+      final repo = buildRepository(dio: Dio());
+      final controller = SessionController(repo);
+      await controller.restore(); // resolves unauthenticated
+      final initialGen = repo.generation;
+
+      await controller.clearSession();
+      expect(repo.generation, initialGen);
+    });
+
     test('expired session refreshes during restore', () async {
       storage.storedSession = AppSession(
         accessToken: 'old',

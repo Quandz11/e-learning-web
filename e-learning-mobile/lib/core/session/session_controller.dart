@@ -59,6 +59,9 @@ class SessionController extends StateNotifier<SessionState> {
 
   Future<void> clearSession() async {
     if (_isClearingSession) return;
+    if (state == const SessionState.unauthenticated()) {
+      return;
+    }
     _isClearingSession = true;
 
     // Fire-and-forget background unregister (non-blocking for 100% instant logout)

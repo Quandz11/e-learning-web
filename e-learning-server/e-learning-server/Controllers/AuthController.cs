@@ -42,7 +42,7 @@ public class AuthController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_LOGIN_FAILED", ex.Message);
+            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_INVALID_CREDENTIALS", ex.Message);
         }
     }
 
@@ -52,7 +52,7 @@ public class AuthController : ControllerBase
         try
         {
             await _authService.RegisterAsync(request);
-            return Ok(new { message = "Registration successful. Please verify your email." });
+            return Ok(new { message = "Đăng ký thành công. Vui lòng xác thực mã OTP để kích hoạt tài khoản." });
         }
         catch (InvalidOperationException ex)
         {
@@ -73,7 +73,7 @@ public class AuthController : ControllerBase
                 accessToken = response.AccessToken,
                 refreshToken = response.RefreshToken,
                 expiresAt = response.ExpiresAt,
-                message = "Account verified."
+                message = "Xác thực tài khoản thành công."
             });
         }
         catch (UnauthorizedAccessException ex)
@@ -88,7 +88,7 @@ public class AuthController : ControllerBase
         try
         {
             await _authService.ResendOtpAsync(request);
-            return Ok(new { message = "OTP resent successfully." });
+            return Ok(new { message = "Đã gửi lại mã xác thực OTP thành công." });
         }
         catch (Exception ex)
         {
@@ -165,7 +165,7 @@ public class AuthController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(refreshToken))
         {
-            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_REFRESH_TOKEN_MISSING", "Refresh token is missing.");
+            return ApiError(StatusCodes.Status401Unauthorized, "AUTH_REFRESH_TOKEN_MISSING", "Không tìm thấy phiên làm việc để làm mới mã truy cập.");
         }
 
         try
@@ -204,7 +204,7 @@ public class AuthController : ControllerBase
         }
 
         Response.Cookies.Delete("refreshToken");
-        return Ok(new { message = "Logged out successfully." });
+        return Ok(new { message = "Đăng xuất thành công." });
     }
 
     [Authorize]
@@ -216,7 +216,7 @@ public class AuthController : ControllerBase
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
             }
 
             var (secret, qrCodeUri) = await _authService.GenerateTwoFactorSetupAsync(Guid.Parse(userId));
@@ -237,7 +237,7 @@ public class AuthController : ControllerBase
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
             }
 
             var response = await _authService.EnableTwoFactorAsync(Guid.Parse(userId), request.Secret, request.Code);
@@ -247,7 +247,8 @@ public class AuthController : ControllerBase
             {
                 accessToken = response.AccessToken,
                 refreshToken = response.RefreshToken,
-                expiresAt = response.ExpiresAt
+                expiresAt = response.ExpiresAt,
+                message = "Đã bật xác thực hai lớp (2FA) thành công."
             });
         }
         catch (Exception ex)
@@ -265,11 +266,11 @@ public class AuthController : ControllerBase
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
             }
 
             await _authService.DisableTwoFactorAsync(Guid.Parse(userId), request.Password);
-            return Ok(new { message = "2FA disabled successfully." });
+            return Ok(new { message = "Đã tắt xác thực hai lớp (2FA) thành công." });
         }
         catch (Exception ex)
         {
@@ -285,7 +286,7 @@ public class AuthController : ControllerBase
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
             }
 
             var response = await _authService.VerifyTwoFactorLoginAsync(Guid.Parse(userId), request.Code);
@@ -305,6 +306,7 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
+    [DisableRateLimiting]
     [HttpGet("sessions")]
     public async Task<IActionResult> GetActiveSessions()
     {
@@ -313,7 +315,7 @@ public class AuthController : ControllerBase
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
             }
 
             var currentRefreshToken = User.FindFirst("sid")?.Value;
@@ -328,6 +330,7 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
+    [DisableRateLimiting]
     [HttpPost("sessions/revoke")]
     public async Task<IActionResult> RevokeSession([FromBody] RevokeSessionRequest request)
     {
@@ -336,11 +339,11 @@ public class AuthController : ControllerBase
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
             }
 
             await _authService.RevokeSessionAsync(Guid.Parse(userId), request.SessionId);
-            return Ok(new { message = "Session revoked successfully" });
+            return Ok(new { message = "Đã thu hồi phiên đăng nhập thành công." });
         }
         catch (KeyNotFoundException ex)
         {
@@ -354,6 +357,7 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
+    [DisableRateLimiting]
     [HttpPost("sessions/revoke-all")]
     public async Task<IActionResult> RevokeAllSessions()
     {
@@ -362,12 +366,12 @@ public class AuthController : ControllerBase
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Unauthorized.");
+                return ApiError(StatusCodes.Status401Unauthorized, "AUTH_UNAUTHORIZED", "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
             }
 
             var currentRefreshToken = User.FindFirst("sid")?.Value;
             await _authService.RevokeAllSessionsAsync(Guid.Parse(userId), currentRefreshToken);
-            return Ok(new { message = "All other sessions revoked successfully" });
+            return Ok(new { message = "Đã đăng xuất khỏi tất cả các thiết bị khác thành công." });
         }
         catch (Exception ex)
         {

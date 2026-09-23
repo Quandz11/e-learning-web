@@ -215,7 +215,7 @@ builder.Services.AddAuthentication(options =>
             if (context.HttpContext.Items.ContainsKey("SessionRevoked")) {
                 context.HandleResponse();
                 context.Response.StatusCode = 401;
-                await context.Response.WriteAsJsonAsync(new { code = "AUTH_SESSION_REVOKED", message = "Phi?n ??ng nh?p ?? h?t hi?u l?c." });
+                await context.Response.WriteAsJsonAsync(new { code = "AUTH_SESSION_REVOKED", message = "Phiên đăng nhập đã hết hiệu lực." });
             }
         },
         OnMessageReceived = context =>
@@ -326,8 +326,13 @@ builder.Services.AddRateLimiter(options =>
 
     options.OnRejected = async (context, token) =>
     {
-        context.HttpContext.Response.StatusCode = 429;
-        await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json; charset=utf-8";
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            code = "TOO_MANY_REQUESTS",
+            message = "Bạn đang thao tác quá nhanh. Vui lòng thử lại sau giây lát."
+        }, token);
     };
 });
 

@@ -46,7 +46,7 @@ public class PhoneAuthService : IPhoneAuthService
         var existingByPhone = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
         if (existingByPhone != null)
         {
-            throw new InvalidOperationException("Phone number is already registered.");
+            throw new InvalidOperationException("Số điện thoại này đã được đăng ký.");
         }
 
         var hasExplicitEmail = !string.IsNullOrWhiteSpace(request.Email);
@@ -61,7 +61,7 @@ public class PhoneAuthService : IPhoneAuthService
 
             if (emailExists)
             {
-                throw new InvalidOperationException("Email already exists.");
+                throw new InvalidOperationException("Email này đã được đăng ký trong hệ thống.");
             }
         }
 
@@ -118,12 +118,12 @@ public class PhoneAuthService : IPhoneAuthService
         var user = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
         if (user == null)
         {
-            throw new UnauthorizedAccessException("Phone number does not exist.");
+            throw new UnauthorizedAccessException("Số điện thoại không tồn tại trong hệ thống.");
         }
 
         if (user.IsDeleted)
         {
-            throw new UnauthorizedAccessException("Account has been deleted.");
+            throw new UnauthorizedAccessException("Tài khoản đã bị xóa khỏi hệ thống.");
         }
 
         if (user.Status == "ACTIVE" && user.IsPhoneVerified)
@@ -155,17 +155,17 @@ public class PhoneAuthService : IPhoneAuthService
         var user = await GetUniqueUserByPhoneAsync(normalizedPhone, cancellationToken);
         if (user == null)
         {
-            throw new UnauthorizedAccessException("Phone number does not exist.");
+            throw new UnauthorizedAccessException("Số điện thoại không tồn tại trong hệ thống.");
         }
 
         if (user.IsDeleted)
         {
-            throw new UnauthorizedAccessException("Account has been deleted.");
+            throw new UnauthorizedAccessException("Tài khoản đã bị xóa khỏi hệ thống.");
         }
 
         if (user.Status == "ACTIVE" && user.IsPhoneVerified)
         {
-            throw new InvalidOperationException("Phone number is already verified.");
+            throw new InvalidOperationException("Số điện thoại đã được xác thực trước đó.");
         }
 
         var otp = GenerateOtp();
@@ -301,17 +301,17 @@ public class PhoneAuthService : IPhoneAuthService
     {
         if (string.IsNullOrWhiteSpace(user.OtpCode) || user.OtpExpiration == null)
         {
-            throw new UnauthorizedAccessException("OTP does not exist or has expired.");
+            throw new UnauthorizedAccessException("Mã OTP không tồn tại hoặc đã hết hạn.");
         }
 
         if (!string.Equals(user.OtpCode, otp, StringComparison.Ordinal))
         {
-            throw new UnauthorizedAccessException("OTP is invalid.");
+            throw new UnauthorizedAccessException("Mã xác thực OTP không chính xác.");
         }
 
         if (user.OtpExpiration.Value < DateTime.UtcNow)
         {
-            throw new UnauthorizedAccessException("OTP has expired.");
+            throw new UnauthorizedAccessException("Mã xác thực OTP đã hết hạn.");
         }
     }
 
@@ -349,7 +349,7 @@ public class PhoneAuthService : IPhoneAuthService
             return users.SingleOrDefault();
         }
 
-        throw new InvalidOperationException("Phone number is linked to multiple accounts. Please contact support.");
+        throw new InvalidOperationException("Số điện thoại này liên kết với nhiều tài khoản. Vui lòng liên hệ hỗ trợ.");
     }
 
     private static List<string> BuildPhoneCandidates(string identifier)
@@ -412,7 +412,7 @@ public class PhoneAuthService : IPhoneAuthService
     {
         if (string.IsNullOrWhiteSpace(phone))
         {
-            throw new InvalidOperationException("Phone number is required.");
+            throw new InvalidOperationException("Vui lòng nhập số điện thoại.");
         }
 
         var normalized = Regex.Replace(phone.Trim(), @"[\s\-\.\(\)]", string.Empty);
@@ -429,7 +429,7 @@ public class PhoneAuthService : IPhoneAuthService
 
         if (!Regex.IsMatch(normalized, @"^\d{9,15}$"))
         {
-            throw new InvalidOperationException("Phone number format is invalid.");
+            throw new InvalidOperationException("Định dạng số điện thoại không hợp lệ.");
         }
 
         return normalized;

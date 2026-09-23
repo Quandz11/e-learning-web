@@ -90,14 +90,27 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
     }
   }
 
-  IconData _deviceIcon(String platform) {
-    final p = platform.toLowerCase();
-    if (p.contains('android') || p.contains('ios') || p.contains('mobile')) {
+  IconData _deviceIcon(String platform, String deviceName) {
+    final text = '${platform.toLowerCase()} ${deviceName.toLowerCase()}';
+    if (text.contains('ipad') || text.contains('tablet')) {
+      return Icons.tablet_mac_rounded;
+    } else if (text.contains('iphone') || text.contains('android') || text.contains('mobile') || text.contains('phone')) {
       return Icons.smartphone_rounded;
-    } else if (p.contains('mac') || p.contains('windows') || p.contains('linux') || p.contains('pc')) {
+    } else if (text.contains('mac') || text.contains('windows') || text.contains('linux') || text.contains('pc') || text.contains('web')) {
       return Icons.laptop_chromebook_rounded;
     }
     return Icons.devices_rounded;
+  }
+
+  String _formatPlatform(String platform) {
+    final p = platform.trim().toLowerCase();
+    if (p == 'web') return 'Trình duyệt Web';
+    if (p == 'android') return 'Android';
+    if (p == 'ios') return 'iOS';
+    if (p == 'windows') return 'Windows';
+    if (p == 'macos' || p == 'mac') return 'macOS';
+    if (p == 'linux') return 'Linux';
+    return platform.isNotEmpty ? platform : 'Không rõ HĐH';
   }
 
   @override
@@ -280,7 +293,7 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
-                  _deviceIcon(row.platform),
+                  _deviceIcon(row.platform, row.deviceName),
                   color: row.isCurrent
                       ? const Color(0xFF16A34A)
                       : context.textSecondary(),
@@ -328,7 +341,7 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${row.platform.isNotEmpty ? row.platform : 'Không rõ HĐH'} • ${row.browser.isNotEmpty ? row.browser : 'Ứng dụng SKVI'}',
+                      '${_formatPlatform(row.platform)} • ${row.browser.isNotEmpty ? row.browser : 'Ứng dụng SKVI'}',
                       style: TextStyle(
                         fontSize: 12,
                         color: context.textSecondary(),

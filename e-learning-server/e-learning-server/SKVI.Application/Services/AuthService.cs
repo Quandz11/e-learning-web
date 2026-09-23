@@ -43,11 +43,11 @@ public class AuthService : IAuthService
         var identifier = request.Email?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(identifier))
         {
-            throw new UnauthorizedAccessException("Invalid credentials.");
+            throw new UnauthorizedAccessException("Email, số điện thoại hoặc mật khẩu không chính xác.");
         }
         if (string.IsNullOrWhiteSpace(request.Password))
         {
-            throw new UnauthorizedAccessException("Invalid credentials.");
+            throw new UnauthorizedAccessException("Email, số điện thoại hoặc mật khẩu không chính xác.");
         }
 
         var isPhoneLogin = IsPhoneIdentifier(identifier);
@@ -55,27 +55,27 @@ public class AuthService : IAuthService
 
         if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid credentials.");
+            throw new UnauthorizedAccessException("Email, số điện thoại hoặc mật khẩu không chính xác.");
         }
 
         if (user.IsDeleted)
         {
-            throw new UnauthorizedAccessException("Account is deleted.");
+            throw new UnauthorizedAccessException("Tài khoản đã bị xóa khỏi hệ thống.");
         }
 
         if (!user.IsEmailVerified && !user.IsPhoneVerified)
         {
-            throw new UnauthorizedAccessException("Account is not verified. Please complete OTP verification.");
+            throw new UnauthorizedAccessException("Tài khoản chưa được kích hoạt. Vui lòng xác thực mã OTP.");
         }
 
         if (isPhoneLogin && !user.IsPhoneVerified)
         {
-            throw new UnauthorizedAccessException("Phone number is not verified.");
+            throw new UnauthorizedAccessException("Số điện thoại chưa được xác thực.");
         }
 
         if (user.Status != "ACTIVE")
         {
-            throw new UnauthorizedAccessException("Account is not active.");
+            throw new UnauthorizedAccessException("Tài khoản hiện đang bị tạm khóa hoặc ngưng hoạt động.");
         }
 
         if (user.IsTwoFactorEnabled)
@@ -134,7 +134,7 @@ public class AuthService : IAuthService
             return users.SingleOrDefault();
         }
 
-        throw new UnauthorizedAccessException("Phone number is linked to multiple accounts. Please contact support.");
+        throw new UnauthorizedAccessException("Số điện thoại này liên kết với nhiều tài khoản. Vui lòng liên hệ hỗ trợ.");
     }
 
     private static bool IsPhoneIdentifier(string identifier)
@@ -212,7 +212,7 @@ public class AuthService : IAuthService
         {
             if (!existingUser.IsDeleted)
             {
-                throw new InvalidOperationException("Email is already registered.");
+                throw new InvalidOperationException("Email này đã được đăng ký trong hệ thống.");
             }
 
             // If the account was previously soft-deleted, anonymize the old record's email
@@ -226,7 +226,7 @@ public class AuthService : IAuthService
         var normalizedPhone = string.IsNullOrWhiteSpace(request.Phone) ? null : NormalizePhone(request.Phone);
         if (!string.IsNullOrWhiteSpace(normalizedPhone) && !Regex.IsMatch(normalizedPhone, @"^\d{9,15}$"))
         {
-            throw new InvalidOperationException("Phone number format is invalid.");
+            throw new InvalidOperationException("Định dạng số điện thoại không hợp lệ.");
         }
 
         var user = new User
@@ -254,8 +254,8 @@ public class AuthService : IAuthService
         }
         
         // Send OTP Email
-        string subject = "Verify your account - SKVI E-Learning";
-        string body = $"<h3>Welcome to SKVI!</h3><p>Your verification code is: <strong>{otp}</strong></p><p>This code expires in 10 minutes.</p>";
+        string subject = "Xác thực tài khoản của bạn - SKVI E-Learning";
+        string body = $"<h3>Chào mừng bạn đến với SKVI!</h3><p>Mã xác thực tài khoản của bạn là: <strong>{otp}</strong></p><p>Mã này có hiệu lực trong 10 phút.</p>";
         
         await Task.Run(() => BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body)));
         
@@ -268,7 +268,7 @@ public class AuthService : IAuthService
         
         if (user == null)
         {
-             throw new UnauthorizedAccessException("Invalid email.");
+             throw new UnauthorizedAccessException("Email không tồn tại trong hệ thống.");
         }
 
         if (user.IsEmailVerified)
@@ -278,12 +278,12 @@ public class AuthService : IAuthService
 
         if (user.OtpCode != request.Otp)
         {
-            throw new UnauthorizedAccessException("Invalid OTP.");
+            throw new UnauthorizedAccessException("Mã xác thực OTP không chính xác.");
         }
 
         if (user.OtpExpiration < DateTime.UtcNow)
         {
-            throw new UnauthorizedAccessException("OTP has expired.");
+            throw new UnauthorizedAccessException("Mã xác thực OTP đã hết hạn.");
         }
 
         // Verify Success
@@ -306,12 +306,12 @@ public class AuthService : IAuthService
         
         if (user == null)
         {
-             throw new UnauthorizedAccessException("Invalid email.");
+             throw new UnauthorizedAccessException("Email không tồn tại trong hệ thống.");
         }
 
         if (user.IsEmailVerified)
         {
-            throw new InvalidOperationException("Email is already verified.");
+            throw new InvalidOperationException("Email này đã được xác thực trước đó.");
         }
 
         var otp = Random.Shared.Next(100000, 999999).ToString();
@@ -321,8 +321,8 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
 
         // Send OTP Email
-        string subject = "Resend Verification Code - SKVI E-Learning";
-        string body = $"<h3>Validation Code</h3><p>Your new verification code is: <strong>{otp}</strong></p>";
+        string subject = "Gửi lại mã xác thực - SKVI E-Learning";
+        string body = $"<h3>Mã xác thực tài khoản</h3><p>Mã xác thực mới của bạn là: <strong>{otp}</strong></p><p>Mã này có hiệu lực trong 10 phút.</p>";
         
         BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body));
 
@@ -339,7 +339,7 @@ public class AuthService : IAuthService
     public async Task<(string Secret, string QrCodeUri)> GenerateTwoFactorSetupAsync(Guid userId)
     {
         var user = await _context.Users.FindAsync(userId);
-        if (user == null) throw new UnauthorizedAccessException("User not found.");
+        if (user == null) throw new UnauthorizedAccessException("Không tìm thấy thông tin tài khoản người dùng.");
 
         var key = OtpNet.KeyGeneration.GenerateRandomKey(20);
         var secret = OtpNet.Base32Encoding.ToString(key);
@@ -355,14 +355,14 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> EnableTwoFactorAsync(Guid userId, string secret, string code)
     {
         var user = await _context.Users.FindAsync(userId);
-        if (user == null) throw new UnauthorizedAccessException("User not found.");
+        if (user == null) throw new UnauthorizedAccessException("Không tìm thấy thông tin tài khoản người dùng.");
 
         var secretBytes = OtpNet.Base32Encoding.ToBytes(secret);
         var totp = new OtpNet.Totp(secretBytes);
         
         if (!totp.VerifyTotp(code, out _, new OtpNet.VerificationWindow(2, 2)))
         {
-             throw new UnauthorizedAccessException("Invalid code.");
+             throw new UnauthorizedAccessException("Mã xác thực 2FA không chính xác.");
         }
 
         user.TwoFactorSecret = secret;
@@ -375,11 +375,11 @@ public class AuthService : IAuthService
     public async Task DisableTwoFactorAsync(Guid userId, string password)
     {
         var user = await _context.Users.FindAsync(userId);
-        if (user == null) throw new UnauthorizedAccessException("User not found.");
+        if (user == null) throw new UnauthorizedAccessException("Không tìm thấy thông tin tài khoản người dùng.");
 
         if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid password.");
+            throw new UnauthorizedAccessException("Mật khẩu xác nhận không chính xác.");
         }
 
         user.IsTwoFactorEnabled = false;
@@ -390,11 +390,11 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> VerifyTwoFactorLoginAsync(Guid userId, string code)
     {
         var user = await _context.Users.FindAsync(userId);
-        if (user == null) throw new UnauthorizedAccessException("User not found.");
+        if (user == null) throw new UnauthorizedAccessException("Không tìm thấy thông tin tài khoản người dùng.");
 
         if (!user.IsTwoFactorEnabled || string.IsNullOrEmpty(user.TwoFactorSecret))
         {
-            throw new UnauthorizedAccessException("2FA is not enabled for this user.");
+            throw new UnauthorizedAccessException("Tài khoản chưa bật tính năng bảo mật hai lớp (2FA).");
         }
 
 
@@ -403,7 +403,7 @@ public class AuthService : IAuthService
 
         if (!totp.VerifyTotp(code, out _, new OtpNet.VerificationWindow(2, 2)))
         {
-            throw new UnauthorizedAccessException("Invalid 2FA code.");
+            throw new UnauthorizedAccessException("Mã bảo mật hai lớp (2FA) không chính xác.");
         }
 
         return await GenerateTokensForUser(user, "Unknown", "Unknown"); // Should pass IP/UA

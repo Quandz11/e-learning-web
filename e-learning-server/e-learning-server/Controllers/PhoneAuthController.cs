@@ -25,7 +25,7 @@ public class PhoneAuthController : ControllerBase
         try
         {
             await _phoneAuthService.RegisterByPhoneAsync(request);
-            return Ok(new { message = "Phone registration successful. Please enter the OTP sent via Zalo." });
+            return Ok(new { message = "Đăng ký bằng số điện thoại thành công. Vui lòng nhập mã OTP được gửi qua Zalo/SMS." });
         }
         catch (InvalidOperationException ex)
         {
@@ -47,8 +47,9 @@ public class PhoneAuthController : ControllerBase
             return Ok(new
             {
                 accessToken = response.AccessToken,
+                refreshToken = response.RefreshToken,
                 expiresAt = response.ExpiresAt,
-                message = "Phone number verified successfully."
+                message = "Xác thực số điện thoại thành công."
             });
         }
         catch (UnauthorizedAccessException ex)
@@ -67,7 +68,7 @@ public class PhoneAuthController : ControllerBase
         try
         {
             await _phoneAuthService.ResendPhoneRegistrationOtpAsync(request);
-            return Ok(new { message = "OTP has been resent via Zalo." });
+            return Ok(new { message = "Đã gửi lại mã xác thực OTP qua Zalo/SMS." });
         }
         catch (UnauthorizedAccessException ex)
         {

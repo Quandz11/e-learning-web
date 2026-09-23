@@ -20,12 +20,16 @@ public class UserSessionService(ApplicationDbContext db, ITokenService tokens,
     {
         var request = accessor.HttpContext?.Request;
         var ua = Limit(request?.Headers.UserAgent.ToString() ?? agent, 1000, "");
+        var rawPlatform = request?.Headers["X-Device-Platform"].ToString();
+        var rawDeviceName = request?.Headers["X-Device-Name"].ToString();
+        var platform = ResolvePlatform(rawPlatform, ua);
+        var deviceName = Limit(rawDeviceName, 200, ResolveDeviceName(ua, platform));
         var session = new UserSession {
             Id = Guid.NewGuid(), UserId = user.Id,
             IpAddress = Limit(accessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? ip, 64),
             UserAgent = ua,
-            Platform = Limit(request?.Headers["X-Device-Platform"].ToString(), 40, "Web"),
-            DeviceName = Limit(request?.Headers["X-Device-Name"].ToString(), 200, DeviceName(ua)),
+            Platform = platform,
+            DeviceName = deviceName,
             ExpiresAt = DateTime.UtcNow.AddDays(settings.Value.RefreshTokenExpirationDays)
         };
         db.UserSessions.Add(session);
@@ -65,8 +69,7 @@ public class UserSessionService(ApplicationDbContext db, ITokenService tokens,
 
     public async Task<bool> IsActiveAsync(Guid userId, Guid sessionId, CancellationToken ct = default) =>
         await db.UserSessions.AsNoTracking().AnyAsync(s => s.Id == sessionId && s.UserId == userId &&
-            s.RevokedAt == null && s.ExpiresAt > DateTime.UtcNow && !s.User.IsDeleted && s.User.Status == "ACTIVE" &&
-            db.RefreshTokens.Any(t => t.SessionId == s.Id && t.RevokedAt == null && t.ExpiresAt > DateTime.UtcNow), ct);
+            s.RevokedAt == null && s.ExpiresAt > DateTime.UtcNow && !s.User.IsDeleted && s.User.Status == "ACTIVE", ct);
 
     public Task TouchAsync(Guid sessionId, CancellationToken ct = default) => db.UserSessions
         .Where(s => s.Id == sessionId && s.RevokedAt == null && s.LastActiveAt < DateTime.UtcNow.AddMinutes(-1))
@@ -75,8 +78,7 @@ public class UserSessionService(ApplicationDbContext db, ITokenService tokens,
     public async Task<List<ActiveSessionDto>> ListAsync(Guid userId, Guid? current)
     {
         var sessions = await db.UserSessions.AsNoTracking().Where(s => s.UserId == userId &&
-            s.RevokedAt == null && s.ExpiresAt > DateTime.UtcNow &&
-            db.RefreshTokens.Any(t => t.SessionId == s.Id && t.RevokedAt == null && t.ExpiresAt > DateTime.UtcNow))
+            s.RevokedAt == null && s.ExpiresAt > DateTime.UtcNow)
             .OrderByDescending(s => s.LastActiveAt).ToListAsync();
         return sessions.Select(s => new ActiveSessionDto { SessionId = s.Id, DeviceName = s.DeviceName,
             Platform = s.Platform, Browser = Browser(s.UserAgent), IpAddress = s.IpAddress,
@@ -112,8 +114,48 @@ public class UserSessionService(ApplicationDbContext db, ITokenService tokens,
         foreach (var id in ids) await connections.RevokeAsync(id, reason);
     }
 
-    private static string DeviceName(string ua) => ua.Contains("Android") ? "Android" : ua.Contains("iPhone") ? "iPhone" :
-        ua.Contains("Windows") ? "Windows" : ua.Contains("Mac") ? "Mac" : ua.Contains("Linux") ? "Linux" : "Unknown";
+    private static string ResolvePlatform(string? headerPlatform, string ua)
+    {
+        if (!string.IsNullOrWhiteSpace(headerPlatform))
+        {
+            var p = headerPlatform.Trim();
+            if (string.Equals(p, "android", StringComparison.OrdinalIgnoreCase)) return "Android";
+            if (string.Equals(p, "ios", StringComparison.OrdinalIgnoreCase)) return "iOS";
+            if (string.Equals(p, "web", StringComparison.OrdinalIgnoreCase))
+            {
+                if (ua.Contains("Windows")) return "Windows";
+                if (ua.Contains("Macintosh") || ua.Contains("Mac OS")) return "macOS";
+                if (ua.Contains("Linux")) return "Linux";
+                if (ua.Contains("iPhone")) return "iOS";
+                if (ua.Contains("iPad")) return "iPadOS";
+                if (ua.Contains("Android")) return "Android";
+                return "Web";
+            }
+            return p;
+        }
+
+        if (ua.Contains("Windows")) return "Windows";
+        if (ua.Contains("Macintosh") || ua.Contains("Mac OS")) return "macOS";
+        if (ua.Contains("iPhone")) return "iOS";
+        if (ua.Contains("iPad")) return "iPadOS";
+        if (ua.Contains("Android")) return "Android";
+        if (ua.Contains("Linux")) return "Linux";
+        return "Web";
+    }
+
+    private static string ResolveDeviceName(string ua, string platform)
+    {
+        if (ua.Contains("Windows NT 10")) return "Windows 10/11 PC";
+        if (ua.Contains("Windows")) return "Windows PC";
+        if (ua.Contains("Macintosh") || ua.Contains("Mac OS")) return "Mac";
+        if (ua.Contains("iPhone")) return "iPhone";
+        if (ua.Contains("iPad")) return "iPad";
+        if (ua.Contains("Android")) return "Thiết bị Android";
+        if (ua.Contains("Linux")) return "Linux PC";
+        return !string.IsNullOrWhiteSpace(platform) && platform != "Web" ? platform : "Trình duyệt Web";
+    }
+
     private static string Browser(string ua) => ua.Contains("Edg/") ? "Edge" : ua.Contains("Chrome/") ? "Chrome" :
-        ua.Contains("Firefox/") ? "Firefox" : ua.Contains("Safari/") ? "Safari" : "Ứng dụng";
+        ua.Contains("Firefox/") ? "Firefox" : ua.Contains("Safari/") && !ua.Contains("Chrome") ? "Safari" :
+        ua.Contains("Opera") || ua.Contains("OPR/") ? "Opera" : "Ứng dụng SKVI";
 }

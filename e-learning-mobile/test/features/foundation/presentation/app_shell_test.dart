@@ -20,8 +20,11 @@ import 'package:e_learning_mobile/features/profile/data/profile_api.dart';
 import 'package:e_learning_mobile/features/profile/data/profile_repository.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
+import 'package:e_learning_mobile/features/personalization/data/models/wellness_models.dart';
 import 'package:e_learning_mobile/features/personalization/data/personalization_repository.dart';
+import 'package:e_learning_mobile/features/personalization/data/wellness_api.dart';
 import 'package:e_learning_mobile/features/personalization/domain/reminder_model.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/controllers/wellness_controller.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -383,6 +386,9 @@ _ShellHarness _buildHarness({required SessionState sessionState}) {
       personalizationStateProvider.overrideWith(
         (ref) => _TestPersonalizationController(),
       ),
+      wellnessControllerProvider.overrideWith(
+        (ref) => _TestWellnessController(),
+      ),
     ],
   );
 
@@ -391,6 +397,26 @@ _ShellHarness _buildHarness({required SessionState sessionState}) {
     router: container.read(appRouterProvider),
     app: UncontrolledProviderScope(container: container, child: const App()),
   );
+}
+
+class _TestWellnessController extends WellnessController {
+  _TestWellnessController() : super(_NoopWellnessApi()) {
+    state = const WellnessState(
+      status: WellnessStatus.success,
+      dashboard: WellnessDashboard(),
+    );
+  }
+
+  @override
+  Future<void> ensureLoaded() async {}
+
+  @override
+  Future<void> loadDashboard() async {}
+}
+
+class _NoopWellnessApi extends WellnessApi {
+  _NoopWellnessApi()
+    : super(apiClient: ApiClient(Dio()), errorMapper: const DioErrorMapper());
 }
 
 class _TestPersonalizationController extends PersonalizationController {

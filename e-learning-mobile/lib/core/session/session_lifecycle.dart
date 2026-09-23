@@ -23,12 +23,16 @@ class _SessionLifecycleState extends ConsumerState<SessionLifecycle> with Widget
   bool _checking = false;
   int _generation = 0;
 
+  bool get _isRealApp => WidgetsBinding.instance is WidgetsFlutterBinding;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     ref.listenManual<SessionState>(sessionControllerProvider, (_, state) => _sync(state.session?.sessionId), fireImmediately: true);
-    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _verify());
+    if (_isRealApp) {
+      _timer = Timer.periodic(const Duration(seconds: 30), (_) => _verify());
+    }
   }
 
   Future<void> _sync(String? id) async {
@@ -38,7 +42,7 @@ class _SessionLifecycleState extends ConsumerState<SessionLifecycle> with Widget
     final previous = _connection;
     _connection = null;
     await previous?.stop();
-    if (!mounted || generation != _generation || id == null) return;
+    if (!mounted || generation != _generation || id == null || !_isRealApp) return;
     await _verify();
     if (!mounted || generation != _generation) return;
     final repository = ref.read(sessionRepositoryProvider);

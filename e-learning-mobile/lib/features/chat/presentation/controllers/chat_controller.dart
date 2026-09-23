@@ -77,30 +77,30 @@ class ChatController extends StateNotifier<ChatState> {
       final conversation = await _repository.getOrCreateSupportConversation(currentUserId: currentUserId);
       if (!mounted || version != _loadVersion) return;
       state = state.copyWith(conversation: conversation);
-      await _setupSignalR(conversation.id);
+      _setupSignalR(conversation.id);
       final messages = await _repository.getMessages(conversation.id, currentUserId: currentUserId);
       if (!mounted || version != _loadVersion) return;
       state = state.copyWith(messages: mergeMessages(messages, state.messages, currentUserId: currentUserId), isLoading: false);
       _repository.markAsRead(conversation.id).ignore();
     } catch (_) {
-      if (mounted && version == _loadVersion) state = state.copyWith(isLoading: false, error: 'Kh?ng th? t?i cu?c tr? chuy?n.');
+      if (mounted && version == _loadVersion) state = state.copyWith(isLoading: false, error: 'Không thể tải cuộc trò chuyện.');
     }
   }
 
-  Future<void> _setupSignalR(String conversationId) async {
+  void _setupSignalR(String conversationId) {
     final signalR = _repository.signalR;
     if (signalR == null) return;
-    await _messageSubscription?.cancel();
-    await _reconnectSubscription?.cancel();
-    if (!mounted) return;
+    _messageSubscription?.cancel();
+    _reconnectSubscription?.cancel();
     _messageSubscription = signalR.onReceiveMessage.listen((incoming) {
       if (!mounted || incoming.conversationId != conversationId) return;
       state = state.copyWith(messages: mergeMessages(state.messages, [incoming], currentUserId: currentUserId));
       _repository.markAsRead(conversationId).ignore();
     });
     _reconnectSubscription = signalR.onReconnected.listen((_) => load());
-    await signalR.connect(currentUserId: currentUserId);
-    if (mounted) await signalR.joinConversation(conversationId);
+    signalR.connect(currentUserId: currentUserId).then((_) {
+      if (mounted) signalR.joinConversation(conversationId);
+    }).catchError((_) {});
   }
 
   Future<void> sendMessage(String text, {String? clientMessageId}) async {

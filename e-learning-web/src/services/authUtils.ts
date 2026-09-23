@@ -35,8 +35,8 @@ export const authUtils = {
       return result;
     };
     // Serialize cookie rotation across tabs, as well as within this tab.
-    const promise = typeof navigator !== 'undefined' && navigator.locks
-      ? navigator.locks.request('skvi-token-refresh', run) : run();
+    const promise: Promise<AuthResponse> = typeof navigator !== 'undefined' && navigator.locks
+      ? (navigator.locks.request('skvi-token-refresh', run) as unknown as Promise<AuthResponse>) : run();
     inFlight = promise;
     try { return await promise; }
     finally { if (inFlight === promise) inFlight = null; }

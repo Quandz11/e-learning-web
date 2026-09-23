@@ -102,6 +102,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
             _buildSettingRow(
+              icon: Icons.devices_rounded,
+              title: 'Thiết bị & Phiên đăng nhập',
+              subtitle: 'Quản lý các thiết bị và phiên đang hoạt động',
+              bgColor: const Color(0xFFFFF7ED),
+              iconColor: const Color(0xFFEA580C),
+              onTap: () => context.push('/app/profile/security/devices'),
+            ),
+            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            _buildSettingRow(
               icon: Icons.verified_user_outlined,
               title: 'Bảo mật & 2FA',
               subtitle: 'Xác thực hai yếu tố cho tài khoản',

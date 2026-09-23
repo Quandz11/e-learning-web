@@ -49,52 +49,50 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (ref.watch(sessionControllerProvider.select((s) => s.session?.role)) != 'ADMIN') ...[
-            Container(
-              margin: const EdgeInsets.only(bottom: AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: context.cardBg(),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: context.cardBorder(),
-                  width: 0.8,
-                ),
-              ),
-              child: ListTile(
-                leading: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF7ED),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.devices_rounded,
-                    color: Color(0xFFEA580C),
-                    size: 18,
-                  ),
-                ),
-                title: const Text(
-                  'Thiết bị đăng nhập',
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
-                ),
-                subtitle: Text(
-                  'Xem và quản lý các phiên đăng nhập đang hoạt động',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w300,
-                    color: context.textSecondary(),
-                  ),
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
-                  color: context.textMuted(),
-                ),
-                onTap: () => context.push('/app/profile/security/devices'),
+          Container(
+            margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: context.cardBg(),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: context.cardBorder(),
+                width: 0.8,
               ),
             ),
-          ],
+            child: ListTile(
+              leading: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.devices_rounded,
+                  color: Color(0xFFEA580C),
+                  size: 18,
+                ),
+              ),
+              title: const Text(
+                'Thiết bị đăng nhập',
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+              ),
+              subtitle: Text(
+                'Xem và quản lý các phiên đăng nhập đang hoạt động',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w300,
+                  color: context.textSecondary(),
+                ),
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: context.textMuted(),
+              ),
+              onTap: () => context.push('/app/profile/security/devices'),
+            ),
+          ),
           AppSectionHeader(
             title: 'Xác thực hai lớp',
             subtitle: isEnabled

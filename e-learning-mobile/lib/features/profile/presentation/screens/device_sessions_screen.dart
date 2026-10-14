@@ -384,6 +384,8 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                     Text(
                       '${_formatPlatform(row.platform)} • ${row.browser.isNotEmpty ? row.browser : 'Ứng dụng SKVI'}',
                       style: TextStyle(fontSize: 12, color: context.textSecondary()),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -408,6 +410,8 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                           color: context.textSecondary(),
                           fontFamily: 'monospace',
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     const SizedBox(height: 2),
                     Text(

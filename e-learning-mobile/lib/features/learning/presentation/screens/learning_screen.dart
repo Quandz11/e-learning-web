@@ -392,15 +392,14 @@ class _MyLearningSection extends StatelessWidget {
               message:
                   'Bạn chưa đăng ký khóa học nào. Khám phá các khóa học phù hợp với bạn bên dưới.',
             )
-          : Column(
-              children: enrollments
-                  .map(
-                    (enrollment) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: _EnrollmentCard(enrollment: enrollment),
-                    ),
-                  )
-                  .toList(growable: false),
+          : ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: enrollments.length,
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: _EnrollmentCard(enrollment: enrollments[index]),
+              ),
             ),
     );
   }
@@ -464,15 +463,14 @@ class _CourseCatalogSection extends StatelessWidget {
           ? const AppEmptyView(
               message: 'Chưa có khóa học phù hợp. Vui lòng quay lại sau.',
             )
-          : Column(
-              children: courses
-                  .map(
-                    (course) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: _LearningCourseCard(course: course),
-                    ),
-                  )
-                  .toList(growable: false),
+          : ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: courses.length,
+              itemBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: _LearningCourseCard(course: courses[index]),
+              ),
             ),
     );
   }

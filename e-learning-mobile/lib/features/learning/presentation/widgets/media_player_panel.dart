@@ -139,7 +139,6 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
   bool _volumeOpen = false;
   double _playbackSpeed = 1.0;
   String _quality = 'Tự động (Auto)';
-  String _selectedSubtitle = 'off';
 
   @override
   void initState() {
@@ -439,11 +438,6 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
                     onTap: _togglePlayPause,
                   ),
                 ),
-                _CaptionOverlay(
-                  subtitleMode: _selectedSubtitle,
-                  title: widget.title,
-                  position: position,
-                ),
                 // bottom bar
                 Positioned(
                   bottom: 0, left: 0, right: 0,
@@ -455,10 +449,6 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
                     isFullScreen: false,
                     quality: _quality,
                     onQualityChanged: _changeQuality,
-                    selectedSubtitle: _selectedSubtitle,
-                    onSubtitleChanged: (sub) {
-                      setState(() => _selectedSubtitle = sub);
-                    },
                     onPlayPause: _togglePlayPause,
                     onSeek: (val) => c.seekTo(Duration(seconds: val.round())),
                     onSpeedChanged: (s) {
@@ -658,8 +648,6 @@ class _LearningVideoEmbedPlayerState
   bool _volumeOpen = false;
   OverlayEntry? _overlayEntry;
   bool _isFullScreen = false;
-  String _quality = 'Tự động (Auto)';
-  String _selectedSubtitle = 'off';
 
   @override
   void initState() {
@@ -1052,14 +1040,10 @@ class _LearningVideoEmbedPlayerState
 
     if (mounted) {
       setState(() {});
-      _reinjectAndResume();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _reinjectAndResume();
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (mounted) _reinjectAndResume();
-        });
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 400), () {
           if (mounted) _reinjectAndResume();
         });
       });
@@ -1110,11 +1094,6 @@ class _LearningVideoEmbedPlayerState
                           onTap: _togglePlayPause,
                         ),
                       ),
-                      _CaptionOverlay(
-                        subtitleMode: _selectedSubtitle,
-                        title: widget.title,
-                        position: d.position,
-                      ),
                       Positioned(
                         bottom: 0, left: 0, right: 0,
                         child: _BottomBar(
@@ -1123,24 +1102,13 @@ class _LearningVideoEmbedPlayerState
                           isPlaying: d.isPlaying,
                           speed: d.speed,
                           isFullScreen: false,
-                          quality: _quality,
-                          onQualityChanged: (q) {
-                            setState(() => _quality = q);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Đang phát chất lượng: $q')),
-                            );
-                          },
-                          selectedSubtitle: _selectedSubtitle,
-                          onSubtitleChanged: (sub) {
-                            setState(() => _selectedSubtitle = sub);
-                          },
                           onPlayPause: _togglePlayPause,
                           onSeek: _seekTo,
                           onSpeedChanged: _setSpeed,
                           onFullScreen: _openFullScreen,
                           volume: d.volume,
                           onVolumeChanged: _setVolume,
-                              onVolumeInteractionChanged: (open) => _volumeOpen = open,
+                          onVolumeInteractionChanged: (open) => _volumeOpen = open,
                         ),
                       ),
                     ],

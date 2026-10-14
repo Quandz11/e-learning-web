@@ -336,6 +336,8 @@ class _ArticleCard extends StatelessWidget {
                       ? CachedNetworkImage(
                           imageUrl: article.featuredImageUrl!,
                           fit: BoxFit.cover,
+                          memCacheWidth: 192,
+                          maxWidthDiskCache: 384,
                           errorWidget: (_, __, ___) => Icon(
                             Icons.image_outlined,
                             size: 28,

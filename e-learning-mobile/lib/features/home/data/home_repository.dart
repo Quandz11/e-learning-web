@@ -14,13 +14,21 @@ class HomeRepository {
 
   Future<HomeLoadResult?> loadHomeFromCache() async {
     try {
-      final featuredCourses = await _api.getCachedPublishedCourses();
+      final results = await Future.wait([
+        _api.getCachedPublishedCourses(),
+        _api.getCachedEnrollments(),
+        _api.getCachedActiveCategories(),
+        _api.getCachedRecentArticles(),
+        _api.getCachedActiveTestimonials(),
+      ]);
+
+      final featuredCourses = results[0] as List<dynamic>?;
       if (featuredCourses == null) return null;
 
-      final enrollments = await _api.getCachedEnrollments() ?? const [];
-      final categories = await _api.getCachedActiveCategories() ?? const [];
-      final articles = await _api.getCachedRecentArticles() ?? const [];
-      final testimonials = await _api.getCachedActiveTestimonials() ?? const [];
+      final enrollments = (results[1] as List<dynamic>?) ?? const [];
+      final categories = (results[2] as List<dynamic>?) ?? const [];
+      final articles = (results[3] as List<dynamic>?) ?? const [];
+      final testimonials = (results[4] as List<dynamic>?) ?? const [];
 
       return HomeLoadResult(
         featuredCourses: featuredCourses

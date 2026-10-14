@@ -27,13 +27,26 @@ class CacheService {
     } catch (_) {}
   }
 
+  static const Duration _defaultTtl = Duration(hours: 1);
+
+  bool _isExpired(Map<String, dynamic> decoded, Duration ttl) {
+    final ts = decoded['timestamp'];
+    if (ts is! int) return true;
+    final age = DateTime.now().millisecondsSinceEpoch - ts;
+    return age > ttl.inMilliseconds;
+  }
+
   /// Read cached data from local storage
-  Future<Map<String, dynamic>?> getMap(String key) async {
+  Future<Map<String, dynamic>?> getMap(String key, {Duration ttl = _defaultTtl}) async {
     try {
       final prefs = await _asyncPrefs;
       final raw = prefs.getString('$_prefix$key');
       if (raw == null) return null;
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      if (_isExpired(decoded, ttl)) {
+        await prefs.remove('$_prefix$key');
+        return null;
+      }
       final data = decoded['data'];
       if (data is Map<String, dynamic>) {
         return data;
@@ -48,12 +61,16 @@ class CacheService {
   }
 
   /// Read cached list from local storage
-  Future<List<dynamic>?> getList(String key) async {
+  Future<List<dynamic>?> getList(String key, {Duration ttl = _defaultTtl}) async {
     try {
       final prefs = await _asyncPrefs;
       final raw = prefs.getString('$_prefix$key');
       if (raw == null) return null;
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      if (_isExpired(decoded, ttl)) {
+        await prefs.remove('$_prefix$key');
+        return null;
+      }
       final data = decoded['data'];
       if (data is List) return data;
       return null;

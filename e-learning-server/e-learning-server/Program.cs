@@ -133,7 +133,8 @@ builder.Services.AddHttpClient<IBunnyStreamService, BunnyStreamService>()
         options.Retry.MaxRetryAttempts = 3;
         options.Retry.Delay = TimeSpan.FromSeconds(1);
         options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
-        options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(20);
+        options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(10); // must be <= SamplingDuration/2 (default 30s)
+        options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
     });
 builder.Services.AddHttpClient<IPayOSService, PayOSService>((sp, client) =>
 {

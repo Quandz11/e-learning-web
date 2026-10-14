@@ -8,6 +8,20 @@ const certDir = path.resolve(__dirname, 'certs')
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-redux': ['@reduxjs/toolkit', 'react-redux'],
+          'vendor-signalr': ['@microsoft/signalr'],
+          'vendor-i18n': ['i18next', 'react-i18next'],
+          'vendor-ui': ['react-toastify'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
   server: {
     https: {
       key: fs.readFileSync(path.join(certDir, 'localhost+2-key.pem')),

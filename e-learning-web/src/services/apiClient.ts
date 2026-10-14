@@ -28,6 +28,8 @@ const processQueue = (error: any, token: string | null = null) => {
     failedQueue = [];
 };
 
+const DEFAULT_TIMEOUT_MS = 60_000;
+
 export const apiClient = async <T = any>(endpoint: string, options: RequestConfig = {}): Promise<T> => {
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
@@ -54,9 +56,22 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
         config.credentials = 'include';
     }
 
+    const controller = new AbortController();
+    if (!config.signal) {
+        const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+        config.signal = controller.signal;
+        const originalSignal = options.signal;
+        if (originalSignal) {
+            originalSignal.addEventListener('abort', () => controller.abort());
+        }
+        // Clear timeout when the request completes via the response handling below
+        (config as any)._timeoutId = timeoutId;
+    }
+
     const generation = tokenService.getGeneration();
     try {
         const response = await fetch(url, config);
+        clearTimeout((config as any)._timeoutId);
         if (generation !== tokenService.getGeneration()) throw new ApiError('Session changed', 401);
         if (response.status === 401) {
             const body = await response.clone().json().catch(() => null);
@@ -144,6 +159,7 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
             return (await response.text()) as unknown as T;
         }
     } catch (error) {
+        clearTimeout((config as any)._timeoutId);
         throw error;
     }
 };

@@ -1,0 +1,36 @@
+# Build outputs
+**/bin/
+**/obj/
+**/dist/
+**/build/
+**/.next/
+**/.nuxt/
+
+# Dependencies
+**/node_modules/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# IDE
+**/.vs/
+**/.vscode/settings.json
+**/.idea/
+**/*.user
+**/*.suo
+**/.DS_Store
+
+# Secrets — never commit real credentials
+# Use dotnet user-secrets, Azure Key Vault, or env vars for production
+appsettings.Production.json
+appsettings.*.local.json
+firebase-service-account.json
+**/assets/env/.env.prod
+**/assets/env/.env.staging
+
+# Flutter
+**/*.dart_tool/
+**/pubspec.lock
+
+# .NET test results
+**/TestResults/
+**/*.coverage

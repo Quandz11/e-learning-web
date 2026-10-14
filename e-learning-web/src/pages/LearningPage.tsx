@@ -70,26 +70,28 @@ const LearningPage: React.FC = () => {
             try {
                 setLoading(true);
                 setIsEnrollmentExpired(false);
-                const courseData = await courseApi.getById(id);
+
+                const [courseData, progressData] = await Promise.all([
+                    courseApi.getById(id),
+                    isAuthenticated
+                        ? enrollmentApi.getCourseProgress(id).catch((err: any) => {
+                            if ((err?.status === 404 || err?.status === 403)) return null;
+                            throw err;
+                        })
+                        : Promise.resolve(null),
+                ]);
+
                 setCourse(courseData);
 
                 // Access check: course must be free or user must be authenticated
                 const isFreeCourse = courseData.isFree === true;
                 if (!isFreeCourse && !isAuthenticated) {
-                    console.log('Redirecting to login: Course is not free and user not authenticated', { isFreeCourse, isAuthenticated });
                     navigate('/login', { state: { from: `/courses/${id}/learn` } });
                     return;
                 }
 
-                let progressData = null;
-                if (isAuthenticated) {
-                    try {
-                        progressData = await enrollmentApi.getCourseProgress(id);
-                        setProgress(progressData);
-                    } catch (progressErr: any) {
-                        // For free courses, progress might not exist if they just started
-                        if (!courseData.isFree) throw progressErr;
-                    }
+                if (progressData) {
+                    setProgress(progressData);
                 }
 
                 // Expand all lessons by default
@@ -276,8 +278,6 @@ const LearningPage: React.FC = () => {
     const isCurrentPartCompleted = currentPartProgress?.isCompleted || false;
     const completedCount = progress?.partProgress?.filter(p => p.isCompleted).length || 0;
     const progressPercentage = allParts.length > 0 ? Math.round((completedCount / allParts.length) * 100) : 0;
-
-    console.log('DEBUG: currentPart', currentPart); // Debug log
 
     return (
         <div className="min-h-screen bg-white flex flex-col lg:flex-row">

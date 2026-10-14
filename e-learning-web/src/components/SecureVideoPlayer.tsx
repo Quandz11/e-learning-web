@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { videoApi } from '../services/videoApi';
 import { authApi } from '../services/authApi';
 
@@ -10,6 +10,8 @@ interface SecureVideoPlayerProps {
     onEnded?: () => void;
 }
 
+const MAX_RETRIES = 2;
+
 const SecureVideoPlayer = React.forwardRef<HTMLVideoElement, SecureVideoPlayerProps>(({
     videoId,
     className = '',
@@ -18,37 +20,44 @@ const SecureVideoPlayer = React.forwardRef<HTMLVideoElement, SecureVideoPlayerPr
     const [embedUrl, setEmbedUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const retryCount = useRef(0);
 
-    useEffect(() => {
-        const fetchEmbedUrl = async () => {
-            if (!videoId) {
-                setError('No video ID provided');
-                setLoading(false);
-                return;
-            }
+    const fetchEmbedUrl = useCallback(async () => {
+        if (!videoId) {
+            setError('No video ID provided');
+            setLoading(false);
+            return;
+        }
 
-            const token = authApi.getAccessToken();
-            if (!token) {
-                setError('Please login to watch videos');
-                setLoading(false);
-                return;
-            }
+        const token = authApi.getAccessToken();
+        if (!token) {
+            setError('Please login to watch videos');
+            setLoading(false);
+            return;
+        }
 
-            try {
-                console.log('Fetching embed URL for video:', videoId);
-                const { embedUrl: url } = await videoApi.getEmbedUrl(videoId);
-                console.log('Received embed URL:', url);
-                setEmbedUrl(url);
-                setLoading(false);
-            } catch (err: any) {
-                console.error('Failed to fetch embed URL:', err);
+        setLoading(true);
+        setError(null);
+        try {
+            const { embedUrl: url } = await videoApi.getEmbedUrl(videoId);
+            setEmbedUrl(url);
+            setLoading(false);
+        } catch (err: any) {
+            if (retryCount.current < MAX_RETRIES) {
+                retryCount.current += 1;
+                const delay = retryCount.current * 1500;
+                setTimeout(fetchEmbedUrl, delay);
+            } else {
                 setError(err.message || 'Failed to load video');
                 setLoading(false);
             }
-        };
-
-        fetchEmbedUrl();
+        }
     }, [videoId]);
+
+    useEffect(() => {
+        retryCount.current = 0;
+        fetchEmbedUrl();
+    }, [fetchEmbedUrl]);
 
     if (loading) {
         return (
@@ -67,6 +76,12 @@ const SecureVideoPlayer = React.forwardRef<HTMLVideoElement, SecureVideoPlayerPr
                 <div className="text-center text-red-400">
                     <span className="material-symbols-outlined text-5xl">error</span>
                     <p className="mt-2 text-sm">{error}</p>
+                    <button
+                        onClick={() => { retryCount.current = 0; fetchEmbedUrl(); }}
+                        className="mt-3 px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 text-white rounded transition-colors"
+                    >
+                        Thử lại
+                    </button>
                 </div>
             </div>
         );

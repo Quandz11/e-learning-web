@@ -23,47 +23,34 @@ const StudentCourseDetailPage: React.FC = () => {
     const [isInCart, setIsInCart] = useState(false);
 
     useEffect(() => {
-        const fetchCourse = async () => {
+        const fetchAll = async () => {
             if (!id) return;
             try {
                 setLoading(true);
-                const data = await courseApi.getById(id);
+                const [data, enrollments] = await Promise.all([
+                    courseApi.getById(id),
+                    isAuthenticated ? enrollmentApi.getUserEnrollments().catch(() => []) : Promise.resolve([]),
+                ]);
                 setCourse(data);
                 if (data.lessons && data.lessons.length > 0) {
                     setExpandedSections(new Set([data.lessons[0].id || '0']));
                 }
+                const normalizedId = id.toLowerCase();
+                const matchedEnrollment = enrollments.find((item) => item.courseId.toLowerCase() === normalizedId) || null;
+                setEnrollmentInfo(matchedEnrollment);
+                const isExpired = Boolean(
+                    matchedEnrollment?.isExpired
+                    || (matchedEnrollment?.accessExpiresAt && new Date(matchedEnrollment.accessExpiresAt).getTime() <= Date.now())
+                );
+                setIsEnrolled(Boolean(matchedEnrollment && !isExpired));
             } catch (err: any) {
                 setError(err.message || t('courseDetail.loadError'));
             } finally {
                 setLoading(false);
             }
         };
-        fetchCourse();
-    }, [id]);
-
-    // Check enrollment status
-    useEffect(() => {
-        const checkEnrollment = async () => {
-            if (!id || !isAuthenticated || !course) return;
-
-            try {
-                const enrollments = await enrollmentApi.getUserEnrollments();
-                const normalizedId = id.toLowerCase();
-                const matchedEnrollment = enrollments.find((item) => item.courseId.toLowerCase() === normalizedId) || null;
-
-                setEnrollmentInfo(matchedEnrollment);
-
-                const isExpired = Boolean(
-                    matchedEnrollment?.isExpired
-                    || (matchedEnrollment?.accessExpiresAt && new Date(matchedEnrollment.accessExpiresAt).getTime() <= Date.now())
-                );
-                setIsEnrolled(Boolean(matchedEnrollment && !isExpired));
-            } catch (err) {
-                console.error('Failed to check enrollment:', err);
-            }
-        };
-        checkEnrollment();
-    }, [id, isAuthenticated, course]);
+        fetchAll();
+    }, [id, isAuthenticated]);
 
     useEffect(() => {
         if (!course) return;

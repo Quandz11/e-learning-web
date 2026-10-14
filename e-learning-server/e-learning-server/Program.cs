@@ -127,7 +127,14 @@ builder.Services.AddScoped<IVideoSecurityService>(sp =>
     return new VideoSecurityService(bunnySettings);
 });
 
-builder.Services.AddHttpClient<IBunnyStreamService, BunnyStreamService>();
+builder.Services.AddHttpClient<IBunnyStreamService, BunnyStreamService>()
+    .AddStandardResilienceHandler(options =>
+    {
+        options.Retry.MaxRetryAttempts = 3;
+        options.Retry.Delay = TimeSpan.FromSeconds(1);
+        options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(60);
+        options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(20);
+    });
 builder.Services.AddHttpClient<IPayOSService, PayOSService>((sp, client) =>
 {
     var settings = sp.GetRequiredService<IOptions<PayOSSettings>>().Value;
@@ -271,6 +278,19 @@ builder.Services.AddSignalR(options =>
     options.MaximumReceiveMessageSize = 200 * 1024; // 200 KB
 });
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+    options.MimeTypes = Microsoft.AspNetCore.ResponseCompression.ResponseCompressionDefaults.MimeTypes.Concat(
+        ["application/json", "application/javascript", "text/css"]);
+});
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(options =>
+    options.Level = System.IO.Compression.CompressionLevel.Fastest);
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProviderOptions>(options =>
+    options.Level = System.IO.Compression.CompressionLevel.Fastest);
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -377,6 +397,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.UseResponseCompression();
 app.UseCors("StrictPolicy");
 
 app.UseMiddleware<RequestResponseLoggingMiddleware>();

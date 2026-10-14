@@ -124,6 +124,13 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Role);
         modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique()
+            .HasFilter("[Email] IS NOT NULL");
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Phone)
+            .HasFilter("[Phone] IS NOT NULL");
+        modelBuilder.Entity<User>()
             .Property(u => u.Role)
             .IsRequired();
 
@@ -263,7 +270,13 @@ public class ApplicationDbContext : DbContext
             .IsUnique()
             .HasFilter("[ReferralCode] IS NOT NULL");
 
+        // Notifications
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.UserId, n.IsRead });
+
         // Courses
+        modelBuilder.Entity<Course>()
+            .HasIndex(c => c.IsPublished);
         modelBuilder.Entity<Course>()
             .Property(c => c.Price)
             .HasColumnType("decimal(18,2)");

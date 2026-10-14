@@ -144,21 +144,22 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId)
+    public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId, int page = 1, int pageSize = 50)
     {
-        var notifications = await _context.Notifications
+        return await _context.Notifications
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(n => new NotificationDto
+            {
+                Id = n.Id,
+                Title = n.Title,
+                Content = n.Content,
+                IsRead = n.IsRead,
+                CreatedAt = DateTime.SpecifyKind(n.CreatedAt, DateTimeKind.Utc)
+            })
             .ToListAsync();
-
-        return notifications.Select(n => new NotificationDto
-        {
-            Id = n.Id,
-            Title = n.Title,
-            Content = n.Content,
-            IsRead = n.IsRead,
-            CreatedAt = DateTime.SpecifyKind(n.CreatedAt, DateTimeKind.Utc)
-        });
     }
 
     public async Task<int> GetUnreadCountAsync(Guid userId)
@@ -169,30 +170,16 @@ public class NotificationService : INotificationService
 
     public async Task MarkAsReadAsync(Guid notificationId, Guid userId)
     {
-        var notification = await _context.Notifications
-            .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
-
-        if (notification != null)
-        {
-            notification.IsRead = true;
-            await _context.SaveChangesAsync();
-        }
+        await _context.Notifications
+            .Where(n => n.Id == notificationId && n.UserId == userId)
+            .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true));
     }
 
     public async Task MarkAllAsReadAsync(Guid userId)
     {
-        var notifications = await _context.Notifications
+        await _context.Notifications
             .Where(n => n.UserId == userId && !n.IsRead)
-            .ToListAsync();
-
-        if (notifications.Any())
-        {
-            foreach (var note in notifications)
-            {
-                note.IsRead = true;
-            }
-            await _context.SaveChangesAsync();
-        }
+            .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true));
     }
 
     public async Task RegisterDeviceTokenAsync(Guid userId, RegisterDeviceTokenRequest request)

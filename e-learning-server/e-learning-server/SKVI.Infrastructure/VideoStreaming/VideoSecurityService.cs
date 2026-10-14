@@ -5,7 +5,7 @@ namespace SKVI.Infrastructure.VideoStreaming;
 
 public interface IVideoSecurityService
 {
-    string GenerateSignedUrl(string videoId, int expirationMinutes = 30);
+    string GenerateSignedUrl(string videoId, int expirationMinutes = 120);
     string GenerateEmbedUrl(string videoId);
 }
 
@@ -18,7 +18,7 @@ public class VideoSecurityService : IVideoSecurityService
         _settings = settings;
     }
 
-    public string GenerateSignedUrl(string videoId, int expirationMinutes = 30)
+    public string GenerateSignedUrl(string videoId, int expirationMinutes = 120)
     {
         var expirationTime = DateTimeOffset.UtcNow.AddMinutes(expirationMinutes).ToUnixTimeSeconds();
         
@@ -42,7 +42,7 @@ public class VideoSecurityService : IVideoSecurityService
     {
         // Generate signed embed URL with token authentication
         // Per Bunny Stream docs: SHA256_HEX(token_security_key + video_id + expiration)
-        var expirationTime = DateTimeOffset.UtcNow.AddMinutes(3600).ToUnixTimeSeconds(); // 60 hours
+        var expirationTime = DateTimeOffset.UtcNow.AddHours(24).ToUnixTimeSeconds();
         
         // Create hash input: security_key + videoId + expires
         var hashInput = $"{_settings.VideoTokenKey}{videoId}{expirationTime}";

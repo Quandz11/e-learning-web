@@ -30,18 +30,27 @@ public class ChatService : IChatService
             .OrderByDescending(c => c.LastMessageAt)
             .ToListAsync();
 
+        var conversationIds = conversations.Select(c => c.Id).ToList();
+        var participantMap = conversations
+            .Select(c => new { c.Id, Participant = c.Participants.FirstOrDefault(p => p.UserId == userId) })
+            .ToDictionary(x => x.Id, x => x.Participant);
+
+        // Single query for all unread counts (avoids N+1)
+        var unreadCounts = await _context.Messages
+            .Where(m => conversationIds.Contains(m.ConversationId)
+                && m.SenderId != userId
+                && !m.IsRead)
+            .GroupBy(m => m.ConversationId)
+            .Select(g => new { ConversationId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ConversationId, x => x.Count);
+
         var result = new List<ConversationResponse>();
 
         foreach (var conv in conversations)
         {
-            var participant = conv.Participants.FirstOrDefault(p => p.UserId == userId);
+            var participant = participantMap.GetValueOrDefault(conv.Id);
             var otherParticipant = conv.Participants.FirstOrDefault(p => p.UserId != userId);
-            var unreadCount = await _context.Messages
-                .Where(m => m.ConversationId == conv.Id 
-                    && m.SenderId != userId 
-                    && !m.IsRead
-                    && (participant == null || participant.LastReadAt == null || m.SentAt > participant.LastReadAt))
-                .CountAsync();
+            var unreadCount = unreadCounts.GetValueOrDefault(conv.Id, 0);
 
             result.Add(new ConversationResponse
             {
@@ -86,13 +95,20 @@ public class ChatService : IChatService
             .OrderByDescending(c => c.LastMessageAt)
             .ToListAsync();
 
+        var allIds = conversations.Select(c => c.Id).ToList();
+
+        // Single query for all unread counts (avoids N+1)
+        var allUnreadCounts = await _context.Messages
+            .Where(m => allIds.Contains(m.ConversationId) && !m.IsRead)
+            .GroupBy(m => m.ConversationId)
+            .Select(g => new { ConversationId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ConversationId, x => x.Count);
+
         var result = new List<ConversationResponse>();
 
         foreach (var conv in conversations)
         {
-            var unreadCount = await _context.Messages
-                .Where(m => m.ConversationId == conv.Id && !m.IsRead)
-                .CountAsync();
+            var unreadCount = allUnreadCounts.GetValueOrDefault(conv.Id, 0);
 
             var firstParticipant = conv.Participants.FirstOrDefault();
             var secondParticipant = conv.Participants.Skip(1).FirstOrDefault();

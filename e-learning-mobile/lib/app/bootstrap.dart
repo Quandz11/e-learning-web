@@ -6,11 +6,14 @@ import 'package:e_learning_mobile/features/foundation/presentation/startup_scree
 import 'package:e_learning_mobile/features/foundation/presentation/startup_failure_screen.dart';
 import 'package:e_learning_mobile/core/notifications/local_notification_service.dart';
 import 'package:e_learning_mobile/features/notifications/services/notification_service.dart';
+import 'package:e_learning_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final hasSeenOnboardingProvider = StateProvider<bool>((ref) => true);
 
 typedef AppRunner = void Function(Widget app);
 typedef Bootstrapper = Future<ProviderContainer> Function();
@@ -61,21 +64,32 @@ Future<void> bootstrapAndRun({
 }
 
 Future<ProviderContainer> bootstrap() async {
-  try {
-    await Firebase.initializeApp();
+  // Run Firebase init in parallel with config loading — both are independent
+  final firebaseFuture = Firebase.initializeApp().then((_) async {
     await NotificationService.instance.initialize();
     await NotificationService.instance.setupFirebaseMessaging();
     await LocalNotificationService.instance.initialize();
-  } catch (e) {
+  }).catchError((Object e) {
     debugPrint('Firebase/Notification init warning (safe to ignore in test/offline): $e');
-  }
+  });
 
-  final config = await AppConfigLoader.load();
+  final (config, seenOnboarding) = await (
+    AppConfigLoader.load(),
+    hasSeenOnboarding(),
+  ).wait;
+
   final container = ProviderContainer(
-    overrides: [appConfigProvider.overrideWithValue(config)],
+    overrides: [
+      appConfigProvider.overrideWithValue(config),
+      hasSeenOnboardingProvider.overrideWithValue(seenOnboarding),
+    ],
   );
 
-  await container.read(sessionControllerProvider.notifier).restore();
+  // Restore session and let Firebase finish concurrently
+  await Future.wait([
+    container.read(sessionControllerProvider.notifier).restore(),
+    firebaseFuture,
+  ]);
 
   return container;
 }

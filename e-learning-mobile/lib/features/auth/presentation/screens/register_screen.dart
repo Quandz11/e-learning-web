@@ -254,42 +254,42 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: Material(
                     color: Colors.transparent,
                     child: CheckboxListTile(
-                    key: const Key('register_terms_checkbox'),
-                    value: _acceptedTerms,
-                    onChanged: state.isSubmitting
-                        ? null
-                        : (value) {
-                            setState(() {
-                              _acceptedTerms = value ?? false;
-                            });
-                          },
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    dense: true,
-                    title: RichText(
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        children: [
-                          const TextSpan(text: 'Tôi đồng ý với '),
-                          TextSpan(
-                            text: 'Điều khoản sử dụng',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w600,
+                      key: const Key('register_terms_checkbox'),
+                      value: _acceptedTerms,
+                      onChanged: state.isSubmitting
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _acceptedTerms = value ?? false;
+                              });
+                            },
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      dense: true,
+                      title: RichText(
+                        text: TextSpan(
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          children: [
+                            const TextSpan(text: 'Tôi đồng ý với '),
+                            TextSpan(
+                              text: 'Điều khoản sử dụng',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          const TextSpan(text: ' và '),
-                          TextSpan(
-                            text: 'Chính sách bảo mật',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w600,
+                            const TextSpan(text: ' và '),
+                            TextSpan(
+                              text: 'Chính sách bảo mật',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),

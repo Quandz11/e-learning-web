@@ -80,7 +80,10 @@ class _SessionLifecycleState extends ConsumerState<SessionLifecycle>
         .build();
     _connection = connection;
     connection.on('SessionRevoked', (args) {
-      if (!mounted || generation != _generation || args == null || args.isEmpty) {
+      if (!mounted ||
+          generation != _generation ||
+          args == null ||
+          args.isEmpty) {
         return;
       }
       final event = args.first;

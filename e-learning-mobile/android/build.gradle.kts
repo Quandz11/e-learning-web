@@ -13,6 +13,13 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
+    pluginManager.withPlugin("com.android.library") {
+        extensions.configure<com.android.build.api.variant.LibraryAndroidComponentsExtension> {
+            finalizeDsl { it.compileSdk = 36 }
+        }
+    }
+}
+subprojects {
     project.evaluationDependsOn(":app")
 }
 

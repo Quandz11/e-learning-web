@@ -1,5 +1,7 @@
+import 'package:e_learning_mobile/app/bootstrap.dart';
 import 'package:e_learning_mobile/features/profile/presentation/screens/device_sessions_screen.dart';
 import 'package:e_learning_mobile/core/config/app_config.dart';
+import 'package:e_learning_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/core/session/session_controller.dart';
 import 'package:e_learning_mobile/core/session/session_state.dart';
@@ -66,6 +68,10 @@ class AppRouterNotifier extends ChangeNotifier {
       forgotPasswordChallengeControllerProvider,
       (_, __) => notifyListeners(),
     );
+    _ref.listen<bool>(
+      hasSeenOnboardingProvider,
+      (prev, next) { if (prev != next) notifyListeners(); },
+    );
   }
 
   final Ref _ref;
@@ -79,11 +85,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(appRouterNotifierProvider);
   final config = ref.watch(appConfigProvider);
   final deepLinks = DeepLinkConfig(config);
+  final seenOnboarding = ref.watch(hasSeenOnboardingProvider);
 
   return GoRouter(
     initialLocation: AppRoutes.appRoot,
     refreshListenable: notifier,
     routes: [
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (_, __) => const OnboardingScreen(),
+      ),
       GoRoute(
         path: AppRoutes.welcome,
         builder: (_, __) => const WelcomeScreen(),
@@ -308,6 +319,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       uri: state.uri,
       matchedLocation: state.matchedLocation,
       extra: state.extra,
+      seenOnboarding: seenOnboarding,
     ),
   );
 });
@@ -320,6 +332,7 @@ String? appRedirect({
   required Uri uri,
   required String matchedLocation,
   Object? extra,
+  bool seenOnboarding = true,
 }) {
   final mappedDeepLink = deepLinks.mapExternalUri(uri);
   final currentLocation = uri.path;
@@ -330,6 +343,17 @@ String? appRedirect({
 
   if (sessionState.isRestoring) {
     return null;
+  }
+
+  final isOnboarding = matchedLocation == AppRoutes.onboarding;
+
+  // First-time user → show onboarding (skip if already logged in from a prior session)
+  if (!seenOnboarding && !isOnboarding && !sessionState.isAuthenticated) {
+    return AppRoutes.onboarding;
+  }
+  // Once onboarding done (or user is authenticated), don't re-show it
+  if (isOnboarding && (seenOnboarding || sessionState.isAuthenticated)) {
+    return AppRoutes.welcome;
   }
 
   final isProtected = AppRoutes.isProtectedLocation(matchedLocation);
@@ -373,7 +397,8 @@ String? appRedirect({
   }
 
   if (sessionState.isAuthenticated &&
-      (isPublicWelcome ||
+      (isOnboarding ||
+          isPublicWelcome ||
           isLogin ||
           isRegister ||
           isVerifyOtp ||

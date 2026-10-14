@@ -22,13 +22,13 @@ class HomeRepository {
         _api.getCachedActiveTestimonials(),
       ]);
 
-      final featuredCourses = results[0] as List<dynamic>?;
+      final featuredCourses = results[0] as List<HomeCourse>?;
       if (featuredCourses == null) return null;
 
-      final enrollments = (results[1] as List<dynamic>?) ?? const [];
-      final categories = (results[2] as List<dynamic>?) ?? const [];
-      final articles = (results[3] as List<dynamic>?) ?? const [];
-      final testimonials = (results[4] as List<dynamic>?) ?? const [];
+      final enrollments = (results[1] as List<HomeEnrollment>?) ?? const <HomeEnrollment>[];
+      final categories = (results[2] as List<HomeCategory>?) ?? const <HomeCategory>[];
+      final articles = (results[3] as List<HomeArticle>?) ?? const <HomeArticle>[];
+      final testimonials = (results[4] as List<HomeTestimonial>?) ?? const <HomeTestimonial>[];
 
       return HomeLoadResult(
         featuredCourses: featuredCourses

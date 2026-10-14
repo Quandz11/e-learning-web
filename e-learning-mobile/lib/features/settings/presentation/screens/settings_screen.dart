@@ -147,7 +147,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w300),
               ),
               value: _notificationsEnabled,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
               onChanged: (val) {
                 setState(() => _notificationsEnabled = val);
               },
@@ -247,7 +247,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w300),
               ),
               value: _widgetSyncEnabled,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
               onChanged: (val) async {
                 setState(() => _widgetSyncEnabled = val);
                 await HomeWidgetService.instance.setSyncEnabled(val);

@@ -1561,6 +1561,7 @@ class _SubtitleCue {
   final String text;
 }
 
+// ignore: unused_element
 class _CaptionOverlay extends StatelessWidget {
   const _CaptionOverlay({
     required this.subtitleMode,
@@ -1684,7 +1685,9 @@ class _BottomBar extends StatelessWidget {
     this.onVolumeInteractionChanged,
     this.quality = 'Tự động (Auto)',
     this.onQualityChanged,
+    // ignore: unused_element_parameter
     this.selectedSubtitle = 'off',
+    // ignore: unused_element_parameter
     this.onSubtitleChanged,
   });
 

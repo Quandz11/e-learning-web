@@ -81,7 +81,7 @@ Future<ProviderContainer> bootstrap() async {
   final container = ProviderContainer(
     overrides: [
       appConfigProvider.overrideWithValue(config),
-      hasSeenOnboardingProvider.overrideWithValue(seenOnboarding),
+      hasSeenOnboardingProvider.overrideWith((ref) => seenOnboarding),
     ],
   );
 

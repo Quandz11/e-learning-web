@@ -149,7 +149,7 @@ class _WidgetPreviewGalleryScreenState
                   ),
                   Switch.adaptive(
                     value: _isSyncEnabled,
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     onChanged: _toggleSync,
                   ),
                 ],

@@ -353,7 +353,7 @@ class _ReminderListScreenState extends ConsumerState<ReminderListScreen> {
               ),
               Switch.adaptive(
                 value: rem.enabled,
-                activeColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                activeThumbColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                 onChanged: (val) {
                   ref
                       .read(personalizationStateProvider.notifier)

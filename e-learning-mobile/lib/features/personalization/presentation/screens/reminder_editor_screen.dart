@@ -442,7 +442,7 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                         ),
                       ),
                       value: _soundEnabled,
-                      activeColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                      activeThumbColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                       onChanged: (val) => setState(() => _soundEnabled = val),
                     ),
                     Divider(
@@ -460,7 +460,7 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                         ),
                       ),
                       value: _vibrationEnabled,
-                      activeColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                      activeThumbColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
                       onChanged: (val) => setState(() => _vibrationEnabled = val),
                     ),
                   ],

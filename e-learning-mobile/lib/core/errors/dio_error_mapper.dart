@@ -32,7 +32,8 @@ class DioErrorMapper {
           type: _isNetworkUnavailable(error.error)
               ? AppFailureType.networkUnavailable
               : AppFailureType.connectionFailure,
-          message: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.',
+          message:
+              'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.',
           statusCode: error.response?.statusCode,
           debugDetails: error.message,
           originalCause: error,
@@ -57,7 +58,8 @@ class DioErrorMapper {
     final envelope = _extractEnvelope(body);
 
     final fallbackMessage = switch (statusCode) {
-      401 => 'Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.',
+      401 =>
+        'Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.',
       403 => 'Bạn không có quyền thực hiện thao tác này.',
       404 => 'Không tìm thấy tài nguyên yêu cầu.',
       429 => 'Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.',
@@ -160,16 +162,19 @@ class DioErrorMapper {
 
   String? _mapEnglishMessage(String message) {
     final lower = message.toLowerCase();
-    if (lower.contains('invalid credential') || lower.contains('invalid email or password')) {
+    if (lower.contains('invalid credential') ||
+        lower.contains('invalid email or password')) {
       return 'Email, số điện thoại hoặc mật khẩu không chính xác.';
     }
-    if (lower.contains('account is deleted') || lower.contains('account has been deleted')) {
+    if (lower.contains('account is deleted') ||
+        lower.contains('account has been deleted')) {
       return 'Tài khoản đã bị xóa khỏi hệ thống.';
     }
     if (lower.contains('not active') || lower.contains('verify otp')) {
       return 'Tài khoản chưa được kích hoạt. Vui lòng xác thực mã OTP.';
     }
-    if (lower.contains('phone number is not verified') || lower.contains('phone not verified')) {
+    if (lower.contains('phone number is not verified') ||
+        lower.contains('phone not verified')) {
       return 'Số điện thoại chưa được xác thực.';
     }
     if (lower.contains('user not found')) {
@@ -178,10 +183,12 @@ class DioErrorMapper {
     if (lower.contains('invalid otp')) {
       return 'Mã xác thực OTP không chính xác.';
     }
-    if (lower.contains('otp has expired') || lower.contains('otp does not exist or has expired')) {
+    if (lower.contains('otp has expired') ||
+        lower.contains('otp does not exist or has expired')) {
       return 'Mã xác thực OTP đã hết hạn.';
     }
-    if (lower.contains('already registered') || lower.contains('already exists')) {
+    if (lower.contains('already registered') ||
+        lower.contains('already exists')) {
       return 'Thông tin này đã được đăng ký trong hệ thống.';
     }
     if (lower.contains('too many requests')) {

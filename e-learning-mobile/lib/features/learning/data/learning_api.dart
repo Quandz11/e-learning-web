@@ -25,10 +25,10 @@ class LearningApi {
     required DioErrorMapper errorMapper,
     required Uri apiBaseUrl,
     CacheService? cacheService,
-  })  : _apiClient = apiClient,
-        _errorMapper = errorMapper,
-        _apiBaseUrl = apiBaseUrl,
-        _cacheService = cacheService;
+  }) : _apiClient = apiClient,
+       _errorMapper = errorMapper,
+       _apiBaseUrl = apiBaseUrl,
+       _cacheService = cacheService;
 
   final ApiClient _apiClient;
   final DioErrorMapper _errorMapper;

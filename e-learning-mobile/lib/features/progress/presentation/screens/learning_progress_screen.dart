@@ -13,10 +13,12 @@ class LearningProgressScreen extends ConsumerStatefulWidget {
   const LearningProgressScreen({super.key});
 
   @override
-  ConsumerState<LearningProgressScreen> createState() => _LearningProgressScreenState();
+  ConsumerState<LearningProgressScreen> createState() =>
+      _LearningProgressScreenState();
 }
 
-class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen> {
+class _LearningProgressScreenState
+    extends ConsumerState<LearningProgressScreen> {
   int _selectedFilterIndex = 0;
 
   @override
@@ -44,7 +46,9 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
     final myEnrollments = learningState.enrollments;
 
     return Scaffold(
-      backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+      backgroundColor: context.isDark
+          ? context.colorScheme.surface
+          : AppColors.background,
       appBar: AppBar(
         title: Text(
           'Tiến độ học tập',
@@ -56,7 +60,9 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
           ),
         ),
         elevation: 0,
-        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+        backgroundColor: context.isDark
+            ? context.colorScheme.surface
+            : AppColors.background,
       ),
       body: RefreshIndicator(
         color: context.colorScheme.primary,
@@ -76,10 +82,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                 decoration: BoxDecoration(
                   color: context.cardBg(),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: context.cardBorder(),
-                    width: 0.8,
-                  ),
+                  border: Border.all(color: context.cardBorder(), width: 0.8),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.02),
@@ -102,7 +105,9 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF108A55).withValues(alpha: 0.4),
+                                color: const Color(
+                                  0xFF108A55,
+                                ).withValues(alpha: 0.4),
                                 blurRadius: 6,
                               ),
                             ],
@@ -120,9 +125,14 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                         ),
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: context.isDark ? const Color(0xFF143823) : const Color(0xFFF0F5F1),
+                            color: context.isDark
+                                ? const Color(0xFF143823)
+                                : const Color(0xFFF0F5F1),
                             borderRadius: BorderRadius.circular(AppRadius.pill),
                           ),
                           child: Text(
@@ -130,7 +140,9 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
-                              color: context.isDark ? context.colorScheme.primary : const Color(0xFF43544B),
+                              color: context.isDark
+                                  ? context.colorScheme.primary
+                                  : const Color(0xFF43544B),
                             ),
                           ),
                         ),
@@ -152,7 +164,9 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                               value: (overallPercent / 100.0).clamp(0.0, 1.0),
                               strokeWidth: 4.5,
                               strokeCap: StrokeCap.round,
-                              backgroundColor: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF3EE),
+                              backgroundColor: context.isDark
+                                  ? context.colorScheme.surfaceContainerHighest
+                                  : const Color(0xFFEFF3EE),
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 context.colorScheme.primary,
                               ),
@@ -196,7 +210,11 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                           Icons.local_fire_department_rounded,
                           AppColors.warning,
                         ),
-                        Container(height: 32, width: 0.8, color: context.cardBorder()),
+                        Container(
+                          height: 32,
+                          width: 0.8,
+                          color: context.cardBorder(),
+                        ),
                         _buildMetricCol(
                           context,
                           '$completedLessons bài',
@@ -204,7 +222,11 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                           Icons.check_circle_outline_rounded,
                           context.colorScheme.primary,
                         ),
-                        Container(height: 32, width: 0.8, color: context.cardBorder()),
+                        Container(
+                          height: 32,
+                          width: 0.8,
+                          color: context.cardBorder(),
+                        ),
                         _buildMetricCol(
                           context,
                           '$totalMinutes phút',
@@ -215,7 +237,11 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                       ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    Divider(height: 1, thickness: 0.8, color: context.cardBorder()),
+                    Divider(
+                      height: 1,
+                      thickness: 0.8,
+                      color: context.cardBorder(),
+                    ),
                     const SizedBox(height: AppSpacing.md),
 
                     // Weekly Learning Streak Chart
@@ -245,20 +271,50 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: weeklyStats.isNotEmpty
                           ? weeklyStats
-                              .map((stat) => _DayStreakBar(
+                                .map(
+                                  (stat) => _DayStreakBar(
                                     day: stat.dayOfWeek,
                                     minutes: stat.minutesLearned,
                                     isToday: stat.isToday,
-                                  ))
-                              .toList()
+                                  ),
+                                )
+                                .toList()
                           : const [
-                              _DayStreakBar(day: 'T2', minutes: 0, isToday: false),
-                              _DayStreakBar(day: 'T3', minutes: 0, isToday: false),
-                              _DayStreakBar(day: 'T4', minutes: 0, isToday: false),
-                              _DayStreakBar(day: 'T5', minutes: 0, isToday: false),
-                              _DayStreakBar(day: 'T6', minutes: 0, isToday: false),
-                              _DayStreakBar(day: 'T7', minutes: 0, isToday: false),
-                              _DayStreakBar(day: 'CN', minutes: 0, isToday: false),
+                              _DayStreakBar(
+                                day: 'T2',
+                                minutes: 0,
+                                isToday: false,
+                              ),
+                              _DayStreakBar(
+                                day: 'T3',
+                                minutes: 0,
+                                isToday: false,
+                              ),
+                              _DayStreakBar(
+                                day: 'T4',
+                                minutes: 0,
+                                isToday: false,
+                              ),
+                              _DayStreakBar(
+                                day: 'T5',
+                                minutes: 0,
+                                isToday: false,
+                              ),
+                              _DayStreakBar(
+                                day: 'T6',
+                                minutes: 0,
+                                isToday: false,
+                              ),
+                              _DayStreakBar(
+                                day: 'T7',
+                                minutes: 0,
+                                isToday: false,
+                              ),
+                              _DayStreakBar(
+                                day: 'CN',
+                                minutes: 0,
+                                isToday: false,
+                              ),
                             ],
                     ),
                   ],
@@ -271,7 +327,11 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterChip(context, 0, 'Tất cả (${myEnrollments.length})'),
+                    _buildFilterChip(
+                      context,
+                      0,
+                      'Tất cả (${myEnrollments.length})',
+                    ),
                     const SizedBox(width: AppSpacing.xs),
                     _buildFilterChip(
                       context,
@@ -301,7 +361,11 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.school_outlined, size: 40, color: context.textMuted()),
+                      Icon(
+                        Icons.school_outlined,
+                        size: 40,
+                        color: context.textMuted(),
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         'Chưa có khóa học nào',
@@ -330,15 +394,20 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
                       if (_selectedFilterIndex == 2) return e.isCompleted;
                       return true;
                     })
-                    .map((enrollment) => _buildCourseProgressCard(
-                          context,
-                          title: enrollment.courseTitle,
-                          subtitle: enrollment.isCompleted
-                              ? 'Đã hoàn thành 100%'
-                              : 'Tiến độ: ${enrollment.progressPercentage}% · Đang học',
-                          progress: (enrollment.progressPercentage / 100.0).clamp(0.0, 1.0),
-                          courseId: enrollment.courseId,
-                        )),
+                    .map(
+                      (enrollment) => _buildCourseProgressCard(
+                        context,
+                        title: enrollment.courseTitle,
+                        subtitle: enrollment.isCompleted
+                            ? 'Đã hoàn thành 100%'
+                            : 'Tiến độ: ${enrollment.progressPercentage}% · Đang học',
+                        progress: (enrollment.progressPercentage / 100.0).clamp(
+                          0.0,
+                          1.0,
+                        ),
+                        courseId: enrollment.courseId,
+                      ),
+                    ),
             ],
           ),
         ),
@@ -355,9 +424,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
       backgroundColor: context.cardBg(),
       elevation: 0,
       side: BorderSide(
-        color: isSelected
-            ? context.colorScheme.primary
-            : context.cardBorder(),
+        color: isSelected ? context.colorScheme.primary : context.cardBorder(),
         width: 0.8,
       ),
       shape: RoundedRectangleBorder(
@@ -425,10 +492,7 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -475,7 +539,9 @@ class _LearningProgressScreenState extends ConsumerState<LearningProgressScreen>
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF5F1),
+              backgroundColor: context.isDark
+                  ? context.colorScheme.surfaceContainerHighest
+                  : const Color(0xFFEFF5F1),
               valueColor: AlwaysStoppedAnimation(context.colorScheme.primary),
             ),
           ),
@@ -530,7 +596,9 @@ class _DayStreakBar extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: isToday ? FontWeight.w500 : FontWeight.w300,
-            color: isToday ? context.colorScheme.primary : context.textSecondary(),
+            color: isToday
+                ? context.colorScheme.primary
+                : context.textSecondary(),
           ),
         ),
         const SizedBox(height: 4),
@@ -539,7 +607,9 @@ class _DayStreakBar extends StatelessWidget {
           height: 64,
           alignment: Alignment.bottomCenter,
           decoration: BoxDecoration(
-            color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF5F1),
+            color: context.isDark
+                ? context.colorScheme.surfaceContainerHighest
+                : const Color(0xFFEFF5F1),
             borderRadius: BorderRadius.circular(AppRadius.pill),
           ),
           child: Container(
@@ -548,7 +618,11 @@ class _DayStreakBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: isToday
                   ? context.colorScheme.primary
-                  : (hasLearned ? (context.isDark ? const Color(0xFF388E3C) : const Color(0xFF68B28B)) : Colors.transparent),
+                  : (hasLearned
+                        ? (context.isDark
+                              ? const Color(0xFF388E3C)
+                              : const Color(0xFF68B28B))
+                        : Colors.transparent),
               borderRadius: BorderRadius.circular(AppRadius.pill),
             ),
           ),
@@ -559,7 +633,9 @@ class _DayStreakBar extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: isToday ? FontWeight.w500 : FontWeight.w400,
-            color: isToday ? context.colorScheme.primary : context.textPrimary(),
+            color: isToday
+                ? context.colorScheme.primary
+                : context.textPrimary(),
           ),
         ),
       ],

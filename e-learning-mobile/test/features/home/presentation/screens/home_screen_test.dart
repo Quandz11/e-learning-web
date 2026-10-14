@@ -228,10 +228,7 @@ void main() {
       );
       await tester.tap(avatarTapTarget.first);
       await tester.pumpAndSettle();
-      expect(
-        find.text('Hồ sơ của tôi'),
-        findsOneWidget,
-      );
+      expect(find.text('Hồ sơ của tôi'), findsOneWidget);
     },
   );
 

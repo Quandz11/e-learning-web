@@ -82,31 +82,30 @@ class _ForgotPasswordVerifyScreenState
       });
     }
 
-    ref.listen<ForgotPasswordVerifyState>(
-      forgotPasswordVerifyControllerProvider,
-      (previous, next) {
-        if (previous?.status == next.status ||
-            next.status != ForgotPasswordVerifyStatus.success) {
+    ref.listen<
+      ForgotPasswordVerifyState
+    >(forgotPasswordVerifyControllerProvider, (previous, next) {
+      if (previous?.status == next.status ||
+          next.status != ForgotPasswordVerifyStatus.success) {
+        return;
+      }
+
+      ref.read(forgotPasswordChallengeControllerProvider.notifier).clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
           return;
         }
-
-        ref.read(forgotPasswordChallengeControllerProvider.notifier).clear();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) {
-            return;
-          }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                next.generalMessage ??
-                    'Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.',
-              ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              next.generalMessage ??
+                  'Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.',
             ),
-          );
-          context.go(AppRoutes.login);
-        });
-      },
-    );
+          ),
+        );
+        context.go(AppRoutes.login);
+      });
+    });
 
     if (challenge == null || !challenge.isValid) {
       return AppPage(
@@ -350,10 +349,7 @@ class _RecipientCard extends StatelessWidget {
           Expanded(
             child: Text(
               target,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
           ),
         ],

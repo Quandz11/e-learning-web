@@ -34,8 +34,13 @@ Future<void> bootstrapAndRun({
     String stackInfo = '';
     if (stack != null) {
       final lines = stack.toString().split('\n');
-      final appLines = lines.where((l) => l.contains('package:e_learning_mobile')).take(3).toList();
-      stackInfo = appLines.isNotEmpty ? '\n${appLines.join('\n')}' : '\n${lines.take(2).join('\n')}';
+      final appLines = lines
+          .where((l) => l.contains('package:e_learning_mobile'))
+          .take(3)
+          .toList();
+      stackInfo = appLines.isNotEmpty
+          ? '\n${appLines.join('\n')}'
+          : '\n${lines.take(2).join('\n')}';
     }
 
     return Material(
@@ -46,12 +51,20 @@ Future<void> bootstrapAndRun({
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: Color(0xFFC0392B), size: 32),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: Color(0xFFC0392B),
+                size: 32,
+              ),
               const SizedBox(height: 8),
               SelectableText(
                 'Lỗi: ${details.exception}$stackInfo',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFFC0392B), fontSize: 12, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Color(0xFFC0392B),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -65,13 +78,17 @@ Future<void> bootstrapAndRun({
 
 Future<ProviderContainer> bootstrap() async {
   // Run Firebase init in parallel with config loading — both are independent
-  final firebaseFuture = Firebase.initializeApp().then((_) async {
-    await NotificationService.instance.initialize();
-    await NotificationService.instance.setupFirebaseMessaging();
-    await LocalNotificationService.instance.initialize();
-  }).catchError((Object e) {
-    debugPrint('Firebase/Notification init warning (safe to ignore in test/offline): $e');
-  });
+  final firebaseFuture = Firebase.initializeApp()
+      .then((_) async {
+        await NotificationService.instance.initialize();
+        await NotificationService.instance.setupFirebaseMessaging();
+        await LocalNotificationService.instance.initialize();
+      })
+      .catchError((Object e) {
+        debugPrint(
+          'Firebase/Notification init warning (safe to ignore in test/offline): $e',
+        );
+      });
 
   final (config, seenOnboarding) = await (
     AppConfigLoader.load(),

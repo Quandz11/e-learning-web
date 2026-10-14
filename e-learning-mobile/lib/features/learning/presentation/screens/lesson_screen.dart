@@ -186,10 +186,7 @@ class _LessonHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: const [
           BoxShadow(
             color: Color(0x04000000),
@@ -206,7 +203,9 @@ class _LessonHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2),
+                  color: isDark
+                      ? colorScheme.surfaceContainerHighest
+                      : const Color(0xFFF0F7F2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
@@ -248,8 +247,15 @@ class _LessonHeader extends StatelessWidget {
             children: [
               Chip(
                 label: Text(_typeLabel(part)),
-                backgroundColor: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2),
-                side: BorderSide(color: isDark ? colorScheme.outlineVariant : const Color(0xFFD1E7DD), width: 0.8),
+                backgroundColor: isDark
+                    ? colorScheme.surfaceContainerHighest
+                    : const Color(0xFFF0F7F2),
+                side: BorderSide(
+                  color: isDark
+                      ? colorScheme.outlineVariant
+                      : const Color(0xFFD1E7DD),
+                  width: 0.8,
+                ),
                 labelStyle: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -259,8 +265,15 @@ class _LessonHeader extends StatelessWidget {
               if (part.videoDuration > 0)
                 Chip(
                   label: Text(_durationLabel(part.videoDuration)),
-                  backgroundColor: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
-                  side: BorderSide(color: isDark ? const Color(0xFF3B82F6) : const Color(0xFFBFDBFE), width: 0.8),
+                  backgroundColor: isDark
+                      ? const Color(0xFF1E3A8A)
+                      : const Color(0xFFEFF6FF),
+                  side: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF3B82F6)
+                        : const Color(0xFFBFDBFE),
+                    width: 0.8,
+                  ),
                   labelStyle: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -270,8 +283,15 @@ class _LessonHeader extends StatelessWidget {
               if (part.isPreview)
                 Chip(
                   label: const Text('Xem thử'),
-                  backgroundColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB),
-                  side: BorderSide(color: isDark ? const Color(0xFFF59E0B) : const Color(0xFFFDE68A), width: 0.8),
+                  backgroundColor: isDark
+                      ? const Color(0xFF78350F)
+                      : const Color(0xFFFFFBEB),
+                  side: BorderSide(
+                    color: isDark
+                        ? const Color(0xFFF59E0B)
+                        : const Color(0xFFFDE68A),
+                    width: 0.8,
+                  ),
                   labelStyle: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -281,8 +301,15 @@ class _LessonHeader extends StatelessWidget {
               if (progress?.isCompleted == true)
                 Chip(
                   label: const Text('Đã hoàn thành'),
-                  backgroundColor: isDark ? const Color(0xFF064E3B) : const Color(0xFFF0FDF4),
-                  side: BorderSide(color: isDark ? const Color(0xFF22C55E) : const Color(0xFFBBF7D0), width: 0.8),
+                  backgroundColor: isDark
+                      ? const Color(0xFF064E3B)
+                      : const Color(0xFFF0FDF4),
+                  side: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF22C55E)
+                        : const Color(0xFFBBF7D0),
+                    width: 0.8,
+                  ),
                   labelStyle: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -296,12 +323,11 @@ class _LessonHeader extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF9FBF9),
+                color: isDark
+                    ? colorScheme.surfaceContainerHighest
+                    : const Color(0xFFF9FBF9),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: context.cardBorder(),
-                  width: 0.8,
-                ),
+                border: Border.all(color: context.cardBorder(), width: 0.8),
               ),
               child: Row(
                 children: [
@@ -351,10 +377,7 @@ class _LessonBody extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: const [
           BoxShadow(
             color: Color(0x04000000),

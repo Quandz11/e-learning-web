@@ -187,13 +187,17 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery.toLowerCase();
         final matchTitle = c.title.toLowerCase().contains(q);
-        final matchInstructor = (c.instructorName ?? '').toLowerCase().contains(q);
+        final matchInstructor = (c.instructorName ?? '').toLowerCase().contains(
+          q,
+        );
         if (!matchTitle && !matchInstructor) return false;
       }
       if (_selectedCategory != 'Tất cả') {
         final cat = _selectedCategory.toLowerCase();
         final matchTitle = c.title.toLowerCase().contains(cat);
-        final matchInstructor = (c.instructorName ?? '').toLowerCase().contains(cat);
+        final matchInstructor = (c.instructorName ?? '').toLowerCase().contains(
+          cat,
+        );
         if (!matchTitle && !matchInstructor) return false;
       }
       return true;
@@ -248,10 +252,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
             decoration: BoxDecoration(
               color: const Color(0xFFF0FDF4),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFFD4E8DC),
-                width: 0.8,
-              ),
+              border: Border.all(color: const Color(0xFFD4E8DC), width: 0.8),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,10 +363,7 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: const Color(0xFFEAEFE9),
-                width: 0.8,
-              ),
+              border: Border.all(color: const Color(0xFFEAEFE9), width: 0.8),
             ),
             child: Column(
               children: [
@@ -545,11 +543,7 @@ class _HomeSearchBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.search_rounded,
-            color: Color(0xFF0F5B38),
-            size: 20,
-          ),
+          const Icon(Icons.search_rounded, color: Color(0xFF0F5B38), size: 20),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: TextField(
@@ -688,7 +682,9 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
         20 + MediaQuery.of(context).padding.bottom,
       ),
       decoration: BoxDecoration(
-        color: context.isDark ? context.colorScheme.surfaceContainerLow : Colors.white,
+        color: context.isDark
+            ? context.colorScheme.surfaceContainerLow
+            : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -700,7 +696,9 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: context.isDark ? context.colorScheme.outlineVariant : const Color(0xFFE2EBE5),
+                color: context.isDark
+                    ? context.colorScheme.outlineVariant
+                    : const Color(0xFFE2EBE5),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -732,7 +730,9 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: context.isDark ? context.colorScheme.onSurface : const Color(0xFF0F5B38),
+              color: context.isDark
+                  ? context.colorScheme.onSurface
+                  : const Color(0xFF0F5B38),
             ),
           ),
           const SizedBox(height: 8),
@@ -917,10 +917,7 @@ class _EditorialBanner extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0F623F),
-            Color(0xFF1B8A5A),
-          ],
+          colors: [Color(0xFF0F623F), Color(0xFF1B8A5A)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -1119,9 +1116,7 @@ class _HomeHeader extends ConsumerWidget {
           onPressed: () => context.push(AppRoutes.appNotifications),
           icon: Badge(
             isLabelVisible: unreadCount > 0,
-            label: Text(
-              unreadCount > 99 ? '99+' : '$unreadCount',
-            ),
+            label: Text(unreadCount > 99 ? '99+' : '$unreadCount'),
             child: Icon(
               Icons.notifications_outlined,
               color: colorScheme.onSurface,
@@ -1144,7 +1139,8 @@ class _ContinueLearningSection extends StatelessWidget {
     return _OptionalSectionWrapper(
       title: 'Tiếp tục học',
       child: AppCard(
-        onTap: () => context.push(AppRoutes.courseDetailPath(enrollment.courseId)),
+        onTap: () =>
+            context.push(AppRoutes.courseDetailPath(enrollment.courseId)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1157,9 +1153,9 @@ class _ContinueLearningSection extends StatelessWidget {
             Text(
               enrollment.courseTitle,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: -0.2,
-                  ),
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.2,
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(
@@ -1170,13 +1166,16 @@ class _ContinueLearningSection extends StatelessWidget {
                     semanticsLabel:
                         'Tiến độ học tập, đã hoàn thành ${enrollment.progressPercentage} phần trăm',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w300,
-                          color: AppColors.textSecondary,
-                        ),
+                      fontWeight: FontWeight.w300,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.mint,
                     borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -1203,7 +1202,9 @@ class _ContinueLearningSection extends StatelessWidget {
                 value: enrollment.progressPercentage / 100,
                 minHeight: 6,
                 backgroundColor: const Color(0xFFEFF5F1),
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.primary,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -1350,36 +1351,40 @@ class _CategoriesSection extends StatelessWidget {
           ? Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
-              children: categories.map((category) {
-                final isSelected = selectedCategory == category.name;
-                return ChoiceChip(
-                  label: Text(category.name),
-                  selected: isSelected,
-                  selectedColor: const Color(0xFF0F5B38),
-                  backgroundColor: context.chipBg(isSelected),
-                  labelStyle: TextStyle(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    fontSize: 13,
-                    color: context.chipText(isSelected),
-                  ),
-                  side: BorderSide(
-                    color: isSelected
-                        ? const Color(0xFF0F5B38)
-                        : context.cardBorder(),
-                    width: 0.8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                  onSelected: (_) {
-                    if (onCategoryTap != null) {
-                      onCategoryTap!(category.name);
-                    } else {
-                      context.go(AppRoutes.appLearning);
-                    }
-                  },
-                );
-              }).toList(growable: false),
+              children: categories
+                  .map((category) {
+                    final isSelected = selectedCategory == category.name;
+                    return ChoiceChip(
+                      label: Text(category.name),
+                      selected: isSelected,
+                      selectedColor: const Color(0xFF0F5B38),
+                      backgroundColor: context.chipBg(isSelected),
+                      labelStyle: TextStyle(
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        fontSize: 13,
+                        color: context.chipText(isSelected),
+                      ),
+                      side: BorderSide(
+                        color: isSelected
+                            ? const Color(0xFF0F5B38)
+                            : context.cardBorder(),
+                        width: 0.8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
+                      onSelected: (_) {
+                        if (onCategoryTap != null) {
+                          onCategoryTap!(category.name);
+                        } else {
+                          context.go(AppRoutes.appLearning);
+                        }
+                      },
+                    );
+                  })
+                  .toList(growable: false),
             )
           : issue == null
           ? const SizedBox.shrink()
@@ -1503,9 +1508,9 @@ class _OptionalSectionWrapper extends StatelessWidget {
               child: Text(
                 title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: -0.3,
-                    ),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.3,
+                ),
               ),
             ),
             if (trailing != null) trailing!,
@@ -1561,10 +1566,7 @@ class _QuickActionCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.cardBg(),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: context.cardBorder(),
-              width: 0.8,
-            ),
+            border: Border.all(color: context.cardBorder(), width: 0.8),
             boxShadow: context.isDark
                 ? null
                 : const [
@@ -1603,7 +1605,10 @@ class _QuickActionCard extends StatelessWidget {
                       top: -4,
                       right: -6,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 1.5,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF0F5B38),
                           borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -1672,9 +1677,9 @@ class _CourseCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: -0.2,
-                        ),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.2,
+                    ),
                   ),
                   if (course.instructorName != null) ...[
                     const SizedBox(height: 4),
@@ -1689,7 +1694,8 @@ class _CourseCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             course.instructorName!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w300,
                                 ),
@@ -1702,7 +1708,10 @@ class _CourseCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: course.isFree
                           ? AppColors.mint
@@ -1720,12 +1729,12 @@ class _CourseCard extends StatelessWidget {
                           ? 'Miễn phí'
                           : _currencyFormatter.format(course.price),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: course.isFree
-                                ? AppColors.primary
-                                : colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 11,
-                          ),
+                        color: course.isFree
+                            ? AppColors.primary
+                            : colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
                 ],

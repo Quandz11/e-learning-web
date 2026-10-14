@@ -127,8 +127,8 @@ class StartupScreen extends StatelessWidget {
                                           'Đang khởi động ứng dụng',
                                           style: textTheme.titleMedium
                                               ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                         const SizedBox(height: AppSpacing.xs),
                                         Text(
@@ -186,11 +186,7 @@ class _StartupMark extends StatelessWidget {
           ],
         ),
         child: Center(
-          child: Icon(
-            Icons.spa_rounded,
-            size: 52,
-            color: foreground,
-          ),
+          child: Icon(Icons.spa_rounded, size: 52, color: foreground),
         ),
       ),
     );

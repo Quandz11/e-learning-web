@@ -27,10 +27,11 @@ class LearningRepository {
         enrollments: enrollments
             .where((enrollment) => enrollment.status == 'ACTIVE')
             .toList(growable: false),
-        categories: categories
-            .where((category) => category.isActive)
-            .toList(growable: false)
-          ..sort((left, right) => left.order.compareTo(right.order)),
+        categories:
+            categories
+                .where((category) => category.isActive)
+                .toList(growable: false)
+              ..sort((left, right) => left.order.compareTo(right.order)),
       );
     } catch (_) {
       return null;

@@ -17,8 +17,8 @@ class RemindersApi {
   RemindersApi({
     required ApiClient apiClient,
     required DioErrorMapper errorMapper,
-  })  : _apiClient = apiClient,
-        _errorMapper = errorMapper;
+  }) : _apiClient = apiClient,
+       _errorMapper = errorMapper;
 
   final ApiClient _apiClient;
   final DioErrorMapper _errorMapper;
@@ -29,7 +29,10 @@ class RemindersApi {
       if (data is List) {
         return data
             .whereType<Map>()
-            .map((e) => Reminder.fromJson(e.map((k, v) => MapEntry(k.toString(), v))))
+            .map(
+              (e) =>
+                  Reminder.fromJson(e.map((k, v) => MapEntry(k.toString(), v))),
+            )
             .toList();
       }
       return const [];
@@ -42,14 +45,18 @@ class RemindersApi {
 
   Future<List<Reminder>> syncReminders(List<Reminder> reminders) async {
     try {
-      final payload = {
-        'reminders': reminders.map((r) => r.toJson()).toList(),
-      };
-      final data = await _apiClient.post<Object?>('/user/reminders/sync', data: payload);
+      final payload = {'reminders': reminders.map((r) => r.toJson()).toList()};
+      final data = await _apiClient.post<Object?>(
+        '/user/reminders/sync',
+        data: payload,
+      );
       if (data is List) {
         return data
             .whereType<Map>()
-            .map((e) => Reminder.fromJson(e.map((k, v) => MapEntry(k.toString(), v))))
+            .map(
+              (e) =>
+                  Reminder.fromJson(e.map((k, v) => MapEntry(k.toString(), v))),
+            )
             .toList();
       }
       return reminders;
@@ -62,7 +69,10 @@ class RemindersApi {
 
   Future<Reminder?> upsertReminder(Reminder reminder) async {
     try {
-      final data = await _apiClient.post<Object?>('/user/reminders', data: reminder.toJson());
+      final data = await _apiClient.post<Object?>(
+        '/user/reminders',
+        data: reminder.toJson(),
+      );
       if (data is Map) {
         return Reminder.fromJson(data.map((k, v) => MapEntry(k.toString(), v)));
       }
@@ -86,7 +96,10 @@ class RemindersApi {
 
   Future<void> toggleReminder(String id, bool enabled) async {
     try {
-      await _apiClient.patch<Object?>('/user/reminders/$id/toggle', data: enabled);
+      await _apiClient.patch<Object?>(
+        '/user/reminders/$id/toggle',
+        data: enabled,
+      );
     } on DioException catch (e) {
       final mapped = e.error;
       if (mapped is AppFailure) throw mapped;

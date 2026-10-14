@@ -94,13 +94,13 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
               title: is2FA
                   ? 'Xác thực 2FA'
                   : (challenge.type == AuthOtpChallengeType.registration
-                      ? 'Xác minh tài khoản'
-                      : 'Hoàn tất đăng nhập'),
+                        ? 'Xác minh tài khoản'
+                        : 'Hoàn tất đăng nhập'),
               subtitle: challenge.displayMessage?.trim().isNotEmpty ?? false
                   ? challenge.displayMessage!
                   : (is2FA
-                      ? 'Mở ứng dụng Google Authenticator hoặc Authy để lấy mã 6 chữ số.'
-                      : 'Nhập mã xác minh 6 chữ số đã gửi tới email của bạn.'),
+                        ? 'Mở ứng dụng Google Authenticator hoặc Authy để lấy mã 6 chữ số.'
+                        : 'Nhập mã xác minh 6 chữ số đã gửi tới email của bạn.'),
             ),
             const SizedBox(height: AppSpacing.lg),
             _OtpChallengeCard(
@@ -205,9 +205,7 @@ class _OtpChallengeCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                is2FA
-                    ? 'Tài khoản: $maskedEmail'
-                    : maskedEmail,
+                is2FA ? 'Tài khoản: $maskedEmail' : maskedEmail,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),

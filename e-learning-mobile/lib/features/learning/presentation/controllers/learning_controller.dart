@@ -39,7 +39,9 @@ class LearningController extends StateNotifier<LearningState> {
     if (!refresh && state.courses.isEmpty) {
       try {
         final cachedResult = await _repository.loadLearningFromCache();
-        if (cachedResult != null && mounted && state.status == LearningStatus.loading) {
+        if (cachedResult != null &&
+            mounted &&
+            state.status == LearningStatus.loading) {
           state = LearningState(
             status: LearningStatus.success,
             courses: cachedResult.courses,

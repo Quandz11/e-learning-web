@@ -32,7 +32,9 @@ class ArticlesState {
     return ArticlesState(
       articles: articles ?? this.articles,
       categories: categories ?? this.categories,
-      selectedCategoryId: clearCategory ? null : (selectedCategoryId ?? this.selectedCategoryId),
+      selectedCategoryId: clearCategory
+          ? null
+          : (selectedCategoryId ?? this.selectedCategoryId),
       searchQuery: searchQuery ?? this.searchQuery,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
@@ -42,18 +44,22 @@ class ArticlesState {
 
 final articlesControllerProvider =
     StateNotifierProvider<ArticlesController, ArticlesState>((ref) {
-  return ArticlesController(ref.watch(articlesRepositoryProvider));
-});
+      return ArticlesController(ref.watch(articlesRepositoryProvider));
+    });
 
-final articleDetailProvider =
-    FutureProvider.family<ArticleDetail, String>((ref, slug) async {
+final articleDetailProvider = FutureProvider.family<ArticleDetail, String>((
+  ref,
+  slug,
+) async {
   final repo = ref.watch(articlesRepositoryProvider);
   return repo.getArticleBySlug(slug);
 });
 
 class ArticlesController extends StateNotifier<ArticlesState> {
   ArticlesController(this._repository)
-      : super(const ArticlesState(articles: [], categories: [], isLoading: true)) {
+    : super(
+        const ArticlesState(articles: [], categories: [], isLoading: true),
+      ) {
     load();
   }
 

@@ -50,13 +50,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final colorScheme = context.colorScheme;
 
     final streakDays = progressState.summary?.currentStreakDays ?? 7;
-    final overallPercent = (progressState.summary?.overallProgressPercent ?? 60.0).toInt();
-    final courseCount = learningState.enrollments.isNotEmpty ? learningState.enrollments.length : 3;
+    final overallPercent =
+        (progressState.summary?.overallProgressPercent ?? 60.0).toInt();
+    final courseCount = learningState.enrollments.isNotEmpty
+        ? learningState.enrollments.length
+        : 3;
     final completedCount = progressState.summary?.completedLessonsCount ?? 5;
     final rawName = state.profile?.fullName;
-    final fullName = (rawName != null && rawName.trim().isNotEmpty) ? rawName.trim() : 'Học viên';
+    final fullName = (rawName != null && rawName.trim().isNotEmpty)
+        ? rawName.trim()
+        : 'Học viên';
     final rawEmail = state.profile?.email;
-    final email = (rawEmail != null && rawEmail.trim().isNotEmpty) ? rawEmail.trim() : 'hocvien@nhinanchualanh.vn';
+    final email = (rawEmail != null && rawEmail.trim().isNotEmpty)
+        ? rawEmail.trim()
+        : 'hocvien@nhinanchualanh.vn';
 
     return Scaffold(
       backgroundColor: isDark ? colorScheme.surface : AppColors.background,
@@ -80,10 +87,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ref.read(progressControllerProvider.notifier).refresh();
               ref.read(learningControllerProvider.notifier).refresh();
             },
-            icon: Icon(
-              Icons.refresh_rounded,
-              color: context.textPrimary(),
-            ),
+            icon: Icon(Icons.refresh_rounded, color: context.textPrimary()),
           ),
         ],
       ),
@@ -108,10 +112,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   decoration: BoxDecoration(
                     color: context.cardBg(),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: context.cardBorder(),
-                      width: 0.8,
-                    ),
+                    border: Border.all(color: context.cardBorder(), width: 0.8),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.02),
@@ -165,17 +166,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: isDark ? colorScheme.primaryContainer : AppColors.mint,
-                                borderRadius: BorderRadius.circular(AppRadius.pill),
+                                color: isDark
+                                    ? colorScheme.primaryContainer
+                                    : AppColors.mint,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.pill,
+                                ),
                                 border: Border.all(
-                                  color: isDark ? colorScheme.outlineVariant : const Color(0xFFD3E6DC),
+                                  color: isDark
+                                      ? colorScheme.outlineVariant
+                                      : const Color(0xFFD3E6DC),
                                   width: 0.8,
                                 ),
                               ),
                               child: Text(
-                                streakDays >= 7 ? 'Thành viên Tích cực 🔥' : 'Học viên Thường xuyên 🌟',
+                                streakDays >= 7
+                                    ? 'Thành viên Tích cực 🔥'
+                                    : 'Học viên Thường xuyên 🌟',
                                 style: TextStyle(
-                                  color: isDark ? colorScheme.onPrimaryContainer : AppColors.primary,
+                                  color: isDark
+                                      ? colorScheme.onPrimaryContainer
+                                      : AppColors.primary,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -195,10 +206,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   decoration: BoxDecoration(
                     color: context.cardBg(),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: context.cardBorder(),
-                      width: 0.8,
-                    ),
+                    border: Border.all(color: context.cardBorder(), width: 0.8),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x04000000),
@@ -210,11 +218,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStatColumn(context, '$courseCount', 'Khóa học', Icons.menu_book_rounded, isDark ? colorScheme.primary : const Color(0xFF0F5B38), isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2)),
-                      Container(height: 32, width: 0.8, color: context.cardBorder()),
-                      _buildStatColumn(context, '$overallPercent%', 'Tiến độ', Icons.pie_chart_outline_rounded, const Color(0xFF2563EB), isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF)),
-                      Container(height: 32, width: 0.8, color: context.cardBorder()),
-                      _buildStatColumn(context, '$streakDays ngày', 'Streak', Icons.local_fire_department_rounded, const Color(0xFFD97706), isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB)),
+                      _buildStatColumn(
+                        context,
+                        '$courseCount',
+                        'Khóa học',
+                        Icons.menu_book_rounded,
+                        isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                        isDark
+                            ? colorScheme.surfaceContainerLow
+                            : const Color(0xFFF0F7F2),
+                      ),
+                      Container(
+                        height: 32,
+                        width: 0.8,
+                        color: context.cardBorder(),
+                      ),
+                      _buildStatColumn(
+                        context,
+                        '$overallPercent%',
+                        'Tiến độ',
+                        Icons.pie_chart_outline_rounded,
+                        const Color(0xFF2563EB),
+                        isDark
+                            ? const Color(0xFF1E3A8A)
+                            : const Color(0xFFEFF6FF),
+                      ),
+                      Container(
+                        height: 32,
+                        width: 0.8,
+                        color: context.cardBorder(),
+                      ),
+                      _buildStatColumn(
+                        context,
+                        '$streakDays ngày',
+                        'Streak',
+                        Icons.local_fire_department_rounded,
+                        const Color(0xFFD97706),
+                        isDark
+                            ? const Color(0xFF78350F)
+                            : const Color(0xFFFFFBEB),
+                      ),
                     ],
                   ),
                 ),
@@ -222,7 +265,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                 // Section 1: Học tập & Thành tích
                 Padding(
-                  padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.xs),
+                  padding: const EdgeInsets.only(
+                    left: 4,
+                    bottom: AppSpacing.xs,
+                  ),
                   child: Text(
                     'HỌC TẬP & THÀNH TÍCH',
                     style: theme.textTheme.labelSmall?.copyWith(
@@ -237,10 +283,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   decoration: BoxDecoration(
                     color: context.cardBg(),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: context.cardBorder(),
-                      width: 0.8,
-                    ),
+                    border: Border.all(color: context.cardBorder(), width: 0.8),
                   ),
                   child: Column(
                     children: [
@@ -249,29 +292,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         icon: Icons.person_outline_rounded,
                         title: 'Hồ sơ của tôi',
                         subtitle: 'Cập nhật thông tin cá nhân & ảnh đại diện',
-                        bgColor: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
+                        bgColor: isDark
+                            ? const Color(0xFF1E3A8A)
+                            : const Color(0xFFEFF6FF),
                         iconColor: const Color(0xFF2563EB),
                         onTap: () => context.push(AppRoutes.appProfileEdit),
                       ),
-                      Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        endIndent: 16,
+                        color: context.cardBorder(),
+                      ),
                       _buildListTileItem(
                         context,
                         icon: Icons.emoji_events_outlined,
                         title: 'Thành tích & Huy hiệu',
-                        subtitle: 'Đã hoàn thành $completedCount bài học & chuỗi $streakDays ngày',
-                        bgColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB),
+                        subtitle:
+                            'Đã hoàn thành $completedCount bài học & chuỗi $streakDays ngày',
+                        bgColor: isDark
+                            ? const Color(0xFF78350F)
+                            : const Color(0xFFFFFBEB),
                         iconColor: const Color(0xFFD97706),
                         badge: '$completedCount bài học',
                         onTap: () => _showAchievementsDialog(context),
                       ),
-                      Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        endIndent: 16,
+                        color: context.cardBorder(),
+                      ),
                       _buildListTileItem(
                         context,
                         icon: Icons.history_edu_rounded,
                         title: 'Lịch sử học tập',
                         subtitle: 'Xem danh sách bài đã xem & tiến độ tích lũy',
-                        bgColor: isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2),
-                        iconColor: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                        bgColor: isDark
+                            ? colorScheme.surfaceContainerLow
+                            : const Color(0xFFF0F7F2),
+                        iconColor: isDark
+                            ? colorScheme.primary
+                            : const Color(0xFF0F5B38),
                         onTap: () => context.push(AppRoutes.appProgress),
                       ),
                     ],
@@ -281,7 +343,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                 // Section 2: Hệ thống & Trợ giúp
                 Padding(
-                  padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.xs),
+                  padding: const EdgeInsets.only(
+                    left: 4,
+                    bottom: AppSpacing.xs,
+                  ),
                   child: Text(
                     'HỆ THỐNG & TRỢ GIÚP',
                     style: theme.textTheme.labelSmall?.copyWith(
@@ -296,10 +361,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   decoration: BoxDecoration(
                     color: context.cardBg(),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: context.cardBorder(),
-                      width: 0.8,
-                    ),
+                    border: Border.all(color: context.cardBorder(), width: 0.8),
                   ),
                   child: Column(
                     children: [
@@ -308,27 +370,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         icon: Icons.settings_outlined,
                         title: 'Cài đặt ứng dụng',
                         subtitle: 'Thông báo, bảo mật & bộ nhớ đệm',
-                        bgColor: isDark ? const Color(0xFF4C1D95) : const Color(0xFFF5F3FF),
+                        bgColor: isDark
+                            ? const Color(0xFF4C1D95)
+                            : const Color(0xFFF5F3FF),
                         iconColor: const Color(0xFF7C3AED),
                         onTap: () => context.push(AppRoutes.appSettings),
                       ),
-                      Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        endIndent: 16,
+                        color: context.cardBorder(),
+                      ),
                       _buildListTileItem(
                         context,
                         icon: Icons.help_outline_rounded,
                         title: 'Trung tâm trợ giúp',
                         subtitle: 'Hỏi đáp bác sĩ & hỗ trợ kỹ thuật',
-                        bgColor: isDark ? const Color(0xFF075985) : const Color(0xFFF0F9FF),
+                        bgColor: isDark
+                            ? const Color(0xFF075985)
+                            : const Color(0xFFF0F9FF),
                         iconColor: const Color(0xFF0284C7),
                         onTap: () => _showSupportDialog(context),
                       ),
-                      Divider(height: 1, indent: 56, endIndent: 16, color: context.cardBorder()),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        endIndent: 16,
+                        color: context.cardBorder(),
+                      ),
                       _buildListTileItem(
                         context,
                         icon: Icons.info_outline_rounded,
                         title: 'Về ứng dụng Nhịn Ăn Chữa Lành',
                         subtitle: 'Phiên bản 1.0.0 (Build 100)',
-                        bgColor: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF8FAFC),
+                        bgColor: isDark
+                            ? colorScheme.surfaceContainerHighest
+                            : const Color(0xFFF8FAFC),
                         iconColor: const Color(0xFF64748B),
                         onTap: () => _showAboutDialog(context),
                       ),
@@ -437,8 +515,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }) {
     final theme = Theme.of(context);
     final isDark = context.isDark;
-    final effectiveBgColor = isDark ? iconColor.withValues(alpha: 0.18) : bgColor;
-    final effectiveIconColor = isDark ? (iconColor == AppColors.primary ? const Color(0xFF4CAF50) : iconColor) : iconColor;
+    final effectiveBgColor = isDark
+        ? iconColor.withValues(alpha: 0.18)
+        : bgColor;
+    final effectiveIconColor = isDark
+        ? (iconColor == AppColors.primary ? const Color(0xFF4CAF50) : iconColor)
+        : iconColor;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -481,9 +563,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       if (badge != null) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 1.5,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF2F6F3),
+                            color: isDark
+                                ? context.colorScheme.surfaceContainerHighest
+                                : const Color(0xFFF2F6F3),
                             borderRadius: BorderRadius.circular(AppRadius.pill),
                           ),
                           child: Text(
@@ -491,7 +578,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
-                              color: isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
+                              color: isDark
+                                  ? context.colorScheme.primary
+                                  : const Color(0xFF0F5B38),
                             ),
                           ),
                         ),

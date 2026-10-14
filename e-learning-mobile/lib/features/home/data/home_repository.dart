@@ -25,10 +25,14 @@ class HomeRepository {
       final featuredCourses = results[0] as List<HomeCourse>?;
       if (featuredCourses == null) return null;
 
-      final enrollments = (results[1] as List<HomeEnrollment>?) ?? const <HomeEnrollment>[];
-      final categories = (results[2] as List<HomeCategory>?) ?? const <HomeCategory>[];
-      final articles = (results[3] as List<HomeArticle>?) ?? const <HomeArticle>[];
-      final testimonials = (results[4] as List<HomeTestimonial>?) ?? const <HomeTestimonial>[];
+      final enrollments =
+          (results[1] as List<HomeEnrollment>?) ?? const <HomeEnrollment>[];
+      final categories =
+          (results[2] as List<HomeCategory>?) ?? const <HomeCategory>[];
+      final articles =
+          (results[3] as List<HomeArticle>?) ?? const <HomeArticle>[];
+      final testimonials =
+          (results[4] as List<HomeTestimonial>?) ?? const <HomeTestimonial>[];
 
       return HomeLoadResult(
         featuredCourses: featuredCourses
@@ -36,10 +40,11 @@ class HomeRepository {
             .take(4)
             .toList(growable: false),
         continueLearning: _selectContinueLearning(enrollments),
-        categories: categories
-            .where((category) => category.isActive)
-            .toList(growable: false)
-          ..sort((left, right) => left.order.compareTo(right.order)),
+        categories:
+            categories
+                .where((category) => category.isActive)
+                .toList(growable: false)
+              ..sort((left, right) => left.order.compareTo(right.order)),
         articles: articles.take(4).toList(growable: false),
         testimonials: testimonials.take(2).toList(growable: false)
           ..sort((left, right) => left.order.compareTo(right.order)),
@@ -58,10 +63,11 @@ class HomeRepository {
             .take(4)
             .toList(growable: false),
         continueLearning: _selectContinueLearning(feed.enrollments),
-        categories: feed.categories
-            .where((category) => category.isActive)
-            .toList(growable: false)
-          ..sort((left, right) => left.order.compareTo(right.order)),
+        categories:
+            feed.categories
+                .where((category) => category.isActive)
+                .toList(growable: false)
+              ..sort((left, right) => left.order.compareTo(right.order)),
         articles: feed.articles.take(4).toList(growable: false),
         testimonials: feed.testimonials.take(2).toList(growable: false)
           ..sort((left, right) => left.order.compareTo(right.order)),

@@ -6,7 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PersonalizationRepository {
-  PersonalizationRepository({RemindersApi? remindersApi}) : _remindersApi = remindersApi;
+  PersonalizationRepository({RemindersApi? remindersApi})
+    : _remindersApi = remindersApi;
 
   final RemindersApi? _remindersApi;
 
@@ -139,7 +140,10 @@ class PersonalizationRepository {
     return localReminders;
   }
 
-  Future<void> saveReminders(List<Reminder> reminders, {bool syncToServer = true}) async {
+  Future<void> saveReminders(
+    List<Reminder> reminders, {
+    bool syncToServer = true,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final encoded = jsonEncode(reminders.map((r) => r.toJson()).toList());
     await prefs.setString(_remindersKey, encoded);
@@ -205,7 +209,8 @@ class PersonalizationRepository {
 }
 
 final personalizationRepositoryProvider = Provider<PersonalizationRepository>(
-  (ref) => PersonalizationRepository(remindersApi: ref.read(remindersApiProvider)),
+  (ref) =>
+      PersonalizationRepository(remindersApi: ref.read(remindersApiProvider)),
 );
 
 final personalizationStateProvider =

@@ -113,7 +113,9 @@ class AuthInterceptor extends Interceptor {
       );
       handler.resolve(retryResponse);
     } catch (_) {
-      if (_sessionRepository.generation == generation) await _sessionController.clearSession();
+      if (_sessionRepository.generation == generation) {
+        await _sessionController.clearSession();
+      }
       handler.next(err);
     } finally {
       if (identical(_inFlightRefresh, activeRefresh)) {
@@ -132,7 +134,8 @@ class AuthInterceptor extends Interceptor {
     if (options.extra['auth_retry_attempted'] == true) {
       return false;
     }
-    if ((path.contains('/auth/') && !path.contains('/auth/sessions')) || path.contains('/notifications/device-tokens')) {
+    if ((path.contains('/auth/') && !path.contains('/auth/sessions')) ||
+        path.contains('/notifications/device-tokens')) {
       return false;
     }
     if (_isNonRepeatableMultipart(options)) {

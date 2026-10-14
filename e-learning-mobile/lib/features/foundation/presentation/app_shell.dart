@@ -170,13 +170,17 @@ class AppShell extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? activeBg : Colors.transparent,
+                                  color: isSelected
+                                      ? activeBg
+                                      : Colors.transparent,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
                                   isSelected ? dest.selectedIcon : dest.icon,
                                   size: 22,
-                                  color: isSelected ? activeColor : inactiveColor,
+                                  color: isSelected
+                                      ? activeColor
+                                      : inactiveColor,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -189,7 +193,9 @@ class AppShell extends StatelessWidget {
                                   fontWeight: isSelected
                                       ? FontWeight.w600
                                       : FontWeight.w400,
-                                  color: isSelected ? activeColor : inactiveColor,
+                                  color: isSelected
+                                      ? activeColor
+                                      : inactiveColor,
                                   letterSpacing: -0.2,
                                 ),
                               ),
@@ -282,9 +288,7 @@ class _CenterNavButton extends StatelessWidget {
               ),
               child: Center(
                 child: Icon(
-                  isSelected
-                      ? destination.selectedIcon
-                      : destination.icon,
+                  isSelected ? destination.selectedIcon : destination.icon,
                   color: isSelected ? Colors.white : unselectedIcon,
                   size: 22,
                 ),

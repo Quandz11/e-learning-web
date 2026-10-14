@@ -102,9 +102,11 @@ class Reminder {
   }
 
   Map<String, dynamic> toJson() {
-    final isUuid = id.length == 36 &&
-        RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
-            .hasMatch(id);
+    final isUuid =
+        id.length == 36 &&
+        RegExp(
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+        ).hasMatch(id);
     return {
       'id': isUuid ? id : '00000000-0000-0000-0000-000000000000',
       'clientId': id,
@@ -126,7 +128,9 @@ class Reminder {
   factory Reminder.fromJson(Map<String, dynamic> json) {
     final clientId = json['clientId'] as String?;
     final rawId = json['id'] as String? ?? '';
-    final effectiveId = (clientId != null && clientId.isNotEmpty) ? clientId : rawId;
+    final effectiveId = (clientId != null && clientId.isNotEmpty)
+        ? clientId
+        : rawId;
 
     return Reminder(
       id: effectiveId,

@@ -30,10 +30,14 @@ class WelcomeScreen extends StatelessWidget {
                 return SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
                     child: IntrinsicHeight(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xl,
+                        ),
                         child: Column(
                           children: [
                             const Spacer(flex: 2),
@@ -44,23 +48,27 @@ class WelcomeScreen extends StatelessWidget {
                               width: 180,
                               height: 180,
                               fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? colorScheme.primaryContainer.withValues(alpha: 0.5)
-                                      : AppColors.primaryLight.withValues(alpha: 0.5),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.spa_rounded,
-                                    size: 64,
-                                    color: AppColors.primary,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? colorScheme.primaryContainer
+                                                .withValues(alpha: 0.5)
+                                          : AppColors.primaryLight.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.spa_rounded,
+                                        size: 64,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
                             ),
                             const SizedBox(height: AppSpacing.md),
 
@@ -69,7 +77,9 @@ class WelcomeScreen extends StatelessWidget {
                               'Lắng nghe để chữa lành',
                               textAlign: TextAlign.center,
                               style: textTheme.titleMedium?.copyWith(
-                                color: isDark ? colorScheme.onSurface : AppColors.primary,
+                                color: isDark
+                                    ? colorScheme.onSurface
+                                    : AppColors.primary,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: -0.3,
                                 fontSize: 20,
@@ -86,7 +96,9 @@ class WelcomeScreen extends StatelessWidget {
                                   height: 8,
                                   decoration: BoxDecoration(
                                     color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.pill,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: AppSpacing.xs),
@@ -94,7 +106,9 @@ class WelcomeScreen extends StatelessWidget {
                                   width: 8,
                                   height: 8,
                                   decoration: BoxDecoration(
-                                    color: isDark ? colorScheme.outlineVariant : AppColors.border,
+                                    color: isDark
+                                        ? colorScheme.outlineVariant
+                                        : AppColors.border,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -103,7 +117,9 @@ class WelcomeScreen extends StatelessWidget {
                                   width: 8,
                                   height: 8,
                                   decoration: BoxDecoration(
-                                    color: isDark ? colorScheme.outlineVariant : AppColors.border,
+                                    color: isDark
+                                        ? colorScheme.outlineVariant
+                                        : AppColors.border,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -134,7 +150,9 @@ class WelcomeScreen extends StatelessWidget {
                                   child: Text(
                                     'Đăng nhập',
                                     style: textTheme.bodyMedium?.copyWith(
-                                      color: isDark ? colorScheme.onSurface : AppColors.primary,
+                                      color: isDark
+                                          ? colorScheme.onSurface
+                                          : AppColors.primary,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),

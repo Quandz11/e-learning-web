@@ -38,7 +38,11 @@ class _FakeOfflineDownloadService extends OfflineDownloadService {
 }
 
 class _TestOfflineDownloadController extends OfflineDownloadController {
-  _TestOfflineDownloadController(super.service, List<OfflineDownloadItem> items, int totalBytes) {
+  _TestOfflineDownloadController(
+    super.service,
+    List<OfflineDownloadItem> items,
+    int totalBytes,
+  ) {
     state = OfflineDownloadState(
       items: items,
       totalStorageBytes: totalBytes,
@@ -51,30 +55,34 @@ class _TestOfflineDownloadController extends OfflineDownloadController {
 }
 
 void main() {
-  testWidgets('OfflineDownloadsScreen shows empty state when no downloads exist', (
-    tester,
-  ) async {
-    final fakeService = _FakeOfflineDownloadService([]);
+  testWidgets(
+    'OfflineDownloadsScreen shows empty state when no downloads exist',
+    (tester) async {
+      final fakeService = _FakeOfflineDownloadService([]);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          offlineDownloadControllerProvider.overrideWith(
-            (ref) => _TestOfflineDownloadController(fakeService, [], 0),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            offlineDownloadControllerProvider.overrideWith(
+              (ref) => _TestOfflineDownloadController(fakeService, [], 0),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light(),
+            home: const OfflineDownloadsScreen(),
           ),
-        ],
-        child: MaterialApp(
-          theme: AppTheme.light(),
-          home: const OfflineDownloadsScreen(),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Nội Dung Đã Tải (Offline)'), findsOneWidget);
-    expect(find.text('0 B'), findsOneWidget);
-    expect(find.textContaining('Chưa có video hoặc tài liệu nào được tải về'), findsOneWidget);
-  });
+      expect(find.text('Nội Dung Đã Tải (Offline)'), findsOneWidget);
+      expect(find.text('0 B'), findsOneWidget);
+      expect(
+        find.textContaining('Chưa có video hoặc tài liệu nào được tải về'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('OfflineDownloadsScreen lists downloaded items correctly', (
     tester,
@@ -97,7 +105,9 @@ void main() {
       ProviderScope(
         overrides: [
           offlineDownloadControllerProvider.overrideWith(
-            (ref) => _TestOfflineDownloadController(fakeService, [sampleItem], 20971520),
+            (ref) => _TestOfflineDownloadController(fakeService, [
+              sampleItem,
+            ], 20971520),
           ),
         ],
         child: MaterialApp(

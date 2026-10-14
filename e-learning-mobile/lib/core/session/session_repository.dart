@@ -116,8 +116,11 @@ class SessionRepository {
       throw const SessionRefreshException('No stored session.');
     }
     final pending = _refresh ??= refreshSession(current);
-    try { return await pending; }
-    finally { if (identical(_refresh, pending)) _refresh = null; }
+    try {
+      return await pending;
+    } finally {
+      if (identical(_refresh, pending)) _refresh = null;
+    }
   }
 
   Future<AppSession> refreshSession(AppSession session) async {
@@ -149,10 +152,14 @@ class SessionRepository {
       expiresAt: expiresAt,
     );
     await _write(() async {
-      if (_generation != generation) throw const SessionRefreshException('Session changed during refresh.');
+      if (_generation != generation) {
+        throw const SessionRefreshException('Session changed during refresh.');
+      }
       await _storage.write(refreshed);
     });
-    if (_generation != generation) throw const SessionRefreshException('Session changed during refresh.');
+    if (_generation != generation) {
+      throw const SessionRefreshException('Session changed during refresh.');
+    }
     return refreshed;
   }
 

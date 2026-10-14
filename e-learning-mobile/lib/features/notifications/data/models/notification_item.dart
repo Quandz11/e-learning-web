@@ -87,7 +87,8 @@ class NotificationsPayload {
     }
     return NotificationsPayload(
       notifications: notificationsList,
-      unreadCount: json['unreadCount'] as int? ??
+      unreadCount:
+          json['unreadCount'] as int? ??
           notificationsList.where((n) => !n.isRead).length,
     );
   }

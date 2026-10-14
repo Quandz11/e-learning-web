@@ -18,11 +18,17 @@ class AppTheme {
       brightness: brightness,
       primary: AppColors.primary,
       onPrimary: Colors.white,
-      primaryContainer: isLight ? AppColors.primaryLight : const Color(0xFF184230),
-      onPrimaryContainer: isLight ? AppColors.primaryDark : const Color(0xFFA8F5CB),
+      primaryContainer: isLight
+          ? AppColors.primaryLight
+          : const Color(0xFF184230),
+      onPrimaryContainer: isLight
+          ? AppColors.primaryDark
+          : const Color(0xFFA8F5CB),
       surface: isLight ? AppColors.background : const Color(0xFF121B16),
       onSurface: isLight ? AppColors.textPrimary : const Color(0xFFE4EAE6),
-      onSurfaceVariant: isLight ? AppColors.textSecondary : const Color(0xFFA0B2A6),
+      onSurfaceVariant: isLight
+          ? AppColors.textSecondary
+          : const Color(0xFFA0B2A6),
       surfaceContainerLow: isLight
           ? AppColors.surface
           : const Color(0xFF1A2620),
@@ -164,18 +170,29 @@ class AppTheme {
       ),
       timePickerTheme: TimePickerThemeData(
         backgroundColor: colorScheme.surface,
-        hourMinuteColor: isLight ? const Color(0xFFF0F7F2) : const Color(0xFF1E2D24),
+        hourMinuteColor: isLight
+            ? const Color(0xFFF0F7F2)
+            : const Color(0xFF1E2D24),
         hourMinuteTextColor: colorScheme.primary,
-        dayPeriodColor: isLight ? const Color(0xFFF0F7F2) : const Color(0xFF1E2D24),
+        dayPeriodColor: isLight
+            ? const Color(0xFFF0F7F2)
+            : const Color(0xFF1E2D24),
         dayPeriodTextColor: colorScheme.primary,
         dialHandColor: colorScheme.primary,
-        dialBackgroundColor: isLight ? const Color(0xFFF0F7F2) : const Color(0xFF1E2D24),
+        dialBackgroundColor: isLight
+            ? const Color(0xFFF0F7F2)
+            : const Color(0xFF1E2D24),
         dialTextColor: colorScheme.onSurface,
         entryModeIconColor: colorScheme.primary,
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: isLight ? const Color(0xFFF0F7F2) : const Color(0xFF1E2D24),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          fillColor: isLight
+              ? const Color(0xFFF0F7F2)
+              : const Color(0xFF1E2D24),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: 4,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: BorderSide(color: colorScheme.primary),

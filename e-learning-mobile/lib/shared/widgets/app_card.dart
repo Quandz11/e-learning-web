@@ -28,8 +28,8 @@ class AppCard extends StatelessWidget {
           color: selected
               ? colorScheme.primary
               : (isDark
-                  ? colorScheme.outlineVariant.withValues(alpha: 0.5)
-                  : const Color(0xFFEAEFE9)),
+                    ? colorScheme.outlineVariant.withValues(alpha: 0.5)
+                    : const Color(0xFFEAEFE9)),
           width: selected ? 1.5 : 0.8,
         ),
         boxShadow: isDark

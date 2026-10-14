@@ -1,8 +1,5 @@
 class ForgotPasswordChallenge {
-  const ForgotPasswordChallenge({
-    this.phone,
-    this.email,
-  });
+  const ForgotPasswordChallenge({this.phone, this.email});
 
   final String? phone;
   final String? email;

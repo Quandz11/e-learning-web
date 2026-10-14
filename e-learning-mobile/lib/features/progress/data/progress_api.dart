@@ -1,4 +1,4 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:e_learning_mobile/core/errors/app_failure.dart';
 import 'package:e_learning_mobile/core/errors/dio_error_mapper.dart';
 import 'package:e_learning_mobile/core/network/api_client.dart';
@@ -17,20 +17,24 @@ class ProgressApi {
   ProgressApi({
     required ApiClient apiClient,
     required DioErrorMapper errorMapper,
-  })  : _apiClient = apiClient,
-        _errorMapper = errorMapper;
+  }) : _apiClient = apiClient,
+       _errorMapper = errorMapper;
 
   final ApiClient _apiClient;
   final DioErrorMapper _errorMapper;
 
   Future<LearningProgressSummary> getProgressSummary() async {
     try {
-      final data = await _apiClient.get<Object?>('/mobile/learning/progress-summary');
+      final data = await _apiClient.get<Object?>(
+        '/mobile/learning/progress-summary',
+      );
       if (data is Map<String, dynamic>) {
         return LearningProgressSummary.fromJson(data);
       }
       if (data is Map) {
-        return LearningProgressSummary.fromJson(data.map((k, v) => MapEntry(k.toString(), v)));
+        return LearningProgressSummary.fromJson(
+          data.map((k, v) => MapEntry(k.toString(), v)),
+        );
       }
       throw const AppFailure(
         type: AppFailureType.malformedResponse,

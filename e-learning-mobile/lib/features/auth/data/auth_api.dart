@@ -117,17 +117,15 @@ class AuthApi {
   }
 
   Future<MessageResponse> requestEmailForgotPasswordOtp(String email) async {
-    return _postMessageResponse(
-      '/auth/forgot-password',
-      {'email': email.trim()},
-    );
+    return _postMessageResponse('/auth/forgot-password', {
+      'email': email.trim(),
+    });
   }
 
   Future<MessageResponse> resendEmailForgotPasswordOtp(String email) async {
-    return _postMessageResponse(
-      '/auth/resend-forgot-password-otp',
-      {'email': email.trim()},
-    );
+    return _postMessageResponse('/auth/resend-forgot-password-otp', {
+      'email': email.trim(),
+    });
   }
 
   Future<MessageResponse> verifyEmailForgotPasswordOtp({
@@ -135,14 +133,11 @@ class AuthApi {
     required String otp,
     required String newPassword,
   }) async {
-    return _postMessageResponse(
-      '/auth/verify-forgot-password-otp',
-      {
-        'email': email.trim(),
-        'otp': otp.trim(),
-        'newPassword': newPassword,
-      },
-    );
+    return _postMessageResponse('/auth/verify-forgot-password-otp', {
+      'email': email.trim(),
+      'otp': otp.trim(),
+      'newPassword': newPassword,
+    });
   }
 
   Future<AuthTokenResponse> _postTokenResponse(

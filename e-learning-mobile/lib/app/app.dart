@@ -22,8 +22,8 @@ class _AppState extends ConsumerState<App> {
   @override
   void initState() {
     super.initState();
-    _notificationTapSub =
-        NotificationService.instance.onNotificationTapStream.listen(_handleNotificationTap);
+    _notificationTapSub = NotificationService.instance.onNotificationTapStream
+        .listen(_handleNotificationTap);
   }
 
   @override
@@ -33,12 +33,16 @@ class _AppState extends ConsumerState<App> {
   }
 
   void _handleNotificationTap(NotificationTapEvent event) {
-    debugPrint('🔥 Handling Notification Tap: type=${event.type}, route=${event.targetRoute}, convId=${event.conversationId}');
+    debugPrint(
+      '🔥 Handling Notification Tap: type=${event.type}, route=${event.targetRoute}, convId=${event.conversationId}',
+    );
     final router = ref.read(appRouterProvider);
 
     if (event.type == 'chat') {
       if (event.conversationId != null && event.conversationId!.isNotEmpty) {
-        router.go('${AppRoutes.appChat}?conversationId=${event.conversationId}');
+        router.go(
+          '${AppRoutes.appChat}?conversationId=${event.conversationId}',
+        );
       } else {
         router.go(AppRoutes.appChat);
       }
@@ -74,9 +78,7 @@ class _AppState extends ConsumerState<App> {
           maxScaleFactor: 1.20,
         );
         return MediaQuery(
-          data: mediaQuery.copyWith(
-            textScaler: clampedTextScaler,
-          ),
+          data: mediaQuery.copyWith(textScaler: clampedTextScaler),
           child: SessionLifecycle(child: child ?? const SizedBox()),
         );
       },

@@ -134,7 +134,6 @@ class HomeFeedData {
   final List<HomeTestimonial> testimonials;
 }
 
-
 class HomeLoadResult {
   const HomeLoadResult({
     required this.featuredCourses,

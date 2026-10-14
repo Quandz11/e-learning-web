@@ -66,7 +66,9 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
   Widget build(BuildContext context) {
     if (!_isValidId(widget.courseId) || !_isValidId(widget.lessonPartId)) {
       return Scaffold(
-        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+        backgroundColor: context.isDark
+            ? context.colorScheme.surface
+            : AppColors.background,
         body: const SafeArea(
           child: AppErrorView(message: 'Không tìm thấy tài liệu cần hiển thị.'),
         ),
@@ -77,9 +79,13 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
     final controller = ref.read(_provider.notifier);
 
     return Scaffold(
-      backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+      backgroundColor: context.isDark
+          ? context.colorScheme.surface
+          : AppColors.background,
       appBar: AppBar(
-        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+        backgroundColor: context.isDark
+            ? context.colorScheme.surface
+            : AppColors.background,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
@@ -102,7 +108,9 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
             builder: (context, ref, _) {
               if (state.detail == null) return const SizedBox.shrink();
               final offlineState = ref.watch(offlineDownloadControllerProvider);
-              final offlineController = ref.read(offlineDownloadControllerProvider.notifier);
+              final offlineController = ref.read(
+                offlineDownloadControllerProvider.notifier,
+              );
               final partId = state.detail!.part.id;
               final isDownloaded = offlineState.isDownloaded(partId);
               final isDownloading = offlineState.isDownloading(partId);
@@ -110,12 +118,17 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
               if (isDownloaded) {
                 return IconButton(
                   tooltip: 'Đã tải tài liệu (Offline)',
-                  icon: const Icon(Icons.offline_pin_rounded, color: Color(0xFF16A34A)),
+                  icon: const Icon(
+                    Icons.offline_pin_rounded,
+                    color: Color(0xFF16A34A),
+                  ),
                   onPressed: () async {
                     await offlineController.deleteDownload(partId);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Đã xóa bản tải offline.')),
+                        const SnackBar(
+                          content: Text('Đã xóa bản tải offline.'),
+                        ),
                       );
                     }
                   },
@@ -142,12 +155,17 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
 
               return IconButton(
                 tooltip: 'Tải tài liệu xem Offline',
-                icon: Icon(Icons.download_for_offline_outlined, color: context.colorScheme.primary),
+                icon: Icon(
+                  Icons.download_for_offline_outlined,
+                  color: context.colorScheme.primary,
+                ),
                 onPressed: () async {
                   final docUrl = state.detail!.part.documentUrl?.trim() ?? '';
                   if (docUrl.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Tài liệu chưa có liên kết để tải về.')),
+                      const SnackBar(
+                        content: Text('Tài liệu chưa có liên kết để tải về.'),
+                      ),
                     );
                     return;
                   }
@@ -165,13 +183,17 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                     if (success) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('✅ Đã tải tài liệu xem offline thành công!'),
+                          content: Text(
+                            '✅ Đã tải tài liệu xem offline thành công!',
+                          ),
                           backgroundColor: Color(0xFF0F5B38),
                         ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Không thể tải tài liệu lúc này.')),
+                        const SnackBar(
+                          content: Text('Không thể tải tài liệu lúc này.'),
+                        ),
                       );
                     }
                   }
@@ -192,7 +214,7 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                 ),
                 onRetry: controller.load,
               )
-              : Column(
+            : Column(
                 children: [
                   // 1. Floating Pill PDF Reader Toolbar Controls
                   Padding(
@@ -223,10 +245,17 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEFF5F1),
-                              borderRadius: BorderRadius.circular(AppRadius.pill),
+                              color: context.isDark
+                                  ? const Color(0xFF143823)
+                                  : const Color(0xFFEFF5F1),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.pill,
+                              ),
                             ),
                             child: Text(
                               'Trang $_currentPage / $_totalPages',
@@ -321,7 +350,8 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                                 if (mounted) {
                                   setState(() {
                                     _totalPages = details.document.pages.count;
-                                    _currentPage = _pdfController.pageNumber == 0
+                                    _currentPage =
+                                        _pdfController.pageNumber == 0
                                         ? 1
                                         : _pdfController.pageNumber;
                                   });
@@ -350,7 +380,10 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                     decoration: BoxDecoration(
                       color: context.cardBg(),
                       border: Border(
-                        top: BorderSide(color: context.cardBorder(), width: 0.8),
+                        top: BorderSide(
+                          color: context.cardBorder(),
+                          width: 0.8,
+                        ),
                       ),
                     ),
                     child: SafeArea(
@@ -367,17 +400,25 @@ class _DocumentReaderScreenState extends ConsumerState<DocumentReaderScreen> {
                               ),
                             );
                           },
-                          icon: const Icon(Icons.check_circle_rounded, size: 18),
+                          icon: const Icon(
+                            Icons.check_circle_rounded,
+                            size: 18,
+                          ),
                           label: const Text(
                             'Đánh dấu đã đọc hoàn thành',
-                            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.colorScheme.primary,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.pill),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.pill,
+                              ),
                             ),
                           ),
                         ),

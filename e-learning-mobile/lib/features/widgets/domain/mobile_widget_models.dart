@@ -34,9 +34,13 @@ class MobileWidgetStateData {
       streakDays: map['streakDays'] as int? ?? 7,
       targetMinutes: map['targetMinutes'] as int? ?? 30,
       learnedMinutes: map['learnedMinutes'] as int? ?? 25,
-      activeCourseTitle: map['activeCourseTitle'] as String? ?? 'Khóa học Nhịn ăn Chữa lành SKVI',
+      activeCourseTitle:
+          map['activeCourseTitle'] as String? ??
+          'Khóa học Nhịn ăn Chữa lành SKVI',
       activeCourseProgress: map['activeCourseProgress'] as int? ?? 65,
-      nextLessonTitle: map['nextLessonTitle'] as String? ?? 'Bài 5: Cơ chế Tự thực Autophagy & Re-feeding',
+      nextLessonTitle:
+          map['nextLessonTitle'] as String? ??
+          'Bài 5: Cơ chế Tự thực Autophagy & Re-feeding',
       nextReminderTime: map['nextReminderTime'] as String? ?? '20:00',
     );
   }

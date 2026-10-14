@@ -39,17 +39,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _OnboardingPage(
       icon: Icons.spa_rounded,
       title: 'Chào mừng đến với\nNhịn Ăn Chữa Lành',
-      body: 'Hành trình sức khỏe của bạn bắt đầu tại đây. Học hỏi, thực hành và chữa lành cùng cộng đồng.',
+      body:
+          'Hành trình sức khỏe của bạn bắt đầu tại đây. Học hỏi, thực hành và chữa lành cùng cộng đồng.',
     ),
     _OnboardingPage(
       icon: Icons.play_circle_outline_rounded,
       title: 'Kho bài học\nphong phú',
-      body: 'Hàng trăm video bài học về nhịn ăn, dinh dưỡng và sức khỏe toàn diện từ các chuyên gia.',
+      body:
+          'Hàng trăm video bài học về nhịn ăn, dinh dưỡng và sức khỏe toàn diện từ các chuyên gia.',
     ),
     _OnboardingPage(
       icon: Icons.people_outline_rounded,
       title: 'Cộng đồng\nchữa lành',
-      body: 'Kết nối với hàng nghìn người cùng hành trình. Chia sẻ, học hỏi và cùng nhau phát triển.',
+      body:
+          'Kết nối với hàng nghìn người cùng hành trình. Chia sẻ, học hỏi và cùng nhau phát triển.',
     ),
   ];
 

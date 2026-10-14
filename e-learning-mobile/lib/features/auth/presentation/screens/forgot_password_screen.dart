@@ -162,7 +162,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             const SizedBox(height: AppSpacing.lg),
             AppButton(
               buttonKey: const Key('forgot_password_submit_button'),
-              label: state.isEmailMode ? 'Gửi OTP qua Email' : 'Gửi OTP qua Zalo',
+              label: state.isEmailMode
+                  ? 'Gửi OTP qua Email'
+                  : 'Gửi OTP qua Zalo',
               onPressed: () => _submit(controller),
               loading: state.isSubmitting,
             ),
@@ -211,7 +213,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             Icon(
               icon,
               size: 15,
-              color: isActive ? const Color(0xFF0F5B38) : const Color(0xFF717873),
+              color: isActive
+                  ? const Color(0xFF0F5B38)
+                  : const Color(0xFF717873),
             ),
             const SizedBox(width: 6),
             Text(
@@ -219,7 +223,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                color: isActive ? const Color(0xFF0F5B38) : const Color(0xFF717873),
+                color: isActive
+                    ? const Color(0xFF0F5B38)
+                    : const Color(0xFF717873),
               ),
             ),
           ],

@@ -45,7 +45,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   Widget build(BuildContext context) {
     if (!_isValidId(widget.courseId)) {
       return Scaffold(
-        backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+        backgroundColor: context.isDark
+            ? context.colorScheme.surface
+            : const Color(0xFFFBFBFA),
         body: const SafeArea(
           bottom: false,
           child: AppErrorView(message: 'Không tìm thấy khóa học cần hiển thị.'),
@@ -58,7 +60,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     final controller = ref.read(provider.notifier);
 
     return Scaffold(
-      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+      backgroundColor: context.isDark
+          ? context.colorScheme.surface
+          : const Color(0xFFFBFBFA),
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -160,7 +164,8 @@ class _CourseDetailContentState extends State<_CourseDetailContent> {
           onTabChanged: (tab) => setState(() => _activeTab = tab),
         ),
         const SizedBox(height: AppSpacing.lg),
-        if (widget.state.progressIssue != null && widget.state.progress == null) ...[
+        if (widget.state.progressIssue != null &&
+            widget.state.progress == null) ...[
           _AccessIssue(issue: widget.state.progressIssue!),
           const SizedBox(height: AppSpacing.lg),
         ],
@@ -211,7 +216,10 @@ class _CourseDetailContentState extends State<_CourseDetailContent> {
                       if (mounted) {
                         setState(() => _enrolling = false);
                         if (!success) {
-                          setState(() => _enrollError = 'Không thể đăng ký khóa học. Vui lòng thử lại.');
+                          setState(
+                            () => _enrollError =
+                                'Không thể đăng ký khóa học. Vui lòng thử lại.',
+                          );
                         }
                       }
                     },
@@ -219,12 +227,18 @@ class _CourseDetailContentState extends State<_CourseDetailContent> {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : const Icon(Icons.school_rounded, size: 20),
               label: Text(
                 _enrolling ? 'Đang đăng ký...' : 'Đăng ký miễn phí',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -243,20 +257,37 @@ class _CourseDetailContentState extends State<_CourseDetailContent> {
             child: ElevatedButton.icon(
               onPressed: () {
                 if (firstPart.isVideo) {
-                  context.push(AppRoutes.mediaPlayerPath(
-                      courseId: widget.courseId, lessonPartId: firstPart.id));
+                  context.push(
+                    AppRoutes.mediaPlayerPath(
+                      courseId: widget.courseId,
+                      lessonPartId: firstPart.id,
+                    ),
+                  );
                 } else if (firstPart.isDocument) {
-                  context.push(AppRoutes.documentReaderPath(
-                      courseId: widget.courseId, lessonPartId: firstPart.id));
+                  context.push(
+                    AppRoutes.documentReaderPath(
+                      courseId: widget.courseId,
+                      lessonPartId: firstPart.id,
+                    ),
+                  );
                 } else {
-                  context.push(AppRoutes.lessonPath(
-                      courseId: widget.courseId, lessonPartId: firstPart.id));
+                  context.push(
+                    AppRoutes.lessonPath(
+                      courseId: widget.courseId,
+                      lessonPartId: firstPart.id,
+                    ),
+                  );
                 }
               },
               icon: const Icon(Icons.play_circle_fill_rounded, size: 20),
               label: Text(
-                widget.state.progress != null ? 'Tiếp tục bài học' : 'Bắt đầu học ngay',
-                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                widget.state.progress != null
+                    ? 'Tiếp tục bài học'
+                    : 'Bắt đầu học ngay',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -296,10 +327,7 @@ class _CourseHeroState extends State<_CourseHero> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: context.cardBorder(),
-              width: 0.8,
-            ),
+            border: Border.all(color: context.cardBorder(), width: 0.8),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x06000000),
@@ -332,12 +360,11 @@ class _CourseHeroState extends State<_CourseHero> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: isDark ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.9),
+              color: isDark
+                  ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.9)
+                  : Colors.white.withValues(alpha: 0.9),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x08000000),
@@ -349,7 +376,11 @@ class _CourseHeroState extends State<_CourseHero> {
             child: IconButton(
               tooltip: 'Quay lại',
               padding: EdgeInsets.zero,
-              icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary(), size: 16),
+              icon: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: context.textPrimary(),
+                size: 16,
+              ),
               onPressed: () => context.pop(),
             ),
           ),
@@ -361,12 +392,11 @@ class _CourseHeroState extends State<_CourseHero> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: isDark ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.9),
+              color: isDark
+                  ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.9)
+                  : Colors.white.withValues(alpha: 0.9),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x08000000),
@@ -382,7 +412,9 @@ class _CourseHeroState extends State<_CourseHero> {
                 _isBookmarked
                     ? Icons.favorite_rounded
                     : Icons.favorite_border_rounded,
-                color: _isBookmarked ? const Color(0xFFE11D48) : context.textPrimary(),
+                color: _isBookmarked
+                    ? const Color(0xFFE11D48)
+                    : context.textPrimary(),
                 size: 18,
               ),
               onPressed: () {
@@ -416,19 +448,14 @@ class _CourseSummary extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final isDark = context.isDark;
     final colorScheme = context.colorScheme;
-    final lessonCount = course.lessons.isNotEmpty
-        ? course.lessons.length
-        : 12;
+    final lessonCount = course.lessons.isNotEmpty ? course.lessons.length : 12;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md + 2),
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: const [
           BoxShadow(
             color: Color(0x04000000),
@@ -459,7 +486,9 @@ class _CourseSummary extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2),
+                  color: isDark
+                      ? colorScheme.surfaceContainerHighest
+                      : const Color(0xFFF0F7F2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
@@ -487,12 +516,11 @@ class _CourseSummary extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
             decoration: BoxDecoration(
-              color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF9FBF9),
+              color: isDark
+                  ? colorScheme.surfaceContainerHighest
+                  : const Color(0xFFF9FBF9),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             child: Row(
               children: [
@@ -503,7 +531,9 @@ class _CourseSummary extends StatelessWidget {
                     value: '$lessonCount bài học',
                     label: 'Nội dung',
                     iconColor: const Color(0xFF2563EB),
-                    bgColor: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
+                    bgColor: isDark
+                        ? const Color(0xFF1E3A8A)
+                        : const Color(0xFFEFF6FF),
                   ),
                 ),
                 Container(height: 28, width: 0.8, color: context.cardBorder()),
@@ -513,8 +543,12 @@ class _CourseSummary extends StatelessWidget {
                     icon: Icons.schedule_rounded,
                     value: '2 giờ 30 phút',
                     label: 'Thời lượng',
-                    iconColor: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
-                    bgColor: isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2),
+                    iconColor: isDark
+                        ? colorScheme.primary
+                        : const Color(0xFF0F5B38),
+                    bgColor: isDark
+                        ? colorScheme.surfaceContainerLow
+                        : const Color(0xFFF0F7F2),
                   ),
                 ),
                 Container(height: 28, width: 0.8, color: context.cardBorder()),
@@ -525,7 +559,9 @@ class _CourseSummary extends StatelessWidget {
                     value: 'Trung cấp',
                     label: 'Cấp độ',
                     iconColor: const Color(0xFFD97706),
-                    bgColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB),
+                    bgColor: isDark
+                        ? const Color(0xFF78350F)
+                        : const Color(0xFFFFFBEB),
                   ),
                 ),
               ],
@@ -537,7 +573,9 @@ class _CourseSummary extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F4F1),
+              color: isDark
+                  ? colorScheme.surfaceContainerHighest
+                  : const Color(0xFFF0F4F1),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
@@ -655,10 +693,7 @@ class _LearningOutcomesSection extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.cardBg(),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: context.cardBorder(),
-            width: 0.8,
-          ),
+          border: Border.all(color: context.cardBorder(), width: 0.8),
           boxShadow: const [
             BoxShadow(
               color: Color(0x04000000),
@@ -718,10 +753,7 @@ class _CourseReviewsSection extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.cardBg(),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: context.cardBorder(),
-            width: 0.8,
-          ),
+          border: Border.all(color: context.cardBorder(), width: 0.8),
           boxShadow: const [
             BoxShadow(
               color: Color(0x04000000),
@@ -749,7 +781,11 @@ class _CourseReviewsSection extends StatelessWidget {
                     Row(
                       children: List.generate(
                         5,
-                        (index) => const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 18),
+                        (index) => const Icon(
+                          Icons.star_rounded,
+                          color: Color(0xFFF59E0B),
+                          size: 18,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -772,14 +808,16 @@ class _CourseReviewsSection extends StatelessWidget {
               context: context,
               name: 'Trần Thị Thu Trang',
               time: '2 ngày trước',
-              comment: 'Bài học rất chi tiết và dễ hiểu, video nét và tài liệu hướng dẫn rất thực tế. Rất khuyên mọi người nên học!',
+              comment:
+                  'Bài học rất chi tiết và dễ hiểu, video nét và tài liệu hướng dẫn rất thực tế. Rất khuyên mọi người nên học!',
             ),
             const SizedBox(height: AppSpacing.sm),
             _buildReviewItem(
               context: context,
               name: 'Nguyễn Văn Minh',
               time: '1 tuần trước',
-              comment: 'Kiến thức chuẩn y khoa, phương pháp nhịn ăn gián đoạn giúp mình nhẹ nhõm và tràn đầy năng lượng hơn hẳn.',
+              comment:
+                  'Kiến thức chuẩn y khoa, phương pháp nhịn ăn gián đoạn giúp mình nhẹ nhõm và tràn đầy năng lượng hơn hẳn.',
             ),
           ],
         ),
@@ -798,7 +836,9 @@ class _CourseReviewsSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF9FBF9),
+        color: isDark
+            ? colorScheme.surfaceContainerHighest
+            : const Color(0xFFF9FBF9),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -809,18 +849,31 @@ class _CourseReviewsSection extends StatelessWidget {
             children: [
               Text(
                 name,
-                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: context.textPrimary()),
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                  color: context.textPrimary(),
+                ),
               ),
               Text(
                 time,
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w300, color: context.textMuted()),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w300,
+                  color: context.textMuted(),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             comment,
-            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w300, color: context.textSecondary(), height: 1.4),
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w300,
+              color: context.textSecondary(),
+              height: 1.4,
+            ),
           ),
         ],
       ),
@@ -847,10 +900,7 @@ class _CourseDescription extends StatelessWidget {
         decoration: BoxDecoration(
           color: context.cardBg(),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: context.cardBorder(),
-            width: 0.8,
-          ),
+          border: Border.all(color: context.cardBorder(), width: 0.8),
           boxShadow: const [
             BoxShadow(
               color: Color(0x04000000),
@@ -934,10 +984,7 @@ class _LessonGroup extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: const [
           BoxShadow(
             color: Color(0x04000000),
@@ -954,13 +1001,17 @@ class _LessonGroup extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2),
+                  color: isDark
+                      ? colorScheme.surfaceContainerHighest
+                      : const Color(0xFFF0F7F2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   'CHƯƠNG HỌC',
                   style: TextStyle(
-                    color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                    color: isDark
+                        ? colorScheme.primary
+                        : const Color(0xFF0F5B38),
                     fontWeight: FontWeight.w600,
                     fontSize: 10,
                     letterSpacing: 0.4,
@@ -1044,18 +1095,20 @@ class _LessonPartTile extends StatelessWidget {
     final podBg = completed
         ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFF0FDF4))
         : part.isVideo
-            ? (isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2))
-            : part.isDocument
-                ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF))
-                : (isDark ? const Color(0xFF4C1D95) : const Color(0xFFF5F3FF));
+        ? (isDark
+              ? colorScheme.surfaceContainerHighest
+              : const Color(0xFFF0F7F2))
+        : part.isDocument
+        ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF))
+        : (isDark ? const Color(0xFF4C1D95) : const Color(0xFFF5F3FF));
 
     final podColor = completed
         ? const Color(0xFF16A34A)
         : part.isVideo
-            ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
-            : part.isDocument
-                ? const Color(0xFF2563EB)
-                : const Color(0xFF7C3AED);
+        ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
+        : part.isDocument
+        ? const Color(0xFF2563EB)
+        : const Color(0xFF7C3AED);
 
     return Semantics(
       button: canOpen,
@@ -1197,11 +1250,11 @@ class _Section extends StatelessWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.3,
-                fontSize: 18,
-                color: context.textPrimary(),
-              ),
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.3,
+            fontSize: 18,
+            color: context.textPrimary(),
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         child,

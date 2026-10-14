@@ -1,4 +1,4 @@
-﻿class LearningProgressSummary {
+class LearningProgressSummary {
   const LearningProgressSummary({
     required this.overallProgressPercent,
     required this.totalMinutesLearned,
@@ -21,7 +21,8 @@
         .toList();
 
     return LearningProgressSummary(
-      overallProgressPercent: (json['overallProgressPercent'] as num?)?.toDouble() ?? 0.0,
+      overallProgressPercent:
+          (json['overallProgressPercent'] as num?)?.toDouble() ?? 0.0,
       totalMinutesLearned: json['totalMinutesLearned'] as int? ?? 0,
       completedLessonsCount: json['completedLessonsCount'] as int? ?? 0,
       totalEnrolledCoursesCount: json['totalEnrolledCoursesCount'] as int? ?? 0,

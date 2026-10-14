@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 class AppSession {
   const AppSession({
     required this.accessToken,
@@ -12,14 +13,22 @@ class AppSession {
 
   String? claim(String key) {
     try {
-      final payload = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(accessToken.split('.')[1]))));
+      final payload = jsonDecode(
+        utf8.decode(
+          base64Url.decode(base64Url.normalize(accessToken.split('.')[1])),
+        ),
+      );
       return payload is Map ? payload[key]?.toString() : null;
-    } catch (_) { return null; }
+    } catch (_) {
+      return null;
+    }
   }
 
   String? get userId => claim('sub');
   String? get sessionId => claim('sid');
-  String? get role => claim('role') ?? claim('http://schemas.microsoft.com/ws/2008/06/identity/claims/role');
+  String? get role =>
+      claim('role') ??
+      claim('http://schemas.microsoft.com/ws/2008/06/identity/claims/role');
 
   bool isExpiredAt(DateTime now) {
     return !expiresAt.isAfter(now.toUtc());

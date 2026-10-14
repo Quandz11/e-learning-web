@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 
 /// Applies volume serially so an older platform command cannot win a drag race.
 class VolumeControl extends StatefulWidget {
-  const VolumeControl({super.key, required this.volume, required this.onChanged,
-    this.onInteractionChanged});
+  const VolumeControl({
+    super.key,
+    required this.volume,
+    required this.onChanged,
+    this.onInteractionChanged,
+  });
   final double volume;
   final Future<void> Function(double) onChanged;
   final ValueChanged<bool>? onInteractionChanged;
@@ -16,8 +20,11 @@ class _VolumeControlState extends State<VolumeControl> {
   Future<void> _open() async {
     widget.onInteractionChanged?.call(true);
     try {
-      await showDialog<void>(context: context, builder: (_) =>
-        _VolumeDialog(initial: widget.volume, apply: widget.onChanged));
+      await showDialog<void>(
+        context: context,
+        builder: (_) =>
+            _VolumeDialog(initial: widget.volume, apply: widget.onChanged),
+      );
     } finally {
       if (mounted) widget.onInteractionChanged?.call(false);
     }
@@ -25,11 +32,15 @@ class _VolumeControlState extends State<VolumeControl> {
 
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: 'Âm lượng', padding: const EdgeInsets.all(3),
+    tooltip: 'Âm lượng',
+    padding: const EdgeInsets.all(3),
     constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
     onPressed: _open,
-    icon: Icon(widget.volume == 0 ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-      color: Colors.white, size: 18),
+    icon: Icon(
+      widget.volume == 0 ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+      color: Colors.white,
+      size: 18,
+    ),
   );
 }
 
@@ -56,9 +67,16 @@ class _VolumeDialogState extends State<_VolumeDialog> {
       _pending = null;
       try {
         await widget.apply(next);
-        if (mounted) setState(() { _confirmed = next; _error = null; });
+        if (mounted) {
+          setState(() {
+            _confirmed = next;
+            _error = null;
+          });
+        }
       } catch (_) {
-        if (mounted) setState(() => _error = 'Không thể đổi âm lượng. Vui lòng thử lại.');
+        if (mounted) {
+          setState(() => _error = 'Không thể đổi âm lượng. Vui lòng thử lại.');
+        }
       }
     }
     _applying = false;
@@ -67,11 +85,25 @@ class _VolumeDialogState extends State<_VolumeDialog> {
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: Text('Âm lượng ${(_confirmed * 100).round()}%'),
-    content: SizedBox(width: 280, child: Column(mainAxisSize: MainAxisSize.min,
-      children: [Slider(value: _confirmed, onChanged: _change,
-        semanticFormatterCallback: (v) => '${(v * 100).round()}%',
-      ), if (_error != null) Text(_error!)],
-    )),
-    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Đóng'))],
+    content: SizedBox(
+      width: 280,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Slider(
+            value: _confirmed,
+            onChanged: _change,
+            semanticFormatterCallback: (v) => '${(v * 100).round()}%',
+          ),
+          if (_error != null) Text(_error!),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Đóng'),
+      ),
+    ],
   );
 }

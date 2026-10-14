@@ -47,7 +47,8 @@ class AuthSurface extends StatelessWidget {
                       constraints: BoxConstraints(
                         minHeight: math.max(
                           0.0,
-                          constraints.maxHeight - (AppSpacing.sm + AppSpacing.lg),
+                          constraints.maxHeight -
+                              (AppSpacing.sm + AppSpacing.lg),
                         ),
                       ),
                       child: Center(

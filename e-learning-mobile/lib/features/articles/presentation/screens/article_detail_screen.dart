@@ -17,13 +17,21 @@ class ArticleDetailScreen extends ConsumerWidget {
     final articleAsync = ref.watch(articleDetailProvider(slug));
 
     return Scaffold(
-      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+      backgroundColor: context.isDark
+          ? context.colorScheme.surface
+          : const Color(0xFFFBFBFA),
       appBar: AppBar(
-        backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+        backgroundColor: context.isDark
+            ? context.colorScheme.surface
+            : const Color(0xFFFBFBFA),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: context.textPrimary(),
+          ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -34,7 +42,11 @@ class ArticleDetailScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.share_outlined, size: 22, color: context.textPrimary()),
+            icon: Icon(
+              Icons.share_outlined,
+              size: 22,
+              color: context.textPrimary(),
+            ),
             onPressed: () {
               final shareUrl = 'https://nhinanchualanh.vn/bai-viet/$slug';
               Clipboard.setData(ClipboardData(text: shareUrl));
@@ -63,7 +75,11 @@ class ArticleDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline_rounded, size: 48, color: context.textMuted()),
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: context.textMuted(),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Không thể tải bài viết',
@@ -90,7 +106,9 @@ class ArticleDetailScreen extends ConsumerWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: context.colorScheme.primary,
                     side: BorderSide(color: context.colorScheme.primary),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Text('Thử lại'),
                 ),
@@ -116,9 +134,14 @@ class ArticleDetailScreen extends ConsumerWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEBF5EE),
+                      color: context.isDark
+                          ? const Color(0xFF143823)
+                          : const Color(0xFFEBF5EE),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -188,7 +211,10 @@ class ArticleDetailScreen extends ConsumerWidget {
                               color: context.textMuted(),
                             ),
                           ),
-                          Text(' • ', style: TextStyle(color: context.textMuted())),
+                          Text(
+                            ' • ',
+                            style: TextStyle(color: context.textMuted()),
+                          ),
                           Text(
                             '$readingMinutes phút đọc',
                             style: TextStyle(
@@ -216,7 +242,9 @@ class ArticleDetailScreen extends ConsumerWidget {
                       imageUrl: article.featuredImageUrl!,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Container(
-                        color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF1F3F2),
+                        color: context.isDark
+                            ? context.colorScheme.surfaceContainerHighest
+                            : const Color(0xFFF1F3F2),
                       ),
                       errorWidget: (_, __, ___) => const SizedBox.shrink(),
                     ),
@@ -230,10 +258,15 @@ class ArticleDetailScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF4F9F5),
+                    color: context.isDark
+                        ? context.colorScheme.surfaceContainerHighest
+                        : const Color(0xFFF4F9F5),
                     borderRadius: BorderRadius.circular(12),
                     border: Border(
-                      left: BorderSide(color: context.colorScheme.primary, width: 4),
+                      left: BorderSide(
+                        color: context.colorScheme.primary,
+                        width: 4,
+                      ),
                     ),
                   ),
                   child: Text(
@@ -263,13 +296,25 @@ class ArticleDetailScreen extends ConsumerWidget {
                 ),
                 customStylesBuilder: (element) {
                   if (element.localName == 'h1') {
-                    return {'font-size': '20px', 'font-weight': '600', 'margin-top': '16px'};
+                    return {
+                      'font-size': '20px',
+                      'font-weight': '600',
+                      'margin-top': '16px',
+                    };
                   }
                   if (element.localName == 'h2') {
-                    return {'font-size': '18px', 'font-weight': '600', 'margin-top': '14px'};
+                    return {
+                      'font-size': '18px',
+                      'font-weight': '600',
+                      'margin-top': '14px',
+                    };
                   }
                   if (element.localName == 'h3') {
-                    return {'font-size': '16px', 'font-weight': '500', 'margin-top': '12px'};
+                    return {
+                      'font-size': '16px',
+                      'font-weight': '500',
+                      'margin-top': '12px',
+                    };
                   }
                   if (element.localName == 'p') {
                     return {'margin-bottom': '12px'};

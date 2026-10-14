@@ -21,7 +21,9 @@ class AdminChatListState {
   final String? error;
 
   List<AdminConversationItem> get filteredConversations {
-    final list = activeTab == 'guest' ? guestConversations : authenticatedConversations;
+    final list = activeTab == 'guest'
+        ? guestConversations
+        : authenticatedConversations;
     if (searchQuery.trim().isEmpty) return list;
     final q = searchQuery.trim().toLowerCase();
     return list.where((item) {
@@ -52,7 +54,8 @@ class AdminChatListState {
     bool clearError = false,
   }) {
     return AdminChatListState(
-      authenticatedConversations: authenticatedConversations ?? this.authenticatedConversations,
+      authenticatedConversations:
+          authenticatedConversations ?? this.authenticatedConversations,
       guestConversations: guestConversations ?? this.guestConversations,
       activeTab: activeTab ?? this.activeTab,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -64,12 +67,12 @@ class AdminChatListState {
 
 final adminChatListControllerProvider =
     StateNotifierProvider<AdminChatListController, AdminChatListState>((ref) {
-  return AdminChatListController(ref.watch(chatRepositoryProvider));
-});
+      return AdminChatListController(ref.watch(chatRepositoryProvider));
+    });
 
 class AdminChatListController extends StateNotifier<AdminChatListState> {
   AdminChatListController(this._repository)
-      : super(const AdminChatListState(isLoading: true)) {
+    : super(const AdminChatListState(isLoading: true)) {
     load();
     _setupSignalR();
   }

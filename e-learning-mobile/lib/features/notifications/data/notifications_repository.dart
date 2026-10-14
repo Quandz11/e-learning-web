@@ -9,7 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-final notificationsRepositoryProvider = Provider<NotificationsRepository>((ref) {
+final notificationsRepositoryProvider = Provider<NotificationsRepository>((
+  ref,
+) {
   return NotificationsRepository(
     ref.watch(notificationsApiProvider),
     ref.watch(cacheServiceProvider),
@@ -23,7 +25,9 @@ class NotificationsRepository {
   final CacheService _cacheService;
   static const String _cacheKey = 'notifications_inbox';
 
-  Future<NotificationsPayload> getNotifications({bool forceRefresh = false}) async {
+  Future<NotificationsPayload> getNotifications({
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh) {
       final cached = await _cacheService.getMap(_cacheKey);
       if (cached != null) {
@@ -66,7 +70,9 @@ class NotificationsRepository {
     if (cached != null) {
       try {
         final payload = NotificationsPayload.fromJson(cached);
-        final updatedList = payload.notifications.map((n) => n.copyWith(isRead: true)).toList();
+        final updatedList = payload.notifications
+            .map((n) => n.copyWith(isRead: true))
+            .toList();
         await _cacheService.set(_cacheKey, {
           'notifications': updatedList.map((n) => n.toJson()).toList(),
           'unreadCount': 0,

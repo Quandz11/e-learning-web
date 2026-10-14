@@ -52,7 +52,8 @@ class OfflineDownloadItem {
       remoteUrl: map['remoteUrl'] as String? ?? '',
       localPath: map['localPath'] as String? ?? '',
       fileSizeBytes: (map['fileSizeBytes'] as num?)?.toInt() ?? 0,
-      downloadedAt: DateTime.tryParse(map['downloadedAt'] as String? ?? '') ??
+      downloadedAt:
+          DateTime.tryParse(map['downloadedAt'] as String? ?? '') ??
           DateTime.now(),
     );
   }

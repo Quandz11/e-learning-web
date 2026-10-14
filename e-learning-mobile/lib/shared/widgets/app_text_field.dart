@@ -55,16 +55,15 @@ class AppTextField extends StatelessWidget {
         ? colorScheme.error
         : (isDark ? colorScheme.outlineVariant : const Color(0xFFE9EBEA));
     final fillColor = enabled
-        ? (isDark
-            ? colorScheme.surfaceContainerHigh
-            : const Color(0xFFF4F6F5))
+        ? (isDark ? colorScheme.surfaceContainerHigh : const Color(0xFFF4F6F5))
         : colorScheme.surface.withValues(alpha: 0.5);
     final textStyle = TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w400,
       color: enabled
           ? (isDark ? colorScheme.onSurface : const Color(0xFF1E2621))
-          : (isDark ? colorScheme.onSurface : const Color(0xFF1E2621)).withValues(alpha: 0.38),
+          : (isDark ? colorScheme.onSurface : const Color(0xFF1E2621))
+                .withValues(alpha: 0.38),
     );
 
     return Column(
@@ -88,10 +87,7 @@ class AppTextField extends StatelessWidget {
           decoration: BoxDecoration(
             color: fillColor,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: borderColor,
-              width: hasError ? 1.5 : 1.0,
-            ),
+            border: Border.all(color: borderColor, width: hasError ? 1.5 : 1.0),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
           child: Row(
@@ -99,7 +95,9 @@ class AppTextField extends StatelessWidget {
               if (prefix != null) ...[
                 IconTheme(
                   data: IconThemeData(
-                    color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873),
+                    color: isDark
+                        ? colorScheme.onSurfaceVariant
+                        : const Color(0xFF717873),
                     size: 20,
                   ),
                   child: prefix,
@@ -130,7 +128,11 @@ class AppTextField extends StatelessWidget {
                       hintStyle: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w300,
-                        color: isDark ? colorScheme.onSurfaceVariant.withValues(alpha: 0.6) : const Color(0xFFA5A9A5),
+                        color: isDark
+                            ? colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.6,
+                              )
+                            : const Color(0xFFA5A9A5),
                       ),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -147,7 +149,9 @@ class AppTextField extends StatelessWidget {
                 const SizedBox(width: 8),
                 IconTheme(
                   data: IconThemeData(
-                    color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873),
+                    color: isDark
+                        ? colorScheme.onSurfaceVariant
+                        : const Color(0xFF717873),
                     size: 20,
                   ),
                   child: suffix,
@@ -174,7 +178,3 @@ class AppTextField extends StatelessWidget {
     );
   }
 }
-
-
-
-

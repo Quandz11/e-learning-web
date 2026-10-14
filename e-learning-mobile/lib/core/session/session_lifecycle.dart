@@ -16,7 +16,8 @@ class SessionLifecycle extends ConsumerStatefulWidget {
   ConsumerState<SessionLifecycle> createState() => _SessionLifecycleState();
 }
 
-class _SessionLifecycleState extends ConsumerState<SessionLifecycle> with WidgetsBindingObserver {
+class _SessionLifecycleState extends ConsumerState<SessionLifecycle>
+    with WidgetsBindingObserver {
   HubConnection? _connection;
   String? _sessionId;
   Timer? _timer;
@@ -29,7 +30,11 @@ class _SessionLifecycleState extends ConsumerState<SessionLifecycle> with Widget
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    ref.listenManual<SessionState>(sessionControllerProvider, (_, state) => _sync(state.session?.sessionId), fireImmediately: true);
+    ref.listenManual<SessionState>(
+      sessionControllerProvider,
+      (_, state) => _sync(state.session?.sessionId),
+      fireImmediately: true,
+    );
     if (_isRealApp) {
       _timer = Timer.periodic(const Duration(seconds: 30), (_) => _verify());
     }
@@ -42,22 +47,42 @@ class _SessionLifecycleState extends ConsumerState<SessionLifecycle> with Widget
     final previous = _connection;
     _connection = null;
     await previous?.stop();
-    if (!mounted || generation != _generation || id == null || !_isRealApp) return;
+    if (!mounted || generation != _generation || id == null || !_isRealApp) {
+      return;
+    }
     await _verify();
-    if (!mounted || generation != _generation) return;
+    if (!mounted || generation != _generation) {
+      return;
+    }
     final repository = ref.read(sessionRepositoryProvider);
-    final base = ref.read(appConfigProvider).apiBaseUrl.toString().replaceFirst(RegExp(r'/api/?$'), '');
-    final connection = HubConnectionBuilder().withUrl('$base/hubs/notification', options: HttpConnectionOptions(
-      accessTokenFactory: () async {
-        var session = await repository.readStoredSession();
-        if (session == null || session.sessionId != id) throw StateError('Session changed');
-        if (session.isExpiredAt(DateTime.now())) session = await repository.refreshStoredSession();
-        return session.accessToken;
-      },
-    )).withAutomaticReconnect().build();
+    final base = ref
+        .read(appConfigProvider)
+        .apiBaseUrl
+        .toString()
+        .replaceFirst(RegExp(r'/api/?$'), '');
+    final connection = HubConnectionBuilder()
+        .withUrl(
+          '$base/hubs/notification',
+          options: HttpConnectionOptions(
+            accessTokenFactory: () async {
+              var session = await repository.readStoredSession();
+              if (session == null || session.sessionId != id) {
+                throw StateError('Session changed');
+              }
+              if (session.isExpiredAt(DateTime.now())) {
+                session = await repository.refreshStoredSession();
+              }
+              return session.accessToken;
+            },
+          ),
+        )
+        .withAutomaticReconnect()
+        .build();
     _connection = connection;
     connection.on('SessionRevoked', (args) {
-      if (!mounted || generation != _generation || args == null || args.isEmpty) return;
+      if (!mounted || generation != _generation || args == null || args.isEmpty) {
+        return;
+      }
       final event = args.first;
       if (event is Map && event['sessionId'] == id) {
         unawaited(ref.read(sessionControllerProvider.notifier).clearSession());
@@ -68,15 +93,21 @@ class _SessionLifecycleState extends ConsumerState<SessionLifecycle> with Widget
     try {
       await connection.start();
       if (!mounted || generation != _generation) await connection.stop();
-    } catch (_) { /* HTTP validation is the fallback while realtime is unavailable. */ }
+    } catch (_) {
+      /* HTTP validation is the fallback while realtime is unavailable. */
+    }
   }
 
   Future<void> _verify() async {
     if (!mounted || _sessionId == null || _checking) return;
     _checking = true;
-    try { await ref.read(apiClientProvider).get<Object?>('/auth/sessions'); }
-    catch (_) { /* The auth interceptor handles revocation; network errors keep the session. */ }
-    finally { _checking = false; }
+    try {
+      await ref.read(apiClientProvider).get<Object?>('/auth/sessions');
+    } catch (_) {
+      /* The auth interceptor handles revocation; network errors keep the session. */
+    } finally {
+      _checking = false;
+    }
   }
 
   @override

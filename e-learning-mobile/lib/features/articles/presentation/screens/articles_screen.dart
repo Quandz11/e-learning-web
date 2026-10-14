@@ -29,13 +29,21 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
     final controller = ref.read(articlesControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+      backgroundColor: context.isDark
+          ? context.colorScheme.surface
+          : const Color(0xFFFBFBFA),
       appBar: AppBar(
-        backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+        backgroundColor: context.isDark
+            ? context.colorScheme.surface
+            : const Color(0xFFFBFBFA),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: context.textPrimary(),
+          ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -76,12 +84,19 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
               child: Row(
                 children: [
-                  const Icon(Icons.search_rounded, size: 20, color: Color(0xFF0F5B38)),
+                  const Icon(
+                    Icons.search_rounded,
+                    size: 20,
+                    color: Color(0xFF0F5B38),
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      style: TextStyle(fontSize: 14, color: context.textPrimary()),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.textPrimary(),
+                      ),
                       decoration: InputDecoration(
                         filled: false,
                         fillColor: Colors.transparent,
@@ -97,7 +112,9 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                         disabledBorder: InputBorder.none,
                         errorBorder: InputBorder.none,
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
                       ),
                       onSubmitted: (val) => controller.search(val),
                     ),
@@ -108,7 +125,11 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                         _searchController.clear();
                         controller.search('');
                       },
-                      child: Icon(Icons.close_rounded, size: 18, color: context.textSecondary()),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: context.textSecondary(),
+                      ),
                     ),
                 ],
               ),
@@ -151,91 +172,106 @@ class _ArticlesScreenState extends ConsumerState<ArticlesScreen> {
                 ? const Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F5B38)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0F5B38),
+                      ),
                     ),
                   )
                 : state.error != null && state.articles.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.cloud_off_rounded, size: 48, color: context.textMuted()),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Không thể tải danh sách bài viết',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: context.textPrimary(),
-                                  letterSpacing: -0.3,
-                                ),
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.cloud_off_rounded,
+                            size: 48,
+                            color: context.textMuted(),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Không thể tải danh sách bài viết',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: context.textPrimary(),
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          OutlinedButton(
+                            onPressed: () => controller.load(),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: context.colorScheme.primary,
+                              side: BorderSide(
+                                color: context.colorScheme.primary,
                               ),
-                              const SizedBox(height: 16),
-                              OutlinedButton(
-                                onPressed: () => controller.load(),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: context.colorScheme.primary,
-                                  side: BorderSide(color: context.colorScheme.primary),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: const Text('Thử lại'),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ],
+                            ),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : state.articles.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: context.isDark
+                                ? const Color(0xFF143823)
+                                : const Color(0xFFEBF5EE),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.article_outlined,
+                            size: 32,
+                            color: context.colorScheme.primary,
                           ),
                         ),
-                      )
-                    : state.articles.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 64,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEBF5EE),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Icon(
-                                    Icons.article_outlined,
-                                    size: 32,
-                                    color: context.colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Chưa có bài viết nào phù hợp',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: context.textPrimary(),
-                                    letterSpacing: -0.3,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            color: context.colorScheme.primary,
-                            onRefresh: () => controller.refresh(),
-                            child: ListView.separated(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              itemCount: state.articles.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 14),
-                              itemBuilder: (context, index) {
-                                final item = state.articles[index];
-                                return _ArticleCard(
-                                  article: item,
-                                  onTap: () {
-                                    context.push('/app/articles/${item.slug}');
-                                  },
-                                );
-                              },
-                            ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Chưa có bài viết nào phù hợp',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: context.textPrimary(),
+                            letterSpacing: -0.3,
                           ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    color: context.colorScheme.primary,
+                    onRefresh: () => controller.refresh(),
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      itemCount: state.articles.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      itemBuilder: (context, index) {
+                        final item = state.articles[index];
+                        return _ArticleCard(
+                          article: item,
+                          onTap: () {
+                            context.push('/app/articles/${item.slug}');
+                          },
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -267,7 +303,9 @@ class _CategoryChip extends StatelessWidget {
             color: isSelected ? context.colorScheme.primary : context.cardBg(),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? context.colorScheme.primary : context.cardBorder(),
+              color: isSelected
+                  ? context.colorScheme.primary
+                  : context.cardBorder(),
               width: 1,
             ),
           ),
@@ -287,10 +325,7 @@ class _CategoryChip extends StatelessWidget {
 }
 
 class _ArticleCard extends StatelessWidget {
-  const _ArticleCard({
-    required this.article,
-    required this.onTap,
-  });
+  const _ArticleCard({required this.article, required this.onTap});
 
   final ArticleSummary article;
   final VoidCallback onTap;
@@ -330,8 +365,11 @@ class _ArticleCard extends StatelessWidget {
                 child: Container(
                   width: 96,
                   height: 84,
-                  color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF1F3F2),
-                  child: article.featuredImageUrl != null &&
+                  color: context.isDark
+                      ? context.colorScheme.surfaceContainerHighest
+                      : const Color(0xFFF1F3F2),
+                  child:
+                      article.featuredImageUrl != null &&
                           article.featuredImageUrl!.isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: article.featuredImageUrl!,
@@ -360,9 +398,14 @@ class _ArticleCard extends StatelessWidget {
                   children: [
                     if (article.categoryName != null) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEBF5EE),
+                          color: context.isDark
+                              ? const Color(0xFF143823)
+                              : const Color(0xFFEBF5EE),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -392,7 +435,11 @@ class _ArticleCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.access_time_rounded, size: 12, color: context.textMuted()),
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 12,
+                          color: context.textMuted(),
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           dateStr,
@@ -403,7 +450,11 @@ class _ArticleCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Icon(Icons.visibility_outlined, size: 12, color: context.textMuted()),
+                        Icon(
+                          Icons.visibility_outlined,
+                          size: 12,
+                          color: context.textMuted(),
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '${article.viewCount}',

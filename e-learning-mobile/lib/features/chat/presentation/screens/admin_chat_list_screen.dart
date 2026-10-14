@@ -15,7 +15,8 @@ class AdminChatListScreen extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
 
   @override
-  ConsumerState<AdminChatListScreen> createState() => _AdminChatListScreenState();
+  ConsumerState<AdminChatListScreen> createState() =>
+      _AdminChatListScreenState();
 }
 
 class _AdminChatListScreenState extends ConsumerState<AdminChatListScreen> {
@@ -44,7 +45,11 @@ class _AdminChatListScreenState extends ConsumerState<AdminChatListScreen> {
         surfaceTintColor: Colors.transparent,
         leading: widget.onBack != null
             ? IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: colorScheme.onSurface),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 20,
+                  color: colorScheme.onSurface,
+                ),
                 onPressed: widget.onBack,
               )
             : null,
@@ -60,7 +65,10 @@ class _AdminChatListScreenState extends ConsumerState<AdminChatListScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded, color: isDark ? colorScheme.primary : const Color(0xFF0F5B38)),
+            icon: Icon(
+              Icons.refresh_rounded,
+              color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+            ),
             tooltip: 'Làm mới',
             onPressed: () => notifier.load(),
           ),
@@ -75,7 +83,9 @@ class _AdminChatListScreenState extends ConsumerState<AdminChatListScreen> {
             child: Container(
               height: 42,
               decoration: BoxDecoration(
-                color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F4F1),
+                color: isDark
+                    ? colorScheme.surfaceContainerHighest
+                    : const Color(0xFFF0F4F1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
@@ -86,19 +96,25 @@ class _AdminChatListScreenState extends ConsumerState<AdminChatListScreen> {
                   hintText: 'Tìm kiếm cuộc trò chuyện...',
                   hintStyle: TextStyle(
                     fontSize: 13,
-                    color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFF8A938C),
+                    color: isDark
+                        ? colorScheme.onSurfaceVariant
+                        : const Color(0xFF8A938C),
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
                     size: 20,
-                    color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873),
+                    color: isDark
+                        ? colorScheme.onSurfaceVariant
+                        : const Color(0xFF717873),
                   ),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
                           icon: Icon(
                             Icons.clear_rounded,
                             size: 18,
-                            color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873),
+                            color: isDark
+                                ? colorScheme.onSurfaceVariant
+                                : const Color(0xFF717873),
                           ),
                           onPressed: () {
                             _searchController.clear();
@@ -120,14 +136,17 @@ class _AdminChatListScreenState extends ConsumerState<AdminChatListScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             height: 38,
             decoration: BoxDecoration(
-              color: isDark ? colorScheme.surfaceContainerLow : const Color(0xFFEBF2EC),
+              color: isDark
+                  ? colorScheme.surfaceContainerLow
+                  : const Color(0xFFEBF2EC),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
                 Expanded(
                   child: _TabButton(
-                    label: 'Thành viên (${state.authenticatedConversations.length})',
+                    label:
+                        'Thành viên (${state.authenticatedConversations.length})',
                     isActive: state.activeTab == 'authenticated',
                     onTap: () => notifier.setActiveTab('authenticated'),
                   ),
@@ -150,70 +169,84 @@ class _AdminChatListScreenState extends ConsumerState<AdminChatListScreen> {
                 ? const Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F5B38)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0F5B38),
+                      ),
                     ),
                   )
                 : state.error != null && state.filteredConversations.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error_outline_rounded,
-                              size: 40,
-                              color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFFA5A9A5),
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Không thể tải danh sách cuộc trò chuyện',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(height: 12),
-                            OutlinedButton(
-                              onPressed: () => notifier.load(),
-                              child: const Text('Thử lại'),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 40,
+                          color: isDark
+                              ? colorScheme.onSurfaceVariant
+                              : const Color(0xFFA5A9A5),
                         ),
-                      )
-                    : state.filteredConversations.isEmpty
-                        ? RefreshIndicator(
-                            color: const Color(0xFF0F5B38),
-                            onRefresh: () => notifier.load(),
-                            child: ListView(
-                              children: [
-                                const SizedBox(height: 100),
-                                Center(
-                                  child: Text(
-                                    'Chưa có cuộc trò chuyện nào',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFF8A938C),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            color: const Color(0xFF0F5B38),
-                            onRefresh: () => notifier.load(),
-                            child: ListView.separated(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              itemCount: state.filteredConversations.length,
-                              separatorBuilder: (_, __) => Divider(
-                                height: 1,
-                                color: isDark ? colorScheme.outlineVariant : const Color(0xFFEFF3F0),
-                              ),
-                              itemBuilder: (context, index) {
-                                final item = state.filteredConversations[index];
-                                return _ConversationTile(
-                                  item: item,
-                                  onTap: () => widget.onSelectConversation(item),
-                                );
-                              },
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Không thể tải danh sách cuộc trò chuyện',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: () => notifier.load(),
+                          child: const Text('Thử lại'),
+                        ),
+                      ],
+                    ),
+                  )
+                : state.filteredConversations.isEmpty
+                ? RefreshIndicator(
+                    color: const Color(0xFF0F5B38),
+                    onRefresh: () => notifier.load(),
+                    child: ListView(
+                      children: [
+                        const SizedBox(height: 100),
+                        Center(
+                          child: Text(
+                            'Chưa có cuộc trò chuyện nào',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDark
+                                  ? colorScheme.onSurfaceVariant
+                                  : const Color(0xFF8A938C),
                             ),
                           ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    color: const Color(0xFF0F5B38),
+                    onRefresh: () => notifier.load(),
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      itemCount: state.filteredConversations.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1,
+                        color: isDark
+                            ? colorScheme.outlineVariant
+                            : const Color(0xFFEFF3F0),
+                      ),
+                      itemBuilder: (context, index) {
+                        final item = state.filteredConversations[index];
+                        return _ConversationTile(
+                          item: item,
+                          onTap: () => widget.onSelectConversation(item),
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -238,9 +271,15 @@ class _TabButton extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final activeBg = isDark ? colorScheme.surfaceContainerHighest : Colors.white;
-    final activeText = isDark ? colorScheme.onPrimaryContainer : const Color(0xFF0F5B38);
-    final inactiveText = isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873);
+    final activeBg = isDark
+        ? colorScheme.surfaceContainerHighest
+        : Colors.white;
+    final activeText = isDark
+        ? colorScheme.onPrimaryContainer
+        : const Color(0xFF0F5B38);
+    final inactiveText = isDark
+        ? colorScheme.onSurfaceVariant
+        : const Color(0xFF717873);
 
     return GestureDetector(
       onTap: onTap,
@@ -273,10 +312,7 @@ class _TabButton extends StatelessWidget {
 }
 
 class _ConversationTile extends StatelessWidget {
-  const _ConversationTile({
-    required this.item,
-    required this.onTap,
-  });
+  const _ConversationTile({required this.item, required this.onTap});
 
   final AdminConversationItem item;
   final VoidCallback onTap;
@@ -305,22 +341,36 @@ class _ConversationTile extends StatelessWidget {
                   height: 48,
                   decoration: BoxDecoration(
                     color: item.type == 'guest'
-                        ? (isDark ? const Color(0xFF3B1E54) : const Color(0xFFF3E8FF))
-                        : (isDark ? const Color(0xFF163829) : const Color(0xFFEBF5EE)),
+                        ? (isDark
+                              ? const Color(0xFF3B1E54)
+                              : const Color(0xFFF3E8FF))
+                        : (isDark
+                              ? const Color(0xFF163829)
+                              : const Color(0xFFEBF5EE)),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: item.type == 'guest'
-                          ? (isDark ? const Color(0xFF6B21A8) : const Color(0xFFD8B4FE))
-                          : (isDark ? const Color(0xFF2E6F4E) : const Color(0xFFD4E8DC)),
+                          ? (isDark
+                                ? const Color(0xFF6B21A8)
+                                : const Color(0xFFD8B4FE))
+                          : (isDark
+                                ? const Color(0xFF2E6F4E)
+                                : const Color(0xFFD4E8DC)),
                       width: 1.5,
                     ),
                   ),
                   child: Center(
                     child: Icon(
-                      item.type == 'guest' ? Icons.person_outline_rounded : Icons.person_rounded,
+                      item.type == 'guest'
+                          ? Icons.person_outline_rounded
+                          : Icons.person_rounded,
                       color: item.type == 'guest'
-                          ? (isDark ? const Color(0xFFC084FC) : const Color(0xFF7E22CE))
-                          : (isDark ? colorScheme.onPrimaryContainer : const Color(0xFF0F5B38)),
+                          ? (isDark
+                                ? const Color(0xFFC084FC)
+                                : const Color(0xFF7E22CE))
+                          : (isDark
+                                ? colorScheme.onPrimaryContainer
+                                : const Color(0xFF0F5B38)),
                       size: 24,
                     ),
                   ),
@@ -361,7 +411,9 @@ class _ConversationTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: hasUnread ? FontWeight.w700 : FontWeight.w600,
+                            fontWeight: hasUnread
+                                ? FontWeight.w700
+                                : FontWeight.w600,
                             color: colorScheme.onSurface,
                             letterSpacing: -0.3,
                           ),
@@ -372,10 +424,16 @@ class _ConversationTile extends StatelessWidget {
                           timeStr,
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+                            fontWeight: hasUnread
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                             color: hasUnread
-                                ? (isDark ? colorScheme.onPrimaryContainer : const Color(0xFF0F5B38))
-                                : (isDark ? colorScheme.onSurfaceVariant : const Color(0xFF8A938C)),
+                                ? (isDark
+                                      ? colorScheme.onPrimaryContainer
+                                      : const Color(0xFF0F5B38))
+                                : (isDark
+                                      ? colorScheme.onSurfaceVariant
+                                      : const Color(0xFF8A938C)),
                           ),
                         ),
                     ],
@@ -390,23 +448,32 @@ class _ConversationTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+                            fontWeight: hasUnread
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                             color: hasUnread
                                 ? colorScheme.onSurface
-                                : (isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873)),
+                                : (isDark
+                                      ? colorScheme.onSurfaceVariant
+                                      : const Color(0xFF717873)),
                           ),
                         ),
                       ),
                       if (hasUnread)
                         Container(
                           margin: const EdgeInsets.only(left: 6),
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFF0F5B38),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            item.unreadCount > 99 ? '99+' : '${item.unreadCount}',
+                            item.unreadCount > 99
+                                ? '99+'
+                                : '${item.unreadCount}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
@@ -429,7 +496,9 @@ class _ConversationTile extends StatelessWidget {
     if (dt == null) return '';
     final now = DateTime.now();
     final local = dt.toLocal();
-    if (local.year == now.year && local.month == now.month && local.day == now.day) {
+    if (local.year == now.year &&
+        local.month == now.month &&
+        local.day == now.day) {
       return DateFormat('HH:mm').format(local);
     }
     return DateFormat('dd/MM').format(local);

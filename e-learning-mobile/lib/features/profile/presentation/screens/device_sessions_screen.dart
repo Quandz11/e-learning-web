@@ -16,7 +16,8 @@ class DeviceSessionsScreen extends ConsumerStatefulWidget {
   const DeviceSessionsScreen({super.key});
 
   @override
-  ConsumerState<DeviceSessionsScreen> createState() => _DeviceSessionsScreenState();
+  ConsumerState<DeviceSessionsScreen> createState() =>
+      _DeviceSessionsScreenState();
 }
 
 class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
@@ -32,12 +33,16 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(isRevokeAllOthers
-            ? 'Đăng xuất các thiết bị khác?'
-            : 'Đăng xuất thiết bị?'),
-        content: Text(isRevokeAllOthers
-            ? 'Bạn sẽ đăng xuất khỏi tất cả các thiết bị khác ngoại trừ thiết bị đang sử dụng này.'
-            : 'Bạn có chắc chắn muốn đăng xuất khỏi "${session.deviceName}"?'),
+        title: Text(
+          isRevokeAllOthers
+              ? 'Đăng xuất các thiết bị khác?'
+              : 'Đăng xuất thiết bị?',
+        ),
+        content: Text(
+          isRevokeAllOthers
+              ? 'Bạn sẽ đăng xuất khỏi tất cả các thiết bị khác ngoại trừ thiết bị đang sử dụng này.'
+              : 'Bạn có chắc chắn muốn đăng xuất khỏi "${session.deviceName}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -61,7 +66,9 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
     try {
       if (session?.isCurrent == true) {
         final current = ref.read(sessionControllerProvider).session;
-        await ref.read(authRepositoryProvider).logout(LogoutRequest(refreshToken: current?.refreshToken));
+        await ref
+            .read(authRepositoryProvider)
+            .logout(LogoutRequest(refreshToken: current?.refreshToken));
         await ref.read(sessionControllerProvider.notifier).clearSession();
         return;
       }
@@ -80,7 +87,9 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
         // Optimistic: remove the specific session
         if (mounted && _localSessions != null) {
           setState(() {
-            _localSessions = _localSessions!.where((s) => s.id != session.id).toList();
+            _localSessions = _localSessions!
+                .where((s) => s.id != session.id)
+                .toList();
           });
         }
       }
@@ -91,16 +100,20 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isRevokeAllOthers
-                ? 'Đã đăng xuất khỏi các thiết bị khác thành công.'
-                : 'Đã đăng xuất khỏi "${session.deviceName}".'),
+            content: Text(
+              isRevokeAllOthers
+                  ? 'Đã đăng xuất khỏi các thiết bị khác thành công.'
+                  : 'Đã đăng xuất khỏi "${session.deviceName}".',
+            ),
             backgroundColor: AppColors.primary,
           ),
         );
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Không thể đăng xuất thiết bị. Vui lòng thử lại.');
+        setState(
+          () => _error = 'Không thể đăng xuất thiết bị. Vui lòng thử lại.',
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -111,11 +124,16 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
     final text = '${platform.toLowerCase()} ${deviceName.toLowerCase()}';
     if (text.contains('ipad') || text.contains('tablet')) {
       return Icons.tablet_mac_rounded;
-    } else if (text.contains('iphone') || text.contains('android') ||
-        text.contains('mobile') || text.contains('phone')) {
+    } else if (text.contains('iphone') ||
+        text.contains('android') ||
+        text.contains('mobile') ||
+        text.contains('phone')) {
       return Icons.smartphone_rounded;
-    } else if (text.contains('mac') || text.contains('windows') ||
-        text.contains('linux') || text.contains('pc') || text.contains('web')) {
+    } else if (text.contains('mac') ||
+        text.contains('windows') ||
+        text.contains('linux') ||
+        text.contains('pc') ||
+        text.contains('web')) {
       return Icons.laptop_chromebook_rounded;
     }
     return Icons.devices_rounded;
@@ -164,7 +182,11 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline_rounded, size: 20, color: context.textSecondary()),
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 20,
+                  color: context.textSecondary(),
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -199,13 +221,22 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
 
           // Use local sessions if available (optimistic), else fall back to provider
           if (_localSessions != null)
-            _buildSessionList(context, _localSessions!, format, isDark, colorScheme)
+            _buildSessionList(
+              context,
+              _localSessions!,
+              format,
+              isDark,
+              colorScheme,
+            )
           else
             sessionsAsync.when(
               loading: () => const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
               error: (err, _) => Center(
@@ -213,7 +244,11 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 40),
                   child: Column(
                     children: [
-                      const Icon(Icons.error_outline_rounded, size: 40, color: AppColors.error),
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        size: 40,
+                        color: AppColors.error,
+                      ),
                       const SizedBox(height: 8),
                       const Text('Không thể tải danh sách phiên đăng nhập.'),
                       const SizedBox(height: 12),
@@ -226,7 +261,8 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                   ),
                 ),
               ),
-              data: (rows) => _buildSessionList(context, rows, format, isDark, colorScheme),
+              data: (rows) =>
+                  _buildSessionList(context, rows, format, isDark, colorScheme),
             ),
         ],
       ),
@@ -325,8 +361,12 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                 height: 40,
                 decoration: BoxDecoration(
                   color: row.isCurrent
-                      ? (isDark ? const Color(0xFF143823) : const Color(0xFFF0FDF4))
-                      : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC)),
+                      ? (isDark
+                            ? const Color(0xFF143823)
+                            : const Color(0xFFF0FDF4))
+                      : (isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFF8FAFC)),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -359,12 +399,17 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                         if (row.isCurrent) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: isDark
                                   ? const Color(0xFF14532D)
                                   : const Color(0xFFDCFCE7),
-                              borderRadius: BorderRadius.circular(AppRadius.pill),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.pill,
+                              ),
                             ),
                             child: Text(
                               'Thiết bị này',
@@ -383,7 +428,10 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                     const SizedBox(height: 2),
                     Text(
                       '${_formatPlatform(row.platform)} • ${row.browser.isNotEmpty ? row.browser : 'Ứng dụng SKVI'}',
-                      style: TextStyle(fontSize: 12, color: context.textSecondary()),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.textSecondary(),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -416,7 +464,10 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                     const SizedBox(height: 2),
                     Text(
                       'Hoạt động: ${format.format(row.lastActiveAt.toLocal())}',
-                      style: TextStyle(fontSize: 11, color: context.textMuted()),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.textMuted(),
+                      ),
                     ),
                   ],
                 ),
@@ -428,8 +479,13 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                   label: const Text('Đăng xuất'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
-                    side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    side: BorderSide(
+                      color: AppColors.error.withValues(alpha: 0.3),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     visualDensity: VisualDensity.compact,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.sm),

@@ -38,9 +38,10 @@ typedef LearningMediaPlayerBuilder =
       String? videoId,
     });
 
-final _videoEmbedUrlProvider = FutureProvider.autoDispose.family<Map<String, dynamic>, String>(
-  (ref, videoId) => ref.read(learningApiProvider).getVideoPlayback(videoId),
-);
+final _videoEmbedUrlProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, String>(
+      (ref, videoId) => ref.read(learningApiProvider).getVideoPlayback(videoId),
+    );
 
 // ---------------------------------------------------------------------------
 // MediaPlayerPanel – dispatch based on URL type
@@ -164,9 +165,7 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
           'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     };
     final playbackUri = _refreshedUrl ?? widget.url;
-    final targetUri = playbackUri.scheme == 'file'
-        ? playbackUri
-        : playbackUri;
+    final targetUri = playbackUri.scheme == 'file' ? playbackUri : playbackUri;
     final c = targetUri.scheme == 'file'
         ? VideoPlayerController.file(File(targetUri.toFilePath()))
         : VideoPlayerController.networkUrl(targetUri, httpHeaders: headers);
@@ -190,8 +189,12 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
   void _onControllerChanged() {
     final c = _controller;
     if (c != null && c.value.isInitialized && !c.value.hasError) {
-      _resume = _resume.copyWith(position: c.value.position.inMilliseconds / 1000,
-        isPlaying: c.value.isPlaying, speed: c.value.playbackSpeed, volume: c.value.volume);
+      _resume = _resume.copyWith(
+        position: c.value.position.inMilliseconds / 1000,
+        isPlaying: c.value.isPlaying,
+        speed: c.value.playbackSpeed,
+        volume: c.value.volume,
+      );
     }
     if (c?.value.hasError == true && !_recovering) {
       unawaited(_recover(StateError('Playback failed')));
@@ -206,7 +209,9 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
     if (!_refreshAttempted && widget.videoId != null) {
       _refreshAttempted = true;
       try {
-        final source = await ref.read(learningApiProvider).getVideoPlayback(widget.videoId!);
+        final source = await ref
+            .read(learningApiProvider)
+            .getVideoPlayback(widget.videoId!);
         if (!mounted) return;
         _refreshedUrl = Uri.tryParse(source['playbackUrl']?.toString() ?? '');
         _refreshedEmbed = Uri.tryParse(source['embedUrl']?.toString() ?? '');
@@ -215,7 +220,12 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
         return;
       } catch (_) {
         // No fallback after an API failure: access may have been revoked.
-        if (mounted) setState(() { _error = error; _sourceDenied = true; });
+        if (mounted) {
+          setState(() {
+            _error = error;
+            _sourceDenied = true;
+          });
+        }
         _recovering = false;
         return;
       }
@@ -250,12 +260,12 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
     final qualityParam = newQuality.contains('1080p')
         ? '1080p'
         : newQuality.contains('720p')
-            ? '720p'
-            : newQuality.contains('480p')
-                ? '480p'
-                : newQuality.contains('360p')
-                    ? '360p'
-                    : 'auto';
+        ? '720p'
+        : newQuality.contains('480p')
+        ? '480p'
+        : newQuality.contains('360p')
+        ? '360p'
+        : 'auto';
 
     final queryParams = Map<String, String>.from(baseUri.queryParameters)
       ..['quality'] = qualityParam
@@ -270,7 +280,10 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
       'User-Agent':
           'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     };
-    final newC = VideoPlayerController.networkUrl(qualityUri, httpHeaders: headers);
+    final newC = VideoPlayerController.networkUrl(
+      qualityUri,
+      httpHeaders: headers,
+    );
     _controller = newC;
     newC.addListener(_onControllerChanged);
 
@@ -375,15 +388,25 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
     final c = _controller;
 
     if (_error != null) {
-      final embedUrl = _sourceDenied ? null : (_refreshedEmbed ?? widget.embedUrl);
+      final embedUrl = _sourceDenied
+          ? null
+          : (_refreshedEmbed ?? widget.embedUrl);
       if (embedUrl != null) {
-        return LearningVideoEmbedPlayer(url: embedUrl, title: widget.title,
-          initialPosition: _resume.position, initialVolume: _resume.volume,
-          initialSpeed: _resume.speed, initiallyPlaying: _resume.isPlaying);
+        return LearningVideoEmbedPlayer(
+          url: embedUrl,
+          title: widget.title,
+          initialPosition: _resume.position,
+          initialVolume: _resume.volume,
+          initialSpeed: _resume.speed,
+          initiallyPlaying: _resume.isPlaying,
+        );
       }
       final videoId = widget.videoId;
       if (videoId != null && !_sourceDenied && !_refreshAttempted) {
-        return LearningVideoEmbedFallback(videoId: videoId, title: widget.title);
+        return LearningVideoEmbedFallback(
+          videoId: videoId,
+          title: widget.title,
+        );
       }
       return AppErrorView(
         message: 'Không thể phát video. Vui lòng thử lại.',
@@ -424,7 +447,9 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
                 Positioned.fill(child: Container(color: Colors.black26)),
                 // top bar
                 Positioned(
-                  top: 0, left: 0, right: 0,
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   child: _TopBar(
                     title: widget.title,
                     onBack: () => Navigator.of(context).maybePop(),
@@ -440,7 +465,9 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
                 ),
                 // bottom bar
                 Positioned(
-                  bottom: 0, left: 0, right: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
                   child: _BottomBar(
                     position: position,
                     duration: duration,
@@ -569,7 +596,9 @@ class _NativeFullscreenPageState extends State<_NativeFullscreenPage> {
                 Positioned.fill(child: Container(color: Colors.black26)),
                 // top bar
                 Positioned(
-                  top: 0, left: 0, right: 0,
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   child: SafeArea(
                     child: _TopBar(
                       title: widget.title,
@@ -587,7 +616,9 @@ class _NativeFullscreenPageState extends State<_NativeFullscreenPage> {
                 ),
                 // bottom bar
                 Positioned(
-                  bottom: 0, left: 0, right: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
                   child: SafeArea(
                     child: _BottomBar(
                       position: position,
@@ -605,7 +636,7 @@ class _NativeFullscreenPageState extends State<_NativeFullscreenPage> {
                       onFullScreen: () => Navigator.of(context).pop(),
                       volume: v.volume,
                       onVolumeChanged: (vol) => c.setVolume(vol),
-                    onVolumeInteractionChanged: (open) => _volumeOpen = open,
+                      onVolumeInteractionChanged: (open) => _volumeOpen = open,
                     ),
                   ),
                 ),
@@ -625,8 +656,11 @@ class LearningVideoEmbedPlayer extends ConsumerStatefulWidget {
   const LearningVideoEmbedPlayer({
     required this.url,
     required this.title,
-    this.initialPosition = 0, this.initialVolume = 1,
-    this.initialSpeed = 1, this.initiallyPlaying = true, super.key,
+    this.initialPosition = 0,
+    this.initialVolume = 1,
+    this.initialSpeed = 1,
+    this.initiallyPlaying = true,
+    super.key,
   });
 
   final double initialPosition, initialVolume, initialSpeed;
@@ -672,9 +706,12 @@ class _LearningVideoEmbedPlayerState
             final map = jsonDecode(msg.message) as Map<String, dynamic>;
             final cur = _data.value;
             _data.value = cur.copyWith(
-              volume: (map['muted'] == true) ? 0 : ((map['volume'] as num?)?.toDouble() ?? cur.volume),
+              volume: (map['muted'] == true)
+                  ? 0
+                  : ((map['volume'] as num?)?.toDouble() ?? cur.volume),
               speed: (map['playbackRate'] as num?)?.toDouble() ?? cur.speed,
-              position: (map['currentTime'] as num?)?.toDouble() ?? cur.position,
+              position:
+                  (map['currentTime'] as num?)?.toDouble() ?? cur.position,
               duration: (map['duration'] as num?)?.toDouble() ?? cur.duration,
               isPlaying: map['paused'] != null
                   ? !(map['paused'] as bool)
@@ -683,9 +720,9 @@ class _LearningVideoEmbedPlayerState
           } catch (_) {}
         },
       )
-      ..setNavigationDelegate(NavigationDelegate(
-        onPageFinished: (_) => _injectJS(),
-      ))
+      ..setNavigationDelegate(
+        NavigationDelegate(onPageFinished: (_) => _injectJS()),
+      )
       ..loadRequest(
         _buildUri(widget.url),
         headers: const <String, String>{
@@ -706,7 +743,9 @@ class _LearningVideoEmbedPlayerState
   }
 
   void _injectJS() {
-    _wvc.runJavaScript('window.flutterInitial = ${jsonEncode({'position': widget.initialPosition, 'volume': widget.initialVolume, 'speed': widget.initialSpeed, 'playing': widget.initiallyPlaying})};');
+    _wvc.runJavaScript(
+      'window.flutterInitial = ${jsonEncode({'position': widget.initialPosition, 'volume': widget.initialVolume, 'speed': widget.initialSpeed, 'playing': widget.initiallyPlaying})};',
+    );
     _wvc.runJavaScript(r'''
 (function() {
   function injectStyle() {
@@ -978,9 +1017,13 @@ class _LearningVideoEmbedPlayerState
                   if (d.showControls)
                     Stack(
                       children: [
-                        Positioned.fill(child: Container(color: Colors.black26)),
+                        Positioned.fill(
+                          child: Container(color: Colors.black26),
+                        ),
                         Positioned(
-                          top: 0, left: 0, right: 0,
+                          top: 0,
+                          left: 0,
+                          right: 0,
                           child: SafeArea(
                             child: _TopBar(
                               title: widget.title,
@@ -996,7 +1039,9 @@ class _LearningVideoEmbedPlayerState
                           ),
                         ),
                         Positioned(
-                          bottom: 0, left: 0, right: 0,
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
                           child: SafeArea(
                             child: _BottomBar(
                               position: d.position,
@@ -1010,7 +1055,8 @@ class _LearningVideoEmbedPlayerState
                               onFullScreen: _closeFullScreen,
                               volume: d.volume,
                               onVolumeChanged: _setVolume,
-                              onVolumeInteractionChanged: (open) => _volumeOpen = open,
+                              onVolumeInteractionChanged: (open) =>
+                                  _volumeOpen = open,
                             ),
                           ),
                         ),
@@ -1081,7 +1127,9 @@ class _LearningVideoEmbedPlayerState
                     children: [
                       Positioned.fill(child: Container(color: Colors.black26)),
                       Positioned(
-                        top: 0, left: 0, right: 0,
+                        top: 0,
+                        left: 0,
+                        right: 0,
                         child: _TopBar(
                           title: widget.title,
                           onBack: () => Navigator.of(context).maybePop(),
@@ -1095,7 +1143,9 @@ class _LearningVideoEmbedPlayerState
                         ),
                       ),
                       Positioned(
-                        bottom: 0, left: 0, right: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
                         child: _BottomBar(
                           position: d.position,
                           duration: d.duration,
@@ -1108,7 +1158,8 @@ class _LearningVideoEmbedPlayerState
                           onFullScreen: _openFullScreen,
                           volume: d.volume,
                           onVolumeChanged: _setVolume,
-                          onVolumeInteractionChanged: (open) => _volumeOpen = open,
+                          onVolumeInteractionChanged: (open) =>
+                              _volumeOpen = open,
                         ),
                       ),
                     ],
@@ -1155,8 +1206,7 @@ class _FullscreenGestureOverlay extends StatefulWidget {
       _FullscreenGestureOverlayState();
 }
 
-class _FullscreenGestureOverlayState
-    extends State<_FullscreenGestureOverlay> {
+class _FullscreenGestureOverlayState extends State<_FullscreenGestureOverlay> {
   double _brightness = 1.0;
   _GestureDragType _dragType = _GestureDragType.none;
   Offset _dragStartOffset = Offset.zero;
@@ -1195,8 +1245,10 @@ class _FullscreenGestureOverlayState
     if (_dragType == _GestureDragType.seek) {
       if (widget.duration > 0) {
         final deltaSecs = dx * 0.25;
-        _dragCurrentValue =
-            (_dragStartValue + deltaSecs).clamp(0.0, widget.duration);
+        _dragCurrentValue = (_dragStartValue + deltaSecs).clamp(
+          0.0,
+          widget.duration,
+        );
         setState(() {});
       }
     } else if (_dragType == _GestureDragType.volume) {
@@ -1275,8 +1327,9 @@ class _FullscreenGestureOverlayState
           Positioned.fill(
             child: IgnorePointer(
               child: ColoredBox(
-                color: Colors.black
-                    .withValues(alpha: (1.0 - _brightness).clamp(0.0, 0.85)),
+                color: Colors.black.withValues(
+                  alpha: (1.0 - _brightness).clamp(0.0, 0.85),
+                ),
               ),
             ),
           ),
@@ -1287,8 +1340,10 @@ class _FullscreenGestureOverlayState
               right: 0,
               child: Center(
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black87,
                     borderRadius: BorderRadius.circular(20),
@@ -1297,8 +1352,11 @@ class _FullscreenGestureOverlayState
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.fast_forward_rounded,
-                          color: Colors.amberAccent, size: 20),
+                      Icon(
+                        Icons.fast_forward_rounded,
+                        color: Colors.amberAccent,
+                        size: 20,
+                      ),
                       SizedBox(width: 8),
                       Text(
                         'Đang tua 2X',
@@ -1316,8 +1374,10 @@ class _FullscreenGestureOverlayState
           if (_dragType != _GestureDragType.none)
             Center(
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(16),
@@ -1360,8 +1420,8 @@ class _FullscreenGestureOverlayState
                         _dragCurrentValue == 0
                             ? Icons.volume_off_rounded
                             : _dragCurrentValue < 0.5
-                                ? Icons.volume_down_rounded
-                                : Icons.volume_up_rounded,
+                            ? Icons.volume_down_rounded
+                            : Icons.volume_up_rounded,
                         color: Colors.white,
                         size: 42,
                       ),
@@ -1426,7 +1486,11 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
             onPressed: onBack,
           ),
           const SizedBox(width: 4),
@@ -1435,7 +1499,11 @@ class _TopBar extends StatelessWidget {
               title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           IconButton(
@@ -1452,11 +1520,19 @@ class _TopBar extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.cast_connected_rounded, size: 36, color: Color(0xFF34D399)),
+                      const Icon(
+                        Icons.cast_connected_rounded,
+                        size: 36,
+                        color: Color(0xFF34D399),
+                      ),
                       const SizedBox(height: 12),
                       const Text(
                         'Phát ra thiết bị ngoài (AirPlay / Chromecast)',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
@@ -1472,9 +1548,14 @@ class _TopBar extends StatelessWidget {
                           onPressed: () => Navigator.of(ctx).pop(),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF0F5B38),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          child: const Text('Đóng', style: TextStyle(color: Colors.white)),
+                          child: const Text(
+                            'Đóng',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ],
@@ -1484,7 +1565,11 @@ class _TopBar extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.more_vert_rounded, color: Colors.white, size: 20),
+            icon: const Icon(
+              Icons.more_vert_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
             onPressed: () {
               showModalBottomSheet<void>(
                 context: context,
@@ -1500,18 +1585,37 @@ class _TopBar extends StatelessWidget {
                     children: [
                       const Text(
                         'Tùy chọn trình phát',
-                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       ListTile(
-                        leading: const Icon(Icons.speed_rounded, color: Color(0xFF34D399)),
-                        title: const Text('Tốc độ phát chuẩn (1.0x)', style: TextStyle(color: Colors.white)),
+                        leading: const Icon(
+                          Icons.speed_rounded,
+                          color: Color(0xFF34D399),
+                        ),
+                        title: const Text(
+                          'Tốc độ phát chuẩn (1.0x)',
+                          style: TextStyle(color: Colors.white),
+                        ),
                         onTap: () => Navigator.of(ctx).pop(),
                       ),
                       ListTile(
-                        leading: const Icon(Icons.repeat_rounded, color: Color(0xFF34D399)),
-                        title: const Text('Tự động phát bài tiếp theo', style: TextStyle(color: Colors.white)),
-                        trailing: const Icon(Icons.check_rounded, color: Color(0xFF34D399)),
+                        leading: const Icon(
+                          Icons.repeat_rounded,
+                          color: Color(0xFF34D399),
+                        ),
+                        title: const Text(
+                          'Tự động phát bài tiếp theo',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        trailing: const Icon(
+                          Icons.check_rounded,
+                          color: Color(0xFF34D399),
+                        ),
                         onTap: () => Navigator.of(ctx).pop(),
                       ),
                     ],
@@ -1575,10 +1679,26 @@ class _CaptionOverlay extends StatelessWidget {
 
   static List<_SubtitleCue> _getViAiCues(String title) => [
     _SubtitleCue(0, 5, '✨ Chào mừng bạn đến với bài học: "$title"'),
-    _SubtitleCue(5, 12, 'Hôm nay chúng ta sẽ tìm hiểu các kiến thức cốt lõi và hướng dẫn thực hành.'),
-    _SubtitleCue(12, 20, 'Hãy quan sát kỹ từng thao tác mẫu trên màn hình và làm theo.'),
-    _SubtitleCue(20, 32, 'Bạn có thể nhấn tạm dừng video bất cứ lúc nào để ghi chép nội dung.'),
-    _SubtitleCue(32, 45, 'Tiếp theo, chúng ta cùng đi vào các ví dụ thực tế và bài tập ứng dụng.'),
+    _SubtitleCue(
+      5,
+      12,
+      'Hôm nay chúng ta sẽ tìm hiểu các kiến thức cốt lõi và hướng dẫn thực hành.',
+    ),
+    _SubtitleCue(
+      12,
+      20,
+      'Hãy quan sát kỹ từng thao tác mẫu trên màn hình và làm theo.',
+    ),
+    _SubtitleCue(
+      20,
+      32,
+      'Bạn có thể nhấn tạm dừng video bất cứ lúc nào để ghi chép nội dung.',
+    ),
+    _SubtitleCue(
+      32,
+      45,
+      'Tiếp theo, chúng ta cùng đi vào các ví dụ thực tế và bài tập ứng dụng.',
+    ),
     _SubtitleCue(45, 9999, 'Chúc bạn hoàn thành bài học xuất sắc!'),
   ];
 
@@ -1586,15 +1706,31 @@ class _CaptionOverlay extends StatelessWidget {
     _SubtitleCue(0, 6, 'Bài học: "$title"'),
     _SubtitleCue(6, 14, 'Tổng quan lý thuyết và minh họa từng bước.'),
     _SubtitleCue(14, 25, 'Các nguyên tắc quan trọng cần ghi nhớ khi học.'),
-    _SubtitleCue(25, 40, 'Nội dung chi tiết sẽ được giải thích trong phần tiếp theo.'),
+    _SubtitleCue(
+      25,
+      40,
+      'Nội dung chi tiết sẽ được giải thích trong phần tiếp theo.',
+    ),
     _SubtitleCue(40, 9999, 'Cảm ơn bạn đã xem bài học.'),
   ];
 
   static List<_SubtitleCue> _getEnCues(String title) => [
     _SubtitleCue(0, 6, 'Lesson topic: "$title"'),
-    _SubtitleCue(6, 14, 'In this session, we explore key concepts and practical applications.'),
-    _SubtitleCue(14, 25, 'Feel free to pause and review any section at your own pace.'),
-    _SubtitleCue(25, 40, 'Now let us proceed to the step-by-step demonstration.'),
+    _SubtitleCue(
+      6,
+      14,
+      'In this session, we explore key concepts and practical applications.',
+    ),
+    _SubtitleCue(
+      14,
+      25,
+      'Feel free to pause and review any section at your own pace.',
+    ),
+    _SubtitleCue(
+      25,
+      40,
+      'Now let us proceed to the step-by-step demonstration.',
+    ),
     _SubtitleCue(40, 9999, 'Thank you for watching and happy learning!'),
   ];
 
@@ -1606,8 +1742,8 @@ class _CaptionOverlay extends StatelessWidget {
     final cues = isAi
         ? _getViAiCues(title)
         : subtitleMode == 'en'
-            ? _getEnCues(title)
-            : _getViCues(title);
+        ? _getEnCues(title)
+        : _getViCues(title);
 
     final activeCue = cues.firstWhere(
       (c) => position >= c.startSec && position < c.endSec,
@@ -1637,8 +1773,11 @@ class _CaptionOverlay extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.auto_awesome_rounded,
-                          color: Color(0xFF10B981), size: 11),
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        color: Color(0xFF10B981),
+                        size: 11,
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'Phụ đề tự động tạo (AI)',
@@ -1746,8 +1885,12 @@ class _BottomBar extends StatelessWidget {
                 child: SliderTheme(
                   data: SliderThemeData(
                     trackHeight: 3,
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 5,
+                    ),
+                    overlayShape: const RoundSliderOverlayShape(
+                      overlayRadius: 10,
+                    ),
                     activeTrackColor: AppColors.primary,
                     inactiveTrackColor: Colors.white30,
                     thumbColor: Colors.white,
@@ -1793,14 +1936,26 @@ class _BottomBar extends StatelessWidget {
                   initialValue: quality,
                   onSelected: onQualityChanged,
                   itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'Tự động (Auto)', child: Text('Tự động (Auto)')),
-                    PopupMenuItem(value: '1080p FHD', child: Text('1080p Full HD')),
+                    PopupMenuItem(
+                      value: 'Tự động (Auto)',
+                      child: Text('Tự động (Auto)'),
+                    ),
+                    PopupMenuItem(
+                      value: '1080p FHD',
+                      child: Text('1080p Full HD'),
+                    ),
                     PopupMenuItem(value: '720p HD', child: Text('720p HD')),
                     PopupMenuItem(value: '480p SD', child: Text('480p SD')),
-                    PopupMenuItem(value: '360p Data Saver', child: Text('360p Tiết kiệm')),
+                    PopupMenuItem(
+                      value: '360p Data Saver',
+                      child: Text('360p Tiết kiệm'),
+                    ),
                   ],
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white24,
                       borderRadius: BorderRadius.circular(4),
@@ -1808,7 +1963,11 @@ class _BottomBar extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.hd_rounded, color: Colors.white, size: 13),
+                        const Icon(
+                          Icons.hd_rounded,
+                          color: Colors.white,
+                          size: 13,
+                        ),
                         const SizedBox(width: 2),
                         Text(
                           quality.split(' ').first,
@@ -1833,21 +1992,32 @@ class _BottomBar extends StatelessWidget {
                       value: 'vi_ai',
                       child: Row(
                         children: [
-                          Icon(Icons.auto_awesome_rounded, color: Color(0xFF10B981), size: 16),
+                          Icon(
+                            Icons.auto_awesome_rounded,
+                            color: Color(0xFF10B981),
+                            size: 16,
+                          ),
                           SizedBox(width: 6),
                           Text('Tiếng Việt (Tự động - AI)'),
                         ],
                       ),
                     ),
-                    PopupMenuItem(value: 'vi', child: Text('Tiếng Việt (Chuẩn)')),
+                    PopupMenuItem(
+                      value: 'vi',
+                      child: Text('Tiếng Việt (Chuẩn)'),
+                    ),
                     PopupMenuItem(value: 'en', child: Text('English (Auto)')),
                     PopupMenuItem(value: 'off', child: Text('Tắt phụ đề')),
                   ],
                   child: Padding(
                     padding: const EdgeInsets.all(3),
                     child: Icon(
-                      selectedSubtitle == 'off' ? Icons.closed_caption_disabled_rounded : Icons.closed_caption_rounded,
-                      color: selectedSubtitle == 'vi_ai' ? const Color(0xFF10B981) : Colors.white,
+                      selectedSubtitle == 'off'
+                          ? Icons.closed_caption_disabled_rounded
+                          : Icons.closed_caption_rounded,
+                      color: selectedSubtitle == 'vi_ai'
+                          ? const Color(0xFF10B981)
+                          : Colors.white,
                       size: 18,
                     ),
                   ),
@@ -1872,7 +2042,10 @@ class _BottomBar extends StatelessWidget {
                   PopupMenuItem(value: 2.0, child: Text('2.0x')),
                 ],
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white24,
                     borderRadius: BorderRadius.circular(4),
@@ -1892,7 +2065,9 @@ class _BottomBar extends StatelessWidget {
                 constraints: const BoxConstraints(),
                 padding: const EdgeInsets.all(3),
                 icon: Icon(
-                  isFullScreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,
+                  isFullScreen
+                      ? Icons.fullscreen_exit_rounded
+                      : Icons.fullscreen_rounded,
                   color: Colors.white,
                   size: 20,
                 ),
@@ -1942,15 +2117,14 @@ class _VideoData {
     bool? showControls,
     double? speed,
     double? volume,
-  }) =>
-      _VideoData(
-        position: position ?? this.position,
-        duration: duration ?? this.duration,
-        isPlaying: isPlaying ?? this.isPlaying,
-        showControls: showControls ?? this.showControls,
-        speed: speed ?? this.speed,
-        volume: volume ?? this.volume,
-      );
+  }) => _VideoData(
+    position: position ?? this.position,
+    duration: duration ?? this.duration,
+    isPlaying: isPlaying ?? this.isPlaying,
+    showControls: showControls ?? this.showControls,
+    speed: speed ?? this.speed,
+    volume: volume ?? this.volume,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1979,10 +2153,17 @@ class LearningVideoEmbedFallback extends ConsumerWidget {
         final direct = Uri.tryParse(source['playbackUrl']?.toString() ?? '');
         final embed = Uri.tryParse(source['embedUrl']?.toString() ?? '');
         if (direct != null && _isSupportedNetworkUrl(direct)) {
-          return LearningMediaPlayer(url: direct, title: title, duration: 0,
-            embedUrl: embed, videoId: videoId);
+          return LearningMediaPlayer(
+            url: direct,
+            title: title,
+            duration: 0,
+            embedUrl: embed,
+            videoId: videoId,
+          );
         }
-        if (embed == null || !_isSupportedNetworkUrl(embed)) return const _InvalidMediaUrlCard();
+        if (embed == null || !_isSupportedNetworkUrl(embed)) {
+          return const _InvalidMediaUrlCard();
+        }
         return LearningVideoEmbedPlayer(url: embed, title: title);
       },
     );
@@ -2003,7 +2184,9 @@ class _InvalidMediaUrlCard extends StatelessWidget {
           Icon(Icons.error_outline_rounded),
           SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text('Video chưa có đường dẫn phát hợp lệ. Vui lòng quay lại sau.'),
+            child: Text(
+              'Video chưa có đường dẫn phát hợp lệ. Vui lòng quay lại sau.',
+            ),
           ),
         ],
       ),

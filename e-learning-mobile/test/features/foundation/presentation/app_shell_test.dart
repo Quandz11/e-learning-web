@@ -78,31 +78,27 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(
-      find.text('Hồ sơ của tôi'),
-      findsOneWidget,
-    );
+    expect(find.text('Hồ sơ của tôi'), findsOneWidget);
   });
 
-  testWidgets(
-    'shell renders bottom navigation with five destinations',
-    (tester) async {
-      final harness = _buildHarness(
-        sessionState: SessionState.authenticated(_session()),
-      );
-      addTearDown(harness.container.dispose);
+  testWidgets('shell renders bottom navigation with five destinations', (
+    tester,
+  ) async {
+    final harness = _buildHarness(
+      sessionState: SessionState.authenticated(_session()),
+    );
+    addTearDown(harness.container.dispose);
 
-      await tester.pumpWidget(harness.app);
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(harness.app);
+    await tester.pumpAndSettle();
 
-      expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
-      expect(find.text('Trang chủ'), findsWidgets);
-      expect(find.text('Khóa học'), findsWidgets);
-      expect(find.text('Tư vấn'), findsWidgets);
-      expect(find.text('Lối sống'), findsWidgets);
-      expect(find.text('Hồ sơ'), findsWidgets);
-    },
-  );
+    expect(find.byKey(AppShell.navigationBarKey), findsOneWidget);
+    expect(find.text('Trang chủ'), findsWidgets);
+    expect(find.text('Khóa học'), findsWidgets);
+    expect(find.text('Tư vấn'), findsWidgets);
+    expect(find.text('Lối sống'), findsWidgets);
+    expect(find.text('Hồ sơ'), findsWidgets);
+  });
 
   testWidgets('selected destination matches current route', (tester) async {
     final harness = _buildHarness(
@@ -160,10 +156,7 @@ void main() {
 
     await tester.tap(find.text('Hồ sơ').last);
     await tester.pumpAndSettle();
-    expect(
-      find.text('Hồ sơ của tôi'),
-      findsOneWidget,
-    );
+    expect(find.text('Hồ sơ của tôi'), findsOneWidget);
   });
 
   testWidgets('shell remains visible across destination changes', (
@@ -353,10 +346,7 @@ void main() {
     harness.router.go(AppRoutes.appProfile);
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Hồ sơ của tôi'),
-      findsOneWidget,
-    );
+    expect(find.text('Hồ sơ của tôi'), findsOneWidget);
   });
 }
 

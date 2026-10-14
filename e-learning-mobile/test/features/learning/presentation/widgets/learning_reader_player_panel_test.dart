@@ -99,7 +99,9 @@ void main() {
         child: MaterialApp(
           theme: AppTheme.light(),
           home: Scaffold(
-            body: DocumentReaderPanel(part: fakeDocumentPart(documentUrl: null)),
+            body: DocumentReaderPanel(
+              part: fakeDocumentPart(documentUrl: null),
+            ),
           ),
         ),
       ),

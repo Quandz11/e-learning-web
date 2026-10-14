@@ -12,7 +12,10 @@ class ArticlesApi {
 
   final ApiClient _apiClient;
 
-  Future<List<ArticleSummary>> getArticles({int page = 1, int pageSize = 20}) async {
+  Future<List<ArticleSummary>> getArticles({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
     final res = await _apiClient.get<Map<String, dynamic>>(
       '/articles',
       queryParameters: {'page': page, 'pageSize': pageSize},

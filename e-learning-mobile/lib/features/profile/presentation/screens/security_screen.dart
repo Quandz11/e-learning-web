@@ -54,10 +54,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             child: ListTile(
               leading: Container(
@@ -105,10 +102,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             child: Row(
               children: [
@@ -117,8 +111,12 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
                   height: 36,
                   decoration: BoxDecoration(
                     color: isEnabled
-                        ? (context.isDark ? const Color(0xFF143823) : const Color(0xFFF0FDF4))
-                        : (context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF8FAFC)),
+                        ? (context.isDark
+                              ? const Color(0xFF143823)
+                              : const Color(0xFFF0FDF4))
+                        : (context.isDark
+                              ? context.colorScheme.surfaceContainerHighest
+                              : const Color(0xFFF8FAFC)),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -310,7 +308,8 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
           const SizedBox(height: AppSpacing.xl),
           const AppSectionHeader(
             title: 'Xóa tài khoản',
-            subtitle: 'Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu học tập của bạn.',
+            subtitle:
+                'Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu học tập của bạn.',
           ),
           const SizedBox(height: AppSpacing.md),
           AppCard(
@@ -349,7 +348,10 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
     );
   }
 
-  Future<void> _confirmDeleteAccount(BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmDeleteAccount(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -364,7 +366,9 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
             child: const Text('Hủy'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Xóa vĩnh viễn'),
           ),

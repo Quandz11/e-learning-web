@@ -92,7 +92,9 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaler: MediaQuery.of(context).textScaler.clamp(maxScaleFactor: 1.0),
+            textScaler: MediaQuery.of(
+              context,
+            ).textScaler.clamp(maxScaleFactor: 1.0),
           ),
           child: child ?? const SizedBox.shrink(),
         );
@@ -209,11 +211,17 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                       size: 16,
                       color: selected
                           ? Colors.white
-                          : (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38)),
+                          : (isDark
+                                ? const Color(0xFF34D399)
+                                : const Color(0xFF0F5B38)),
                     ),
                     selected: selected,
-                    selectedColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
-                    backgroundColor: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
+                    selectedColor: isDark
+                        ? const Color(0xFF108A55)
+                        : const Color(0xFF0F5B38),
+                    backgroundColor: isDark
+                        ? colorScheme.surfaceContainerHighest
+                        : Colors.white,
                     labelStyle: TextStyle(
                       color: selected ? Colors.white : context.textPrimary(),
                       fontWeight: selected ? FontWeight.w500 : FontWeight.w300,
@@ -223,7 +231,9 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
                         color: selected
-                            ? (isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38))
+                            ? (isDark
+                                  ? const Color(0xFF108A55)
+                                  : const Color(0xFF0F5B38))
                             : context.cardBorder(),
                         width: 0.8,
                       ),
@@ -257,12 +267,12 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                 decoration: BoxDecoration(
                   color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(
-                    color: context.cardBorder(),
-                    width: 0.8,
-                  ),
+                  border: Border.all(color: context.cardBorder(), width: 0.8),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 4,
+                ),
                 child: TextFormField(
                   controller: _titleController,
                   style: TextStyle(
@@ -303,12 +313,12 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                 decoration: BoxDecoration(
                   color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(
-                    color: context.cardBorder(),
-                    width: 0.8,
-                  ),
+                  border: Border.all(color: context.cardBorder(), width: 0.8),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 4,
+                ),
                 child: TextFormField(
                   controller: _messageController,
                   style: TextStyle(
@@ -371,7 +381,9 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                             Icon(
                               Icons.access_time_rounded,
                               size: 16,
-                              color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                              color: isDark
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFF0F5B38),
                             ),
                           ],
                         ),
@@ -409,7 +421,9 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                             Icon(
                               Icons.access_time_rounded,
                               size: 16,
-                              color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                              color: isDark
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFF0F5B38),
                             ),
                           ],
                         ),
@@ -425,10 +439,7 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                 decoration: BoxDecoration(
                   color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(
-                    color: context.cardBorder(),
-                    width: 0.8,
-                  ),
+                  border: Border.all(color: context.cardBorder(), width: 0.8),
                 ),
                 child: Column(
                   children: [
@@ -442,7 +453,9 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                         ),
                       ),
                       value: _soundEnabled,
-                      activeThumbColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                      activeThumbColor: isDark
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFF0F5B38),
                       onChanged: (val) => setState(() => _soundEnabled = val),
                     ),
                     Divider(
@@ -460,8 +473,11 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                         ),
                       ),
                       value: _vibrationEnabled,
-                      activeThumbColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
-                      onChanged: (val) => setState(() => _vibrationEnabled = val),
+                      activeThumbColor: isDark
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFF0F5B38),
+                      onChanged: (val) =>
+                          setState(() => _vibrationEnabled = val),
                     ),
                   ],
                 ),
@@ -475,7 +491,9 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                 child: ElevatedButton(
                   onPressed: _save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
+                    backgroundColor: isDark
+                        ? const Color(0xFF108A55)
+                        : const Color(0xFF0F5B38),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -499,4 +517,3 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
     );
   }
 }
-

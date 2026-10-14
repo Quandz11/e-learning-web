@@ -52,10 +52,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             child: Row(
               children: [
@@ -63,12 +60,16 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF5F3FF),
+                    color: context.isDark
+                        ? context.colorScheme.surfaceContainerHighest
+                        : const Color(0xFFF5F3FF),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.lock_reset_rounded,
-                    color: context.isDark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED),
+                    color: context.isDark
+                        ? const Color(0xFFA78BFA)
+                        : const Color(0xFF7C3AED),
                     size: 20,
                   ),
                 ),

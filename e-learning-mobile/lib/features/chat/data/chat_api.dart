@@ -14,21 +14,33 @@ class ChatApi {
 
   Future<SupportUser?> getSupportUser() async {
     try {
-      final res = await _apiClient.get<Map<String, dynamic>>('/chat/support-user');
+      final res = await _apiClient.get<Map<String, dynamic>>(
+        '/chat/support-user',
+      );
       return SupportUser.fromJson(res);
     } catch (_) {
       return null;
     }
   }
 
-  Future<List<ChatConversation>> getConversations({String? currentUserId}) async {
+  Future<List<ChatConversation>> getConversations({
+    String? currentUserId,
+  }) async {
     final res = await _apiClient.get<List<dynamic>>('/chat/conversations');
     return res
-        .map((e) => ChatConversation.fromJson(e as Map<String, dynamic>, currentUserId: currentUserId))
+        .map(
+          (e) => ChatConversation.fromJson(
+            e as Map<String, dynamic>,
+            currentUserId: currentUserId,
+          ),
+        )
         .toList();
   }
 
-  Future<ChatConversation> createConversation(String recipientId, {String? currentUserId}) async {
+  Future<ChatConversation> createConversation(
+    String recipientId, {
+    String? currentUserId,
+  }) async {
     final res = await _apiClient.post<Map<String, dynamic>>(
       '/chat/conversations',
       data: {'recipientId': recipientId},
@@ -36,10 +48,20 @@ class ChatApi {
     return ChatConversation.fromJson(res, currentUserId: currentUserId);
   }
 
-  Future<List<ChatMessage>> getMessages(String conversationId, {String? currentUserId}) async {
-    final res = await _apiClient.get<List<dynamic>>('/chat/conversations/$conversationId/messages');
+  Future<List<ChatMessage>> getMessages(
+    String conversationId, {
+    String? currentUserId,
+  }) async {
+    final res = await _apiClient.get<List<dynamic>>(
+      '/chat/conversations/$conversationId/messages',
+    );
     return res
-        .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>, currentUserId: currentUserId))
+        .map(
+          (e) => ChatMessage.fromJson(
+            e as Map<String, dynamic>,
+            currentUserId: currentUserId,
+          ),
+        )
         .toList();
   }
 
@@ -65,16 +87,27 @@ class ChatApi {
   }
 
   Future<AdminConversationsResponse> getAdminConversations() async {
-    final res = await _apiClient.get<Map<String, dynamic>>('/admin/chat/conversations');
+    final res = await _apiClient.get<Map<String, dynamic>>(
+      '/admin/chat/conversations',
+    );
     return AdminConversationsResponse.fromJson(res);
   }
 
   Future<List<ChatMessage>> getAdminGuestMessages(String guestId) async {
-    final res = await _apiClient.get<List<dynamic>>('/admin/chat/guest/$guestId/messages');
-    return res.map((e) => ChatMessage.fromGuestJson(e as Map<String, dynamic>, guestId)).toList();
+    final res = await _apiClient.get<List<dynamic>>(
+      '/admin/chat/guest/$guestId/messages',
+    );
+    return res
+        .map(
+          (e) => ChatMessage.fromGuestJson(e as Map<String, dynamic>, guestId),
+        )
+        .toList();
   }
 
-  Future<ChatMessage> sendAdminGuestMessage(String guestId, String content) async {
+  Future<ChatMessage> sendAdminGuestMessage(
+    String guestId,
+    String content,
+  ) async {
     final res = await _apiClient.post<Map<String, dynamic>>(
       '/admin/chat/guest/$guestId/send',
       data: {'content': content},

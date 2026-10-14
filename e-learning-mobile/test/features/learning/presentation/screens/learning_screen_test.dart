@@ -237,7 +237,7 @@ void main() {
     await tester.pumpWidget(harness.app);
     await tester.pumpAndSettle();
 
-    await tester.fling(find.byType(ListView), const Offset(0, 300), 1000);
+    await tester.fling(find.byType(ListView).first, const Offset(0, 300), 1000);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 

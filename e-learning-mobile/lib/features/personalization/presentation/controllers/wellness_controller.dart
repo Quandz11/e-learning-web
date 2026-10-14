@@ -59,9 +59,9 @@ class WellnessState {
 
 final wellnessControllerProvider =
     StateNotifierProvider<WellnessController, WellnessState>((ref) {
-  final api = ref.watch(wellnessApiProvider);
-  return WellnessController(api);
-});
+      final api = ref.watch(wellnessApiProvider);
+      return WellnessController(api);
+    });
 
 class WellnessController extends StateNotifier<WellnessState> {
   WellnessController(this._api) : super(const WellnessState());
@@ -86,14 +86,8 @@ class WellnessController extends StateNotifier<WellnessState> {
     } catch (e) {
       final failure = e is AppFailure
           ? e
-          : AppFailure(
-              type: AppFailureType.unknown,
-              message: e.toString(),
-            );
-      state = state.copyWith(
-        status: WellnessStatus.failure,
-        failure: failure,
-      );
+          : AppFailure(type: AppFailureType.unknown, message: e.toString());
+      state = state.copyWith(status: WellnessStatus.failure, failure: failure);
     }
   }
 
@@ -106,8 +100,8 @@ class WellnessController extends StateNotifier<WellnessState> {
     final plan = dash?.plan;
     if (dash == null || plan == null) return;
 
-    final currentLog = dash.todayLog ??
-        WellnessDailyLog(logDate: DateTime.now(), waterMl: 0);
+    final currentLog =
+        dash.todayLog ?? WellnessDailyLog(logDate: DateTime.now(), waterMl: 0);
     final newWater = (currentLog.waterMl + deltaMl).clamp(0, 10000);
 
     // Optimistic update
@@ -153,7 +147,8 @@ class WellnessController extends StateNotifier<WellnessState> {
     final plan = dash?.plan;
     if (dash == null || plan == null) return;
 
-    final currentLog = dash.todayLog ?? WellnessDailyLog(logDate: DateTime.now());
+    final currentLog =
+        dash.todayLog ?? WellnessDailyLog(logDate: DateTime.now());
     state = state.copyWith(isSubmittingLog: true);
 
     try {
@@ -184,7 +179,8 @@ class WellnessController extends StateNotifier<WellnessState> {
     final plan = dash?.plan;
     if (dash == null || plan == null) return;
 
-    final currentLog = dash.todayLog ?? WellnessDailyLog(logDate: DateTime.now());
+    final currentLog =
+        dash.todayLog ?? WellnessDailyLog(logDate: DateTime.now());
     state = state.copyWith(isSubmittingLog: true);
 
     try {
@@ -207,7 +203,8 @@ class WellnessController extends StateNotifier<WellnessState> {
           weightProgress: weightProgress,
         ),
         isSubmittingLog: false,
-        actionMessage: 'Đã cập nhật cân nặng: ${weightKg.toStringAsFixed(1)} kg',
+        actionMessage:
+            'Đã cập nhật cân nặng: ${weightKg.toStringAsFixed(1)} kg',
       );
     } catch (e) {
       state = state.copyWith(isSubmittingLog: false);
@@ -231,9 +228,7 @@ class WellnessController extends StateNotifier<WellnessState> {
       isCompleted: nextStatus,
       completedAt: nextStatus ? DateTime.now() : null,
     );
-    state = state.copyWith(
-      dashboard: dash.copyWith(todayTasks: tasks),
-    );
+    state = state.copyWith(dashboard: dash.copyWith(todayTasks: tasks));
 
     try {
       final updatedTask = await _api.completeTask(plan.id, taskId);
@@ -252,10 +247,7 @@ class WellnessController extends StateNotifier<WellnessState> {
     state = state.copyWith(isCoachLoading: true);
     try {
       final reply = await _api.askMoodCoach(plan.id, request);
-      state = state.copyWith(
-        isCoachLoading: false,
-        lastCoachReply: reply,
-      );
+      state = state.copyWith(isCoachLoading: false, lastCoachReply: reply);
     } catch (e) {
       state = state.copyWith(isCoachLoading: false);
     }
@@ -269,10 +261,7 @@ class WellnessController extends StateNotifier<WellnessState> {
     state = state.copyWith(isCoachLoading: true);
     try {
       final meal = await _api.generateMeal(plan.id, request);
-      state = state.copyWith(
-        isCoachLoading: false,
-        lastMealSuggestion: meal,
-      );
+      state = state.copyWith(isCoachLoading: false, lastMealSuggestion: meal);
     } catch (e) {
       state = state.copyWith(isCoachLoading: false);
     }
@@ -286,14 +275,8 @@ class WellnessController extends StateNotifier<WellnessState> {
     } catch (e) {
       final failure = e is AppFailure
           ? e
-          : AppFailure(
-              type: AppFailureType.unknown,
-              message: e.toString(),
-            );
-      state = state.copyWith(
-        status: WellnessStatus.failure,
-        failure: failure,
-      );
+          : AppFailure(type: AppFailureType.unknown, message: e.toString());
+      state = state.copyWith(status: WellnessStatus.failure, failure: failure);
     }
   }
 
@@ -308,14 +291,8 @@ class WellnessController extends StateNotifier<WellnessState> {
     } catch (e) {
       final failure = e is AppFailure
           ? e
-          : AppFailure(
-              type: AppFailureType.unknown,
-              message: e.toString(),
-            );
-      state = state.copyWith(
-        status: WellnessStatus.failure,
-        failure: failure,
-      );
+          : AppFailure(type: AppFailureType.unknown, message: e.toString());
+      state = state.copyWith(status: WellnessStatus.failure, failure: failure);
     }
   }
 

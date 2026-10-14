@@ -17,8 +17,8 @@ class WellnessApi {
   WellnessApi({
     required ApiClient apiClient,
     required DioErrorMapper errorMapper,
-  })  : _apiClient = apiClient,
-        _errorMapper = errorMapper;
+  }) : _apiClient = apiClient,
+       _errorMapper = errorMapper;
 
   final ApiClient _apiClient;
   final DioErrorMapper _errorMapper;

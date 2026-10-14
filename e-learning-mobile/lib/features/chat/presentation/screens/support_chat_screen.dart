@@ -44,7 +44,8 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(profileControllerProvider).profile;
     final role = profile?.role.toUpperCase() ?? '';
-    final isAdmin = role == 'ADMIN' ||
+    final isAdmin =
+        role == 'ADMIN' ||
         role == 'CARE' ||
         role == 'STAFF' ||
         role.contains('ADMIN') ||
@@ -52,17 +53,25 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
 
     final uri = GoRouterState.of(context).uri;
     final queryConvId = uri.queryParameters['conversationId'];
-    if (isAdmin && queryConvId != null && queryConvId.isNotEmpty && _selectedConversation == null) {
+    if (isAdmin &&
+        queryConvId != null &&
+        queryConvId.isNotEmpty &&
+        _selectedConversation == null) {
       final adminListState = ref.watch(adminChatListControllerProvider);
-      final found = [...adminListState.authenticatedConversations, ...adminListState.guestConversations]
-          .firstWhere((c) => c.id == queryConvId || c.guestId == queryConvId,
-              orElse: () => AdminConversationItem(
-                id: queryConvId,
-                type: 'authenticated',
-                userName: 'Cuộc trò chuyện',
-                unreadCount: 0,
-                isActive: true,
-              ));
+      final found =
+          [
+            ...adminListState.authenticatedConversations,
+            ...adminListState.guestConversations,
+          ].firstWhere(
+            (c) => c.id == queryConvId || c.guestId == queryConvId,
+            orElse: () => AdminConversationItem(
+              id: queryConvId,
+              type: 'authenticated',
+              userName: 'Cuộc trò chuyện',
+              unreadCount: 0,
+              isActive: true,
+            ),
+          );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _selectedConversation == null) {
           setState(() {
@@ -106,11 +115,17 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
       return Scaffold(
         backgroundColor: isDark ? colorScheme.surface : const Color(0xFFFBFBFA),
         appBar: AppBar(
-          backgroundColor: isDark ? colorScheme.surface : const Color(0xFFFBFBFA),
+          backgroundColor: isDark
+              ? colorScheme.surface
+              : const Color(0xFFFBFBFA),
           elevation: 0,
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621)),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621),
+            ),
             onPressed: () {
               setState(() {
                 _selectedConversation = null;
@@ -123,17 +138,25 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: detailItem.type == 'guest' ? const Color(0xFFF3E8FF) : const Color(0xFFEBF5EE),
+                  color: detailItem.type == 'guest'
+                      ? const Color(0xFFF3E8FF)
+                      : const Color(0xFFEBF5EE),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: detailItem.type == 'guest' ? const Color(0xFFD8B4FE) : const Color(0xFFD4E8DC),
+                    color: detailItem.type == 'guest'
+                        ? const Color(0xFFD8B4FE)
+                        : const Color(0xFFD4E8DC),
                     width: 1,
                   ),
                 ),
                 child: Icon(
-                  detailItem.type == 'guest' ? Icons.person_outline_rounded : Icons.person_rounded,
+                  detailItem.type == 'guest'
+                      ? Icons.person_outline_rounded
+                      : Icons.person_rounded,
                   size: 20,
-                  color: detailItem.type == 'guest' ? const Color(0xFF7E22CE) : const Color(0xFF0F5B38),
+                  color: detailItem.type == 'guest'
+                      ? const Color(0xFF7E22CE)
+                      : const Color(0xFF0F5B38),
                 ),
               ),
               const SizedBox(width: 10),
@@ -148,16 +171,22 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621),
+                        color: isDark
+                            ? colorScheme.onSurface
+                            : const Color(0xFF1E2621),
                         letterSpacing: -0.3,
                       ),
                     ),
                     Text(
-                      detailItem.type == 'guest' ? 'Khách vãng lai' : 'Học viên chính thức',
+                      detailItem.type == 'guest'
+                          ? 'Khách vãng lai'
+                          : 'Học viên chính thức',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w300,
-                        color: detailItem.type == 'guest' ? const Color(0xFF7E22CE) : const Color(0xFF0F5B38),
+                        color: detailItem.type == 'guest'
+                            ? const Color(0xFF7E22CE)
+                            : const Color(0xFF0F5B38),
                       ),
                     ),
                   ],
@@ -173,46 +202,70 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                   ? const Center(
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F5B38)),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFF0F5B38),
+                        ),
                       ),
                     )
                   : state.error != null && state.messages.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.chat_bubble_outline_rounded, size: 40, color: Color(0xFFA5A9A5)),
-                              const SizedBox(height: 12),
-                              Text(
-                                state.error!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 13, color: Color(0xFF717873)),
-                              ),
-                              const SizedBox(height: 12),
-                              OutlinedButton(
-                                onPressed: () => notifier.load(),
-                                child: const Text('Thử lại'),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 40,
+                            color: Color(0xFFA5A9A5),
                           ),
-                        )
-                      : ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          itemCount: state.messages.length,
-                          itemBuilder: (context, index) {
-                            final msg = state.messages[index];
-                            return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                            _ChatBubble(message: msg),
-                            if (msg.delivery == 'sending') const Text('?ang g?i?'),
-                            if (msg.delivery == 'failed') TextButton(
-                              onPressed: state.isSending ? null : () => ref.read(chatControllerProvider.notifier)
-                                .sendMessage(msg.content, clientMessageId: msg.clientMessageId),
-                              child: const Text('G?i th?t b?i ? Th? l?i'),
+                          const SizedBox(height: 12),
+                          Text(
+                            state.error!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF717873),
                             ),
-                          ]);
-                          },
-                        ),
+                          ),
+                          const SizedBox(height: 12),
+                          OutlinedButton(
+                            onPressed: () => notifier.load(),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      itemCount: state.messages.length,
+                      itemBuilder: (context, index) {
+                        final msg = state.messages[index];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _ChatBubble(message: msg),
+                            if (msg.delivery == 'sending')
+                              const Text('?ang g?i?'),
+                            if (msg.delivery == 'failed')
+                              TextButton(
+                                onPressed: state.isSending
+                                    ? null
+                                    : () => ref
+                                          .read(chatControllerProvider.notifier)
+                                          .sendMessage(
+                                            msg.content,
+                                            clientMessageId:
+                                                msg.clientMessageId,
+                                          ),
+                                child: const Text('G?i th?t b?i ? Th? l?i'),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
             ),
             _buildInputBar(
               isSending: state.isSending,
@@ -246,7 +299,11 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621)),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621),
+          ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -283,7 +340,9 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621),
+                      color: isDark
+                          ? colorScheme.onSurface
+                          : const Color(0xFF1E2621),
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -310,90 +369,121 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                 ? const Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F5B38)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0F5B38),
+                      ),
                     ),
                   )
                 : state.error != null && state.messages.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 48,
+                            color: Color(0xFFA5A9A5),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            state.error!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF717873),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          OutlinedButton(
+                            onPressed: () => ref
+                                .read(chatControllerProvider.notifier)
+                                .load(),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    itemCount: state.messages.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        final isDark =
+                            Theme.of(context).brightness == Brightness.dark;
+                        final colorScheme = Theme.of(context).colorScheme;
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? colorScheme.surfaceContainerLow
+                                : const Color(0xFFF4F9F5),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark
+                                  ? colorScheme.outlineVariant
+                                  : const Color(0xFFD4E8DC),
+                            ),
+                          ),
+                          child: Row(
                             children: [
-                              const Icon(Icons.chat_bubble_outline_rounded, size: 48, color: Color(0xFFA5A9A5)),
-                              const SizedBox(height: 16),
-                              Text(
-                                state.error!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF717873),
-                                ),
+                              Icon(
+                                Icons.shield_outlined,
+                                size: 18,
+                                color: isDark
+                                    ? colorScheme.primary
+                                    : const Color(0xFF0F5B38),
                               ),
-                              const SizedBox(height: 16),
-                              OutlinedButton(
-                                onPressed: () => ref.read(chatControllerProvider.notifier).load(),
-                                child: const Text('Thử lại'),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Bạn đang trò chuyện trực tiếp với Ban Cố Vấn Sống Khỏe SKVI. Mọi thông tin đều được bảo mật tuyệt đối.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w300,
+                                    color: isDark
+                                        ? colorScheme.onSurface
+                                        : const Color(0xFF334036),
+                                    height: 1.4,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        itemCount: state.messages.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            final isDark = Theme.of(context).brightness == Brightness.dark;
-                            final colorScheme = Theme.of(context).colorScheme;
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: isDark ? colorScheme.surfaceContainerLow : const Color(0xFFF4F9F5),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isDark ? colorScheme.outlineVariant : const Color(0xFFD4E8DC),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.shield_outlined,
-                                    size: 18,
-                                    color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Bạn đang trò chuyện trực tiếp với Ban Cố Vấn Sống Khỏe SKVI. Mọi thông tin đều được bảo mật tuyệt đối.',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w300,
-                                        color: isDark ? colorScheme.onSurface : const Color(0xFF334036),
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
+                        );
+                      }
 
-                          final msg = state.messages[index - 1];
-                          return Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                            _ChatBubble(message: msg),
-                            if (msg.delivery == 'sending') const Text('?ang g?i?'),
-                            if (msg.delivery == 'failed') TextButton(
-                              onPressed: state.isSending ? null : () => ref.read(chatControllerProvider.notifier)
-                                .sendMessage(msg.content, clientMessageId: msg.clientMessageId),
+                      final msg = state.messages[index - 1];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _ChatBubble(message: msg),
+                          if (msg.delivery == 'sending')
+                            const Text('?ang g?i?'),
+                          if (msg.delivery == 'failed')
+                            TextButton(
+                              onPressed: state.isSending
+                                  ? null
+                                  : () => ref
+                                        .read(chatControllerProvider.notifier)
+                                        .sendMessage(
+                                          msg.content,
+                                          clientMessageId: msg.clientMessageId,
+                                        ),
                               child: const Text('G?i th?t b?i ? Th? l?i'),
                             ),
-                          ]);
-                        },
-                      ),
+                        ],
+                      );
+                    },
+                  ),
           ),
           _buildInputBar(
             isSending: state.isSending,
@@ -422,13 +512,17 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
         16,
         8,
         16,
-        8 + MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
+        8 +
+            MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom,
       ),
       decoration: BoxDecoration(
         color: isDark ? colorScheme.surfaceContainerLow : Colors.white,
         border: Border(
           top: BorderSide(
-            color: isDark ? colorScheme.outlineVariant : const Color(0xFFE9EBEA),
+            color: isDark
+                ? colorScheme.outlineVariant
+                : const Color(0xFFE9EBEA),
             width: 1,
           ),
         ),
@@ -438,7 +532,9 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF4F6F5),
+                color: isDark
+                    ? colorScheme.surfaceContainerHighest
+                    : const Color(0xFFF4F6F5),
                 borderRadius: BorderRadius.circular(24),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -446,7 +542,9 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                 controller: _textController,
                 style: TextStyle(
                   fontSize: 14,
-                  color: isDark ? colorScheme.onSurface : const Color(0xFF1E2621),
+                  color: isDark
+                      ? colorScheme.onSurface
+                      : const Color(0xFF1E2621),
                 ),
                 maxLines: 4,
                 minLines: 1,
@@ -457,7 +555,9 @@ class _SupportChatScreenState extends ConsumerState<SupportChatScreen> {
                   hintStyle: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w300,
-                    color: isDark ? colorScheme.onSurfaceVariant : const Color(0xFFA5A9A5),
+                    color: isDark
+                        ? colorScheme.onSurfaceVariant
+                        : const Color(0xFFA5A9A5),
                   ),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -542,8 +642,9 @@ class _ChatBubble extends StatelessWidget {
                 ],
         ),
         child: Column(
-          crossAxisAlignment:
-              message.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: message.isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             if (!message.isMe && message.senderName.isNotEmpty)
               Padding(
@@ -553,7 +654,9 @@ class _ChatBubble extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? colorScheme.onPrimaryContainer : const Color(0xFF0F5B38),
+                    color: isDark
+                        ? colorScheme.onPrimaryContainer
+                        : const Color(0xFF0F5B38),
                   ),
                 ),
               ),
@@ -564,7 +667,9 @@ class _ChatBubble extends StatelessWidget {
                 height: 1.4,
                 color: message.isMe
                     ? Colors.white
-                    : (isDark ? colorScheme.onSurface : const Color(0xFF1E2621)),
+                    : (isDark
+                          ? colorScheme.onSurface
+                          : const Color(0xFF1E2621)),
                 fontWeight: FontWeight.w300,
               ),
             ),
@@ -575,7 +680,9 @@ class _ChatBubble extends StatelessWidget {
                 fontSize: 10,
                 color: message.isMe
                     ? Colors.white.withValues(alpha: 0.7)
-                    : (isDark ? colorScheme.onSurfaceVariant : const Color(0xFFA5A9A5)),
+                    : (isDark
+                          ? colorScheme.onSurfaceVariant
+                          : const Color(0xFFA5A9A5)),
               ),
             ),
           ],

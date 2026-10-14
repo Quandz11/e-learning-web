@@ -32,7 +32,8 @@ class NotificationTapEvent {
 
   factory NotificationTapEvent.fromData(Map<String, dynamic> data) {
     final type = data['type']?.toString().toLowerCase() ?? '';
-    final convId = data['conversationId']?.toString() ?? data['guestId']?.toString();
+    final convId =
+        data['conversationId']?.toString() ?? data['guestId']?.toString();
     final route = data['targetRoute']?.toString() ?? data['route']?.toString();
 
     if (type == 'chat' || convId != null) {
@@ -131,17 +132,25 @@ class NotificationService {
         if (response.payload != null && response.payload!.isNotEmpty) {
           try {
             final map = jsonDecode(response.payload!) as Map<String, dynamic>;
-            _onNotificationTapController.add(NotificationTapEvent.fromData(map));
+            _onNotificationTapController.add(
+              NotificationTapEvent.fromData(map),
+            );
           } catch (_) {
             final payloadStr = response.payload!;
             if (payloadStr.contains('chat')) {
-              _onNotificationTapController.add(const NotificationTapEvent(type: 'chat'));
+              _onNotificationTapController.add(
+                const NotificationTapEvent(type: 'chat'),
+              );
             } else {
-              _onNotificationTapController.add(const NotificationTapEvent(type: 'notification'));
+              _onNotificationTapController.add(
+                const NotificationTapEvent(type: 'notification'),
+              );
             }
           }
         } else {
-          _onNotificationTapController.add(const NotificationTapEvent(type: 'notification'));
+          _onNotificationTapController.add(
+            const NotificationTapEvent(type: 'notification'),
+          );
         }
       },
     );
@@ -347,7 +356,9 @@ class NotificationService {
   }) async {
     await initialize();
 
-    final percent = targetMinutes > 0 ? ((learnedMinutes / targetMinutes) * 100).toInt() : 100;
+    final percent = targetMinutes > 0
+        ? ((learnedMinutes / targetMinutes) * 100).toInt()
+        : 100;
 
     final androidDetails = AndroidNotificationDetails(
       channelId,
@@ -440,7 +451,9 @@ class NotificationService {
         messaging.getInitialMessage().then((RemoteMessage? message) {
           if (message != null) {
             _onMessageController.add(message);
-            _onNotificationTapController.add(NotificationTapEvent.fromRemoteMessage(message));
+            _onNotificationTapController.add(
+              NotificationTapEvent.fromRemoteMessage(message),
+            );
           }
         });
 
@@ -448,12 +461,15 @@ class NotificationService {
           final notification = message.notification;
           final isChat = message.data['type'] == 'chat';
           final dataMap = Map<String, dynamic>.from(message.data);
-          dataMap['type'] = message.data['type'] ?? (isChat ? 'chat' : 'notification');
+          dataMap['type'] =
+              message.data['type'] ?? (isChat ? 'chat' : 'notification');
 
           if (notification != null) {
             showImmediateNotification(
               id: message.hashCode,
-              title: notification.title ?? (isChat ? 'Tin nhắn mới' : 'Thông báo mới'),
+              title:
+                  notification.title ??
+                  (isChat ? 'Tin nhắn mới' : 'Thông báo mới'),
               body: notification.body ?? '',
               payload: jsonEncode(dataMap),
               isChat: isChat,
@@ -464,7 +480,9 @@ class NotificationService {
 
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
           _onMessageController.add(message);
-          _onNotificationTapController.add(NotificationTapEvent.fromRemoteMessage(message));
+          _onNotificationTapController.add(
+            NotificationTapEvent.fromRemoteMessage(message),
+          );
         });
       }
     } catch (e) {

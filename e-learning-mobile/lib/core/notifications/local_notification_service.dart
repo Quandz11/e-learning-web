@@ -8,7 +8,8 @@ class LocalNotificationService {
 
   static final LocalNotificationService instance = LocalNotificationService._();
 
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
@@ -18,7 +19,9 @@ class LocalNotificationService {
 
     tz.initializeTimeZones();
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -34,7 +37,9 @@ class LocalNotificationService {
       await _plugin.initialize(
         initSettings,
         onDidReceiveNotificationResponse: (details) {
-          debugPrint('🔔 [LocalNotificationService] Notification tapped: ${details.payload}');
+          debugPrint(
+            '🔔 [LocalNotificationService] Notification tapped: ${details.payload}',
+          );
         },
       );
 
@@ -42,12 +47,15 @@ class LocalNotificationService {
       const androidChannel = AndroidNotificationChannel(
         'wellness_reminders_channel',
         'Nhắc nhở Sức khỏe & Học tập',
-        description: 'Thông báo hẹn giờ uống nước, nhịn ăn và duy trì chuỗi học tập',
+        description:
+            'Thông báo hẹn giờ uống nước, nhịn ăn và duy trì chuỗi học tập',
         importance: Importance.high,
       );
 
       await _plugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.createNotificationChannel(androidChannel);
 
       _isInitialized = true;
@@ -68,7 +76,8 @@ class LocalNotificationService {
     const androidDetails = AndroidNotificationDetails(
       'wellness_reminders_channel',
       'Nhắc nhở Sức khỏe & Học tập',
-      channelDescription: 'Thông báo hẹn giờ uống nước, nhịn ăn và duy trì chuỗi học tập',
+      channelDescription:
+          'Thông báo hẹn giờ uống nước, nhịn ăn và duy trì chuỗi học tập',
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
@@ -87,9 +96,13 @@ class LocalNotificationService {
 
     try {
       await _plugin.show(id, title, body, details, payload: payload);
-      debugPrint('🔔 [LocalNotificationService] Displayed immediate notification #$id');
+      debugPrint(
+        '🔔 [LocalNotificationService] Displayed immediate notification #$id',
+      );
     } catch (e) {
-      debugPrint('⚠️ [LocalNotificationService] Failed to show notification: $e');
+      debugPrint(
+        '⚠️ [LocalNotificationService] Failed to show notification: $e',
+      );
     }
   }
 
@@ -106,7 +119,8 @@ class LocalNotificationService {
     const androidDetails = AndroidNotificationDetails(
       'wellness_reminders_channel',
       'Nhắc nhở Sức khỏe & Học tập',
-      channelDescription: 'Thông báo hẹn giờ uống nước, nhịn ăn và duy trì chuỗi học tập',
+      channelDescription:
+          'Thông báo hẹn giờ uống nước, nhịn ăn và duy trì chuỗi học tập',
       importance: Importance.high,
       priority: Priority.high,
     );
@@ -153,7 +167,9 @@ class LocalNotificationService {
         '⏰ [LocalNotificationService] Scheduled daily notification #$id at ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}',
       );
     } catch (e) {
-      debugPrint('⚠️ [LocalNotificationService] Failed to schedule notification: $e');
+      debugPrint(
+        '⚠️ [LocalNotificationService] Failed to schedule notification: $e',
+      );
     }
   }
 

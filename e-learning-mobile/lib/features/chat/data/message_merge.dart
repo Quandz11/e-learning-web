@@ -11,20 +11,34 @@ String newClientMessageId() {
 }
 
 /// Server IDs deduplicate delivery; correlation IDs replace pending messages.
-List<ChatMessage> mergeMessages(Iterable<ChatMessage> existing,
-    Iterable<ChatMessage> incoming, {String? currentUserId}) {
+List<ChatMessage> mergeMessages(
+  Iterable<ChatMessage> existing,
+  Iterable<ChatMessage> incoming, {
+  String? currentUserId,
+}) {
   final result = <ChatMessage>[];
   for (final message in [...existing, ...incoming]) {
     if (message.id.isEmpty || message.conversationId.isEmpty) continue;
-    final index = result.indexWhere((m) => m.conversationId == message.conversationId &&
-      (m.id == message.id || (message.clientMessageId != null &&
-       m.clientMessageId == message.clientMessageId && m.senderId == message.senderId)));
-    var normalized = currentUserId == null ? message : message.copyWith(
-      isMe: message.senderId.toLowerCase() == currentUserId.toLowerCase());
-    if (index < 0) { result.add(normalized); }
-    else {
+    final index = result.indexWhere(
+      (m) =>
+          m.conversationId == message.conversationId &&
+          (m.id == message.id ||
+              (message.clientMessageId != null &&
+                  m.clientMessageId == message.clientMessageId &&
+                  m.senderId == message.senderId)),
+    );
+    var normalized = currentUserId == null
+        ? message
+        : message.copyWith(
+            isMe: message.senderId.toLowerCase() == currentUserId.toLowerCase(),
+          );
+    if (index < 0) {
+      result.add(normalized);
+    } else {
       // A late HTTP error/pending update must not replace an acknowledged echo.
-      if (result[index].delivery == 'sent' && normalized.delivery != 'sent') normalized = result[index];
+      if (result[index].delivery == 'sent' && normalized.delivery != 'sent') {
+        normalized = result[index];
+      }
       result[index] = normalized;
     }
   }

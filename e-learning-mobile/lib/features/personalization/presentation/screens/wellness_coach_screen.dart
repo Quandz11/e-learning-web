@@ -23,8 +23,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
   final TextEditingController _moodPromptController = TextEditingController();
 
   // Meal Planner State
-  final TextEditingController _ingredientsController =
-      TextEditingController(text: 'Ức gà, Rau xanh, Cà rốt, Trứng, Gạo lứt');
+  final TextEditingController _ingredientsController = TextEditingController(
+    text: 'Ức gà, Rau xanh, Cà rốt, Trứng, Gạo lứt',
+  );
   String _dietaryPreference = 'Eat Clean';
 
   final List<String> _quickPrompts = const [
@@ -74,7 +75,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFEFEFEF),
+                color: isDark
+                    ? colorScheme.surfaceContainerHighest
+                    : const Color(0xFFEFEFEF),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Row(
@@ -125,7 +128,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: isActive
-              ? (isDark ? context.colorScheme.surfaceContainerHigh : Colors.white)
+              ? (isDark
+                    ? context.colorScheme.surfaceContainerHigh
+                    : Colors.white)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           boxShadow: isActive
@@ -154,7 +159,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isActive ? FontWeight.w500 : FontWeight.w400,
-                color: isActive ? context.textPrimary() : context.textSecondary(),
+                color: isActive
+                    ? context.textPrimary()
+                    : context.textSecondary(),
               ),
             ),
           ],
@@ -181,10 +188,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
@@ -199,12 +203,16 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9),
+                    color: isDark
+                        ? colorScheme.surfaceContainerHighest
+                        : const Color(0xFFE8F5E9),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.spa_outlined,
-                    color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                    color: isDark
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFF0F5B38),
                     size: 22,
                   ),
                 ),
@@ -279,7 +287,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                  color: isDark
+                      ? const Color(0xFF34D399)
+                      : const Color(0xFF0F5B38),
                 ),
               ),
             ],
@@ -290,10 +300,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -308,8 +315,12 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                     height: 36,
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? (isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38))
-                          : (isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF3F4F6)),
+                          ? (isDark
+                                ? const Color(0xFF108A55)
+                                : const Color(0xFF0F5B38))
+                          : (isDark
+                                ? colorScheme.surfaceContainerHighest
+                                : const Color(0xFFF3F4F6)),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     alignment: Alignment.center,
@@ -317,9 +328,12 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                       '$level',
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight:
-                            isSelected ? FontWeight.w500 : FontWeight.w300,
-                        color: isSelected ? Colors.white : context.textSecondary(),
+                        fontWeight: isSelected
+                            ? FontWeight.w500
+                            : FontWeight.w300,
+                        color: isSelected
+                            ? Colors.white
+                            : context.textSecondary(),
                       ),
                     ),
                   ),
@@ -355,10 +369,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                 backgroundColor: context.cardBg(),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(
-                    color: context.cardBorder(),
-                    width: 0.8,
-                  ),
+                  side: BorderSide(color: context.cardBorder(), width: 0.8),
                 ),
                 onPressed: () {
                   _moodPromptController.text = prompt;
@@ -373,10 +384,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             child: TextField(
@@ -422,7 +430,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                           );
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
+                backgroundColor: isDark
+                    ? const Color(0xFF108A55)
+                    : const Color(0xFF0F5B38),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -473,11 +483,15 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isSelected
-                  ? (isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9))
+                  ? (isDark
+                        ? context.colorScheme.surfaceContainerHighest
+                        : const Color(0xFFE8F5E9))
                   : context.cardBg(),
               border: Border.all(
                 color: isSelected
-                    ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                    ? (isDark
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFF0F5B38))
                     : context.cardBorder(),
                 width: isSelected ? 1.5 : 0.8,
               ),
@@ -490,10 +504,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
               ],
             ),
             alignment: Alignment.center,
-            child: Text(
-              emoji,
-              style: const TextStyle(fontSize: 24),
-            ),
+            child: Text(emoji, style: const TextStyle(fontSize: 24)),
           ),
           const SizedBox(height: 6),
           Text(
@@ -520,10 +531,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
@@ -618,10 +626,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             child: Row(
               children: [
@@ -629,7 +634,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF3F4F6),
+                    color: isDark
+                        ? colorScheme.surfaceContainerHighest
+                        : const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -683,10 +690,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             child: TextField(
@@ -723,13 +727,16 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: ['Eat Clean', 'Low Carb', 'Keto', 'Chay thanh lọc']
-                .map((pref) {
+            children: ['Eat Clean', 'Low Carb', 'Keto', 'Chay thanh lọc'].map((
+              pref,
+            ) {
               final isSelected = _dietaryPreference == pref;
               return ChoiceChip(
                 label: Text(pref),
                 selected: isSelected,
-                selectedColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
+                selectedColor: isDark
+                    ? const Color(0xFF108A55)
+                    : const Color(0xFF0F5B38),
                 backgroundColor: context.cardBg(),
                 labelStyle: TextStyle(
                   fontSize: 12,
@@ -740,7 +747,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
                     color: isSelected
-                        ? (isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38))
+                        ? (isDark
+                              ? const Color(0xFF108A55)
+                              : const Color(0xFF0F5B38))
                         : context.cardBorder(),
                     width: 0.8,
                   ),
@@ -780,7 +789,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                           );
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
+                backgroundColor: isDark
+                    ? const Color(0xFF108A55)
+                    : const Color(0xFF0F5B38),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -825,10 +836,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
@@ -873,11 +881,7 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Divider(
-            color: context.cardBorder(),
-            thickness: 0.8,
-            height: 1,
-          ),
+          Divider(color: context.cardBorder(), thickness: 0.8, height: 1),
           const SizedBox(height: AppSpacing.sm),
           Text(
             suggestion.menu,
@@ -893,12 +897,11 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF9FBF9),
+                color: isDark
+                    ? context.colorScheme.surfaceContainerHighest
+                    : const Color(0xFFF9FBF9),
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(
-                  color: context.cardBorder(),
-                  width: 0.8,
-                ),
+                border: Border.all(color: context.cardBorder(), width: 0.8),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -906,7 +909,9 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
                   Icon(
                     Icons.info_outline_rounded,
                     size: 16,
-                    color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                    color: isDark
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFF0F5B38),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -980,4 +985,3 @@ class _WellnessCoachScreenState extends ConsumerState<WellnessCoachScreen> {
     }
   }
 }
-

@@ -19,8 +19,8 @@ class ChatSignalRService {
   ChatSignalRService({
     required AppConfig config,
     required SessionRepository sessionRepository,
-  })  : _config = config,
-        _sessionRepository = sessionRepository;
+  }) : _config = config,
+       _sessionRepository = sessionRepository;
 
   final AppConfig _config;
   final SessionRepository _sessionRepository;
@@ -38,16 +38,23 @@ class ChatSignalRService {
   final _typingController = StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<ChatMessage> get onReceiveMessage => _messageController.stream;
-  Stream<void> get onConversationUpdated => _conversationUpdatedController.stream;
+  Stream<void> get onConversationUpdated =>
+      _conversationUpdatedController.stream;
   Stream<Map<String, dynamic>> get onUserTyping => _typingController.stream;
 
   HubConnectionState get connectionState =>
       _hubConnection?.state ?? HubConnectionState.Disconnected;
 
   Future<void> connect({String? currentUserId}) async {
-    if (_disposed || _hubConnection?.state == HubConnectionState.Connected) return;
+    if (_disposed || _hubConnection?.state == HubConnectionState.Connected) {
+      return;
+    }
     final pending = _connecting ??= _connect();
-    try { await pending; } finally { if (identical(_connecting, pending)) _connecting = null; }
+    try {
+      await pending;
+    } finally {
+      if (identical(_connecting, pending)) _connecting = null;
+    }
   }
 
   Future<void> _connect() async {
@@ -56,15 +63,26 @@ class ChatSignalRService {
     _hubConnection = null;
     await previous?.stop();
     if (_disposed || generation != _generation) return;
-    final hubUrl = '${_config.apiBaseUrl.toString().replaceFirst(RegExp(r'/api/?$'), '')}/hubs/chat';
-    final connection = HubConnectionBuilder().withUrl(hubUrl, options: HttpConnectionOptions(
-      accessTokenFactory: () async {
-        var session = await _sessionRepository.readStoredSession();
-        if (session == null || _disposed || generation != _generation) throw StateError('No active session');
-        if (session.isExpiredAt(DateTime.now())) session = await _sessionRepository.refreshStoredSession();
-        return session.accessToken;
-      },
-    )).withAutomaticReconnect().build();
+    final hubUrl =
+        '${_config.apiBaseUrl.toString().replaceFirst(RegExp(r'/api/?$'), '')}/hubs/chat';
+    final connection = HubConnectionBuilder()
+        .withUrl(
+          hubUrl,
+          options: HttpConnectionOptions(
+            accessTokenFactory: () async {
+              var session = await _sessionRepository.readStoredSession();
+              if (session == null || _disposed || generation != _generation) {
+                throw StateError('No active session');
+              }
+              if (session.isExpiredAt(DateTime.now())) {
+                session = await _sessionRepository.refreshStoredSession();
+              }
+              return session.accessToken;
+            },
+          ),
+        )
+        .withAutomaticReconnect()
+        .build();
     _hubConnection = connection;
     connection.on('ReceiveMessage', _handleReceiveMessage);
     connection.on('ReceiveGuestMessage', _handleReceiveGuestMessage);
@@ -72,7 +90,9 @@ class ChatSignalRService {
     connection.on('UserTyping', _handleUserTyping);
     connection.onreconnected(({connectionId}) async {
       if (_disposed || generation != _generation) return;
-      for (final group in _groups.toList()) { await joinConversation(group); }
+      for (final group in _groups.toList()) {
+        await joinConversation(group);
+      }
       if (!_reconnected.isClosed) _reconnected.add(null);
     });
     try {
@@ -124,7 +144,10 @@ class ChatSignalRService {
     _groups.add(conversationId);
     if (_hubConnection?.state == HubConnectionState.Connected) {
       try {
-        await _hubConnection!.invoke('JoinConversation', args: [conversationId]);
+        await _hubConnection!.invoke(
+          'JoinConversation',
+          args: [conversationId],
+        );
       } catch (e) {
         debugPrint('[SignalR] Error joining conversation: $e');
       }
@@ -135,7 +158,10 @@ class ChatSignalRService {
     _groups.remove(conversationId);
     if (_hubConnection?.state == HubConnectionState.Connected) {
       try {
-        await _hubConnection!.invoke('LeaveConversation', args: [conversationId]);
+        await _hubConnection!.invoke(
+          'LeaveConversation',
+          args: [conversationId],
+        );
       } catch (e) {
         debugPrint('[SignalR] Error leaving conversation: $e');
       }

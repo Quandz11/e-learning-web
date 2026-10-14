@@ -38,20 +38,26 @@ class ChatState {
   }
 }
 
-final chatControllerProvider =
-    StateNotifierProvider<ChatController, ChatState>((ref) {
-  final currentUserId = ref.watch(sessionControllerProvider.select((s) => s.session?.userId));
-  return ChatController(
-    ref.watch(chatRepositoryProvider),
-    currentUserId: currentUserId,
-  );
-});
+final chatControllerProvider = StateNotifierProvider<ChatController, ChatState>(
+  (ref) {
+    final currentUserId = ref.watch(
+      sessionControllerProvider.select((s) => s.session?.userId),
+    );
+    return ChatController(
+      ref.watch(chatRepositoryProvider),
+      currentUserId: currentUserId,
+    );
+  },
+);
 
 class ChatController extends StateNotifier<ChatState> {
   ChatController(this._repository, {this.currentUserId})
-      : super(const ChatState(messages: [], isLoading: true)) {
-    if (currentUserId != null) { load(); }
-    else { state = const ChatState(messages: []); }
+    : super(const ChatState(messages: [], isLoading: true)) {
+    if (currentUserId != null) {
+      load();
+    } else {
+      state = const ChatState(messages: []);
+    }
   }
 
   final ChatRepository _repository;
@@ -74,16 +80,33 @@ class ChatController extends StateNotifier<ChatState> {
     final version = ++_loadVersion;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final conversation = await _repository.getOrCreateSupportConversation(currentUserId: currentUserId);
+      final conversation = await _repository.getOrCreateSupportConversation(
+        currentUserId: currentUserId,
+      );
       if (!mounted || version != _loadVersion) return;
       state = state.copyWith(conversation: conversation);
       _setupSignalR(conversation.id);
-      final messages = await _repository.getMessages(conversation.id, currentUserId: currentUserId);
+      final messages = await _repository.getMessages(
+        conversation.id,
+        currentUserId: currentUserId,
+      );
       if (!mounted || version != _loadVersion) return;
-      state = state.copyWith(messages: mergeMessages(messages, state.messages, currentUserId: currentUserId), isLoading: false);
+      state = state.copyWith(
+        messages: mergeMessages(
+          messages,
+          state.messages,
+          currentUserId: currentUserId,
+        ),
+        isLoading: false,
+      );
       _repository.markAsRead(conversation.id).ignore();
     } catch (_) {
-      if (mounted && version == _loadVersion) state = state.copyWith(isLoading: false, error: 'Không thể tải cuộc trò chuyện.');
+      if (mounted && version == _loadVersion) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Không thể tải cuộc trò chuyện.',
+        );
+      }
     }
   }
 
@@ -94,33 +117,72 @@ class ChatController extends StateNotifier<ChatState> {
     _reconnectSubscription?.cancel();
     _messageSubscription = signalR.onReceiveMessage.listen((incoming) {
       if (!mounted || incoming.conversationId != conversationId) return;
-      state = state.copyWith(messages: mergeMessages(state.messages, [incoming], currentUserId: currentUserId));
+      state = state.copyWith(
+        messages: mergeMessages(state.messages, [
+          incoming,
+        ], currentUserId: currentUserId),
+      );
       _repository.markAsRead(conversationId).ignore();
     });
     _reconnectSubscription = signalR.onReconnected.listen((_) => load());
-    signalR.connect(currentUserId: currentUserId).then((_) {
-      if (mounted) signalR.joinConversation(conversationId);
-    }).catchError((_) {});
+    signalR
+        .connect(currentUserId: currentUserId)
+        .then((_) {
+          if (mounted) signalR.joinConversation(conversationId);
+        })
+        .catchError((_) {});
   }
 
   Future<void> sendMessage(String text, {String? clientMessageId}) async {
     final conversationId = state.conversation?.id;
-    if (text.trim().isEmpty || conversationId == null || state.isSending || currentUserId == null) return;
+    if (text.trim().isEmpty ||
+        conversationId == null ||
+        state.isSending ||
+        currentUserId == null) {
+      return;
+    }
     final correlation = clientMessageId ?? newClientMessageId();
-    final pending = ChatMessage(id: 'temp_$correlation', clientMessageId: correlation,
-      conversationId: conversationId, senderId: currentUserId!, senderName: 'B?n',
-      content: text.trim(), sentAt: DateTime.now(), isRead: false, isMe: true, delivery: 'sending');
-    state = state.copyWith(messages: mergeMessages(state.messages, [pending], currentUserId: currentUserId), isSending: true, clearError: true);
+    final pending = ChatMessage(
+      id: 'temp_$correlation',
+      clientMessageId: correlation,
+      conversationId: conversationId,
+      senderId: currentUserId!,
+      senderName: 'B?n',
+      content: text.trim(),
+      sentAt: DateTime.now(),
+      isRead: false,
+      isMe: true,
+      delivery: 'sending',
+    );
+    state = state.copyWith(
+      messages: mergeMessages(state.messages, [
+        pending,
+      ], currentUserId: currentUserId),
+      isSending: true,
+      clearError: true,
+    );
     try {
-      final sent = await _repository.sendMessage(conversationId: conversationId, content: pending.content,
-        currentUserId: currentUserId, clientMessageId: correlation);
+      final sent = await _repository.sendMessage(
+        conversationId: conversationId,
+        content: pending.content,
+        currentUserId: currentUserId,
+        clientMessageId: correlation,
+      );
       if (!mounted) return;
-      state = state.copyWith(messages: mergeMessages(state.messages, [sent.copyWith(clientMessageId: correlation)],
-        currentUserId: currentUserId), isSending: false);
+      state = state.copyWith(
+        messages: mergeMessages(state.messages, [
+          sent.copyWith(clientMessageId: correlation),
+        ], currentUserId: currentUserId),
+        isSending: false,
+      );
     } catch (_) {
       if (!mounted) return;
-      state = state.copyWith(messages: mergeMessages(state.messages, [pending.copyWith(delivery: 'failed')],
-        currentUserId: currentUserId), isSending: false);
+      state = state.copyWith(
+        messages: mergeMessages(state.messages, [
+          pending.copyWith(delivery: 'failed'),
+        ], currentUserId: currentUserId),
+        isSending: false,
+      );
     }
   }
 }

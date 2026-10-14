@@ -25,7 +25,10 @@ class ChatMessage {
   final String? clientMessageId;
   final String delivery;
 
-  factory ChatMessage.fromJson(Map<String, dynamic> json, {String? currentUserId}) {
+  factory ChatMessage.fromJson(
+    Map<String, dynamic> json, {
+    String? currentUserId,
+  }) {
     final senderId = json['senderId']?.toString() ?? '';
     return ChatMessage(
       clientMessageId: json['clientMessageId']?.toString(),
@@ -45,11 +48,21 @@ class ChatMessage {
 
   factory ChatMessage.fromGuestJson(Map<String, dynamic> json, String guestId) {
     final guest = json['isFromGuest'] == true;
-    return ChatMessage(id: json['id']?.toString() ?? '', conversationId: guestId,
-      senderId: guest ? guestId : 'support', senderName: json['senderName']?.toString() ?? '',
-      senderRole: guest ? 'Guest' : 'Admin', content: json['content']?.toString() ?? '',
-      sentAt: DateTime.tryParse((json['sentAt'] ?? json['timestamp'])?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0),
-      isRead: json['isRead'] == true, isMe: !guest);
+    return ChatMessage(
+      id: json['id']?.toString() ?? '',
+      conversationId: guestId,
+      senderId: guest ? guestId : 'support',
+      senderName: json['senderName']?.toString() ?? '',
+      senderRole: guest ? 'Guest' : 'Admin',
+      content: json['content']?.toString() ?? '',
+      sentAt:
+          DateTime.tryParse(
+            (json['sentAt'] ?? json['timestamp'])?.toString() ?? '',
+          ) ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      isRead: json['isRead'] == true,
+      isMe: !guest,
+    );
   }
 
   ChatMessage copyWith({
@@ -100,7 +113,10 @@ class ChatConversation {
   final ChatMessage? lastMessage;
   final int unreadCount;
 
-  factory ChatConversation.fromJson(Map<String, dynamic> json, {String? currentUserId}) {
+  factory ChatConversation.fromJson(
+    Map<String, dynamic> json, {
+    String? currentUserId,
+  }) {
     return ChatConversation(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString(),
@@ -108,13 +124,23 @@ class ChatConversation {
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
       lastMessageAt: json['lastMessageAt'] != null
-          ? DateTime.tryParse(json['lastMessageAt'].toString()) ?? DateTime.now()
+          ? DateTime.tryParse(json['lastMessageAt'].toString()) ??
+                DateTime.now()
           : DateTime.now(),
-      otherParticipant: json['otherParticipant'] != null && json['otherParticipant'] is Map<String, dynamic>
-          ? SupportUser.fromJson(json['otherParticipant'] as Map<String, dynamic>)
+      otherParticipant:
+          json['otherParticipant'] != null &&
+              json['otherParticipant'] is Map<String, dynamic>
+          ? SupportUser.fromJson(
+              json['otherParticipant'] as Map<String, dynamic>,
+            )
           : null,
-      lastMessage: json['lastMessage'] != null && json['lastMessage'] is Map<String, dynamic>
-          ? ChatMessage.fromJson(json['lastMessage'] as Map<String, dynamic>, currentUserId: currentUserId)
+      lastMessage:
+          json['lastMessage'] != null &&
+              json['lastMessage'] is Map<String, dynamic>
+          ? ChatMessage.fromJson(
+              json['lastMessage'] as Map<String, dynamic>,
+              currentUserId: currentUserId,
+            )
           : null,
       unreadCount: json['unreadCount'] as int? ?? 0,
     );
@@ -136,7 +162,10 @@ class SupportUser {
 
   factory SupportUser.fromJson(Map<String, dynamic> json) {
     final id = json['id']?.toString() ?? json['userId']?.toString() ?? '';
-    final name = json['fullName']?.toString() ?? json['userName']?.toString() ?? 'Ban Cố Vấn Sống Khỏe';
+    final name =
+        json['fullName']?.toString() ??
+        json['userName']?.toString() ??
+        'Ban Cố Vấn Sống Khỏe';
     return SupportUser(
       id: id,
       fullName: name,

@@ -37,7 +37,10 @@ class CacheService {
   }
 
   /// Read cached data from local storage
-  Future<Map<String, dynamic>?> getMap(String key, {Duration ttl = _defaultTtl}) async {
+  Future<Map<String, dynamic>?> getMap(
+    String key, {
+    Duration ttl = _defaultTtl,
+  }) async {
     try {
       final prefs = await _asyncPrefs;
       final raw = prefs.getString('$_prefix$key');
@@ -61,7 +64,10 @@ class CacheService {
   }
 
   /// Read cached list from local storage
-  Future<List<dynamic>?> getList(String key, {Duration ttl = _defaultTtl}) async {
+  Future<List<dynamic>?> getList(
+    String key, {
+    Duration ttl = _defaultTtl,
+  }) async {
     try {
       final prefs = await _asyncPrefs;
       final raw = prefs.getString('$_prefix$key');

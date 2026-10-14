@@ -57,7 +57,9 @@ class ForgotPasswordRequestController
       );
 
       try {
-        final message = await _authRepository.requestEmailForgotPasswordOtp(email);
+        final message = await _authRepository.requestEmailForgotPasswordOtp(
+          email,
+        );
         state = state.copyWith(
           status: ForgotPasswordRequestStatus.success,
           generalMessage: message,

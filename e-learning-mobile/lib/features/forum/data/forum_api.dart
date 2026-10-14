@@ -20,14 +20,18 @@ class ForumApi {
   }
 
   Future<List<ForumThread>> getThreadsByCategory(String categoryId) async {
-    final res = await _apiClient.get<List<dynamic>>('/forum/categories/$categoryId/threads');
+    final res = await _apiClient.get<List<dynamic>>(
+      '/forum/categories/$categoryId/threads',
+    );
     return res
         .map((item) => ForumThread.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 
   Future<ForumThread> getThread(String id) async {
-    final res = await _apiClient.get<Map<String, dynamic>>('/forum/threads/$id');
+    final res = await _apiClient.get<Map<String, dynamic>>(
+      '/forum/threads/$id',
+    );
     return ForumThread.fromJson(res);
   }
 
@@ -38,17 +42,15 @@ class ForumApi {
   }) async {
     final res = await _apiClient.post<Map<String, dynamic>>(
       '/forum/threads',
-      data: {
-        'categoryId': categoryId,
-        'title': title,
-        'content': content,
-      },
+      data: {'categoryId': categoryId, 'title': title, 'content': content},
     );
     return ForumThread.fromJson(res);
   }
 
   Future<List<ForumPost>> getPosts(String threadId) async {
-    final res = await _apiClient.get<List<dynamic>>('/forum/threads/$threadId/posts');
+    final res = await _apiClient.get<List<dynamic>>(
+      '/forum/threads/$threadId/posts',
+    );
     return res
         .map((item) => ForumPost.fromJson(item as Map<String, dynamic>))
         .toList();
@@ -60,10 +62,7 @@ class ForumApi {
   }) async {
     final res = await _apiClient.post<Map<String, dynamic>>(
       '/forum/posts',
-      data: {
-        'threadId': threadId,
-        'content': content,
-      },
+      data: {'threadId': threadId, 'content': content},
     );
     return ForumPost.fromJson(res);
   }

@@ -112,7 +112,9 @@ class HomeWidgetService {
       // Nếu người dùng TẮT đồng bộ widget, ngưng gửi tín hiệu ra OS
       final enabled = prefs.getBool(keyWidgetSyncEnabled) ?? true;
       if (!enabled) {
-        debugPrint('⏸ [HomeWidgetService] Widget sync is currently toggled OFF.');
+        debugPrint(
+          '⏸ [HomeWidgetService] Widget sync is currently toggled OFF.',
+        );
         return true;
       }
 
@@ -122,10 +124,22 @@ class HomeWidgetService {
         await HomeWidget.saveWidgetData<int>(keyStreakDays, streakDays);
         await HomeWidget.saveWidgetData<int>(keyTargetMinutes, targetMinutes);
         await HomeWidget.saveWidgetData<int>(keyLearnedMinutes, learnedMinutes);
-        await HomeWidget.saveWidgetData<String>(keyActiveCourseTitle, activeCourseTitle);
-        await HomeWidget.saveWidgetData<int>(keyActiveCourseProgress, activeCourseProgress);
-        await HomeWidget.saveWidgetData<String>(keyNextLessonTitle, nextLessonTitle);
-        await HomeWidget.saveWidgetData<String>(keyNextReminderTime, nextReminderTime);
+        await HomeWidget.saveWidgetData<String>(
+          keyActiveCourseTitle,
+          activeCourseTitle,
+        );
+        await HomeWidget.saveWidgetData<int>(
+          keyActiveCourseProgress,
+          activeCourseProgress,
+        );
+        await HomeWidget.saveWidgetData<String>(
+          keyNextLessonTitle,
+          nextLessonTitle,
+        );
+        await HomeWidget.saveWidgetData<String>(
+          keyNextReminderTime,
+          nextReminderTime,
+        );
 
         await HomeWidget.updateWidget(
           androidName: 'LearningWidgetProvider',
@@ -148,10 +162,14 @@ class HomeWidgetService {
           activeCourseTitle: activeCourseTitle,
         );
       } catch (e) {
-        debugPrint('ℹ️ [HomeWidgetService] Native platform channel unavailable in test/web: $e');
+        debugPrint(
+          'ℹ️ [HomeWidgetService] Native platform channel unavailable in test/web: $e',
+        );
       }
 
-      debugPrint('📱 [HomeWidgetService] Synced widget data successfully: Streak $streakDays, Course "$activeCourseTitle"');
+      debugPrint(
+        '📱 [HomeWidgetService] Synced widget data successfully: Streak $streakDays, Course "$activeCourseTitle"',
+      );
       return true;
     } catch (e) {
       debugPrint('❌ [HomeWidgetService] Error updating widget data: $e');
@@ -166,11 +184,16 @@ class HomeWidgetService {
       'streakDays': prefs.getInt(keyStreakDays) ?? 7,
       'targetMinutes': prefs.getInt(keyTargetMinutes) ?? 30,
       'learnedMinutes': prefs.getInt(keyLearnedMinutes) ?? 25,
-      'activeCourseTitle': prefs.getString(keyActiveCourseTitle) ?? 'Khóa học Nhịn ăn Chữa lành SKVI',
+      'activeCourseTitle':
+          prefs.getString(keyActiveCourseTitle) ??
+          'Khóa học Nhịn ăn Chữa lành SKVI',
       'activeCourseProgress': prefs.getInt(keyActiveCourseProgress) ?? 65,
-      'nextLessonTitle': prefs.getString(keyNextLessonTitle) ?? 'Bài 5: Cơ chế Tự thực Autophagy & Re-feeding',
+      'nextLessonTitle':
+          prefs.getString(keyNextLessonTitle) ??
+          'Bài 5: Cơ chế Tự thực Autophagy & Re-feeding',
       'nextReminderTime': prefs.getString(keyNextReminderTime) ?? '20:00',
-      'lastUpdated': prefs.getString(keyLastUpdated) ?? DateTime.now().toIso8601String(),
+      'lastUpdated':
+          prefs.getString(keyLastUpdated) ?? DateTime.now().toIso8601String(),
     };
   }
 }

@@ -168,35 +168,41 @@ void main() {
     expect(adapter.lastCustomHeaderFor('/protected', 'X-Test'), 'true');
   });
 
-  test('session-bound request is cancelled if generation changes in-flight', () async {
-    storage.storedSession = _session();
-    adapter.queueSuccess('/protected');
-    adapter.onFetch = (_) async {
-      await sessionRepository.clear();
-    };
+  test(
+    'session-bound request is cancelled if generation changes in-flight',
+    () async {
+      storage.storedSession = _session();
+      adapter.queueSuccess('/protected');
+      adapter.onFetch = (_) async {
+        await sessionRepository.clear();
+      };
 
-    final future = dio.get('/protected');
-    await expectLater(
-      future,
-      throwsA(
-        isA<DioException>().having(
-          (e) => e.type,
-          'type',
-          DioExceptionType.cancel,
+      final future = dio.get('/protected');
+      await expectLater(
+        future,
+        throwsA(
+          isA<DioException>().having(
+            (e) => e.type,
+            'type',
+            DioExceptionType.cancel,
+          ),
         ),
-      ),
-    );
-  });
+      );
+    },
+  );
 
-  test('public auth request is not cancelled if generation changes in-flight', () async {
-    adapter.queueSuccess('/auth/login');
-    adapter.onFetch = (_) async {
-      await sessionRepository.clear();
-    };
+  test(
+    'public auth request is not cancelled if generation changes in-flight',
+    () async {
+      adapter.queueSuccess('/auth/login');
+      adapter.onFetch = (_) async {
+        await sessionRepository.clear();
+      };
 
-    final response = await dio.post('/auth/login');
-    expect(response.statusCode, 200);
-  });
+      final response = await dio.post('/auth/login');
+      expect(response.statusCode, 200);
+    },
+  );
 }
 
 class InMemorySessionStorage implements SessionStorage {

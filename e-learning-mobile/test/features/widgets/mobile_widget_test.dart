@@ -11,13 +11,16 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('MobileWidgetStateData default values and goal progress calculation', () {
-      final defaultData = MobileWidgetStateData.defaultData();
-      expect(defaultData.streakDays, 7);
-      expect(defaultData.targetMinutes, 30);
-      expect(defaultData.learnedMinutes, 25);
-      expect(defaultData.goalProgressRatio, closeTo(25 / 30, 0.01));
-    });
+    test(
+      'MobileWidgetStateData default values and goal progress calculation',
+      () {
+        final defaultData = MobileWidgetStateData.defaultData();
+        expect(defaultData.streakDays, 7);
+        expect(defaultData.targetMinutes, 30);
+        expect(defaultData.learnedMinutes, 25);
+        expect(defaultData.goalProgressRatio, closeTo(25 / 30, 0.01));
+      },
+    );
 
     test('MobileWidgetStateData fromMap and toMap conversion', () {
       final map = {

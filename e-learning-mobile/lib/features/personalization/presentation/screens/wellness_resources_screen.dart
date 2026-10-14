@@ -96,7 +96,9 @@ class _WellnessResourcesScreenState
                       decoration: BoxDecoration(
                         color: isSelected
                             ? const Color(0xFF0F5B38)
-                            : (isDark ? colorScheme.surfaceContainerHighest : Colors.white),
+                            : (isDark
+                                  ? colorScheme.surfaceContainerHighest
+                                  : Colors.white),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
@@ -106,7 +108,9 @@ class _WellnessResourcesScreenState
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.2 : 0.02,
+                            ),
                             blurRadius: 4,
                             offset: const Offset(0, 1),
                           ),
@@ -116,8 +120,9 @@ class _WellnessResourcesScreenState
                         category,
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight:
-                              isSelected ? FontWeight.w500 : FontWeight.w300,
+                          fontWeight: isSelected
+                              ? FontWeight.w500
+                              : FontWeight.w300,
                           color: isSelected
                               ? Colors.white
                               : context.textPrimary(),
@@ -141,65 +146,69 @@ class _WellnessResourcesScreenState
                     ),
                   )
                 : filteredItems.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Icon(
-                                Icons.spa_outlined,
-                                size: 26,
-                                color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              'Không có nội dung trong mục này',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
-                                color: context.textPrimary(),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Vui lòng chọn danh mục khác hoặc kéo xuống để làm mới.',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w300,
-                                color: context.textSecondary(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        color: const Color(0xFF0F5B38),
-                        onRefresh: () async {
-                          await ref
-                              .read(wellnessControllerProvider.notifier)
-                              .loadDashboard();
-                        },
-                        child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? colorScheme.surfaceContainerHighest
+                                : const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          itemCount: filteredItems.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: AppSpacing.md),
-                          itemBuilder: (context, index) {
-                            final item = filteredItems[index];
-                            return _buildEditorialResourceCard(context, item);
-                          },
+                          child: Icon(
+                            Icons.spa_outlined,
+                            size: 26,
+                            color: isDark
+                                ? const Color(0xFF34D399)
+                                : const Color(0xFF0F5B38),
+                          ),
                         ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          'Không có nội dung trong mục này',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                            color: context.textPrimary(),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Vui lòng chọn danh mục khác hoặc kéo xuống để làm mới.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w300,
+                            color: context.textSecondary(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    color: const Color(0xFF0F5B38),
+                    onRefresh: () async {
+                      await ref
+                          .read(wellnessControllerProvider.notifier)
+                          .loadDashboard();
+                    },
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
                       ),
+                      itemCount: filteredItems.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppSpacing.md),
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        return _buildEditorialResourceCard(context, item);
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -215,10 +224,7 @@ class _WellnessResourcesScreenState
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
@@ -237,7 +243,10 @@ class _WellnessResourcesScreenState
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDark
-                    ? [context.colorScheme.surfaceContainerHighest, context.colorScheme.surfaceContainerHigh]
+                    ? [
+                        context.colorScheme.surfaceContainerHighest,
+                        context.colorScheme.surfaceContainerHigh,
+                      ]
                     : const [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -249,7 +258,9 @@ class _WellnessResourcesScreenState
                   child: Icon(
                     _getResourceIcon(item.resourceType),
                     size: 40,
-                    color: isDark ? const Color(0xFF34D399).withValues(alpha: 0.5) : const Color(0xFF0F5B38).withValues(alpha: 0.4),
+                    color: isDark
+                        ? const Color(0xFF34D399).withValues(alpha: 0.5)
+                        : const Color(0xFF0F5B38).withValues(alpha: 0.4),
                   ),
                 ),
                 Positioned(
@@ -324,9 +335,13 @@ class _WellnessResourcesScreenState
                       GoRouter.of(context).push('/app/articles');
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                      foregroundColor: isDark
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFF0F5B38),
                       side: BorderSide(
-                        color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                        color: isDark
+                            ? const Color(0xFF34D399)
+                            : const Color(0xFF0F5B38),
                         width: 0.8,
                       ),
                       shape: RoundedRectangleBorder(
@@ -366,4 +381,3 @@ class _WellnessResourcesScreenState
     return Icons.menu_book_rounded;
   }
 }
-

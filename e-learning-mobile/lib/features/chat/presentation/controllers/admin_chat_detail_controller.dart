@@ -39,24 +39,33 @@ class AdminChatDetailState {
 }
 
 final adminChatDetailProvider = StateNotifierProvider.family
-    .autoDispose<AdminChatDetailController, AdminChatDetailState, AdminConversationItem>(
-  (ref, conversation) {
-    final currentUserId = ref.watch(sessionControllerProvider.select((s) => s.session?.userId));
-    return AdminChatDetailController(
-      ref.watch(chatRepositoryProvider),
-      conversation: conversation,
-      currentUserId: currentUserId,
-    );
-  },
-);
+    .autoDispose<
+      AdminChatDetailController,
+      AdminChatDetailState,
+      AdminConversationItem
+    >((ref, conversation) {
+      final currentUserId = ref.watch(
+        sessionControllerProvider.select((s) => s.session?.userId),
+      );
+      return AdminChatDetailController(
+        ref.watch(chatRepositoryProvider),
+        conversation: conversation,
+        currentUserId: currentUserId,
+      );
+    });
 
 class AdminChatDetailController extends StateNotifier<AdminChatDetailState> {
   AdminChatDetailController(
     this._repository, {
     required AdminConversationItem conversation,
     this.currentUserId,
-  }) : super(AdminChatDetailState(conversation: conversation, isLoading: true)) {
-    if (currentUserId != null) { _setupSignalR(); load(); }
+  }) : super(
+         AdminChatDetailState(conversation: conversation, isLoading: true),
+       ) {
+    if (currentUserId != null) {
+      _setupSignalR();
+      load();
+    }
   }
 
   final ChatRepository _repository;
@@ -88,9 +97,23 @@ class AdminChatDetailController extends StateNotifier<AdminChatDetailState> {
         );
       }
       if (!mounted) return;
-      state = state.copyWith(messages: mergeMessages(msgs, state.messages, currentUserId: state.conversation.type == 'guest' ? null : currentUserId), isLoading: false);
+      state = state.copyWith(
+        messages: mergeMessages(
+          msgs,
+          state.messages,
+          currentUserId: state.conversation.type == 'guest'
+              ? null
+              : currentUserId,
+        ),
+        isLoading: false,
+      );
     } catch (e) {
-      if (mounted) state = state.copyWith(isLoading: false, error: 'Kh?ng th? t?i tin nh?n.');
+      if (mounted) {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Kh?ng th? t?i tin nh?n.',
+        );
+      }
     }
   }
 
@@ -111,16 +134,24 @@ class AdminChatDetailController extends StateNotifier<AdminChatDetailState> {
     _messageSubscription?.cancel();
     _messageSubscription = signalR.onReceiveMessage.listen((incoming) {
       if (!mounted) return;
-      final matchesConv = incoming.conversationId == convId ||
+      final matchesConv =
+          incoming.conversationId == convId ||
           (state.conversation.type == 'guest' &&
-              incoming.conversationId == (state.conversation.guestId ?? convId));
+              incoming.conversationId ==
+                  (state.conversation.guestId ?? convId));
       if (!matchesConv) return;
 
       final existing = state.messages.any((m) => m.id == incoming.id);
       if (existing) return;
 
       state = state.copyWith(
-        messages: mergeMessages(state.messages, [incoming], currentUserId: state.conversation.type == 'guest' ? null : currentUserId),
+        messages: mergeMessages(
+          state.messages,
+          [incoming],
+          currentUserId: state.conversation.type == 'guest'
+              ? null
+              : currentUserId,
+        ),
       );
     });
   }
@@ -143,11 +174,22 @@ class AdminChatDetailController extends StateNotifier<AdminChatDetailState> {
       }
       if (!mounted) return;
       state = state.copyWith(
-        messages: mergeMessages(state.messages, [newMsg], currentUserId: state.conversation.type == 'guest' ? null : currentUserId),
+        messages: mergeMessages(
+          state.messages,
+          [newMsg],
+          currentUserId: state.conversation.type == 'guest'
+              ? null
+              : currentUserId,
+        ),
         isSending: false,
       );
     } catch (e) {
-      if (mounted) state = state.copyWith(isSending: false, error: 'Kh?ng th? g?i tin nh?n.');
+      if (mounted) {
+        state = state.copyWith(
+          isSending: false,
+          error: 'Kh?ng th? g?i tin nh?n.',
+        );
+      }
     }
   }
 }

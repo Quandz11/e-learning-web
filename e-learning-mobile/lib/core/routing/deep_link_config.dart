@@ -67,8 +67,10 @@ abstract final class AppRoutes {
       '/app/learning/course/:courseId/lesson/:lessonPartId/document';
   static const appPersonalization = '/app/personalization';
   static const appPersonalizationCoach = '/app/personalization/coach';
-  static const appPersonalizationPlanEditor = '/app/personalization/plan-editor';
-  static const appPersonalizationProgressTimeline = '/app/personalization/progress-timeline';
+  static const appPersonalizationPlanEditor =
+      '/app/personalization/plan-editor';
+  static const appPersonalizationProgressTimeline =
+      '/app/personalization/progress-timeline';
   static const appPersonalizationResources = '/app/personalization/resources';
   static const appPersonalizationReminders = '/app/personalization/reminders';
   static const appPersonalizationReminderNew =

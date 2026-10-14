@@ -29,14 +29,18 @@ class ForumRepository {
     final categories = await _api.getCategories();
     await _cacheService.set(
       _categoriesCacheKey,
-      categories.map((c) => {
-        'id': c.id,
-        'name': c.name,
-        'description': c.description,
-        'icon': c.icon,
-        'order': c.order,
-        'threadCount': c.threadCount,
-      }).toList(),
+      categories
+          .map(
+            (c) => {
+              'id': c.id,
+              'name': c.name,
+              'description': c.description,
+              'icon': c.icon,
+              'order': c.order,
+              'threadCount': c.threadCount,
+            },
+          )
+          .toList(),
     );
     return categories;
   }

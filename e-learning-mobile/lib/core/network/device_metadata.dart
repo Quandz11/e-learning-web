@@ -17,8 +17,13 @@ class DeviceMetadata {
       } else if (Platform.isIOS) {
         name = (await info.iosInfo).utsname.machine;
       }
-      return {'X-Device-Name': name, 'X-Device-Platform': Platform.operatingSystem,
-        'X-App-Version': package.version};
-    } catch (_) { return {'X-Device-Platform': Platform.operatingSystem}; }
+      return {
+        'X-Device-Name': name,
+        'X-Device-Platform': Platform.operatingSystem,
+        'X-App-Version': package.version,
+      };
+    } catch (_) {
+      return {'X-Device-Platform': Platform.operatingSystem};
+    }
   }
 }

@@ -209,7 +209,7 @@ void main() {
               .having(
                 (failure) => failure.message,
                 'message',
-                'Invalid credentials.',
+                'Email, số điện thoại hoặc mật khẩu không chính xác.',
               ),
         ),
       );
@@ -295,7 +295,7 @@ void main() {
               .having(
                 (failure) => failure.message,
                 'message',
-                'OTP has expired.',
+                'Mã xác thực OTP không chính xác.',
               ),
         ),
       );

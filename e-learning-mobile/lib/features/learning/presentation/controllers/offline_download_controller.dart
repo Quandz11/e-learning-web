@@ -43,7 +43,8 @@ class OfflineDownloadState {
 }
 
 class OfflineDownloadController extends StateNotifier<OfflineDownloadState> {
-  OfflineDownloadController(this._service) : super(const OfflineDownloadState()) {
+  OfflineDownloadController(this._service)
+    : super(const OfflineDownloadState()) {
     load();
   }
 
@@ -112,7 +113,9 @@ class OfflineDownloadController extends StateNotifier<OfflineDownloadState> {
 }
 
 final offlineDownloadControllerProvider =
-    StateNotifierProvider<OfflineDownloadController, OfflineDownloadState>((ref) {
-  final service = ref.watch(offlineDownloadServiceProvider);
-  return OfflineDownloadController(service);
-});
+    StateNotifierProvider<OfflineDownloadController, OfflineDownloadState>((
+      ref,
+    ) {
+      final service = ref.watch(offlineDownloadServiceProvider);
+      return OfflineDownloadController(service);
+    });

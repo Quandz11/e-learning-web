@@ -4,10 +4,7 @@ import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class TermsAndPrivacyScreen extends StatelessWidget {
-  const TermsAndPrivacyScreen({
-    super.key,
-    this.initialIndex = 0,
-  });
+  const TermsAndPrivacyScreen({super.key, this.initialIndex = 0});
 
   final int initialIndex;
 
@@ -181,10 +178,7 @@ class _TermsOfUseTab extends StatelessWidget {
         Center(
           child: Text(
             'Cập nhật lần cuối: Tháng 09/2026',
-            style: TextStyle(
-              fontSize: 12,
-              color: context.textMuted(),
-            ),
+            style: TextStyle(fontSize: 12, color: context.textMuted()),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -309,10 +303,7 @@ class _PrivacyPolicyTab extends StatelessWidget {
         Center(
           child: Text(
             'Phiên bản chính sách: 2.1 • Cập nhật 09/2026',
-            style: TextStyle(
-              fontSize: 12,
-              color: context.textMuted(),
-            ),
+            style: TextStyle(fontSize: 12, color: context.textMuted()),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -332,10 +323,7 @@ Widget _buildSectionCard(
     decoration: BoxDecoration(
       color: context.cardBg(),
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: context.cardBorder(),
-        width: 0.8,
-      ),
+      border: Border.all(color: context.cardBorder(), width: 0.8),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

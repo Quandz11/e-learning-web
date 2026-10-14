@@ -40,7 +40,9 @@ class HomeController extends StateNotifier<HomeState> {
     if (!refresh && state.featuredCourses.isEmpty) {
       try {
         final cachedResult = await _repository.loadHomeFromCache();
-        if (cachedResult != null && mounted && state.status == HomeStatus.loading) {
+        if (cachedResult != null &&
+            mounted &&
+            state.status == HomeStatus.loading) {
           state = HomeState(
             status: HomeStatus.success,
             featuredCourses: cachedResult.featuredCourses,

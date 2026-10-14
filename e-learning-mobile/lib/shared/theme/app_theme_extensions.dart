@@ -13,7 +13,11 @@ extension ThemeContextX on BuildContext {
     return lightColor ?? colorScheme.surface;
   }
 
-  Color chipBg(bool isSelected, [Color? lightSelected, Color? lightUnselected]) {
+  Color chipBg(
+    bool isSelected, [
+    Color? lightSelected,
+    Color? lightUnselected,
+  ]) {
     if (isSelected) {
       return colorScheme.primary;
     }
@@ -23,7 +27,11 @@ extension ThemeContextX on BuildContext {
     return lightUnselected ?? const Color(0xFFF4F6F5);
   }
 
-  Color chipText(bool isSelected, [Color? lightSelected, Color? lightUnselected]) {
+  Color chipText(
+    bool isSelected, [
+    Color? lightSelected,
+    Color? lightUnselected,
+  ]) {
     if (isSelected) {
       return Colors.white;
     }

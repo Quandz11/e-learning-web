@@ -37,24 +37,27 @@ class ForumState {
 
 final forumControllerProvider =
     StateNotifierProvider<ForumController, ForumState>((ref) {
-  return ForumController(ref.watch(forumRepositoryProvider));
-});
+      return ForumController(ref.watch(forumRepositoryProvider));
+    });
 
-final forumThreadDetailProvider =
-    FutureProvider.family<ForumThread, String>((ref, threadId) async {
+final forumThreadDetailProvider = FutureProvider.family<ForumThread, String>((
+  ref,
+  threadId,
+) async {
   final repo = ref.watch(forumRepositoryProvider);
   return repo.getThread(threadId);
 });
 
-final forumThreadPostsProvider =
-    FutureProvider.family<List<ForumPost>, String>((ref, threadId) async {
-  final repo = ref.watch(forumRepositoryProvider);
-  return repo.getPosts(threadId);
-});
+final forumThreadPostsProvider = FutureProvider.family<List<ForumPost>, String>(
+  (ref, threadId) async {
+    final repo = ref.watch(forumRepositoryProvider);
+    return repo.getPosts(threadId);
+  },
+);
 
 class ForumController extends StateNotifier<ForumState> {
   ForumController(this._repository)
-      : super(const ForumState(categories: [], threads: [], isLoading: true)) {
+    : super(const ForumState(categories: [], threads: [], isLoading: true)) {
     load();
   }
 
@@ -104,7 +107,9 @@ class ForumController extends StateNotifier<ForumState> {
     if (state.selectedCategoryId != null) {
       state = state.copyWith(isLoading: true, clearError: true);
       try {
-        final threads = await _repository.getThreadsByCategory(state.selectedCategoryId!);
+        final threads = await _repository.getThreadsByCategory(
+          state.selectedCategoryId!,
+        );
         state = state.copyWith(threads: threads, isLoading: false);
       } catch (e) {
         state = state.copyWith(isLoading: false, error: e.toString());

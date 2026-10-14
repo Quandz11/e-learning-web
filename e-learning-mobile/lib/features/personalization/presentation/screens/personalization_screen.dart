@@ -68,46 +68,46 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
               ),
             )
           : state.failure != null && state.dashboard == null
-              ? _buildErrorState(state.failure?.message)
-              : RefreshIndicator(
-                  color: AppColors.primary,
-                  onRefresh: () async {
-                    await ref
-                        .read(wellnessControllerProvider.notifier)
-                        .loadDashboard();
-                  },
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
-                    ),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // 1. Zen Dial Fasting Hero Card
-                        _buildZenDialHero(context, state),
-                        const SizedBox(height: AppSpacing.md),
-
-                        // 2. Bento Micro-Checkin (Water, Movement, Weight)
-                        _buildBentoMicroCheckin(context, state),
-                        const SizedBox(height: AppSpacing.lg),
-
-                        // 3. Daily Habit Rituals Checklist
-                        _buildDailyRituals(context, state),
-                        const SizedBox(height: AppSpacing.lg),
-
-                        // 4. Bento Feature Navigation Grid (2x2)
-                        _buildBentoNavigationGrid(context),
-                        const SizedBox(height: AppSpacing.sm),
-
-                        // 5. Reminders Banner Card
-                        _buildRemindersBanner(context),
-                        const SizedBox(height: AppSpacing.xl),
-                      ],
-                    ),
-                  ),
+          ? _buildErrorState(state.failure?.message)
+          : RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () async {
+                await ref
+                    .read(wellnessControllerProvider.notifier)
+                    .loadDashboard();
+              },
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
                 ),
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 1. Zen Dial Fasting Hero Card
+                    _buildZenDialHero(context, state),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // 2. Bento Micro-Checkin (Water, Movement, Weight)
+                    _buildBentoMicroCheckin(context, state),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // 3. Daily Habit Rituals Checklist
+                    _buildDailyRituals(context, state),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // 4. Bento Feature Navigation Grid (2x2)
+                    _buildBentoNavigationGrid(context),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // 5. Reminders Banner Card
+                    _buildRemindersBanner(context),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 
@@ -118,11 +118,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.spa_outlined,
-              size: 40,
-              color: Color(0xFF8E9E94),
-            ),
+            const Icon(Icons.spa_outlined, size: 40, color: Color(0xFF8E9E94)),
             const SizedBox(height: AppSpacing.md),
             Text(
               message ?? 'Không thể tải dữ liệu lúc này.',
@@ -198,12 +194,19 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 width: 7,
                 height: 7,
                 decoration: BoxDecoration(
-                  color: isFasting ? (isDark ? colorScheme.primary : const Color(0xFF108A55)) : const Color(0xFFD97706),
+                  color: isFasting
+                      ? (isDark ? colorScheme.primary : const Color(0xFF108A55))
+                      : const Color(0xFFD97706),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: (isFasting ? (isDark ? colorScheme.primary : const Color(0xFF108A55)) : const Color(0xFFD97706))
-                          .withValues(alpha: 0.4),
+                      color:
+                          (isFasting
+                                  ? (isDark
+                                        ? colorScheme.primary
+                                        : const Color(0xFF108A55))
+                                  : const Color(0xFFD97706))
+                              .withValues(alpha: 0.4),
                       blurRadius: 6,
                     ),
                   ],
@@ -225,7 +228,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF0F5F1),
+                  color: isDark
+                      ? colorScheme.surfaceContainerHighest
+                      : const Color(0xFFF0F5F1),
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
                 child: Text(
@@ -251,7 +256,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 child: CircularProgressIndicator(
                   value: (progressPercent / 100.0).clamp(0.0, 1.0),
                   strokeWidth: 3.5,
-                  backgroundColor: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFEFF3EE),
+                  backgroundColor: isDark
+                      ? colorScheme.surfaceContainerHighest
+                      : const Color(0xFFEFF3EE),
                   color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
                   strokeCap: StrokeCap.round,
                 ),
@@ -297,14 +304,18 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                      color: isDark
+                          ? colorScheme.primary
+                          : const Color(0xFF0F5B38),
                     ),
                   ),
                   const SizedBox(width: 4),
                   Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 10,
-                    color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                    color: isDark
+                        ? colorScheme.primary
+                        : const Color(0xFF0F5B38),
                   ),
                 ],
               ),
@@ -363,7 +374,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
           child: _buildBentoCard(
             context: context,
             icon: Icons.scale_rounded,
-            iconColor: isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
+            iconColor: isDark
+                ? context.colorScheme.primary
+                : const Color(0xFF0F5B38),
             bgColor: isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
             label: 'Cân nặng',
             value: currentWeight != null
@@ -371,7 +384,8 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 : '-- kg',
             subtitle: currentWeight != null ? 'Hôm nay' : 'Chưa ghi',
             actionText: 'Ghi',
-            onAction: () => _showEnhancedWeightSheet(context, currentWeight, state),
+            onAction: () =>
+                _showEnhancedWeightSheet(context, currentWeight, state),
           ),
         ),
       ],
@@ -422,10 +436,14 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                   child: Icon(icon, size: 18, color: iconColor),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF2F6F3),
+                    color: isDark
+                        ? context.colorScheme.surfaceContainerHighest
+                        : const Color(0xFFF2F6F3),
                     borderRadius: BorderRadius.circular(AppRadius.pill),
                   ),
                   child: Text(
@@ -433,7 +451,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
+                      color: isDark
+                          ? context.colorScheme.primary
+                          : const Color(0xFF0F5B38),
                     ),
                   ),
                 ),
@@ -516,10 +536,11 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF2F6F3),
+                  color: isDark
+                      ? context.colorScheme.surfaceContainerHighest
+                      : const Color(0xFFF2F6F3),
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
                 child: Text(
@@ -527,7 +548,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
+                    color: isDark
+                        ? context.colorScheme.primary
+                        : const Color(0xFF0F5B38),
                   ),
                 ),
               ),
@@ -553,18 +576,28 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       height: 20,
                       decoration: BoxDecoration(
                         color: task.isCompleted
-                            ? (isDark ? context.colorScheme.primary : const Color(0xFF0F5B38))
+                            ? (isDark
+                                  ? context.colorScheme.primary
+                                  : const Color(0xFF0F5B38))
                             : Colors.transparent,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: task.isCompleted
-                              ? (isDark ? context.colorScheme.primary : const Color(0xFF0F5B38))
-                              : (isDark ? context.colorScheme.outlineVariant : const Color(0xFFC7D3CA)),
+                              ? (isDark
+                                    ? context.colorScheme.primary
+                                    : const Color(0xFF0F5B38))
+                              : (isDark
+                                    ? context.colorScheme.outlineVariant
+                                    : const Color(0xFFC7D3CA)),
                           width: 1.2,
                         ),
                       ),
                       child: task.isCompleted
-                          ? const Icon(Icons.check, size: 12, color: Colors.white)
+                          ? const Icon(
+                              Icons.check,
+                              size: 12,
+                              color: Colors.white,
+                            )
                           : null,
                     ),
                     const SizedBox(width: 12),
@@ -637,8 +670,12 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 title: 'Trợ lý Sức khỏe',
                 subtitle: 'Tâm trí & Thực đơn',
                 icon: Icons.psychology_outlined,
-                iconColor: isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
-                bgColor: isDark ? context.colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2),
+                iconColor: isDark
+                    ? context.colorScheme.primary
+                    : const Color(0xFF0F5B38),
+                bgColor: isDark
+                    ? context.colorScheme.surfaceContainerLow
+                    : const Color(0xFFF0F7F2),
                 onTap: () => context.push(AppRoutes.appPersonalizationCoach),
               ),
             ),
@@ -650,7 +687,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 subtitle: 'Tỷ lệ & Giờ nhịn',
                 icon: Icons.tune_rounded,
                 iconColor: const Color(0xFF2563EB),
-                bgColor: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
+                bgColor: isDark
+                    ? const Color(0xFF1E3A8A)
+                    : const Color(0xFFEFF6FF),
                 onTap: () =>
                     context.push(AppRoutes.appPersonalizationPlanEditor),
               ),
@@ -667,7 +706,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 subtitle: '30 ngày & Cân nặng',
                 icon: Icons.insights_rounded,
                 iconColor: const Color(0xFF7C3AED),
-                bgColor: isDark ? const Color(0xFF4C1D95) : const Color(0xFFF5F3FF),
+                bgColor: isDark
+                    ? const Color(0xFF4C1D95)
+                    : const Color(0xFFF5F3FF),
                 onTap: () =>
                     context.push(AppRoutes.appPersonalizationProgressTimeline),
               ),
@@ -680,8 +721,11 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 subtitle: 'Thiền, Thở & Bài tập',
                 icon: Icons.spa_outlined,
                 iconColor: const Color(0xFFD97706),
-                bgColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFFFBEB),
-                onTap: () => context.push(AppRoutes.appPersonalizationResources),
+                bgColor: isDark
+                    ? const Color(0xFF78350F)
+                    : const Color(0xFFFFFBEB),
+                onTap: () =>
+                    context.push(AppRoutes.appPersonalizationResources),
               ),
             ),
           ],
@@ -778,7 +822,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
             Icon(
               Icons.notifications_active_outlined,
               size: 20,
-              color: context.isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
+              color: context.isDark
+                  ? context.colorScheme.primary
+                  : const Color(0xFF0F5B38),
             ),
             SizedBox(width: 12),
             Expanded(
@@ -893,7 +939,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                     value: progress,
                     minHeight: 8,
                     backgroundColor: const Color(0xFFE0F2FE),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0284C7)),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Color(0xFF0284C7),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -913,7 +961,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       volume: '+150 ml',
                       icon: Icons.local_cafe_outlined,
                       onTap: () {
-                        ref.read(wellnessControllerProvider.notifier).logWaterDelta(150);
+                        ref
+                            .read(wellnessControllerProvider.notifier)
+                            .logWaterDelta(150);
                         Navigator.pop(ctx);
                       },
                     ),
@@ -924,7 +974,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       icon: Icons.local_drink_rounded,
                       isHighlight: true,
                       onTap: () {
-                        ref.read(wellnessControllerProvider.notifier).logWaterDelta(250);
+                        ref
+                            .read(wellnessControllerProvider.notifier)
+                            .logWaterDelta(250);
                         Navigator.pop(ctx);
                       },
                     ),
@@ -934,7 +986,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       volume: '+500 ml',
                       icon: Icons.water_drop_outlined,
                       onTap: () {
-                        ref.read(wellnessControllerProvider.notifier).logWaterDelta(500);
+                        ref
+                            .read(wellnessControllerProvider.notifier)
+                            .logWaterDelta(500);
                         Navigator.pop(ctx);
                       },
                     ),
@@ -963,10 +1017,14 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: isHighlight ? const Color(0xFFE0F2FE) : const Color(0xFFF8FAFC),
+            color: isHighlight
+                ? const Color(0xFFE0F2FE)
+                : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isHighlight ? const Color(0xFF0284C7) : const Color(0xFFE2E8F0),
+              color: isHighlight
+                  ? const Color(0xFF0284C7)
+                  : const Color(0xFFE2E8F0),
               width: isHighlight ? 1.2 : 0.8,
             ),
           ),
@@ -975,7 +1033,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
               Icon(
                 icon,
                 size: 24,
-                color: isHighlight ? const Color(0xFF0284C7) : const Color(0xFF64748B),
+                color: isHighlight
+                    ? const Color(0xFF0284C7)
+                    : const Color(0xFF64748B),
               ),
               const SizedBox(height: 6),
               Text(
@@ -992,7 +1052,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isHighlight ? const Color(0xFF0284C7) : const Color(0xFF0F172A),
+                  color: isHighlight
+                      ? const Color(0xFF0284C7)
+                      : const Color(0xFF0F172A),
                 ),
               ),
             ],
@@ -1126,7 +1188,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: () {
-          ref.read(wellnessControllerProvider.notifier).logWorkout(minutes, title);
+          ref
+              .read(wellnessControllerProvider.notifier)
+              .logWorkout(minutes, title);
           Navigator.pop(ctx);
         },
         borderRadius: BorderRadius.circular(14),
@@ -1270,8 +1334,8 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                               delta.abs() < 0.05
                                   ? 'Bằng cân nặng lúc bắt đầu ($startWeight kg)'
                                   : delta < 0
-                                      ? 'Giảm ${(delta.abs()).toStringAsFixed(1)} kg so với ban đầu'
-                                      : 'Tăng ${delta.toStringAsFixed(1)} kg so với ban đầu',
+                                  ? 'Giảm ${(delta.abs()).toStringAsFixed(1)} kg so với ban đầu'
+                                  : 'Tăng ${delta.toStringAsFixed(1)} kg so với ban đầu',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: delta < 0
@@ -1288,7 +1352,10 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                   const SizedBox(height: 20),
                   // Weight Stepper Display
                   Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 16,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF9FBF9),
                       borderRadius: BorderRadius.circular(20),
@@ -1298,10 +1365,14 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.remove_circle_outline_rounded, size: 32),
+                          icon: const Icon(
+                            Icons.remove_circle_outline_rounded,
+                            size: 32,
+                          ),
                           color: const Color(0xFF0F5B38),
                           onPressed: () {
-                            final current = double.tryParse(controller.text) ?? 62.0;
+                            final current =
+                                double.tryParse(controller.text) ?? 62.0;
                             final next = (current - 0.1).clamp(30.0, 250.0);
                             controller.text = next.toStringAsFixed(1);
                             setModalState(() {});
@@ -1312,7 +1383,9 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                           width: 110,
                           child: TextField(
                             controller: controller,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontSize: 32,
@@ -1334,10 +1407,14 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                         ),
                         const SizedBox(width: 16),
                         IconButton(
-                          icon: const Icon(Icons.add_circle_outline_rounded, size: 32),
+                          icon: const Icon(
+                            Icons.add_circle_outline_rounded,
+                            size: 32,
+                          ),
                           color: const Color(0xFF0F5B38),
                           onPressed: () {
-                            final current = double.tryParse(controller.text) ?? 62.0;
+                            final current =
+                                double.tryParse(controller.text) ?? 62.0;
                             final next = (current + 0.1).clamp(30.0, 250.0);
                             controller.text = next.toStringAsFixed(1);
                             setModalState(() {});
@@ -1353,11 +1430,15 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       onPressed: () {
                         final val = double.tryParse(controller.text);
                         if (val != null && val > 0) {
-                          ref.read(wellnessControllerProvider.notifier).logWeight(val);
+                          ref
+                              .read(wellnessControllerProvider.notifier)
+                              .logWeight(val);
                           Navigator.pop(ctx);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Đã ghi nhận cân nặng: ${val.toStringAsFixed(1)} kg'),
+                              content: Text(
+                                'Đã ghi nhận cân nặng: ${val.toStringAsFixed(1)} kg',
+                              ),
                               backgroundColor: const Color(0xFF0F5B38),
                             ),
                           );

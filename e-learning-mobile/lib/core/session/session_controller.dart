@@ -27,7 +27,7 @@ final sessionControllerProvider =
 
 class SessionController extends StateNotifier<SessionState> {
   SessionController(this._repository, [this._ref])
-      : super(const SessionState.initial());
+    : super(const SessionState.initial());
 
   final SessionRepository _repository;
   final Ref? _ref;
@@ -66,7 +66,9 @@ class SessionController extends StateNotifier<SessionState> {
 
     // Fire-and-forget background unregister (non-blocking for 100% instant logout)
     try {
-      _ref?.read(notificationsRepositoryProvider).unregisterCurrentDeviceToken();
+      _ref
+          ?.read(notificationsRepositoryProvider)
+          .unregisterCurrentDeviceToken();
     } catch (_) {}
 
     try {

@@ -20,9 +20,13 @@ class OfflineDownloadsScreen extends ConsumerWidget {
     final controller = ref.read(offlineDownloadControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+      backgroundColor: context.isDark
+          ? context.colorScheme.surface
+          : AppColors.background,
       appBar: AppBar(
-        backgroundColor: context.isDark ? context.colorScheme.surface : AppColors.background,
+        backgroundColor: context.isDark
+            ? context.colorScheme.surface
+            : AppColors.background,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
@@ -44,7 +48,10 @@ class OfflineDownloadsScreen extends ConsumerWidget {
           if (state.items.isNotEmpty)
             IconButton(
               tooltip: 'Xóa tất cả',
-              icon: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent),
+              icon: const Icon(
+                Icons.delete_sweep_outlined,
+                color: Colors.redAccent,
+              ),
               onPressed: () => _confirmDeleteAll(context, controller),
             ),
         ],
@@ -61,7 +68,9 @@ class OfflineDownloadsScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: context.isDark ? const Color(0xFF143823) : const Color(0xFFEFF5F1),
+                        color: context.isDark
+                            ? const Color(0xFF143823)
+                            : const Color(0xFFEFF5F1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -77,7 +86,8 @@ class OfflineDownloadsScreen extends ConsumerWidget {
                         children: [
                           Text(
                             'Dung lượng đã sử dụng',
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
                                   color: context.textSecondary(),
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -85,7 +95,8 @@ class OfflineDownloadsScreen extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             formatBytes(state.totalStorageBytes),
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: context.colorScheme.primary,
                                 ),
@@ -106,11 +117,20 @@ class OfflineDownloadsScreen extends ConsumerWidget {
                         onPressed: () => _confirmDeleteAll(context, controller),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.redAccent,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text('Xóa tất cả', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        child: const Text(
+                          'Xóa tất cả',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -121,13 +141,17 @@ class OfflineDownloadsScreen extends ConsumerWidget {
             Expanded(
               child: state.items.isEmpty
                   ? const AppEmptyView(
-                      message: 'Chưa có video hoặc tài liệu nào được tải về.\n'
+                      message:
+                          'Chưa có video hoặc tài liệu nào được tải về.\n'
                           'Bạn có thể bấm "Tải xem Offline" ở bài học để xem mà không cần mạng!',
                     )
                   : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
                       itemCount: state.items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.xs),
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppSpacing.xs),
                       itemBuilder: (context, index) {
                         final item = state.items[index];
                         return _buildItemTile(context, controller, item);
@@ -153,12 +177,18 @@ class OfflineDownloadsScreen extends ConsumerWidget {
           height: 42,
           decoration: BoxDecoration(
             color: item.isVideo
-                ? (context.isDark ? const Color(0xFF1C2D24) : const Color(0xFFEBF5EE))
-                : (context.isDark ? const Color(0xFF3B2A1E) : const Color(0xFFFFF3E0)),
+                ? (context.isDark
+                      ? const Color(0xFF1C2D24)
+                      : const Color(0xFFEBF5EE))
+                : (context.isDark
+                      ? const Color(0xFF3B2A1E)
+                      : const Color(0xFFFFF3E0)),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
-            item.isVideo ? Icons.play_circle_fill_rounded : Icons.description_rounded,
+            item.isVideo
+                ? Icons.play_circle_fill_rounded
+                : Icons.description_rounded,
             color: item.isVideo
                 ? context.colorScheme.primary
                 : (context.isDark ? Colors.orangeAccent : Colors.orange),
@@ -193,7 +223,11 @@ class OfflineDownloadsScreen extends ConsumerWidget {
           ],
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+          icon: const Icon(
+            Icons.delete_outline_rounded,
+            color: Colors.redAccent,
+            size: 20,
+          ),
           onPressed: () async {
             await controller.deleteDownload(item.id);
             if (context.mounted) {
@@ -206,11 +240,17 @@ class OfflineDownloadsScreen extends ConsumerWidget {
         onTap: () {
           if (item.isVideo) {
             context.push(
-              AppRoutes.mediaPlayerPath(courseId: item.courseId, lessonPartId: item.id),
+              AppRoutes.mediaPlayerPath(
+                courseId: item.courseId,
+                lessonPartId: item.id,
+              ),
             );
           } else {
             context.push(
-              AppRoutes.documentReaderPath(courseId: item.courseId, lessonPartId: item.id),
+              AppRoutes.documentReaderPath(
+                courseId: item.courseId,
+                lessonPartId: item.id,
+              ),
             );
           }
         },
@@ -218,12 +258,17 @@ class OfflineDownloadsScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmDeleteAll(BuildContext context, OfflineDownloadController controller) {
+  void _confirmDeleteAll(
+    BuildContext context,
+    OfflineDownloadController controller,
+  ) {
     showDialog<void>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
         title: const Text('Xóa tất cả bản tải?'),
-        content: const Text('Tất cả video và tài liệu offline sẽ bị xóa khỏi thiết bị.'),
+        content: const Text(
+          'Tất cả video và tài liệu offline sẽ bị xóa khỏi thiết bị.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
@@ -235,11 +280,16 @@ class OfflineDownloadsScreen extends ConsumerWidget {
               await controller.deleteAll();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Đã xóa toàn bộ nội dung offline.')),
+                  const SnackBar(
+                    content: Text('Đã xóa toàn bộ nội dung offline.'),
+                  ),
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Xóa tất cả'),
           ),
         ],
@@ -252,6 +302,8 @@ String formatBytes(int bytes) {
   if (bytes <= 0) return '0 B';
   if (bytes < 1024) return '$bytes B';
   if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-  if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  if (bytes < 1024 * 1024 * 1024) {
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
   return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
 }

@@ -29,13 +29,17 @@ class ArticlesRepository {
     final categories = await _api.getCategories();
     await _cacheService.set(
       _categoriesCacheKey,
-      categories.map((c) => {
-        'id': c.id,
-        'name': c.name,
-        'slug': c.slug,
-        'description': c.description,
-        'articleCount': c.articleCount,
-      }).toList(),
+      categories
+          .map(
+            (c) => {
+              'id': c.id,
+              'name': c.name,
+              'slug': c.slug,
+              'description': c.description,
+              'articleCount': c.articleCount,
+            },
+          )
+          .toList(),
     );
     return categories;
   }
@@ -50,7 +54,11 @@ class ArticlesRepository {
       return _api.searchArticles(query.trim(), page: page, pageSize: pageSize);
     }
     if (categoryId != null && categoryId.isNotEmpty) {
-      return _api.getArticlesByCategory(categoryId, page: page, pageSize: pageSize);
+      return _api.getArticlesByCategory(
+        categoryId,
+        page: page,
+        pageSize: pageSize,
+      );
     }
     return _api.getArticles(page: page, pageSize: pageSize);
   }

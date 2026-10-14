@@ -12,8 +12,8 @@ class WidgetPreviewGalleryScreen extends StatefulWidget {
       _WidgetPreviewGalleryScreenState();
 }
 
-class _WidgetPreviewGalleryScreenState
-    extends State<WidgetPreviewGalleryScreen> with SingleTickerProviderStateMixin {
+class _WidgetPreviewGalleryScreenState extends State<WidgetPreviewGalleryScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   MobileWidgetStateData _widgetData = MobileWidgetStateData.defaultData();
   bool _isSyncing = false;
@@ -121,7 +121,9 @@ class _WidgetPreviewGalleryScreenState
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppColors.primary,
-          unselectedLabelColor: isDark ? Colors.white60 : AppColors.textSecondary,
+          unselectedLabelColor: isDark
+              ? Colors.white60
+              : AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           tabs: const [
             Tab(text: 'Màn hình chính'),
@@ -136,7 +138,9 @@ class _WidgetPreviewGalleryScreenState
             // Top Toggle Bar
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: isDark ? const Color(0xFF1B2B23) : AppColors.mint.withValues(alpha: 0.5),
+              color: isDark
+                  ? const Color(0xFF1B2B23)
+                  : AppColors.mint.withValues(alpha: 0.5),
               child: Row(
                 children: [
                   const Icon(Icons.sync, size: 20, color: AppColors.primary),
@@ -144,7 +148,10 @@ class _WidgetPreviewGalleryScreenState
                   const Expanded(
                     child: Text(
                       'Tự động đồng bộ dữ liệu Widget',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   Switch.adaptive(
@@ -178,7 +185,10 @@ class _WidgetPreviewGalleryScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildWidgetCardHeader('1. Widget Nhỏ (2x2) - Chuỗi học tập', 'streak_small'),
+          _buildWidgetCardHeader(
+            '1. Widget Nhỏ (2x2) - Chuỗi học tập',
+            'streak_small',
+          ),
           const SizedBox(height: 10),
           Center(
             child: SmallStreakWidgetView(
@@ -190,7 +200,10 @@ class _WidgetPreviewGalleryScreenState
           _buildSelectButton('streak_small', 'Widget Nhỏ 2x2'),
 
           const SizedBox(height: 24),
-          _buildWidgetCardHeader('2. Widget Vừa (4x2) - Bài học dở dang', 'course_medium'),
+          _buildWidgetCardHeader(
+            '2. Widget Vừa (4x2) - Bài học dở dang',
+            'course_medium',
+          ),
           const SizedBox(height: 10),
           Center(
             child: MediumCourseWidgetView(
@@ -202,7 +215,10 @@ class _WidgetPreviewGalleryScreenState
           _buildSelectButton('course_medium', 'Widget Vừa 4x2'),
 
           const SizedBox(height: 24),
-          _buildWidgetCardHeader('3. Widget Lớn (4x4) - Bảng tin học tập', 'dashboard_large'),
+          _buildWidgetCardHeader(
+            '3. Widget Lớn (4x4) - Bảng tin học tập',
+            'dashboard_large',
+          ),
           const SizedBox(height: 10),
           Center(
             child: LargeDashboardWidgetView(
@@ -225,31 +241,34 @@ class _WidgetPreviewGalleryScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildWidgetCardHeader('1. Circular (Khung tròn 1x1)', 'lock_circular'),
-          const SizedBox(height: 12),
-          Center(
-            child: LockScreenCircularWidgetView(data: _widgetData),
+          _buildWidgetCardHeader(
+            '1. Circular (Khung tròn 1x1)',
+            'lock_circular',
           ),
+          const SizedBox(height: 12),
+          Center(child: LockScreenCircularWidgetView(data: _widgetData)),
           const SizedBox(height: 8),
           _buildSelectButton('lock_circular', 'Widget Màn hình khóa Tròn 1x1'),
 
           const SizedBox(height: 24),
           _buildWidgetCardHeader('2. Inline (Dòng chữ sát giờ)', 'lock_inline'),
           const SizedBox(height: 12),
-          Center(
-            child: LockScreenInlineWidgetView(data: _widgetData),
-          ),
+          Center(child: LockScreenInlineWidgetView(data: _widgetData)),
           const SizedBox(height: 8),
           _buildSelectButton('lock_inline', 'Widget Màn hình khóa Dòng đơn'),
 
           const SizedBox(height: 24),
-          _buildWidgetCardHeader('3. Rectangular (Khung chữ nhật 2x1)', 'lock_rectangular'),
-          const SizedBox(height: 12),
-          Center(
-            child: LockScreenRectangularWidgetView(data: _widgetData),
+          _buildWidgetCardHeader(
+            '3. Rectangular (Khung chữ nhật 2x1)',
+            'lock_rectangular',
           ),
+          const SizedBox(height: 12),
+          Center(child: LockScreenRectangularWidgetView(data: _widgetData)),
           const SizedBox(height: 8),
-          _buildSelectButton('lock_rectangular', 'Widget Màn hình khóa Khung nhật 2x1'),
+          _buildSelectButton(
+            'lock_rectangular',
+            'Widget Màn hình khóa Khung nhật 2x1',
+          ),
         ],
       ),
     );
@@ -261,11 +280,17 @@ class _WidgetPreviewGalleryScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildWidgetCardHeader('Thông báo Nhắc học Tương tác (Rich Notification Widget)', 'notification_banner'),
+          _buildWidgetCardHeader(
+            'Thông báo Nhắc học Tương tác (Rich Notification Widget)',
+            'notification_banner',
+          ),
           const SizedBox(height: 12),
           RichNotificationPreviewView(data: _widgetData),
           const SizedBox(height: 12),
-          _buildSelectButton('notification_banner', 'Thông báo Trung tâm Tương tác'),
+          _buildSelectButton(
+            'notification_banner',
+            'Thông báo Trung tâm Tương tác',
+          ),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(14),
@@ -326,7 +351,11 @@ class _WidgetPreviewGalleryScreenState
                 SizedBox(width: 4),
                 Text(
                   'ĐANG KÍCH HOẠT',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -407,7 +436,10 @@ class _WidgetPreviewGalleryScreenState
                 ? const SizedBox(
                     width: 14,
                     height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : const Icon(Icons.sync, size: 16),
             label: const Text('Đồng bộ ngay'),

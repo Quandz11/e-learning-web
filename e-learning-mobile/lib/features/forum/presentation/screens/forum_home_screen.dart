@@ -24,7 +24,11 @@ class ForumHomeScreen extends ConsumerWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: context.textPrimary(),
+          ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -68,7 +72,10 @@ class ForumHomeScreen extends ConsumerWidget {
               height: 48,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 itemCount: state.categories.length,
                 itemBuilder: (context, index) {
                   final cat = state.categories[index];
@@ -81,15 +88,22 @@ class ForumHomeScreen extends ConsumerWidget {
                         onTap: () => controller.selectCategory(cat.id),
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
+                                ? (isDark
+                                      ? colorScheme.primary
+                                      : const Color(0xFF0F5B38))
                                 : context.cardBg(),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isSelected
-                                  ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
+                                  ? (isDark
+                                        ? colorScheme.primary
+                                        : const Color(0xFF0F5B38))
                                   : context.cardBorder(),
                               width: 1,
                             ),
@@ -98,8 +112,12 @@ class ForumHomeScreen extends ConsumerWidget {
                             cat.name,
                             style: TextStyle(
                               fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-                              color: isSelected ? Colors.white : context.textSecondary(),
+                              fontWeight: isSelected
+                                  ? FontWeight.w500
+                                  : FontWeight.w400,
+                              color: isSelected
+                                  ? Colors.white
+                                  : context.textSecondary(),
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -125,96 +143,114 @@ class ForumHomeScreen extends ConsumerWidget {
                     ),
                   )
                 : state.error != null && state.threads.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.cloud_off_rounded, size: 48, color: context.textMuted()),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Không thể tải các chủ đề thảo luận',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: context.textPrimary(),
-                                  letterSpacing: -0.3,
-                                ),
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.cloud_off_rounded,
+                            size: 48,
+                            color: context.textMuted(),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Không thể tải các chủ đề thảo luận',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: context.textPrimary(),
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          OutlinedButton(
+                            onPressed: () => controller.refresh(),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: isDark
+                                  ? colorScheme.primary
+                                  : const Color(0xFF0F5B38),
+                              side: BorderSide(
+                                color: isDark
+                                    ? colorScheme.primary
+                                    : const Color(0xFF0F5B38),
                               ),
-                              const SizedBox(height: 16),
-                              OutlinedButton(
-                                onPressed: () => controller.refresh(),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
-                                  side: BorderSide(color: isDark ? colorScheme.primary : const Color(0xFF0F5B38)),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: const Text('Thử lại'),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ],
+                            ),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : state.threads.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? colorScheme.surfaceContainerHighest
+                                : const Color(0xFFEBF5EE),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.forum_outlined,
+                            size: 32,
+                            color: isDark
+                                ? colorScheme.primary
+                                : const Color(0xFF0F5B38),
                           ),
                         ),
-                      )
-                    : state.threads.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 64,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFEBF5EE),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Icon(
-                                    Icons.forum_outlined,
-                                    size: 32,
-                                    color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Chưa có bài thảo luận nào',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: context.textPrimary(),
-                                    letterSpacing: -0.3,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Hãy là người đầu tiên đặt câu hỏi trong chuyên mục này!',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w300,
-                                    color: context.textSecondary(),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
-                            onRefresh: () => controller.refresh(),
-                            child: ListView.separated(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-                              itemCount: state.threads.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 12),
-                              itemBuilder: (context, index) {
-                                final thread = state.threads[index];
-                                return _ThreadCard(
-                                  thread: thread,
-                                  onTap: () {
-                                    context.push('/app/community/threads/${thread.id}');
-                                  },
-                                );
-                              },
-                            ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Chưa có bài thảo luận nào',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: context.textPrimary(),
+                            letterSpacing: -0.3,
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Hãy là người đầu tiên đặt câu hỏi trong chuyên mục này!',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w300,
+                            color: context.textSecondary(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    color: isDark
+                        ? colorScheme.primary
+                        : const Color(0xFF0F5B38),
+                    onRefresh: () => controller.refresh(),
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+                      itemCount: state.threads.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final thread = state.threads[index];
+                        return _ThreadCard(
+                          thread: thread,
+                          onTap: () {
+                            context.push('/app/community/threads/${thread.id}');
+                          },
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -223,10 +259,7 @@ class ForumHomeScreen extends ConsumerWidget {
 }
 
 class _ThreadCard extends StatelessWidget {
-  const _ThreadCard({
-    required this.thread,
-    required this.onTap,
-  });
+  const _ThreadCard({required this.thread, required this.onTap});
 
   final ForumThread thread;
   final VoidCallback onTap;
@@ -267,13 +300,17 @@ class _ThreadCard extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFF0F5B38).withValues(alpha: 0.1),
+                      color: isDark
+                          ? colorScheme.surfaceContainerHighest
+                          : const Color(0xFF0F5B38).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.person_outline_rounded,
                       size: 16,
-                      color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                      color: isDark
+                          ? colorScheme.primary
+                          : const Color(0xFF0F5B38),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -333,7 +370,9 @@ class _ThreadCard extends StatelessWidget {
                   Icon(
                     Icons.mode_comment_outlined,
                     size: 14,
-                    color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                    color: isDark
+                        ? colorScheme.primary
+                        : const Color(0xFF0F5B38),
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -341,11 +380,17 @@ class _ThreadCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                      color: isDark
+                          ? colorScheme.primary
+                          : const Color(0xFF0F5B38),
                     ),
                   ),
                   const SizedBox(width: 14),
-                  Icon(Icons.visibility_outlined, size: 14, color: context.textMuted()),
+                  Icon(
+                    Icons.visibility_outlined,
+                    size: 14,
+                    color: context.textMuted(),
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${thread.viewCount} xem',

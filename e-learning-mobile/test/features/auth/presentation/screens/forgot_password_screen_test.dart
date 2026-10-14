@@ -10,42 +10,44 @@ import '../../../../helpers/fake_auth_repository.dart';
 import '../../../../helpers/in_memory_session_storage.dart';
 
 void main() {
-  testWidgets('forgot-password screen renders email field by default and validates', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_pumpForgotPasswordScreen());
+  testWidgets(
+    'forgot-password screen renders email field by default and validates',
+    (tester) async {
+      await tester.pumpWidget(_pumpForgotPasswordScreen());
 
-    expect(find.text('Khôi phục mật khẩu'), findsOneWidget);
-    expect(
-      find.byKey(const Key('forgot_password_email_field')),
-      findsOneWidget,
-    );
+      expect(find.text('Khôi phục mật khẩu'), findsOneWidget);
+      expect(
+        find.byKey(const Key('forgot_password_email_field')),
+        findsOneWidget,
+      );
 
-    await tester.tap(find.byKey(const Key('forgot_password_submit_button')));
-    await tester.pump();
+      await tester.tap(find.byKey(const Key('forgot_password_submit_button')));
+      await tester.pump();
 
-    expect(find.text('Vui lòng nhập địa chỉ email.'), findsOneWidget);
-  });
+      expect(find.text('Vui lòng nhập địa chỉ email.'), findsOneWidget);
+    },
+  );
 
-  testWidgets('forgot-password screen switches to phone tab and validates phone input', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_pumpForgotPasswordScreen());
+  testWidgets(
+    'forgot-password screen switches to phone tab and validates phone input',
+    (tester) async {
+      await tester.pumpWidget(_pumpForgotPasswordScreen());
 
-    // Switch to Phone tab
-    await tester.tap(find.text('Số điện thoại'));
-    await tester.pumpAndSettle();
+      // Switch to Phone tab
+      await tester.tap(find.text('Số điện thoại'));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const Key('forgot_password_phone_field')),
-      findsOneWidget,
-    );
+      expect(
+        find.byKey(const Key('forgot_password_phone_field')),
+        findsOneWidget,
+      );
 
-    await tester.tap(find.byKey(const Key('forgot_password_submit_button')));
-    await tester.pump();
+      await tester.tap(find.byKey(const Key('forgot_password_submit_button')));
+      await tester.pump();
 
-    expect(find.text('Vui lòng nhập số điện thoại.'), findsOneWidget);
-  });
+      expect(find.text('Vui lòng nhập số điện thoại.'), findsOneWidget);
+    },
+  );
 }
 
 Widget _pumpForgotPasswordScreen() {

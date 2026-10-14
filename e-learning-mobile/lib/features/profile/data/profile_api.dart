@@ -68,10 +68,7 @@ class ProfileApi {
   }) async {
     try {
       final formData = FormData.fromMap({
-        'file': MultipartFile.fromBytes(
-          bytes,
-          filename: fileName,
-        ),
+        'file': MultipartFile.fromBytes(bytes, filename: fileName),
       });
       final data = await _apiClient.post<Object?>(
         '/profile/upload-avatar',

@@ -145,10 +145,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       }
 
       final bytes = await picked.readAsBytes();
-      final url = await ref.read(profileRepositoryProvider).uploadAvatar(
-        bytes: bytes,
-        fileName: picked.name,
-      );
+      final url = await ref
+          .read(profileRepositoryProvider)
+          .uploadAvatar(bytes: bytes, fileName: picked.name);
       if (url.isNotEmpty && mounted) {
         final updated = profile.copyWith(avatarUrl: url);
         ref.read(profileControllerProvider.notifier).updateProfile(updated);
@@ -161,14 +160,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       }
     } on PlatformException catch (e) {
       if (mounted) {
-        final msg = e.code == 'camera_access_denied' || e.code == 'photo_access_denied'
+        final msg =
+            e.code == 'camera_access_denied' || e.code == 'photo_access_denied'
             ? 'Vui lòng cấp quyền truy cập máy ảnh hoặc thư viện trong cài đặt máy.'
             : 'Không thể mở thư viện/máy ảnh (${e.code}). Vui lòng kiểm tra quyền trên thiết bị.';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            backgroundColor: AppColors.error,
-          ),
+          SnackBar(content: Text(msg), backgroundColor: AppColors.error),
         );
       }
     } catch (e) {
@@ -222,7 +219,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           // Avatar Picker Pod
           Center(
             child: GestureDetector(
-              onTap: _isUploadingAvatar ? null : () => _showAvatarSourceSheet(profile),
+              onTap: _isUploadingAvatar
+                  ? null
+                  : () => _showAvatarSourceSheet(profile),
               behavior: HitTestBehavior.opaque,
               child: Stack(
                 children: [
@@ -238,12 +237,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       ),
                     ),
                     child: ClipOval(
-                      child: profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+                      child:
+                          profile.avatarUrl != null &&
+                              profile.avatarUrl!.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: profile.avatarUrl!,
                               fit: BoxFit.cover,
                               placeholder: (_, __) => const Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                               errorWidget: (_, __, ___) => const Icon(
                                 Icons.person_rounded,
@@ -332,10 +335,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             decoration: BoxDecoration(
               color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             child: Row(
               children: [
@@ -343,12 +343,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFEFF6FF),
+                    color: context.isDark
+                        ? context.colorScheme.surfaceContainerHighest
+                        : const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     Icons.mail_outline_rounded,
-                    color: context.isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
+                    color: context.isDark
+                        ? const Color(0xFF60A5FA)
+                        : const Color(0xFF2563EB),
                     size: 18,
                   ),
                 ),

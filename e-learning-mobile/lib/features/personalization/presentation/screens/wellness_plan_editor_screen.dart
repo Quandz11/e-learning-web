@@ -142,10 +142,7 @@ class _WellnessPlanEditorScreenState
                 decoration: BoxDecoration(
                   color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(
-                    color: context.cardBorder(),
-                    width: 0.8,
-                  ),
+                  border: Border.all(color: context.cardBorder(), width: 0.8),
                 ),
                 child: Row(
                   children: [
@@ -153,12 +150,16 @@ class _WellnessPlanEditorScreenState
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFE8F5E9),
+                        color: isDark
+                            ? colorScheme.surfaceContainerHighest
+                            : const Color(0xFFE8F5E9),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.tune_outlined,
-                        color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                        color: isDark
+                            ? const Color(0xFF34D399)
+                            : const Color(0xFF0F5B38),
                         size: 20,
                       ),
                     ),
@@ -234,15 +235,20 @@ class _WellnessPlanEditorScreenState
                         borderRadius: BorderRadius.circular(AppRadius.lg),
                         border: Border.all(
                           color: isSelected
-                              ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                              ? (isDark
+                                    ? const Color(0xFF34D399)
+                                    : const Color(0xFF0F5B38))
                               : context.cardBorder(),
                           width: isSelected ? 1.5 : 0.8,
                         ),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
-                                      .withValues(alpha: 0.1),
+                                  color:
+                                      (isDark
+                                              ? const Color(0xFF34D399)
+                                              : const Color(0xFF0F5B38))
+                                          .withValues(alpha: 0.1),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -262,7 +268,9 @@ class _WellnessPlanEditorScreenState
                                       ? FontWeight.w500
                                       : FontWeight.w400,
                                   color: isSelected
-                                      ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
+                                      ? (isDark
+                                            ? const Color(0xFF34D399)
+                                            : const Color(0xFF0F5B38))
                                       : context.textPrimary(),
                                 ),
                               ),
@@ -271,7 +279,9 @@ class _WellnessPlanEditorScreenState
                                 Icon(
                                   Icons.check_circle_rounded,
                                   size: 18,
-                                  color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                                  color: isDark
+                                      ? const Color(0xFF34D399)
+                                      : const Color(0xFF0F5B38),
                                 ),
                             ],
                           ),
@@ -296,14 +306,20 @@ class _WellnessPlanEditorScreenState
                                     flex: fH,
                                     child: Container(
                                       color: isSelected
-                                          ? (isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38))
-                                          : (isDark ? const Color(0xFF2E6F40) : const Color(0xFF7A9E88)),
+                                          ? (isDark
+                                                ? const Color(0xFF34D399)
+                                                : const Color(0xFF0F5B38))
+                                          : (isDark
+                                                ? const Color(0xFF2E6F40)
+                                                : const Color(0xFF7A9E88)),
                                     ),
                                   ),
                                   Expanded(
                                     flex: eH,
                                     child: Container(
-                                      color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFE5E7EB),
+                                      color: isDark
+                                          ? colorScheme.surfaceContainerHighest
+                                          : const Color(0xFFE5E7EB),
                                     ),
                                   ),
                                 ],
@@ -337,7 +353,9 @@ class _WellnessPlanEditorScreenState
                     builder: (context, child) {
                       return MediaQuery(
                         data: MediaQuery.of(context).copyWith(
-                          textScaler: MediaQuery.of(context).textScaler.clamp(maxScaleFactor: 1.0),
+                          textScaler: MediaQuery.of(
+                            context,
+                          ).textScaler.clamp(maxScaleFactor: 1.0),
                         ),
                         child: child ?? const SizedBox.shrink(),
                       );
@@ -355,10 +373,7 @@ class _WellnessPlanEditorScreenState
                   decoration: BoxDecoration(
                     color: context.cardBg(),
                     borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(
-                      color: context.cardBorder(),
-                      width: 0.8,
-                    ),
+                    border: Border.all(color: context.cardBorder(), width: 0.8),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -389,13 +404,17 @@ class _WellnessPlanEditorScreenState
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF3F4F6),
+                          color: isDark
+                              ? colorScheme.surfaceContainerHighest
+                              : const Color(0xFFF3F4F6),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
                           Icons.access_time_rounded,
                           size: 20,
-                          color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                          color: isDark
+                              ? const Color(0xFF34D399)
+                              : const Color(0xFF0F5B38),
                         ),
                       ),
                     ],
@@ -457,8 +476,8 @@ class _WellnessPlanEditorScreenState
                             ),
                             validator: (val) =>
                                 double.tryParse(val ?? '') == null
-                                    ? 'Nhập số hợp lệ'
-                                    : null,
+                                ? 'Nhập số hợp lệ'
+                                : null,
                           ),
                         ],
                       ),
@@ -496,7 +515,9 @@ class _WellnessPlanEditorScreenState
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w300,
-                              color: isDark ? const Color(0xFF34D399) : const Color(0xFF0F5B38),
+                              color: isDark
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFF0F5B38),
                             ),
                             decoration: const InputDecoration(
                               isDense: true,
@@ -505,8 +526,8 @@ class _WellnessPlanEditorScreenState
                             ),
                             validator: (val) =>
                                 double.tryParse(val ?? '') == null
-                                    ? 'Nhập số hợp lệ'
-                                    : null,
+                                ? 'Nhập số hợp lệ'
+                                : null,
                           ),
                         ],
                       ),
@@ -525,7 +546,8 @@ class _WellnessPlanEditorScreenState
                       ? null
                       : () async {
                           if (_formKey.currentState!.validate()) {
-                            final startMinute = _fastingStartTime.hour * 60 +
+                            final startMinute =
+                                _fastingStartTime.hour * 60 +
                                 _fastingStartTime.minute;
                             await ref
                                 .read(wellnessControllerProvider.notifier)
@@ -545,8 +567,9 @@ class _WellnessPlanEditorScreenState
                                 );
 
                             if (context.mounted) {
-                              final updatedState =
-                                  ref.read(wellnessControllerProvider);
+                              final updatedState = ref.read(
+                                wellnessControllerProvider,
+                              );
                               if (updatedState.status ==
                                   WellnessStatus.success) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -554,7 +577,9 @@ class _WellnessPlanEditorScreenState
                                     content: const Text(
                                       'Lưu kế hoạch nhịn ăn thành công!',
                                     ),
-                                    backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
+                                    backgroundColor: isDark
+                                        ? const Color(0xFF108A55)
+                                        : const Color(0xFF0F5B38),
                                   ),
                                 );
                                 Navigator.pop(context);
@@ -572,7 +597,9 @@ class _WellnessPlanEditorScreenState
                           }
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isDark ? const Color(0xFF108A55) : const Color(0xFF0F5B38),
+                    backgroundColor: isDark
+                        ? const Color(0xFF108A55)
+                        : const Color(0xFF0F5B38),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -605,4 +632,3 @@ class _WellnessPlanEditorScreenState
     );
   }
 }
-

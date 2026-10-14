@@ -22,7 +22,11 @@ class NotificationInboxScreen extends ConsumerWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: colorScheme.onSurface),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: colorScheme.onSurface,
+          ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -49,7 +53,9 @@ class NotificationInboxScreen extends ConsumerWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             onPressed: () {
-              ref.read(notificationsControllerProvider.notifier).markAllAsRead();
+              ref
+                  .read(notificationsControllerProvider.notifier)
+                  .markAllAsRead();
             },
             child: const Text(
               'Đã đọc tất cả',
@@ -77,7 +83,11 @@ class NotificationInboxScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.cloud_off_rounded, size: 48, color: Color(0xFFA5A9A5)),
+                const Icon(
+                  Icons.cloud_off_rounded,
+                  size: 48,
+                  color: Color(0xFFA5A9A5),
+                ),
                 const SizedBox(height: 16),
                 const Text(
                   'Không thể tải thông báo',
@@ -106,7 +116,9 @@ class NotificationInboxScreen extends ConsumerWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFF0F5B38),
                     side: const BorderSide(color: Color(0xFF0F5B38)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Text('Thử lại'),
                 ),
@@ -225,9 +237,7 @@ class _NotificationCard extends StatelessWidget {
     final unreadBg = isDark
         ? colorScheme.surfaceContainerHighest
         : const Color(0xFFF4F9F5);
-    final readBg = isDark
-        ? colorScheme.surfaceContainerLow
-        : Colors.white;
+    final readBg = isDark ? colorScheme.surfaceContainerLow : Colors.white;
 
     return Material(
       color: Colors.transparent,
@@ -241,8 +251,12 @@ class _NotificationCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: item.isRead
-                  ? (isDark ? colorScheme.outlineVariant : const Color(0xFFE9EBEA))
-                  : (isDark ? colorScheme.primary.withValues(alpha: 0.5) : const Color(0xFFD4E8DC)),
+                  ? (isDark
+                        ? colorScheme.outlineVariant
+                        : const Color(0xFFE9EBEA))
+                  : (isDark
+                        ? colorScheme.primary.withValues(alpha: 0.5)
+                        : const Color(0xFFD4E8DC)),
               width: 1,
             ),
             boxShadow: [
@@ -262,8 +276,12 @@ class _NotificationCard extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: item.isRead
-                      ? (isDark ? colorScheme.surfaceContainerLowest : const Color(0xFFF1F3F2))
-                      : colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.12),
+                      ? (isDark
+                            ? colorScheme.surfaceContainerLowest
+                            : const Color(0xFFF1F3F2))
+                      : colorScheme.primary.withValues(
+                          alpha: isDark ? 0.25 : 0.12,
+                        ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -272,8 +290,12 @@ class _NotificationCard extends StatelessWidget {
                       : Icons.notifications_active_rounded,
                   size: 20,
                   color: item.isRead
-                      ? (isDark ? colorScheme.onSurfaceVariant : const Color(0xFF717873))
-                      : (isDark ? colorScheme.onPrimaryContainer : const Color(0xFF0F5B38)),
+                      ? (isDark
+                            ? colorScheme.onSurfaceVariant
+                            : const Color(0xFF717873))
+                      : (isDark
+                            ? colorScheme.onPrimaryContainer
+                            : const Color(0xFF0F5B38)),
                 ),
               ),
               const SizedBox(width: 14),
@@ -288,8 +310,9 @@ class _NotificationCard extends StatelessWidget {
                             item.title,
                             style: TextStyle(
                               fontSize: 15,
-                              fontWeight:
-                                  item.isRead ? FontWeight.w500 : FontWeight.w600,
+                              fontWeight: item.isRead
+                                  ? FontWeight.w500
+                                  : FontWeight.w600,
                               color: colorScheme.onSurface,
                               letterSpacing: -0.3,
                             ),

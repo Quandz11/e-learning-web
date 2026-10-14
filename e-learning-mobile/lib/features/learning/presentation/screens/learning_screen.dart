@@ -42,7 +42,9 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
     final controller = ref.read(learningControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+      backgroundColor: context.isDark
+          ? context.colorScheme.surface
+          : const Color(0xFFFBFBFA),
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
@@ -145,10 +147,7 @@ class _LearningContentState extends State<_LearningContent> {
           decoration: BoxDecoration(
             color: context.cardBg(),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: context.cardBorder(),
-              width: 0.8,
-            ),
+            border: Border.all(color: context.cardBorder(), width: 0.8),
             boxShadow: context.isDark
                 ? null
                 : const [
@@ -165,11 +164,16 @@ class _LearningContentState extends State<_LearningContent> {
                 child: _buildBentoMetricCol(
                   context: context,
                   label: 'Đang học',
-                  value: '${allEnrollments.where((e) => !e.isCompleted).length}',
+                  value:
+                      '${allEnrollments.where((e) => !e.isCompleted).length}',
                   unit: 'khóa',
                   icon: Icons.auto_stories_outlined,
-                  color: context.isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
-                  bgColor: context.isDark ? context.colorScheme.surfaceContainerLow : const Color(0xFFF0F7F2),
+                  color: context.isDark
+                      ? context.colorScheme.primary
+                      : const Color(0xFF0F5B38),
+                  bgColor: context.isDark
+                      ? context.colorScheme.surfaceContainerLow
+                      : const Color(0xFFF0F7F2),
                 ),
               ),
               Container(height: 36, width: 0.8, color: context.cardBorder()),
@@ -181,7 +185,9 @@ class _LearningContentState extends State<_LearningContent> {
                   unit: 'khóa',
                   icon: Icons.verified_outlined,
                   color: const Color(0xFF108A55),
-                  bgColor: context.isDark ? const Color(0xFF064E3B).withValues(alpha: 0.4) : const Color(0xFFEDF7F1),
+                  bgColor: context.isDark
+                      ? const Color(0xFF064E3B).withValues(alpha: 0.4)
+                      : const Color(0xFFEDF7F1),
                 ),
               ),
               Container(height: 36, width: 0.8, color: context.cardBorder()),
@@ -193,7 +199,9 @@ class _LearningContentState extends State<_LearningContent> {
                   unit: 'khóa',
                   icon: Icons.explore_outlined,
                   color: const Color(0xFF2563EB),
-                  bgColor: context.isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.4) : const Color(0xFFEFF6FF),
+                  bgColor: context.isDark
+                      ? const Color(0xFF1E3A8A).withValues(alpha: 0.4)
+                      : const Color(0xFFEFF6FF),
                 ),
               ),
             ],
@@ -245,14 +253,14 @@ class _LearningContentState extends State<_LearningContent> {
       label: Text(label),
       selected: selected,
       selectedColor: AppColors.primary,
-      backgroundColor: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
+      backgroundColor: isDark
+          ? colorScheme.surfaceContainerHighest
+          : Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.pill),
         side: BorderSide(
-          color: selected
-              ? AppColors.primary
-              : context.cardBorder(),
+          color: selected ? AppColors.primary : context.cardBorder(),
           width: 0.8,
         ),
       ),
@@ -493,7 +501,8 @@ class _EnrollmentCard extends StatelessWidget {
       label:
           'Khóa học ${enrollment.courseTitle}. Đã hoàn thành ${enrollment.progressPercentage} phần trăm.',
       child: AppCard(
-        onTap: () => context.push(AppRoutes.courseDetailPath(enrollment.courseId)),
+        onTap: () =>
+            context.push(AppRoutes.courseDetailPath(enrollment.courseId)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -524,12 +533,18 @@ class _EnrollmentCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isDone
-                          ? (context.isDark ? const Color(0xFF064E3B).withValues(alpha: 0.4) : const Color(0xFFF0FDF4))
-                          : (context.isDark ? context.colorScheme.surfaceContainerHighest : const Color(0xFFF0F7F2)),
+                          ? (context.isDark
+                                ? const Color(0xFF064E3B).withValues(alpha: 0.4)
+                                : const Color(0xFFF0FDF4))
+                          : (context.isDark
+                                ? context.colorScheme.surfaceContainerHighest
+                                : const Color(0xFFF0F7F2)),
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                       border: Border.all(
                         color: isDone
-                            ? (context.isDark ? const Color(0xFF059669) : const Color(0xFFBBF7D0))
+                            ? (context.isDark
+                                  ? const Color(0xFF059669)
+                                  : const Color(0xFFBBF7D0))
                             : context.cardBorder(),
                         width: 0.8,
                       ),
@@ -538,8 +553,12 @@ class _EnrollmentCard extends StatelessWidget {
                       _enrollmentStatusLabel(enrollment),
                       style: textTheme.labelSmall?.copyWith(
                         color: isDone
-                            ? (context.isDark ? const Color(0xFF34D399) : const Color(0xFF16A34A))
-                            : (context.isDark ? context.colorScheme.primary : AppColors.primary),
+                            ? (context.isDark
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFF16A34A))
+                            : (context.isDark
+                                  ? context.colorScheme.primary
+                                  : AppColors.primary),
                         fontWeight: FontWeight.w500,
                         fontSize: 11,
                       ),
@@ -576,7 +595,9 @@ class _EnrollmentCard extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 6,
-                      backgroundColor: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      backgroundColor: colorScheme.outlineVariant.withValues(
+                        alpha: 0.5,
+                      ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         isDone ? AppColors.success : AppColors.primary,
                       ),
@@ -725,9 +746,9 @@ class _SectionWrapper extends StatelessWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.3,
-              ),
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.3,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         child,

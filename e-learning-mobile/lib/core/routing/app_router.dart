@@ -68,10 +68,9 @@ class AppRouterNotifier extends ChangeNotifier {
       forgotPasswordChallengeControllerProvider,
       (_, __) => notifyListeners(),
     );
-    _ref.listen<bool>(
-      hasSeenOnboardingProvider,
-      (prev, next) { if (prev != next) notifyListeners(); },
-    );
+    _ref.listen<bool>(hasSeenOnboardingProvider, (prev, next) {
+      if (prev != next) notifyListeners();
+    });
   }
 
   final Ref _ref;
@@ -293,7 +292,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'security',
                 builder: (_, __) => const SecurityScreen(),
-                routes: [GoRoute(path: 'devices', builder: (_, __) => const DeviceSessionsScreen())],
+                routes: [
+                  GoRoute(
+                    path: 'devices',
+                    builder: (_, __) => const DeviceSessionsScreen(),
+                  ),
+                ],
               ),
             ],
           ),

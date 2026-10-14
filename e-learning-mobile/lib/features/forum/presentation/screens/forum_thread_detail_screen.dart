@@ -13,10 +13,12 @@ class ForumThreadDetailScreen extends ConsumerStatefulWidget {
   final String threadId;
 
   @override
-  ConsumerState<ForumThreadDetailScreen> createState() => _ForumThreadDetailScreenState();
+  ConsumerState<ForumThreadDetailScreen> createState() =>
+      _ForumThreadDetailScreenState();
 }
 
-class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScreen> {
+class _ForumThreadDetailScreenState
+    extends ConsumerState<ForumThreadDetailScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSubmitting = false;
 
@@ -42,9 +44,9 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
       ref.invalidate(forumThreadDetailProvider(widget.threadId));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không thể gửi phản hồi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Không thể gửi phản hồi: $e')));
       }
     } finally {
       if (mounted) {
@@ -69,7 +71,11 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: context.textPrimary(),
+          ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -101,9 +107,7 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                   ),
                 ),
               ),
-              error: (error, _) => Center(
-                child: Text('Lỗi: $error'),
-              ),
+              error: (error, _) => Center(child: Text('Lỗi: $error')),
               data: (thread) {
                 final dateFormat = DateFormat('HH:mm - dd/MM/yyyy');
 
@@ -116,7 +120,10 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                       decoration: BoxDecoration(
                         color: context.cardBg(),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: context.cardBorder(), width: 1),
+                        border: Border.all(
+                          color: context.cardBorder(),
+                          width: 1,
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,13 +134,19 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFF0F5B38).withValues(alpha: 0.1),
+                                  color: isDark
+                                      ? colorScheme.surfaceContainerHighest
+                                      : const Color(
+                                          0xFF0F5B38,
+                                        ).withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   Icons.person_outline_rounded,
                                   size: 20,
-                                  color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                                  color: isDark
+                                      ? colorScheme.primary
+                                      : const Color(0xFF0F5B38),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -151,7 +164,9 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                                       ),
                                     ),
                                     Text(
-                                      dateFormat.format(thread.createdAt.toLocal()),
+                                      dateFormat.format(
+                                        thread.createdAt.toLocal(),
+                                      ),
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w300,
@@ -207,7 +222,9 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                            isDark
+                                ? colorScheme.primary
+                                : const Color(0xFF0F5B38),
                           ),
                         ),
                       ),
@@ -233,7 +250,10 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                           children: posts.map((post) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 10),
-                              child: _PostCard(post: post, dateFormat: dateFormat),
+                              child: _PostCard(
+                                post: post,
+                                dateFormat: dateFormat,
+                              ),
                             );
                           }).toList(),
                         );
@@ -251,11 +271,15 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
               16,
               10,
               16,
-              10 + MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
+              10 +
+                  MediaQuery.of(context).viewInsets.bottom +
+                  MediaQuery.of(context).padding.bottom,
             ),
             decoration: BoxDecoration(
               color: context.cardBg(),
-              border: Border(top: BorderSide(color: context.cardBorder(), width: 1)),
+              border: Border(
+                top: BorderSide(color: context.cardBorder(), width: 1),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -269,13 +293,18 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF4F6F5),
+                      color: isDark
+                          ? colorScheme.surfaceContainerHighest
+                          : const Color(0xFFF4F6F5),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: TextField(
                       controller: _commentController,
-                      style: TextStyle(fontSize: 14, color: context.textPrimary()),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.textPrimary(),
+                      ),
                       maxLines: 3,
                       minLines: 1,
                       decoration: InputDecoration(
@@ -293,7 +322,9 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                         disabledBorder: InputBorder.none,
                         errorBorder: InputBorder.none,
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                        ),
                       ),
                     ),
                   ),
@@ -309,7 +340,9 @@ class _ForumThreadDetailScreenState extends ConsumerState<ForumThreadDetailScree
                         )
                       : Icon(
                           Icons.send_rounded,
-                          color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
+                          color: isDark
+                              ? colorScheme.primary
+                              : const Color(0xFF0F5B38),
                         ),
                 ),
               ],
@@ -348,7 +381,9 @@ class _PostCard extends StatelessWidget {
                 width: 26,
                 height: 26,
                 decoration: BoxDecoration(
-                  color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFF0F5B38).withValues(alpha: 0.08),
+                  color: isDark
+                      ? colorScheme.surfaceContainerHighest
+                      : const Color(0xFF0F5B38).withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

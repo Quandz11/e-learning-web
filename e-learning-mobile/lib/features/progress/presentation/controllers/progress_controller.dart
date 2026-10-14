@@ -1,4 +1,4 @@
-﻿import 'package:e_learning_mobile/core/errors/app_failure.dart';
+import 'package:e_learning_mobile/core/errors/app_failure.dart';
 import 'package:e_learning_mobile/features/progress/data/models/progress_models.dart';
 import 'package:e_learning_mobile/features/progress/data/progress_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,8 +31,8 @@ class ProgressState {
 
 final progressControllerProvider =
     StateNotifierProvider<ProgressController, ProgressState>((ref) {
-  return ProgressController(ref.read(progressRepositoryProvider));
-});
+      return ProgressController(ref.read(progressRepositoryProvider));
+    });
 
 class ProgressController extends StateNotifier<ProgressState> {
   ProgressController(this._repository) : super(const ProgressState());
@@ -43,15 +43,9 @@ class ProgressController extends StateNotifier<ProgressState> {
     state = state.copyWith(status: ProgressStatus.loading);
     try {
       final summary = await _repository.getProgressSummary();
-      state = ProgressState(
-        status: ProgressStatus.success,
-        summary: summary,
-      );
+      state = ProgressState(status: ProgressStatus.success, summary: summary);
     } on AppFailure catch (e) {
-      state = ProgressState(
-        status: ProgressStatus.failure,
-        failure: e,
-      );
+      state = ProgressState(status: ProgressStatus.failure, failure: e);
     } catch (e) {
       state = ProgressState(
         status: ProgressStatus.failure,

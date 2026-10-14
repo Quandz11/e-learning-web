@@ -8,11 +8,7 @@ class SmallStreakWidgetView extends StatelessWidget {
   final MobileWidgetStateData data;
   final VoidCallback? onTap;
 
-  const SmallStreakWidgetView({
-    super.key,
-    required this.data,
-    this.onTap,
-  });
+  const SmallStreakWidgetView({super.key, required this.data, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -57,17 +53,16 @@ class SmallStreakWidgetView extends StatelessWidget {
                     color: const Color(0xFFFFECEB),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    '🔥',
-                    style: TextStyle(fontSize: 14),
-                  ),
+                  child: const Text('🔥', style: TextStyle(fontSize: 14)),
                 ),
                 Text(
                   '${data.streakDays} ngày',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? const Color(0xFFFF8A65) : const Color(0xFFE65100),
+                    color: isDark
+                        ? const Color(0xFFFF8A65)
+                        : const Color(0xFFE65100),
                   ),
                 ),
               ],
@@ -84,7 +79,9 @@ class SmallStreakWidgetView extends StatelessWidget {
                       CircularProgressIndicator(
                         value: data.goalProgressRatio,
                         strokeWidth: 4,
-                        backgroundColor: isDark ? const Color(0xFF2C3E35) : AppColors.mint,
+                        backgroundColor: isDark
+                            ? const Color(0xFF2C3E35)
+                            : AppColors.mint,
                         color: primaryColor,
                       ),
                       Text(
@@ -145,11 +142,7 @@ class MediumCourseWidgetView extends StatelessWidget {
   final MobileWidgetStateData data;
   final VoidCallback? onTap;
 
-  const MediumCourseWidgetView({
-    super.key,
-    required this.data,
-    this.onTap,
-  });
+  const MediumCourseWidgetView({super.key, required this.data, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -187,15 +180,24 @@ class MediumCourseWidgetView extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF2C3E35) : AppColors.primaryLight,
+                    color: isDark
+                        ? const Color(0xFF2C3E35)
+                        : AppColors.primaryLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.play_circle_fill, size: 12, color: primaryColor),
+                      Icon(
+                        Icons.play_circle_fill,
+                        size: 12,
+                        color: primaryColor,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Đang học',
@@ -214,7 +216,9 @@ class MediumCourseWidgetView extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? const Color(0xFFFF8A65) : const Color(0xFFE65100),
+                    color: isDark
+                        ? const Color(0xFFFF8A65)
+                        : const Color(0xFFE65100),
                   ),
                 ),
               ],
@@ -261,7 +265,9 @@ class MediumCourseWidgetView extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: data.activeCourseProgress / 100.0,
                 minHeight: 5,
-                backgroundColor: isDark ? const Color(0xFF2C3E35) : AppColors.mint,
+                backgroundColor: isDark
+                    ? const Color(0xFF2C3E35)
+                    : AppColors.mint,
                 color: primaryColor,
               ),
             ),
@@ -277,11 +283,7 @@ class LargeDashboardWidgetView extends StatelessWidget {
   final MobileWidgetStateData data;
   final VoidCallback? onTap;
 
-  const LargeDashboardWidgetView({
-    super.key,
-    required this.data,
-    this.onTap,
-  });
+  const LargeDashboardWidgetView({super.key, required this.data, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -328,7 +330,11 @@ class LargeDashboardWidgetView extends StatelessWidget {
                         color: primaryColor,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.school, size: 14, color: Colors.white),
+                      child: const Icon(
+                        Icons.school,
+                        size: 14,
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -342,7 +348,10 @@ class LargeDashboardWidgetView extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFECEB),
                     borderRadius: BorderRadius.circular(10),
@@ -370,11 +379,34 @@ class LargeDashboardWidgetView extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatItem('Đã học', '${data.learnedMinutes}p', textColor, subTextColor),
-                  Container(height: 20, width: 1, color: isDark ? Colors.white24 : AppColors.border),
-                  _buildStatItem('Mục tiêu', '${data.targetMinutes}p', textColor, subTextColor),
-                  Container(height: 20, width: 1, color: isDark ? Colors.white24 : AppColors.border),
-                  _buildStatItem('Tiến độ', '${(data.goalProgressRatio * 100).toInt()}%', primaryColor, subTextColor),
+                  _buildStatItem(
+                    'Đã học',
+                    '${data.learnedMinutes}p',
+                    textColor,
+                    subTextColor,
+                  ),
+                  Container(
+                    height: 20,
+                    width: 1,
+                    color: isDark ? Colors.white24 : AppColors.border,
+                  ),
+                  _buildStatItem(
+                    'Mục tiêu',
+                    '${data.targetMinutes}p',
+                    textColor,
+                    subTextColor,
+                  ),
+                  Container(
+                    height: 20,
+                    width: 1,
+                    color: isDark ? Colors.white24 : AppColors.border,
+                  ),
+                  _buildStatItem(
+                    'Tiến độ',
+                    '${(data.goalProgressRatio * 100).toInt()}%',
+                    primaryColor,
+                    subTextColor,
+                  ),
                 ],
               ),
             ),
@@ -384,7 +416,9 @@ class LargeDashboardWidgetView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF23362C) : AppColors.primaryLight.withValues(alpha: 0.5),
+                color: isDark
+                    ? const Color(0xFF23362C)
+                    : AppColors.primaryLight.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -463,7 +497,10 @@ class LargeDashboardWidgetView extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: primaryColor,
                     borderRadius: BorderRadius.circular(10),
@@ -485,18 +522,24 @@ class LargeDashboardWidgetView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color valColor, Color labelColor) {
+  Widget _buildStatItem(
+    String label,
+    String value,
+    Color valColor,
+    Color labelColor,
+  ) {
     return Column(
       children: [
         Text(
           value,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: valColor),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: valColor,
+          ),
         ),
         const SizedBox(height: 1),
-        Text(
-          label,
-          style: TextStyle(fontSize: 9.5, color: labelColor),
-        ),
+        Text(label, style: TextStyle(fontSize: 9.5, color: labelColor)),
       ],
     );
   }
@@ -610,7 +653,11 @@ class LockScreenRectangularWidgetView extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.access_time_filled, size: 12, color: Colors.white70),
+              const Icon(
+                Icons.access_time_filled,
+                size: 12,
+                color: Colors.white70,
+              ),
               const SizedBox(width: 4),
               Text(
                 'Lịch học: ${data.nextReminderTime}',
@@ -674,7 +721,11 @@ class RichNotificationPreviewView extends StatelessWidget {
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.notifications_active, size: 14, color: Colors.white),
+                child: const Icon(
+                  Icons.notifications_active,
+                  size: 14,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -734,7 +785,9 @@ class RichNotificationPreviewView extends StatelessWidget {
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('⏰ Đã hoãn lịch nhắc nhở học tập thêm 15 phút!'),
+                        content: Text(
+                          '⏰ Đã hoãn lịch nhắc nhở học tập thêm 15 phút!',
+                        ),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );

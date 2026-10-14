@@ -11,20 +11,22 @@ final chatRepositoryProvider = Provider<ChatRepository>((ref) {
 });
 
 class ChatRepository {
-  const ChatRepository(
-    this._api, {
-    ChatSignalRService? signalRService,
-  }) : _signalRService = signalRService;
+  const ChatRepository(this._api, {ChatSignalRService? signalRService})
+    : _signalRService = signalRService;
 
   final ChatApi _api;
   final ChatSignalRService? _signalRService;
 
   ChatSignalRService? get signalR => _signalRService;
 
-  Future<ChatConversation> getOrCreateSupportConversation({String? currentUserId}) async {
+  Future<ChatConversation> getOrCreateSupportConversation({
+    String? currentUserId,
+  }) async {
     // 1. Get existing conversations
     try {
-      final conversations = await _api.getConversations(currentUserId: currentUserId);
+      final conversations = await _api.getConversations(
+        currentUserId: currentUserId,
+      );
       if (conversations.isNotEmpty) {
         return conversations.first;
       }
@@ -33,13 +35,19 @@ class ChatRepository {
     // 2. If no conversation, get default support user
     final supportUser = await _api.getSupportUser();
     if (supportUser != null) {
-      return _api.createConversation(supportUser.id, currentUserId: currentUserId);
+      return _api.createConversation(
+        supportUser.id,
+        currentUserId: currentUserId,
+      );
     }
 
     throw Exception('Không tìm thấy tư vấn viên hỗ trợ lúc này.');
   }
 
-  Future<List<ChatMessage>> getMessages(String conversationId, {String? currentUserId}) async {
+  Future<List<ChatMessage>> getMessages(
+    String conversationId, {
+    String? currentUserId,
+  }) async {
     return _api.getMessages(conversationId, currentUserId: currentUserId);
   }
 
@@ -69,7 +77,10 @@ class ChatRepository {
     return _api.getAdminGuestMessages(guestId);
   }
 
-  Future<ChatMessage> sendAdminGuestMessage(String guestId, String content) async {
+  Future<ChatMessage> sendAdminGuestMessage(
+    String guestId,
+    String content,
+  ) async {
     return _api.sendAdminGuestMessage(guestId, content);
   }
 }

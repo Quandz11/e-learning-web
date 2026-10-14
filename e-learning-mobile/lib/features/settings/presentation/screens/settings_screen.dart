@@ -91,7 +91,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               iconColor: const Color(0xFF2563EB),
               onTap: () => context.push('/app/profile/edit'),
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             _buildSettingRow(
               icon: Icons.lock_outline_rounded,
               title: 'Đổi mật khẩu',
@@ -100,7 +105,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               iconColor: const Color(0xFF7C3AED),
               onTap: () => context.push('/app/profile/change-password'),
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             _buildSettingRow(
               icon: Icons.devices_rounded,
               title: 'Thiết bị & Phiên đăng nhập',
@@ -109,7 +119,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               iconColor: const Color(0xFFEA580C),
               onTap: () => context.push('/app/profile/security/devices'),
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             _buildSettingRow(
               icon: Icons.verified_user_outlined,
               title: 'Bảo mật & 2FA',
@@ -129,7 +144,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFFD97706).withValues(alpha: 0.18) : const Color(0xFFFFFBEB),
+                  color: isDark
+                      ? const Color(0xFFD97706).withValues(alpha: 0.18)
+                      : const Color(0xFFFFFBEB),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -144,7 +161,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               subtitle: const Text(
                 'Bật/tắt lời nhắc nhở hằng ngày & khóa học',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w300),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w300,
+                ),
               ),
               value: _notificationsEnabled,
               activeThumbColor: AppColors.primary,
@@ -152,13 +173,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 setState(() => _notificationsEnabled = val);
               },
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             ListTile(
               leading: Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF7C3AED).withValues(alpha: 0.18) : const Color(0xFFF5F3FF),
+                  color: isDark
+                      ? const Color(0xFF7C3AED).withValues(alpha: 0.18)
+                      : const Color(0xFFF5F3FF),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -175,12 +203,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 value: selectedTheme,
                 underline: const SizedBox(),
                 items: const [
-                  DropdownMenuItem(
-                    value: 'Sáng',
-                    child: Text('Sáng (Light)'),
-                  ),
+                  DropdownMenuItem(value: 'Sáng', child: Text('Sáng (Light)')),
                   DropdownMenuItem(value: 'Tối', child: Text('Tối (Dark)')),
-                  DropdownMenuItem(value: 'Hệ thống', child: Text('Tự động (System)')),
+                  DropdownMenuItem(
+                    value: 'Hệ thống',
+                    child: Text('Tự động (System)'),
+                  ),
                 ],
                 onChanged: (val) {
                   if (val != null) {
@@ -189,13 +217,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 },
               ),
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             ListTile(
               leading: Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF16A34A).withValues(alpha: 0.18) : const Color(0xFFF0FDF4),
+                  color: isDark
+                      ? const Color(0xFF16A34A).withValues(alpha: 0.18)
+                      : const Color(0xFFF0FDF4),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -223,13 +258,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 },
               ),
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             SwitchListTile.adaptive(
               secondary: Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF0284C7).withValues(alpha: 0.18) : const Color(0xFFEFF6FF),
+                  color: isDark
+                      ? const Color(0xFF0284C7).withValues(alpha: 0.18)
+                      : const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -244,7 +286,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               subtitle: const Text(
                 'Tự động cập nhật dữ liệu ra màn hình khóa & chính',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w300),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w300,
+                ),
               ),
               value: _widgetSyncEnabled,
               activeThumbColor: AppColors.primary,
@@ -253,7 +299,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 await HomeWidgetService.instance.setSyncEnabled(val);
               },
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             _buildSettingRow(
               icon: Icons.widgets_outlined,
               title: 'Cấu hình mẫu Widget',
@@ -276,7 +327,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               iconColor: AppColors.primary,
               onTap: () => context.push(AppRoutes.appSettingsDownloads),
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             _buildSettingRow(
               icon: Icons.cleaning_services_outlined,
               title: 'Xóa bộ nhớ đệm (Cache)',
@@ -287,30 +343,51 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               iconColor: const Color(0xFFB45309),
               onTap: _clearCache,
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             _buildSettingRow(
               icon: Icons.privacy_tip_outlined,
               title: 'Quyền riêng tư & Dữ liệu',
               subtitle: 'Kiểm soát chia sẻ dữ liệu thể trạng',
               bgColor: const Color(0xFFEFF6FF),
               iconColor: const Color(0xFF2563EB),
-              onTap: () => context.push('${AppRoutes.appSettingsTermsPrivacy}?tab=privacy'),
+              onTap: () => context.push(
+                '${AppRoutes.appSettingsTermsPrivacy}?tab=privacy',
+              ),
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             _buildSettingRow(
               icon: Icons.description_outlined,
               title: 'Điều khoản sử dụng',
               bgColor: const Color(0xFFF8FAFC),
               iconColor: const Color(0xFF64748B),
-              onTap: () => context.push('${AppRoutes.appSettingsTermsPrivacy}?tab=terms'),
+              onTap: () => context.push(
+                '${AppRoutes.appSettingsTermsPrivacy}?tab=terms',
+              ),
             ),
-            const Divider(height: 1, indent: 56, endIndent: 16, color: Color(0xFFEAEFE9)),
+            const Divider(
+              height: 1,
+              indent: 56,
+              endIndent: 16,
+              color: Color(0xFFEAEFE9),
+            ),
             _buildSettingRow(
               icon: Icons.policy_outlined,
               title: 'Chính sách bảo mật',
               bgColor: const Color(0xFFF8FAFC),
               iconColor: const Color(0xFF64748B),
-              onTap: () => context.push('${AppRoutes.appSettingsTermsPrivacy}?tab=privacy'),
+              onTap: () => context.push(
+                '${AppRoutes.appSettingsTermsPrivacy}?tab=privacy',
+              ),
             ),
           ]),
           const SizedBox(height: AppSpacing.lg),
@@ -388,10 +465,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       decoration: BoxDecoration(
         color: context.cardBg(),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.cardBorder(),
-          width: 0.8,
-        ),
+        border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: context.isDark
             ? null
             : [
@@ -415,8 +489,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Color iconColor = AppColors.primary,
   }) {
     final isDark = context.isDark;
-    final effectiveBgColor = isDark ? iconColor.withValues(alpha: 0.18) : bgColor;
-    final effectiveIconColor = isDark ? (iconColor == AppColors.primary ? const Color(0xFF4CAF50) : iconColor) : iconColor;
+    final effectiveBgColor = isDark
+        ? iconColor.withValues(alpha: 0.18)
+        : bgColor;
+    final effectiveIconColor = isDark
+        ? (iconColor == AppColors.primary ? const Color(0xFF4CAF50) : iconColor)
+        : iconColor;
 
     return ListTile(
       leading: Container(
@@ -448,7 +526,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           : null,
       trailing: Icon(
         Icons.chevron_right_rounded,
-        color: isDark ? context.colorScheme.onSurfaceVariant : const Color(0xFF9EABA3),
+        color: isDark
+            ? context.colorScheme.onSurfaceVariant
+            : const Color(0xFF9EABA3),
         size: 20,
       ),
       onTap: onTap,

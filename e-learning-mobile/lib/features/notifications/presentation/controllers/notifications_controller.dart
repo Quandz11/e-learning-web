@@ -6,14 +6,22 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final notificationsControllerProvider =
-    StateNotifierProvider<NotificationsController, AsyncValue<NotificationsPayload>>(
-  (ref) => NotificationsController(ref.watch(notificationsRepositoryProvider)),
-);
+    StateNotifierProvider<
+      NotificationsController,
+      AsyncValue<NotificationsPayload>
+    >(
+      (ref) =>
+          NotificationsController(ref.watch(notificationsRepositoryProvider)),
+    );
 
-class NotificationsController extends StateNotifier<AsyncValue<NotificationsPayload>> {
-  NotificationsController(this._repository) : super(const AsyncValue.loading()) {
+class NotificationsController
+    extends StateNotifier<AsyncValue<NotificationsPayload>> {
+  NotificationsController(this._repository)
+    : super(const AsyncValue.loading()) {
     load();
-    _subscription = NotificationService.instance.onMessageStream.listen(_handleIncomingFcm);
+    _subscription = NotificationService.instance.onMessageStream.listen(
+      _handleIncomingFcm,
+    );
   }
 
   final NotificationsRepository _repository;
@@ -23,11 +31,16 @@ class NotificationsController extends StateNotifier<AsyncValue<NotificationsPayl
     final isChat = message.data['type'] == 'chat';
     if (isChat) return;
 
-    final id = message.data['notificationId']?.toString() ??
+    final id =
+        message.data['notificationId']?.toString() ??
         message.messageId ??
         DateTime.now().millisecondsSinceEpoch.toString();
-    final title = message.notification?.title ?? message.data['title']?.toString() ?? 'Thông báo mới';
-    final content = message.notification?.body ?? message.data['body']?.toString();
+    final title =
+        message.notification?.title ??
+        message.data['title']?.toString() ??
+        'Thông báo mới';
+    final content =
+        message.notification?.body ?? message.data['body']?.toString();
 
     final newItem = NotificationItem(
       id: id,
@@ -39,9 +52,12 @@ class NotificationsController extends StateNotifier<AsyncValue<NotificationsPayl
 
     addRealtimeNotification(newItem);
 
-    _repository.getNotifications(forceRefresh: true).then((payload) {
-      state = AsyncValue.data(payload);
-    }).catchError((_) {});
+    _repository
+        .getNotifications(forceRefresh: true)
+        .then((payload) {
+          state = AsyncValue.data(payload);
+        })
+        .catchError((_) {});
   }
 
   @override
@@ -53,7 +69,9 @@ class NotificationsController extends StateNotifier<AsyncValue<NotificationsPayl
   Future<void> load({bool forceRefresh = false}) async {
     state = const AsyncValue.loading();
     try {
-      final payload = await _repository.getNotifications(forceRefresh: forceRefresh);
+      final payload = await _repository.getNotifications(
+        forceRefresh: forceRefresh,
+      );
       state = AsyncValue.data(payload);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -80,7 +98,9 @@ class NotificationsController extends StateNotifier<AsyncValue<NotificationsPayl
   Future<void> markAllAsRead() async {
     final current = state.value;
     if (current != null) {
-      final updatedList = current.notifications.map((n) => n.copyWith(isRead: true)).toList();
+      final updatedList = current.notifications
+          .map((n) => n.copyWith(isRead: true))
+          .toList();
       state = AsyncValue.data(
         NotificationsPayload(notifications: updatedList, unreadCount: 0),
       );

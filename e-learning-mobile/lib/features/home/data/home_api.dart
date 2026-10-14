@@ -25,10 +25,10 @@ class HomeApi {
     required DioErrorMapper errorMapper,
     required Uri apiBaseUrl,
     CacheService? cacheService,
-  })  : _apiClient = apiClient,
-        _errorMapper = errorMapper,
-        _apiBaseUrl = apiBaseUrl,
-        _cacheService = cacheService;
+  }) : _apiClient = apiClient,
+       _errorMapper = errorMapper,
+       _apiBaseUrl = apiBaseUrl,
+       _cacheService = cacheService;
 
   final ApiClient _apiClient;
   final DioErrorMapper _errorMapper;
@@ -37,11 +37,21 @@ class HomeApi {
 
   Future<HomeFeedData> getMobileHomeFeed() async {
     final data = await _getJsonMap('/mobile/home-feed');
-    final courses = _coerceJsonList(data['featuredCourses']).map(_parseCourse).toList(growable: false);
-    final enrollments = _coerceJsonList(data['myEnrollments']).map(_parseEnrollment).toList(growable: false);
-    final categories = _coerceJsonList(data['categories']).map(_parseCategory).toList(growable: false);
-    final articles = _coerceJsonList(data['recentArticles']).map(_parseArticle).toList(growable: false);
-    final testimonials = _coerceJsonList(data['testimonials']).map(_parseTestimonial).toList(growable: false);
+    final courses = _coerceJsonList(
+      data['featuredCourses'],
+    ).map(_parseCourse).toList(growable: false);
+    final enrollments = _coerceJsonList(
+      data['myEnrollments'],
+    ).map(_parseEnrollment).toList(growable: false);
+    final categories = _coerceJsonList(
+      data['categories'],
+    ).map(_parseCategory).toList(growable: false);
+    final articles = _coerceJsonList(
+      data['recentArticles'],
+    ).map(_parseArticle).toList(growable: false);
+    final testimonials = _coerceJsonList(
+      data['testimonials'],
+    ).map(_parseTestimonial).toList(growable: false);
 
     return HomeFeedData(
       courses: courses,

@@ -55,9 +55,9 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
     }
 
     if (_selectedCategoryId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn danh mục')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Vui lòng chọn danh mục')));
       return;
     }
 
@@ -78,9 +78,9 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không thể đăng bài: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Không thể đăng bài: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -92,13 +92,21 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
     final forumState = ref.watch(forumControllerProvider);
 
     return Scaffold(
-      backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+      backgroundColor: context.isDark
+          ? context.colorScheme.surface
+          : const Color(0xFFFBFBFA),
       appBar: AppBar(
-        backgroundColor: context.isDark ? context.colorScheme.surface : const Color(0xFFFBFBFA),
+        backgroundColor: context.isDark
+            ? context.colorScheme.surface
+            : const Color(0xFFFBFBFA),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: context.textPrimary(),
+          ),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -133,7 +141,9 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: context.isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
+                        color: context.isDark
+                            ? context.colorScheme.primary
+                            : const Color(0xFF0F5B38),
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -167,7 +177,10 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
                 value: _selectedCategoryId,
                 dropdownColor: context.cardBg(),
                 isExpanded: true,
-                hint: Text('Chọn chuyên mục', style: TextStyle(color: context.textMuted())),
+                hint: Text(
+                  'Chọn chuyên mục',
+                  style: TextStyle(color: context.textMuted()),
+                ),
                 items: forumState.categories.map((cat) {
                   return DropdownMenuItem(
                     value: cat.id,
@@ -203,7 +216,11 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
           const SizedBox(height: 8),
           TextField(
             controller: _titleController,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: context.textPrimary()),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: context.textPrimary(),
+            ),
             decoration: InputDecoration(
               hintText: 'Ví dụ: Cần chuẩn bị gì trước khi bắt đầu nhịn ăn?',
               hintStyle: TextStyle(
@@ -243,10 +260,15 @@ class _CreateThreadScreenState extends ConsumerState<CreateThreadScreen> {
           const SizedBox(height: 8),
           TextField(
             controller: _contentController,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300, color: context.textPrimary()),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w300,
+              color: context.textPrimary(),
+            ),
             maxLines: 8,
             decoration: InputDecoration(
-              hintText: 'Mô tả chi tiết thắc mắc, trải nghiệm hoặc các câu hỏi cần được hỗ trợ...',
+              hintText:
+                  'Mô tả chi tiết thắc mắc, trải nghiệm hoặc các câu hỏi cần được hỗ trợ...',
               hintStyle: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w300,

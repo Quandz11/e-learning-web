@@ -119,7 +119,8 @@ class OfflineDownloadService {
     );
 
     final currentItems = await getDownloadedItems();
-    final updated = currentItems.where((i) => i.id != id).toList()..add(newItem);
+    final updated = currentItems.where((i) => i.id != id).toList()
+      ..add(newItem);
     await _saveRegistry(updated);
 
     return newItem;

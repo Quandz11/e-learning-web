@@ -68,7 +68,8 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
 
     try {
       // 1. Search Courses
-      if (_selectedCategory == SearchCategory.all || _selectedCategory == SearchCategory.courses) {
+      if (_selectedCategory == SearchCategory.all ||
+          _selectedCategory == SearchCategory.courses) {
         final learningRepo = ref.read(learningRepositoryProvider);
         final loadResult = await learningRepo.loadLearning();
         for (final c in loadResult.courses) {
@@ -78,7 +79,8 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
               SearchResultItem(
                 id: c.id,
                 title: c.title,
-                subtitle: c.description ?? 'Khóa học nhịn ăn & sức khỏe khoa học',
+                subtitle:
+                    c.description ?? 'Khóa học nhịn ăn & sức khỏe khoa học',
                 category: SearchCategory.courses,
                 routePath: '/app/learning/course/${c.id}',
                 badgeText: 'Khóa học',
@@ -89,7 +91,8 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
       }
 
       // 2. Search Articles
-      if (_selectedCategory == SearchCategory.all || _selectedCategory == SearchCategory.articles) {
+      if (_selectedCategory == SearchCategory.all ||
+          _selectedCategory == SearchCategory.articles) {
         final articlesRepo = ref.read(articlesRepositoryProvider);
         final articles = await articlesRepo.getArticles(query: trimmed);
         for (final a in articles) {
@@ -107,7 +110,8 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
       }
 
       // 3. Search Forum Threads
-      if (_selectedCategory == SearchCategory.all || _selectedCategory == SearchCategory.forum) {
+      if (_selectedCategory == SearchCategory.all ||
+          _selectedCategory == SearchCategory.forum) {
         final forumRepo = ref.read(forumRepositoryProvider);
         final categories = await forumRepo.getCategories();
         for (final cat in categories) {
@@ -152,7 +156,11 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
         backgroundColor: isDark ? colorScheme.surface : AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: context.textPrimary()),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 20,
+            color: context.textPrimary(),
+          ),
           onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
@@ -161,10 +169,14 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
           child: Container(
             height: 42,
             decoration: BoxDecoration(
-              color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFEFF5F1),
+              color: isDark
+                  ? colorScheme.surfaceContainerHighest
+                  : const Color(0xFFEFF5F1),
               borderRadius: BorderRadius.circular(AppRadius.pill),
               border: Border.all(
-                color: isDark ? colorScheme.outlineVariant : const Color(0xFFD3E6DC),
+                color: isDark
+                    ? colorScheme.outlineVariant
+                    : const Color(0xFFD3E6DC),
                 width: 0.8,
               ),
             ),
@@ -180,7 +192,11 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                   fontWeight: FontWeight.w300,
                   color: context.textMuted(),
                 ),
-                prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF0F5B38)),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  size: 20,
+                  color: Color(0xFF0F5B38),
+                ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.close_rounded, size: 18),
@@ -201,7 +217,10 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
         children: [
           // Filter Chips Strip
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
             child: Row(
               children: [
                 _buildFilterChip('Tất cả', SearchCategory.all),
@@ -222,22 +241,24 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                 ? const Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0F5B38)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0F5B38),
+                      ),
                     ),
                   )
                 : _searchController.text.trim().isEmpty
-                    ? _buildEmptyPrompt(context)
-                    : _results.isEmpty
-                        ? _buildNoResults(context)
-                        : ListView.separated(
-                            padding: const EdgeInsets.all(AppSpacing.md),
-                            itemCount: _results.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 10),
-                            itemBuilder: (context, index) {
-                              final item = _results[index];
-                              return _buildResultCard(context, item);
-                            },
-                          ),
+                ? _buildEmptyPrompt(context)
+                : _results.isEmpty
+                ? _buildNoResults(context)
+                : ListView.separated(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    itemCount: _results.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final item = _results[index];
+                      return _buildResultCard(context, item);
+                    },
+                  ),
           ),
         ],
       ),
@@ -263,7 +284,9 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
           borderRadius: BorderRadius.circular(AppRadius.pill),
           border: Border.all(
             color: isSelected
-                ? (isDark ? context.colorScheme.primary : const Color(0xFF0F5B38))
+                ? (isDark
+                      ? context.colorScheme.primary
+                      : const Color(0xFF0F5B38))
                 : context.cardBorder(),
             width: 0.8,
           ),
@@ -287,7 +310,11 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_rounded, size: 56, color: context.textMuted().withValues(alpha: 0.5)),
+            Icon(
+              Icons.search_rounded,
+              size: 56,
+              color: context.textMuted().withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
             Text(
               'Tìm kiếm nội dung học tập & sức khỏe',
@@ -320,7 +347,11 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.find_in_page_outlined, size: 52, color: Color(0xFFA5A9A5)),
+            const Icon(
+              Icons.find_in_page_outlined,
+              size: 52,
+              color: Color(0xFFA5A9A5),
+            ),
             const SizedBox(height: 16),
             Text(
               'Không tìm thấy kết quả phù hợp',
@@ -394,7 +425,9 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: isDark ? color.withValues(alpha: 0.2) : color.withValues(alpha: 0.1),
+                color: isDark
+                    ? color.withValues(alpha: 0.2)
+                    : color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 20),
@@ -421,9 +454,14 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                       if (item.badgeText != null) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? color.withValues(alpha: 0.2) : color.withValues(alpha: 0.1),
+                            color: isDark
+                                ? color.withValues(alpha: 0.2)
+                                : color.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(AppRadius.pill),
                           ),
                           child: Text(
@@ -453,7 +491,11 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: context.textMuted(), size: 20),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: context.textMuted(),
+              size: 20,
+            ),
           ],
         ),
       ),

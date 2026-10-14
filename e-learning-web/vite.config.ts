@@ -16,7 +16,6 @@ export default defineConfig({
           'vendor-redux': ['@reduxjs/toolkit', 'react-redux'],
           'vendor-signalr': ['@microsoft/signalr'],
           'vendor-i18n': ['i18next', 'react-i18next'],
-          'vendor-ui': ['react-toastify'],
         },
       },
     },

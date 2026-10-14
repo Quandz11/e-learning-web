@@ -82,6 +82,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                     courseId: widget.courseId,
                     onRetry: controller.load,
                     onRefreshRetry: controller.refresh,
+                    onEnroll: controller.enroll,
                   ),
                 ),
               ),
@@ -99,12 +100,14 @@ class _CourseDetailContent extends StatefulWidget {
     required this.courseId,
     required this.onRetry,
     required this.onRefreshRetry,
+    required this.onEnroll,
   });
 
   final CourseDetailState state;
   final String courseId;
   final Future<void> Function() onRetry;
   final Future<void> Function() onRefreshRetry;
+  final Future<bool> Function() onEnroll;
 
   @override
   State<_CourseDetailContent> createState() => _CourseDetailContentState();
@@ -112,6 +115,8 @@ class _CourseDetailContent extends StatefulWidget {
 
 class _CourseDetailContentState extends State<_CourseDetailContent> {
   int _activeTab = 0; // 0: Nội dung, 1: Giới thiệu, 2: Đánh giá
+  bool _enrolling = false;
+  String? _enrollError;
 
   @override
   Widget build(BuildContext context) {
@@ -174,40 +179,90 @@ class _CourseDetailContentState extends State<_CourseDetailContent> {
         ] else ...[
           _CourseReviewsSection(course: course),
         ],
-        if (firstPart != null) ...[
-          const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.xl),
+        if (_enrollError != null) ...[
           Container(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  if (firstPart.isVideo) {
-                    context.push(
-                      AppRoutes.mediaPlayerPath(courseId: widget.courseId, lessonPartId: firstPart.id),
-                    );
-                  } else if (firstPart.isDocument) {
-                    context.push(
-                      AppRoutes.documentReaderPath(courseId: widget.courseId, lessonPartId: firstPart.id),
-                    );
-                  } else {
-                    context.push(
-                      AppRoutes.lessonPath(courseId: widget.courseId, lessonPartId: firstPart.id),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.play_circle_fill_rounded, size: 20),
-                label: Text(
-                  widget.state.progress != null ? 'Tiếp tục bài học' : 'Bắt đầu học ngay',
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: AppColors.error.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+            ),
+            child: Text(
+              _enrollError!,
+              style: const TextStyle(color: AppColors.error, fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        // Free course not yet enrolled → show enroll button
+        if (course.isFree && widget.state.progress == null) ...[
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _enrolling
+                  ? null
+                  : () async {
+                      setState(() {
+                        _enrolling = true;
+                        _enrollError = null;
+                      });
+                      final success = await widget.onEnroll();
+                      if (mounted) {
+                        setState(() => _enrolling = false);
+                        if (!success) {
+                          setState(() => _enrollError = 'Không thể đăng ký khóa học. Vui lòng thử lại.');
+                        }
+                      }
+                    },
+              icon: _enrolling
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.school_rounded, size: 20),
+              label: Text(
+                _enrolling ? 'Đang đăng ký...' : 'Đăng ký miễn phí',
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
+              ),
+            ),
+          ),
+        ] else if (firstPart != null) ...[
+          // Already enrolled or paid course with access → show start/continue
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                if (firstPart.isVideo) {
+                  context.push(AppRoutes.mediaPlayerPath(
+                      courseId: widget.courseId, lessonPartId: firstPart.id));
+                } else if (firstPart.isDocument) {
+                  context.push(AppRoutes.documentReaderPath(
+                      courseId: widget.courseId, lessonPartId: firstPart.id));
+                } else {
+                  context.push(AppRoutes.lessonPath(
+                      courseId: widget.courseId, lessonPartId: firstPart.id));
+                }
+              },
+              icon: const Icon(Icons.play_circle_fill_rounded, size: 20),
+              label: Text(
+                widget.state.progress != null ? 'Tiếp tục bài học' : 'Bắt đầu học ngay',
+                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
               ),
             ),

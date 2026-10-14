@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _themeModePrefKey = 'user_theme_mode';
 
 class ThemeController extends StateNotifier<ThemeMode> {
-  ThemeController() : super(ThemeMode.system) {
+  ThemeController() : super(ThemeMode.light) {
     _loadThemeMode();
   }
 
@@ -20,6 +20,7 @@ class ThemeController extends StateNotifier<ThemeMode> {
       } else if (saved == 'system') {
         state = ThemeMode.system;
       }
+      // No saved preference → keep constructor default (light)
     } catch (_) {}
   }
 

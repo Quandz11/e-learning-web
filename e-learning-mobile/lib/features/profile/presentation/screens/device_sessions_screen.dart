@@ -23,6 +23,9 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
   bool _busy = false;
   String? _error;
 
+  // Optimistic local copy — updated immediately on revoke so UI doesn't flash loading
+  List<DeviceSession>? _localSessions;
+
   Future<void> _revoke(DeviceSession? session) async {
     if (_busy) return;
     final isRevokeAllOthers = session == null;
@@ -41,9 +44,7 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
             child: const Text('Hủy'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Đăng xuất'),
           ),
@@ -62,24 +63,40 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
         final current = ref.read(sessionControllerProvider).session;
         await ref.read(authRepositoryProvider).logout(LogoutRequest(refreshToken: current?.refreshToken));
         await ref.read(sessionControllerProvider.notifier).clearSession();
+        return;
+      }
+
+      final repository = ref.read(deviceSessionsRepositoryProvider);
+      if (isRevokeAllOthers) {
+        await repository.revokeOthers();
+        // Optimistic: keep only current session
+        if (mounted && _localSessions != null) {
+          setState(() {
+            _localSessions = _localSessions!.where((s) => s.isCurrent).toList();
+          });
+        }
       } else {
-        final repository = ref.read(deviceSessionsRepositoryProvider);
-        if (isRevokeAllOthers) {
-          await repository.revokeOthers();
-        } else {
-          await repository.revoke(session.id);
+        await repository.revoke(session.id);
+        // Optimistic: remove the specific session
+        if (mounted && _localSessions != null) {
+          setState(() {
+            _localSessions = _localSessions!.where((s) => s.id != session.id).toList();
+          });
         }
-        ref.invalidate(deviceSessionsProvider);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(isRevokeAllOthers
-                  ? 'Đã đăng xuất khỏi các thiết bị khác thành công.'
-                  : 'Đã đăng xuất khỏi "${session.deviceName}".'),
-              backgroundColor: AppColors.primary,
-            ),
-          );
-        }
+      }
+
+      // Sync in background without showing loading state
+      ref.invalidate(deviceSessionsProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isRevokeAllOthers
+                ? 'Đã đăng xuất khỏi các thiết bị khác thành công.'
+                : 'Đã đăng xuất khỏi "${session.deviceName}".'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
       }
     } catch (_) {
       if (mounted) {
@@ -94,9 +111,11 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
     final text = '${platform.toLowerCase()} ${deviceName.toLowerCase()}';
     if (text.contains('ipad') || text.contains('tablet')) {
       return Icons.tablet_mac_rounded;
-    } else if (text.contains('iphone') || text.contains('android') || text.contains('mobile') || text.contains('phone')) {
+    } else if (text.contains('iphone') || text.contains('android') ||
+        text.contains('mobile') || text.contains('phone')) {
       return Icons.smartphone_rounded;
-    } else if (text.contains('mac') || text.contains('windows') || text.contains('linux') || text.contains('pc') || text.contains('web')) {
+    } else if (text.contains('mac') || text.contains('windows') ||
+        text.contains('linux') || text.contains('pc') || text.contains('web')) {
       return Icons.laptop_chromebook_rounded;
     }
     return Icons.devices_rounded;
@@ -115,34 +134,37 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final sessions = ref.watch(deviceSessionsProvider);
+    final sessionsAsync = ref.watch(deviceSessionsProvider);
     final format = DateFormat('HH:mm - dd/MM/yyyy');
     final isDark = context.isDark;
+    final colorScheme = context.colorScheme;
+
+    // Sync local copy when provider delivers fresh data
+    sessionsAsync.whenData((rows) {
+      if (_localSessions == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() => _localSessions = List.of(rows));
+        });
+      }
+    });
 
     return AppPage(
       appBarTitle: 'Thiết bị & Phiên đăng nhập',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Information banner
+          // Info banner
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: context.cardBorder(),
-                width: 0.8,
-              ),
+              border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 20,
-                  color: context.textSecondary(),
-                ),
+                Icon(Icons.info_outline_rounded, size: 20, color: context.textSecondary()),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
@@ -175,81 +197,95 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
             const SizedBox(height: AppSpacing.sm),
           ],
 
-          sessions.when(
-            loading: () => const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.primary,
+          // Use local sessions if available (optimistic), else fall back to provider
+          if (_localSessions != null)
+            _buildSessionList(context, _localSessions!, format, isDark, colorScheme)
+          else
+            sessionsAsync.when(
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
                 ),
               ),
-            ),
-            error: (err, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                child: Column(
-                  children: [
-                    const Icon(Icons.error_outline_rounded, size: 40, color: AppColors.error),
-                    const SizedBox(height: 8),
-                    const Text('Không thể tải danh sách phiên đăng nhập.'),
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: () => ref.invalidate(deviceSessionsProvider),
-                      icon: const Icon(Icons.refresh_rounded, size: 16),
-                      label: const Text('Thử lại'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            data: (rows) {
-              if (rows.isEmpty) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
-                    child: Text('Không có phiên đăng nhập nào.'),
-                  ),
-                );
-              }
-
-              final hasOtherSessions = rows.any((s) => !s.isCurrent);
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final row in rows) ...[
-                    _buildSessionCard(context, row, format),
-                    const SizedBox(height: AppSpacing.sm),
-                  ],
-                  if (hasOtherSessions) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    OutlinedButton.icon(
-                      onPressed: _busy ? null : () => _revoke(null),
-                      icon: const Icon(Icons.phonelink_erase_rounded, size: 18),
-                      label: const Text('Đăng xuất các thiết bị khác'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        side: BorderSide(color: AppColors.error.withValues(alpha: 0.5)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                        ),
+              error: (err, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.error_outline_rounded, size: 40, color: AppColors.error),
+                      const SizedBox(height: 8),
+                      const Text('Không thể tải danh sách phiên đăng nhập.'),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () => ref.invalidate(deviceSessionsProvider),
+                        icon: const Icon(Icons.refresh_rounded, size: 16),
+                        label: const Text('Thử lại'),
                       ),
-                    ),
-                  ],
-                  const SizedBox(height: AppSpacing.xs),
-                  TextButton.icon(
-                    onPressed: _busy ? null : () => ref.invalidate(deviceSessionsProvider),
-                    icon: const Icon(Icons.refresh_rounded, size: 16),
-                    label: const Text('Làm mới danh sách'),
+                    ],
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ),
+              data: (rows) => _buildSessionList(context, rows, format, isDark, colorScheme),
+            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSessionList(
+    BuildContext context,
+    List<DeviceSession> rows,
+    DateFormat format,
+    bool isDark,
+    ColorScheme colorScheme,
+  ) {
+    if (rows.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40),
+          child: Text('Không có phiên đăng nhập nào.'),
+        ),
+      );
+    }
+
+    final hasOtherSessions = rows.any((s) => !s.isCurrent);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final row in rows) ...[
+          _buildSessionCard(context, row, format, isDark, colorScheme),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        if (hasOtherSessions) ...[
+          const SizedBox(height: AppSpacing.xs),
+          OutlinedButton.icon(
+            onPressed: _busy ? null : () => _revoke(null),
+            icon: const Icon(Icons.phonelink_erase_rounded, size: 18),
+            label: const Text('Đăng xuất các thiết bị khác'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.error,
+              side: BorderSide(color: AppColors.error.withValues(alpha: 0.5)),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+        TextButton.icon(
+          onPressed: _busy
+              ? null
+              : () {
+                  setState(() => _localSessions = null);
+                  ref.invalidate(deviceSessionsProvider);
+                },
+          icon: const Icon(Icons.refresh_rounded, size: 16),
+          label: const Text('Làm mới danh sách'),
+        ),
+      ],
     );
   }
 
@@ -257,8 +293,9 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
     BuildContext context,
     DeviceSession row,
     DateFormat format,
+    bool isDark,
+    ColorScheme colorScheme,
   ) {
-    final isDark = context.isDark;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -324,15 +361,19 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFDCFCE7),
+                              color: isDark
+                                  ? const Color(0xFF14532D)
+                                  : const Color(0xFFDCFCE7),
                               borderRadius: BorderRadius.circular(AppRadius.pill),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Thiết bị này',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF15803D),
+                                color: isDark
+                                    ? const Color(0xFF86EFAC)
+                                    : const Color(0xFF15803D),
                               ),
                             ),
                           ),
@@ -342,10 +383,7 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                     const SizedBox(height: 2),
                     Text(
                       '${_formatPlatform(row.platform)} • ${row.browser.isNotEmpty ? row.browser : 'Ứng dụng SKVI'}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.textSecondary(),
-                      ),
+                      style: TextStyle(fontSize: 12, color: context.textSecondary()),
                     ),
                   ],
                 ),
@@ -374,10 +412,7 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
                     const SizedBox(height: 2),
                     Text(
                       'Hoạt động: ${format.format(row.lastActiveAt.toLocal())}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: context.textMuted(),
-                      ),
+                      style: TextStyle(fontSize: 11, color: context.textMuted()),
                     ),
                   ],
                 ),

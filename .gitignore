@@ -26,6 +26,9 @@ appsettings.*.local.json
 firebase-service-account.json
 **/assets/env/.env.prod
 **/assets/env/.env.staging
+*.jks
+*.keystore
+key.properties
 
 # Flutter
 **/*.dart_tool/

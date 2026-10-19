@@ -212,6 +212,28 @@ class WellnessDailyLog {
   final String workoutType;
   final double? currentWeightKg;
   final String notes;
+
+  WellnessDailyLog copyWith({
+    String? id,
+    DateTime? logDate,
+    DateTime? ateAtLocal,
+    int? waterMl,
+    int? workoutMinutes,
+    String? workoutType,
+    double? currentWeightKg,
+    String? notes,
+  }) {
+    return WellnessDailyLog(
+      id: id ?? this.id,
+      logDate: logDate ?? this.logDate,
+      ateAtLocal: ateAtLocal ?? this.ateAtLocal,
+      waterMl: waterMl ?? this.waterMl,
+      workoutMinutes: workoutMinutes ?? this.workoutMinutes,
+      workoutType: workoutType ?? this.workoutType,
+      currentWeightKg: currentWeightKg ?? this.currentWeightKg,
+      notes: notes ?? this.notes,
+    );
+  }
 }
 
 @immutable

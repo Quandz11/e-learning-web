@@ -1,5 +1,15 @@
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
+import 'package:e_learning_mobile/features/personalization/data/models/wellness_models.dart';
 import 'package:e_learning_mobile/features/personalization/presentation/controllers/wellness_controller.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_calendar_strip.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_daily_status_sheet.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_daily_tasks_card.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_daily_tips_section.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_fasting_tracker_card.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_meal_timeline_section.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_stats_summary.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_water_tracker_card.dart';
+import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_workout_hero_card.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
@@ -7,6 +17,7 @@ import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PersonalizationScreen extends ConsumerStatefulWidget {
   const PersonalizationScreen({super.key});
@@ -17,6 +28,8 @@ class PersonalizationScreen extends ConsumerStatefulWidget {
 }
 
 class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
+  DateTime _selectedDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -25,39 +38,126 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     });
   }
 
+  Future<void> _openWorkoutVideo(String? url, int workoutMinutes) async {
+    if (url != null && url.isNotEmpty) {
+      final uri = Uri.tryParse(url);
+      if (uri != null && await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    }
+    if (mounted) {
+      _showWorkoutActionSheet(context, workoutMinutes);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(wellnessControllerProvider);
     final isDark = context.isDark;
     final colorScheme = context.colorScheme;
 
+    final dash = state.dashboard;
+    final plan = dash?.plan;
+    final todayLog = dash?.todayLog;
+    final currentWater = todayLog?.waterMl ?? 0;
+    final workoutMinutes = todayLog?.workoutMinutes ?? 0;
+    final ateAtLocal = todayLog?.ateAtLocal;
+
+    // Real calculated values based on user profile and clinical standards
+    final userWeight = (todayLog?.currentWeightKg ??
+            plan?.latestWeightKg ??
+            plan?.startWeightKg ??
+            60.0)
+        .toDouble();
+
+    // Target water: 35ml per kg of bodyweight
+    final targetWaterMl = (userWeight > 0 ? (userWeight * 35).round() : 2000);
+
+    // Calories burned: MET 5.0 (Moderate full body workout) * weight * hours
+    final caloriesBurned =
+        ((5.0 * userWeight * (workoutMinutes / 60.0))).round();
+    final targetCalories = ((5.0 * userWeight * (30 / 60.0))).round();
+
+    // Meals tracking
+    final mealsCount = ateAtLocal != null ? 1 : 0;
+    final targetMeals =
+        (plan?.eatingHours != null && plan!.eatingHours <= 6) ? 2 : 3;
+
+    final workoutResource = dash?.todayResources?.workout;
+    final workoutTitle = workoutResource?.title.isNotEmpty == true
+        ? workoutResource!.title
+        : 'Bài tập Vận động Hàng ngày';
+
     return Scaffold(
-      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
+      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF8FAF9),
       appBar: AppBar(
-        title: Text(
-          'Cá nhân hóa Wellness',
-          style: TextStyle(
-            fontWeight: FontWeight.w400,
-            fontSize: 18,
-            letterSpacing: -0.3,
-            color: context.textPrimary(),
+        titleSpacing: 16,
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Kế hoạch',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                  letterSpacing: -0.4,
+                  color: context.textPrimary(),
+                ),
+              ),
+              Text(
+                'Cá nhân hóa Wellness',
+                style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 10,
+                  letterSpacing: -0.1,
+                  color: context.textMuted(),
+                ),
+              ),
+            ],
           ),
         ),
         centerTitle: false,
         elevation: 0,
-        backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF9FBF9),
+        backgroundColor:
+            isDark ? colorScheme.surface : const Color(0xFFF8FAF9),
         actions: [
-          IconButton(
-            tooltip: 'Làm mới',
-            icon: Icon(
-              Icons.refresh_rounded,
-              color: context.textSecondary(),
-              size: 20,
+          // Nút Trợ giúp nổi bật màu đỏ SOS
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            child: ElevatedButton.icon(
+              onPressed: () =>
+                  context.push(AppRoutes.appPersonalizationCoach),
+              icon: const Icon(
+                Icons.support_agent_rounded,
+                size: 15,
+                color: Colors.white,
+              ),
+              label: const Text(
+                'Trợ giúp',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFDC2626), // SOS Red
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+              ),
             ),
-            onPressed: () {
-              ref.read(wellnessControllerProvider.notifier).loadDashboard();
-            },
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: state.isLoading
@@ -67,42 +167,142 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 color: AppColors.primary,
               ),
             )
-          : state.failure != null && state.dashboard == null
+          : state.failure != null && dash == null
           ? _buildErrorState(state.failure?.message)
           : RefreshIndicator(
               color: AppColors.primary,
               onRefresh: () async {
                 await ref
                     .read(wellnessControllerProvider.notifier)
-                    .loadDashboard();
+                    .refresh();
               },
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
                 ),
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 1. Zen Dial Fasting Hero Card
-                    _buildZenDialHero(context, state),
-                    const SizedBox(height: AppSpacing.md),
+                    // 1. Calendar week strip (T2 -> CN)
+                    PlannerCalendarStrip(
+                      selectedDate: _selectedDate,
+                      onSelectDate: (date) {
+                        setState(() => _selectedDate = date);
+                      },
+                    ),
+                    const SizedBox(height: 14),
 
-                    // 2. Bento Micro-Checkin (Water, Movement, Weight)
-                    _buildBentoMicroCheckin(context, state),
-                    const SizedBox(height: AppSpacing.lg),
+                    // 2. Glanceable Top Stats Bar (Vận động, Bữa ăn, Nước - Dữ liệu tính toán thật)
+                    PlannerStatsSummary(
+                      workoutMinutes: workoutMinutes,
+                      targetWorkoutMinutes: 30,
+                      waterMl: currentWater,
+                      targetWaterMl: targetWaterMl,
+                      mealsCount: mealsCount,
+                      targetMeals: targetMeals,
+                      caloriesBurned: caloriesBurned,
+                      targetCalories: targetCalories,
+                      ateAtLocal: ateAtLocal,
+                      onTapWorkout: () => _showWorkoutActionSheet(
+                        context,
+                        workoutMinutes,
+                      ),
+                      onTapWater: () => _showWaterActionSheet(
+                        context,
+                        currentWater,
+                        targetWaterMl,
+                      ),
+                      onTapMeals: () => _showMealAssistantSheet(context),
+                    ),
+                    const SizedBox(height: 16),
 
-                    // 3. Daily Habit Rituals Checklist
-                    _buildDailyRituals(context, state),
-                    const SizedBox(height: AppSpacing.lg),
+                    // 3. Fasting Schedule & Real-time Bio-Phases Tracker
+                    PlannerFastingTrackerCard(
+                      fastingStatus: dash?.fastingStatus,
+                      plan: plan,
+                      coachReply: state.lastCoachReply,
+                      onEditSchedule: () => context.push(
+                        AppRoutes.appPersonalizationPlanEditor,
+                      ),
+                      onAnswerMood: () => PlannerDailyStatusSheet.show(context),
+                    ),
+                    const SizedBox(height: 16),
 
-                    // 4. Bento Feature Navigation Grid (2x2)
-                    _buildBentoNavigationGrid(context),
-                    const SizedBox(height: AppSpacing.sm),
+                    // 4. Interactive Water Tracker (1-tap quick add buttons)
+                    PlannerWaterTrackerCard(
+                      currentWaterMl: currentWater,
+                      targetWaterMl: targetWaterMl,
+                      onQuickAdd: (delta) {
+                        ref
+                            .read(wellnessControllerProvider.notifier)
+                            .logWaterDelta(delta);
+                      },
+                      onLogWater: () => _showWaterActionSheet(
+                        context,
+                        currentWater,
+                        targetWaterMl,
+                      ),
+                      onLearnMore: () => _showWaterLearnMoreSheet(context),
+                    ),
+                    const SizedBox(height: 16),
 
-                    // 5. Reminders Banner Card
-                    _buildRemindersBanner(context),
+                    // 5. Featured Workout Hero Card (Bound to real workout resource)
+                    PlannerWorkoutHeroCard(
+                      workoutResource: workoutResource,
+                      completedMinutes: workoutMinutes,
+                      onOpenWorkout: () => _openWorkoutVideo(
+                        workoutResource?.url,
+                        workoutMinutes,
+                      ),
+                      onLogWorkout: (mins) {
+                        ref
+                            .read(wellnessControllerProvider.notifier)
+                            .logWorkout(mins, workoutTitle);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 6. Eating Window Timeline & Real Meal Logging
+                    PlannerMealTimelineSection(
+                      fastingStatus: dash?.fastingStatus,
+                      plan: plan,
+                      todayLog: todayLog,
+                      mealSuggestion: state.lastMealSuggestion,
+                      onLogMealNow: () {
+                        ref
+                            .read(wellnessControllerProvider.notifier)
+                            .logMealTime();
+                      },
+                      onRequestAiMeal: () => _showMealAssistantSheet(context),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 7. Daily Tasks / Checklist (Real tasks from backend)
+                    if (dash?.todayTasks != null && dash!.todayTasks.isNotEmpty) ...[
+                      PlannerDailyTasksCard(
+                        tasks: dash.todayTasks,
+                        onToggleTask: (taskId) {
+                          ref
+                              .read(wellnessControllerProvider.notifier)
+                              .completeTask(taskId);
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // 8. Daily Insights & Knowledge Cards (Real AI Insight)
+                    PlannerDailyTipsSection(
+                      todayInsight: dash?.todayInsight,
+                      onTapArticle: () => context.push(
+                        AppRoutes.appPersonalizationResources,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // 9. Bottom Navigation Hub
+                    _buildNavigationHub(context),
                     const SizedBox(height: AppSpacing.xl),
                   ],
                 ),
@@ -118,7 +318,11 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.spa_outlined, size: 40, color: Color(0xFF8E9E94)),
+            const Icon(
+              Icons.spa_outlined,
+              size: 40,
+              color: Color(0xFF8E9E94),
+            ),
             const SizedBox(height: AppSpacing.md),
             Text(
               message ?? 'Không thể tải dữ liệu lúc này.',
@@ -141,10 +345,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
               ),
-              child: const Text(
-                'Thử lại',
-                style: TextStyle(fontWeight: FontWeight.w400),
-              ),
+              child: const Text('Thử lại'),
             ),
           ],
         ),
@@ -152,709 +353,129 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     );
   }
 
-  // 1. Zen Dial Hero Fasting Widget
-  Widget _buildZenDialHero(BuildContext context, WellnessState state) {
-    final fasting = state.dashboard?.fastingStatus;
-    final plan = state.dashboard?.plan;
-    final isDark = context.isDark;
-    final colorScheme = context.colorScheme;
-
-    final ratio = plan != null
-        ? '${plan.fastingHours}:${plan.eatingHours}'
-        : '16:8';
-    final isFasting = fasting?.state.toUpperCase() == 'FASTING';
-    final progressPercent = fasting?.progressPercent ?? 0.0;
-    final remainingMinutes = fasting?.remainingMinutes ?? 0;
-    final remainingHours = remainingMinutes ~/ 60;
-    final remainingMins = remainingMinutes % 60;
-    final displayTime =
-        '${remainingHours}h ${remainingMins.toString().padLeft(2, '0')}m';
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-      decoration: BoxDecoration(
-        color: context.cardBg(),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.cardBorder(), width: 0.8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x05000000),
-            blurRadius: 18,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header row with subtle pulse dot
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(
-                  color: isFasting
-                      ? (isDark ? colorScheme.primary : const Color(0xFF108A55))
-                      : const Color(0xFFD97706),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          (isFasting
-                                  ? (isDark
-                                        ? colorScheme.primary
-                                        : const Color(0xFF108A55))
-                                  : const Color(0xFFD97706))
-                              .withValues(alpha: 0.4),
-                      blurRadius: 6,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                isFasting ? 'ĐANG NHỊN ĂN' : 'CỬA SỔ ĂN UỐNG',
-                style: TextStyle(
-                  letterSpacing: 1.2,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: isFasting
-                      ? (isDark ? colorScheme.primary : const Color(0xFF0F5B38))
-                      : const Color(0xFFB45309),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? colorScheme.surfaceContainerHighest
-                      : const Color(0xFFF0F5F1),
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: Text(
-                  ratio,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: context.textSecondary(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Center Circular Dial
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 170,
-                height: 170,
-                child: CircularProgressIndicator(
-                  value: (progressPercent / 100.0).clamp(0.0, 1.0),
-                  strokeWidth: 3.5,
-                  backgroundColor: isDark
-                      ? colorScheme.surfaceContainerHighest
-                      : const Color(0xFFEFF3EE),
-                  color: isDark ? colorScheme.primary : const Color(0xFF0F5B38),
-                  strokeCap: StrokeCap.round,
-                ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    displayTime,
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w300,
-                      letterSpacing: -0.5,
-                      color: context.textPrimary(),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'thời gian còn lại',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                      color: context.textMuted(),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-
-          // Edit schedule subtle link button
-          InkWell(
-            onTap: () => context.push(AppRoutes.appPersonalizationPlanEditor),
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Tùy chỉnh kế hoạch',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: isDark
-                          ? colorScheme.primary
-                          : const Color(0xFF0F5B38),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 10,
-                    color: isDark
-                        ? colorScheme.primary
-                        : const Color(0xFF0F5B38),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 2. Bento Micro-Checkin Tracker
-  Widget _buildBentoMicroCheckin(BuildContext context, WellnessState state) {
-    final todayLog = state.dashboard?.todayLog;
-    final currentWater = todayLog?.waterMl ?? 0;
-    final currentMovement = todayLog?.workoutMinutes ?? 0;
-    final currentWeight = todayLog?.currentWeightKg;
-    final cupsCount = (currentWater / 250).ceil();
-    final isDark = context.isDark;
-
-    return Row(
-      children: [
-        // Water Bento Card
-        Expanded(
-          child: _buildBentoCard(
-            context: context,
-            icon: Icons.local_drink_rounded,
-            iconColor: const Color(0xFF0284C7),
-            bgColor: isDark ? const Color(0xFF075985) : const Color(0xFFE0F2FE),
-            label: 'Nước uống',
-            value: '$currentWater ml',
-            subtitle: '$cupsCount/8 cốc',
-            actionText: '+Thêm',
-            onAction: () => _showWaterActionSheet(context, currentWater),
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // Movement Bento Card
-        Expanded(
-          child: _buildBentoCard(
-            context: context,
-            icon: Icons.directions_run_rounded,
-            iconColor: const Color(0xFFD97706),
-            bgColor: isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7),
-            label: 'Vận động',
-            value: '$currentMovement phút',
-            subtitle: 'Mục tiêu: 30p',
-            actionText: '+Tập',
-            onAction: () => _showWorkoutActionSheet(context, currentMovement),
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // Weight Bento Card
-        Expanded(
-          child: _buildBentoCard(
-            context: context,
-            icon: Icons.scale_rounded,
-            iconColor: isDark
-                ? context.colorScheme.primary
-                : const Color(0xFF0F5B38),
-            bgColor: isDark ? const Color(0xFF064E3B) : const Color(0xFFDCFCE7),
-            label: 'Cân nặng',
-            value: currentWeight != null
-                ? '${currentWeight.toStringAsFixed(1)} kg'
-                : '-- kg',
-            subtitle: currentWeight != null ? 'Hôm nay' : 'Chưa ghi',
-            actionText: 'Ghi',
-            onAction: () =>
-                _showEnhancedWeightSheet(context, currentWeight, state),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBentoCard({
-    required BuildContext context,
-    required IconData icon,
-    required Color iconColor,
-    required Color bgColor,
-    required String label,
-    required String value,
-    String? subtitle,
-    required String actionText,
-    required VoidCallback onAction,
-  }) {
-    final isDark = context.isDark;
-    return GestureDetector(
-      onTap: onAction,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-        decoration: BoxDecoration(
-          color: context.cardBg(),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.cardBorder(), width: 0.8),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x04000000),
-              blurRadius: 10,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, size: 18, color: iconColor),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? context.colorScheme.surfaceContainerHighest
-                        : const Color(0xFFF2F6F3),
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                  child: Text(
-                    actionText,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? context.colorScheme.primary
-                          : const Color(0xFF0F5B38),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-                color: context.textSecondary(),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: context.textPrimary(),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 1),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w300,
-                  color: context.textMuted(),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 3. Daily Habit Rituals Checklist
-  Widget _buildDailyRituals(BuildContext context, WellnessState state) {
-    final tasks = state.dashboard?.todayTasks ?? [];
-    if (tasks.isEmpty) return const SizedBox.shrink();
-
-    final completedCount = tasks.where((t) => t.isCompleted).length;
+  // Bottom Navigation Hub
+  Widget _buildNavigationHub(BuildContext context) {
     final isDark = context.isDark;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.cardBg(),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: context.cardBorder(), width: 0.8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x04000000),
-            blurRadius: 14,
-            offset: Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            'Tiện ích Lối sống & Sức khỏe',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: context.textPrimary(),
+            ),
+          ),
+          const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Nhiệm vụ Thói quen',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                  color: context.textPrimary(),
-                  letterSpacing: -0.2,
+              Expanded(
+                child: _buildHubItem(
+                  context: context,
+                  icon: Icons.insights_rounded,
+                  label: 'Tiến trình 30 ngày',
+                  color: const Color(0xFF8B5CF6),
+                  onTap: () => context.push(
+                    AppRoutes.appPersonalizationProgressTimeline,
+                  ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? context.colorScheme.surfaceContainerHighest
-                      : const Color(0xFFF2F6F3),
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: Text(
-                  '$completedCount/${tasks.length}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? context.colorScheme.primary
-                        : const Color(0xFF0F5B38),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildHubItem(
+                  context: context,
+                  icon: Icons.tune_rounded,
+                  label: 'Tùy chỉnh lịch nhịn',
+                  color: const Color(0xFF2563EB),
+                  onTap: () => context.push(
+                    AppRoutes.appPersonalizationPlanEditor,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-
-          ...tasks.map((task) {
-            return InkWell(
-              onTap: () {
-                ref
-                    .read(wellnessControllerProvider.notifier)
-                    .completeTask(task.id);
-              },
-              borderRadius: BorderRadius.circular(10),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: task.isCompleted
-                            ? (isDark
-                                  ? context.colorScheme.primary
-                                  : const Color(0xFF0F5B38))
-                            : Colors.transparent,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: task.isCompleted
-                              ? (isDark
-                                    ? context.colorScheme.primary
-                                    : const Color(0xFF0F5B38))
-                              : (isDark
-                                    ? context.colorScheme.outlineVariant
-                                    : const Color(0xFFC7D3CA)),
-                          width: 1.2,
-                        ),
-                      ),
-                      child: task.isCompleted
-                          ? const Icon(
-                              Icons.check,
-                              size: 12,
-                              color: Colors.white,
-                            )
-                          : null,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            task.lessonTitle.isNotEmpty
-                                ? task.lessonTitle
-                                : 'Bài thực hành chăm sóc thể trạng',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w300,
-                              color: task.isCompleted
-                                  ? context.textMuted()
-                                  : context.textPrimary(),
-                              decoration: task.isCompleted
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                            ),
-                          ),
-                          if (task.description.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              task.description,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w300,
-                                color: context.textMuted(),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildHubItem(
+                  context: context,
+                  icon: Icons.spa_outlined,
+                  label: 'Thư viện Thiền & Thở',
+                  color: const Color(0xFFD97706),
+                  onTap: () => context.push(
+                    AppRoutes.appPersonalizationResources,
+                  ),
                 ),
               ),
-            );
-          }),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildHubItem(
+                  context: context,
+                  icon: Icons.notifications_active_outlined,
+                  label: 'Lịch nhắc nhở',
+                  color: isDark ? context.colorScheme.primary : const Color(0xFF0F5B38),
+                  onTap: () => context.push(
+                    AppRoutes.appPersonalizationReminders,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  // 4. Bento Navigation Grid (2x2)
-  Widget _buildBentoNavigationGrid(BuildContext context) {
-    final isDark = context.isDark;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Không gian Cá nhân hóa',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-            color: context.textPrimary(),
-            letterSpacing: -0.2,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildBentoNavCard(
-                context: context,
-                title: 'Trợ lý Sức khỏe',
-                subtitle: 'Tâm trí & Thực đơn',
-                icon: Icons.psychology_outlined,
-                iconColor: isDark
-                    ? context.colorScheme.primary
-                    : const Color(0xFF0F5B38),
-                bgColor: isDark
-                    ? context.colorScheme.surfaceContainerLow
-                    : const Color(0xFFF0F7F2),
-                onTap: () => context.push(AppRoutes.appPersonalizationCoach),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildBentoNavCard(
-                context: context,
-                title: 'Kế hoạch',
-                subtitle: 'Tỷ lệ & Giờ nhịn',
-                icon: Icons.tune_rounded,
-                iconColor: const Color(0xFF2563EB),
-                bgColor: isDark
-                    ? const Color(0xFF1E3A8A)
-                    : const Color(0xFFEFF6FF),
-                onTap: () =>
-                    context.push(AppRoutes.appPersonalizationPlanEditor),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildBentoNavCard(
-                context: context,
-                title: 'Tiến trình',
-                subtitle: '30 ngày & Cân nặng',
-                icon: Icons.insights_rounded,
-                iconColor: const Color(0xFF7C3AED),
-                bgColor: isDark
-                    ? const Color(0xFF4C1D95)
-                    : const Color(0xFFF5F3FF),
-                onTap: () =>
-                    context.push(AppRoutes.appPersonalizationProgressTimeline),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildBentoNavCard(
-                context: context,
-                title: 'Thư viện',
-                subtitle: 'Thiền, Thở & Bài tập',
-                icon: Icons.spa_outlined,
-                iconColor: const Color(0xFFD97706),
-                bgColor: isDark
-                    ? const Color(0xFF78350F)
-                    : const Color(0xFFFFFBEB),
-                onTap: () =>
-                    context.push(AppRoutes.appPersonalizationResources),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBentoNavCard({
+  Widget _buildHubItem({
     required BuildContext context,
-    required String title,
-    required String subtitle,
     required IconData icon,
-    required Color iconColor,
-    required Color bgColor,
+    required String label,
+    required Color color,
     required VoidCallback onTap,
   }) {
+    final isDark = context.isDark;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
-          color: context.cardBg(),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: context.cardBorder(), width: 0.8),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x03000000),
-              blurRadius: 10,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, size: 20, color: iconColor),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 12,
-                  color: context.textMuted(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: context.textPrimary(),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w300,
-                color: context.textMuted(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 5. Reminders Banner Card
-  Widget _buildRemindersBanner(BuildContext context) {
-    return InkWell(
-      onTap: () => context.push(AppRoutes.appPersonalizationReminders),
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: context.cardBg(),
-          borderRadius: BorderRadius.circular(18),
+          color: isDark
+              ? context.colorScheme.surfaceContainerHighest
+              : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: context.cardBorder(), width: 0.8),
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.notifications_active_outlined,
-              size: 20,
-              color: context.isDark
-                  ? context.colorScheme.primary
-                  : const Color(0xFF0F5B38),
-            ),
-            SizedBox(width: 12),
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 8),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Lịch nhắc nhở thói quen',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF1A2520),
-                    ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Thông báo uống nước, bắt đầu & kết thúc nhịn ăn',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w300,
-                      color: Color(0xFF8E9E94),
-                    ),
-                  ),
-                ],
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: context.textPrimary(),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Icon(
               Icons.chevron_right_rounded,
-              size: 18,
-              color: Color(0xFFB5C2BA),
+              size: 16,
+              color: context.textMuted(),
             ),
           ],
         ),
@@ -862,20 +483,27 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     );
   }
 
-  // 1. Water Intake Action Sheet (with visual cups)
-  void _showWaterActionSheet(BuildContext context, int currentWater) {
+  // Water Action Sheet (+150ml, +250ml, +500ml)
+  void _showWaterActionSheet(
+    BuildContext context,
+    int currentWater,
+    int targetWater,
+  ) {
     final cupsCount = (currentWater / 250).ceil();
-    final progress = (currentWater / 2000.0).clamp(0.0, 1.0);
+    final progress =
+        (targetWater > 0 ? (currentWater / targetWater.toDouble()) : 0.0)
+            .clamp(0.0, 1.0);
 
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      backgroundColor: context.cardBg(),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
         return SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -911,19 +539,19 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Ghi nhận Nước uống',
+                          Text(
+                            'Ghi nhận Lượng nước uống',
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF1E2621),
+                              fontWeight: FontWeight.w700,
+                              color: context.textPrimary(),
                             ),
                           ),
                           Text(
-                            'Đã uống $currentWater ml • $cupsCount/8 cốc trong ngày',
-                            style: const TextStyle(
+                            'Đã uống $currentWater / $targetWater ml • $cupsCount cốc trong ngày',
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF717873),
+                              color: context.textSecondary(),
                             ),
                           ),
                         ],
@@ -932,7 +560,6 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                // Progress Bar
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: LinearProgressIndicator(
@@ -945,12 +572,12 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'Chọn nhanh lượng nước vừa uống:',
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF1E2621),
+                    fontWeight: FontWeight.w600,
+                    color: context.textPrimary(),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -1051,7 +678,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 volume,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: isHighlight
                       ? const Color(0xFF0284C7)
                       : const Color(0xFF0F172A),
@@ -1064,17 +691,77 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     );
   }
 
-  // 2. Workout / Movement Action Sheet
-  void _showWorkoutActionSheet(BuildContext context, int currentMovement) {
+  void _showWaterLearnMoreSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      backgroundColor: context.cardBg(),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
         return SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tầm quan trọng của Nước khi Nhịn ăn',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: context.textPrimary(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Trong thời gian nhịn ăn gián đoạn, cơ thể đào thải nước và chất điện giải nhanh hơn bình thường. Uống đủ 35ml nước cho mỗi kg cân nặng mỗi ngày giúp:',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: context.textSecondary(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text('• Giảm cảm giác đói giả do thiếu nước.'),
+                const Text('• Hỗ trợ gan và thận thanh lọc độc tố hiệu quả.'),
+                const Text('• Duy trì năng lượng và hạn chế tình trạng mệt mỏi.'),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0284C7),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
+                    ),
+                    child: const Text('Đã hiểu', style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Workout Action Sheet
+  void _showWorkoutActionSheet(BuildContext context, int currentMovement) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.cardBg(),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1096,12 +783,12 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEF3C7),
+                        color: const Color(0xFFFEE2E2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
-                        Icons.directions_run_rounded,
-                        color: Color(0xFFD97706),
+                        Icons.fitness_center_rounded,
+                        color: Color(0xFFEF4444),
                         size: 22,
                       ),
                     ),
@@ -1110,19 +797,19 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Ghi nhận Hoạt động Vận động',
+                          Text(
+                            'Ghi nhận Hoạt động Thể chất',
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF1E2621),
+                              fontWeight: FontWeight.w700,
+                              color: context.textPrimary(),
                             ),
                           ),
                           Text(
                             'Đã tập $currentMovement phút hôm nay • Mục tiêu: 30 phút',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF717873),
+                              color: context.textSecondary(),
                             ),
                           ),
                         ],
@@ -1131,12 +818,12 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                   ],
                 ),
                 const SizedBox(height: 18),
-                const Text(
+                Text(
                   'Chọn bài tập vừa thực hiện:',
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF1E2621),
+                    fontWeight: FontWeight.w600,
+                    color: context.textPrimary(),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -1150,23 +837,23 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                 _buildWorkoutOption(
                   ctx: ctx,
                   icon: Icons.self_improvement_rounded,
-                  title: 'Yoga & Dãn cơ phục hồi',
+                  title: 'Yoga & Giãn cơ phục hồi',
                   minutes: 20,
                   desc: 'Thư giãn cơ bắp và giảm căng thẳng',
                 ),
                 _buildWorkoutOption(
                   ctx: ctx,
-                  icon: Icons.directions_run_rounded,
-                  title: 'Chạy bộ / Đi bộ nhanh',
-                  minutes: 30,
-                  desc: 'Tăng cường trao đổi chất và đốt mỡ',
+                  icon: Icons.fitness_center_rounded,
+                  title: 'Shaped Lower Body Workout',
+                  minutes: 24,
+                  desc: 'Bài tập cơ thân dưới & đốt calo',
                 ),
                 _buildWorkoutOption(
                   ctx: ctx,
-                  icon: Icons.fitness_center_rounded,
-                  title: 'Tập thể lực / HIIT / Kháng lực',
-                  minutes: 45,
-                  desc: 'Xây dựng cơ bắp và đốt calo sâu',
+                  icon: Icons.directions_run_rounded,
+                  title: 'Chạy bộ / Vận động nhịp tim cao',
+                  minutes: 30,
+                  desc: 'Tăng cường trao đổi chất sâu',
                 ),
                 const SizedBox(height: 10),
               ],
@@ -1206,10 +893,10 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: const Color(0xFFFEE2E2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, size: 20, color: const Color(0xFFD97706)),
+                child: Icon(icon, size: 20, color: const Color(0xFFEF4444)),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1220,7 +907,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                       title,
                       style: const TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         color: Color(0xFF1E2621),
                       ),
                     ),
@@ -1244,7 +931,7 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                   '+$minutes phút',
                   style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: Color(0xFF0F5B38),
                   ),
                 ),
@@ -1256,215 +943,140 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
     );
   }
 
-  // 3. Enhanced Weight Tracking Action Sheet
-  void _showEnhancedWeightSheet(
-    BuildContext context,
-    double? currentWeight,
-    WellnessState state,
-  ) {
-    final weightProg = state.dashboard?.weightProgress;
-    final startWeight = weightProg?.startWeightKg ?? (currentWeight ?? 65.0);
+  // AI Meal Assistant Dialog
+  void _showMealAssistantSheet(BuildContext context) {
     final controller = TextEditingController(
-      text: currentWeight?.toStringAsFixed(1) ?? '62.0',
+      text: 'Ức gà, Trứng, Súp lơ xanh, Gạo lứt, Cà chua',
     );
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.cardBg(),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            final parsedWeight = double.tryParse(controller.text) ?? 62.0;
-            final delta = parsedWeight - startWeight;
-
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 16,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 16,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2EBE5),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              const SizedBox(height: 16),
+              Row(
                 children: [
-                  Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE2EBE5),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Color(0xFF10B981),
+                    size: 22,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.scale_rounded,
-                          color: Color(0xFF0F5B38),
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Ghi nhận Cân nặng',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF1E2621),
-                              ),
-                            ),
-                            Text(
-                              delta.abs() < 0.05
-                                  ? 'Bằng cân nặng lúc bắt đầu ($startWeight kg)'
-                                  : delta < 0
-                                  ? 'Giảm ${(delta.abs()).toStringAsFixed(1)} kg so với ban đầu'
-                                  : 'Tăng ${delta.toStringAsFixed(1)} kg so với ban đầu',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: delta < 0
-                                    ? const Color(0xFF0F5B38)
-                                    : const Color(0xFF717873),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Weight Stepper Display
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FBF9),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFEAEFE9)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.remove_circle_outline_rounded,
-                            size: 32,
-                          ),
-                          color: const Color(0xFF0F5B38),
-                          onPressed: () {
-                            final current =
-                                double.tryParse(controller.text) ?? 62.0;
-                            final next = (current - 0.1).clamp(30.0, 250.0);
-                            controller.text = next.toStringAsFixed(1);
-                            setModalState(() {});
-                          },
-                        ),
-                        const SizedBox(width: 16),
-                        SizedBox(
-                          width: 110,
-                          child: TextField(
-                            controller: controller,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF1E2621),
-                            ),
-                            decoration: const InputDecoration(
-                              filled: false,
-                              border: InputBorder.none,
-                              suffixText: 'kg',
-                              suffixStyle: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFF717873),
-                              ),
-                            ),
-                            onChanged: (_) => setModalState(() {}),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.add_circle_outline_rounded,
-                            size: 32,
-                          ),
-                          color: const Color(0xFF0F5B38),
-                          onPressed: () {
-                            final current =
-                                double.tryParse(controller.text) ?? 62.0;
-                            final next = (current + 0.1).clamp(30.0, 250.0);
-                            controller.text = next.toStringAsFixed(1);
-                            setModalState(() {});
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        final val = double.tryParse(controller.text);
-                        if (val != null && val > 0) {
-                          ref
-                              .read(wellnessControllerProvider.notifier)
-                              .logWeight(val);
-                          Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Đã ghi nhận cân nặng: ${val.toStringAsFixed(1)} kg',
-                              ),
-                              backgroundColor: const Color(0xFF0F5B38),
-                            ),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F5B38),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                        ),
-                      ),
-                      child: const Text(
-                        'Lưu cân nặng hôm nay',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Trợ lý Lên Thực đơn Thông minh',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.textPrimary(),
                     ),
                   ),
                 ],
               ),
-            );
-          },
+              const SizedBox(height: 10),
+              Text(
+                'Nhập các nguyên liệu bạn đang có sẵn trong tủ lạnh:',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: context.textSecondary(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                maxLines: 3,
+                style: TextStyle(color: context.textPrimary()),
+                decoration: InputDecoration(
+                  hintText: 'VD: Thịt bò, rau muống, nấm, trứng...',
+                  filled: true,
+                  fillColor: context.isDark
+                      ? context.colorScheme.surfaceContainerHighest
+                      : const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: context.cardBorder()),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: context.cardBorder()),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final raw = controller.text.trim();
+                    final items = raw
+                        .split(RegExp(r'[,;\n]'))
+                        .map((e) => e.trim())
+                        .where((e) => e.isNotEmpty)
+                        .toList();
+                    if (items.isNotEmpty) {
+                      ref
+                          .read(wellnessControllerProvider.notifier)
+                          .generateMeal(
+                            WellnessCoachMealRequest(
+                              ingredients: items,
+                              servings: 1,
+                              goal: 'healthy',
+                              dietaryPreference: 'Low Carb',
+                            ),
+                          );
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Huấn luyện viên đang tạo thực đơn cho bạn...',
+                          ),
+                          backgroundColor: Color(0xFF0F5B38),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F5B38),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                  ),
+                  child: const Text(
+                    'Sinh Thực đơn Phù hợp',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

@@ -401,7 +401,7 @@ class _TestWellnessController extends WellnessController {
   Future<void> ensureLoaded() async {}
 
   @override
-  Future<void> loadDashboard() async {}
+  Future<void> loadDashboard({bool isSilent = false}) async {}
 }
 
 class _NoopWellnessApi extends WellnessApi {

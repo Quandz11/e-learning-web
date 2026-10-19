@@ -956,20 +956,15 @@ public class WellnessService : IWellnessService
         var fasting = BuildFastingStatus(plan, localNow);
         var fallback = BuildFallbackInsight(todayLog, fasting);
 
-        var aiRaw = await ExecuteAiPromptAsync(
-            BuildInsightPrompt(plan, todayLog, fasting),
-            fallback.Summary + Environment.NewLine + fallback.Risks + Environment.NewLine + fallback.Tip);
-
-        var parsed = ParseInsight(aiRaw, fallback);
-
+        // Fast instant load: avoid blocking dashboard API on synchronous external Gemini AI HTTP calls
         insight = new WellnessInsight
         {
             PlanId = plan.Id,
             InsightDate = insightDate,
-            SummaryEncrypted = _encryptionService.Encrypt(parsed.Summary),
-            TipEncrypted = _encryptionService.Encrypt(parsed.Tip),
-            RisksEncrypted = _encryptionService.Encrypt(parsed.Risks),
-            GeneratedBy = parsed.GeneratedBy,
+            SummaryEncrypted = _encryptionService.Encrypt(fallback.Summary),
+            TipEncrypted = _encryptionService.Encrypt(fallback.Tip),
+            RisksEncrypted = _encryptionService.Encrypt(fallback.Risks),
+            GeneratedBy = "SYSTEM",
             CreatedAt = DateTime.UtcNow
         };
 
@@ -980,10 +975,10 @@ public class WellnessService : IWellnessService
         {
             Id = insight.Id,
             InsightDate = insight.InsightDate,
-            Summary = parsed.Summary,
-            Tip = parsed.Tip,
-            Risks = parsed.Risks,
-            GeneratedBy = parsed.GeneratedBy
+            Summary = fallback.Summary,
+            Tip = fallback.Tip,
+            Risks = fallback.Risks,
+            GeneratedBy = "SYSTEM"
         };
     }
 

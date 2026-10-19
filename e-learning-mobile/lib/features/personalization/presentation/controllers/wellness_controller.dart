@@ -69,13 +69,15 @@ class WellnessController extends StateNotifier<WellnessState> {
   final WellnessApi _api;
 
   Future<void> ensureLoaded() async {
-    if (state.status == WellnessStatus.initial) {
+    if (state.status == WellnessStatus.initial || state.dashboard == null) {
       await loadDashboard();
     }
   }
 
-  Future<void> loadDashboard() async {
-    state = state.copyWith(status: WellnessStatus.loading);
+  Future<void> loadDashboard({bool isSilent = false}) async {
+    if (!isSilent && state.dashboard == null) {
+      state = state.copyWith(status: WellnessStatus.loading);
+    }
     try {
       final dashboard = await _api.getDashboard();
       state = state.copyWith(
@@ -92,7 +94,7 @@ class WellnessController extends StateNotifier<WellnessState> {
   }
 
   Future<void> refresh() async {
-    await loadDashboard();
+    await loadDashboard(isSilent: true);
   }
 
   Future<void> logWaterDelta(int deltaMl) async {
@@ -168,6 +170,47 @@ class WellnessController extends StateNotifier<WellnessState> {
         dashboard: state.dashboard?.copyWith(todayLog: serverLog),
         isSubmittingLog: false,
         actionMessage: 'Đã lưu $minutes phút vận động ($type)',
+      );
+    } catch (e) {
+      state = state.copyWith(isSubmittingLog: false);
+    }
+  }
+
+  Future<void> logMealTime([DateTime? time]) async {
+    final dash = state.dashboard;
+    final plan = dash?.plan;
+    if (dash == null || plan == null) return;
+
+    final currentLog =
+        dash.todayLog ?? WellnessDailyLog(logDate: DateTime.now());
+    final mealTime = time ?? DateTime.now();
+
+    // Optimistic
+    final updatedLog = currentLog.copyWith(ateAtLocal: mealTime);
+    state = state.copyWith(
+      dashboard: dash.copyWith(todayLog: updatedLog),
+      isSubmittingLog: true,
+    );
+
+    try {
+      final serverLog = await _api.upsertDailyLog(
+        plan.id,
+        UpsertWellnessDailyLogRequest(
+          logDate: currentLog.logDate,
+          ateAtLocal: mealTime,
+          waterMl: currentLog.waterMl,
+          workoutMinutes: currentLog.workoutMinutes,
+          workoutType: currentLog.workoutType,
+          currentWeightKg: currentLog.currentWeightKg,
+          notes: currentLog.notes,
+        ),
+      );
+      final hourStr = mealTime.hour.toString().padLeft(2, '0');
+      final minStr = mealTime.minute.toString().padLeft(2, '0');
+      state = state.copyWith(
+        dashboard: state.dashboard?.copyWith(todayLog: serverLog),
+        isSubmittingLog: false,
+        actionMessage: 'Đã ghi nhận bữa ăn lúc $hourStr:$minStr',
       );
     } catch (e) {
       state = state.copyWith(isSubmittingLog: false);

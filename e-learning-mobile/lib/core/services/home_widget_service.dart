@@ -173,12 +173,16 @@ class HomeWidgetService {
         );
       }
 
-      debugPrint(
-        '📱 [HomeWidgetService] Synced widget data successfully: Streak $streakDays, Course "$activeCourseTitle"',
-      );
+      if (kDebugMode) {
+        debugPrint(
+          '📱 [HomeWidgetService] Synced widget data successfully: Streak $streakDays, Course "$activeCourseTitle"',
+        );
+      }
       return true;
     } catch (e) {
-      debugPrint('❌ [HomeWidgetService] Error updating widget data: $e');
+      if (kDebugMode) {
+        debugPrint('❌ [HomeWidgetService] Error updating widget data: $e');
+      }
       return false;
     }
   }

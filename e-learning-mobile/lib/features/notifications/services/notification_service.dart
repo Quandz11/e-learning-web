@@ -432,17 +432,18 @@ class NotificationService {
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         final token = await messaging.getToken();
         if (token != null) {
-          debugPrint('====================================');
-          debugPrint('🔥 FCM REGISTRATION TOKEN:');
-          debugPrint(token);
-          debugPrint('====================================');
+          if (kDebugMode) {
+            debugPrint('🔥 FCM token obtained: ${token.substring(0, 12)}...');
+          }
           if (onTokenRefresh != null) {
             onTokenRefresh(token);
           }
         }
 
         messaging.onTokenRefresh.listen((newToken) {
-          debugPrint('🔥 FCM TOKEN REFRESHED: $newToken');
+          if (kDebugMode) {
+            debugPrint('🔥 FCM token refreshed: ${newToken.substring(0, 12)}...');
+          }
           if (onTokenRefresh != null) {
             onTokenRefresh(newToken);
           }

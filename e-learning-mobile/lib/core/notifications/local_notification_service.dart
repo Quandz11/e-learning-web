@@ -59,9 +59,13 @@ class LocalNotificationService {
           ?.createNotificationChannel(androidChannel);
 
       _isInitialized = true;
-      debugPrint('✅ [LocalNotificationService] Initialized successfully');
+      if (kDebugMode) {
+        debugPrint('✅ [LocalNotificationService] Initialized successfully');
+      }
     } catch (e) {
-      debugPrint('⚠️ [LocalNotificationService] Initialization error: $e');
+      if (kDebugMode) {
+        debugPrint('⚠️ [LocalNotificationService] Initialization error: $e');
+      }
     }
   }
 

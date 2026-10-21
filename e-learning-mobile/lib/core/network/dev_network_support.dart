@@ -60,7 +60,9 @@ bool shouldEnableDevelopmentHttpDiagnostics(AppConfig config) {
 }
 
 void logRequestStart(RequestOptions options) {
-  debugPrint('[HTTP] ${options.method.toUpperCase()} ${options.path}');
+  if (kDebugMode) {
+    debugPrint('[HTTP] ${options.method.toUpperCase()} ${options.path}');
+  }
 }
 
 void logResponseResult({
@@ -68,13 +70,15 @@ void logResponseResult({
   int? statusCode,
   String? backendCode,
 }) {
-  final statusLabel = statusCode?.toString() ?? 'no-status';
-  final codeLabel = backendCode != null && backendCode.trim().isNotEmpty
-      ? ' code=$backendCode'
-      : '';
-  debugPrint(
-    '[HTTP] $statusLabel ${options.method.toUpperCase()} ${options.path}$codeLabel',
-  );
+  if (kDebugMode) {
+    final statusLabel = statusCode?.toString() ?? 'no-status';
+    final codeLabel = backendCode != null && backendCode.trim().isNotEmpty
+        ? ' code=$backendCode'
+        : '';
+    debugPrint(
+      '[HTTP] $statusLabel ${options.method.toUpperCase()} ${options.path}$codeLabel',
+    );
+  }
 }
 
 String? extractBackendCode(Object? error) {

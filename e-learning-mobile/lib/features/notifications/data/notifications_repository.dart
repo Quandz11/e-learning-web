@@ -137,14 +137,13 @@ class NotificationsRepository {
         appVersion: version,
       );
 
-      debugPrint('====================================');
-      debugPrint('✅ FCM TOKEN REGISTERED TO SERVER DB:');
-      debugPrint('   Device ID: $deviceId');
-      debugPrint('   Platform: $platform');
-      debugPrint('   Token: $token');
-      debugPrint('====================================');
+      if (kDebugMode) {
+        debugPrint('✅ FCM device token synced to server ($platform)');
+      }
     } catch (e) {
-      debugPrint('⚠️ Failed to sync FCM Device Token: $e');
+      if (kDebugMode) {
+        debugPrint('⚠️ Failed to sync FCM Device Token: $e');
+      }
     }
   }
 
@@ -165,12 +164,13 @@ class NotificationsRepository {
 
       await unregisterDeviceToken(deviceId);
 
-      debugPrint('====================================');
-      debugPrint('🗑️ FCM TOKEN UNREGISTERED FROM SERVER DB:');
-      debugPrint('   Device ID: $deviceId');
-      debugPrint('====================================');
+      if (kDebugMode) {
+        debugPrint('🗑️ FCM device token unregistered from server');
+      }
     } catch (e) {
-      debugPrint('⚠️ Failed to unregister FCM Device Token: $e');
+      if (kDebugMode) {
+        debugPrint('⚠️ Failed to unregister FCM Device Token: $e');
+      }
     }
   }
 }

@@ -101,9 +101,17 @@ class _SessionLifecycleState extends ConsumerState<SessionLifecycle>
     }
   }
 
+  DateTime? _lastVerified;
+
   Future<void> _verify() async {
     if (!mounted || _sessionId == null || _checking) return;
+    final now = DateTime.now();
+    if (_lastVerified != null &&
+        now.difference(_lastVerified!) < const Duration(seconds: 15)) {
+      return;
+    }
     _checking = true;
+    _lastVerified = now;
     try {
       await ref.read(apiClientProvider).get<Object?>('/auth/sessions');
     } catch (_) {

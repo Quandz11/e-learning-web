@@ -152,16 +152,42 @@ builder.Services.AddHttpClient<IPhoneOtpSender, ZaloOtpService>((sp, client) =>
 // Firebase Admin SDK Initialization
 try
 {
-    var firebaseJson = builder.Configuration["Firebase:CredentialJson"]
-                       ?? Environment.GetEnvironmentVariable("FIREBASE_CREDENTIAL_JSON")
-                       ?? Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON");
+    var rawCredential = builder.Configuration["FIREBASE_CREDENTIAL_JSON"]
+                        ?? builder.Configuration["APPSETTING_FIREBASE_CREDENTIAL_JSON"]
+                        ?? builder.Configuration["Firebase:CredentialJson"]
+                        ?? builder.Configuration["Firebase__CredentialJson"]
+                        ?? builder.Configuration["FIREBASE_SERVICE_ACCOUNT_JSON"]
+                        ?? builder.Configuration["APPSETTING_FIREBASE_SERVICE_ACCOUNT_JSON"]
+                        ?? Environment.GetEnvironmentVariable("FIREBASE_CREDENTIAL_JSON")
+                        ?? Environment.GetEnvironmentVariable("APPSETTING_FIREBASE_CREDENTIAL_JSON")
+                        ?? Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON")
+                        ?? Environment.GetEnvironmentVariable("APPSETTING_FIREBASE_SERVICE_ACCOUNT_JSON");
     var firebaseCredPath = builder.Configuration["Firebase:CredentialFilePath"] ?? "firebase-service-account.json";
 
     Google.Apis.Auth.OAuth2.GoogleCredential? credential = null;
 
-    if (!string.IsNullOrWhiteSpace(firebaseJson))
+    if (!string.IsNullOrWhiteSpace(rawCredential))
     {
-        credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromJson(firebaseJson);
+        var trimmed = rawCredential.Trim();
+        string jsonContent = trimmed;
+        if (!trimmed.StartsWith("{"))
+        {
+            try
+            {
+                var bytes = Convert.FromBase64String(trimmed);
+                var decoded = Encoding.UTF8.GetString(bytes);
+                if (decoded.Trim().StartsWith("{"))
+                {
+                    jsonContent = decoded.Trim();
+                }
+            }
+            catch
+            {
+                // Fall back to using trimmed directly
+            }
+        }
+
+        credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromJson(jsonContent);
         Console.WriteLine("[Firebase] Admin SDK initialized successfully from environment variable (JSON string).");
     }
     else if (File.Exists(firebaseCredPath))
@@ -183,7 +209,7 @@ try
     }
     else
     {
-        Console.WriteLine($"[Firebase] Credential not found (neither FIREBASE_CREDENTIAL_JSON env nor '{firebaseCredPath}' file). Push notifications via FCM will run in simulated mode.");
+        Console.WriteLine($"[Firebase] Credential not found (checked FIREBASE_CREDENTIAL_JSON, APPSETTING_FIREBASE_CREDENTIAL_JSON, Firebase:CredentialJson, and '{firebaseCredPath}'). Push notifications via FCM will run in simulated mode.");
     }
 }
 catch (Exception ex)

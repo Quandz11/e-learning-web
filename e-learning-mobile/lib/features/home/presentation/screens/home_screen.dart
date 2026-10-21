@@ -1041,10 +1041,14 @@ _GreetingData _buildGreeting({
   };
 
   final profile = profileState.profile;
+  final effectiveName =
+      (profile?.fullName != null && profile!.fullName.trim().isNotEmpty)
+          ? profile.fullName.trim()
+          : 'Học viên';
   return _GreetingData(
     greeting: greeting,
-    displayName: profile?.fullName ?? 'Mai Dung',
-    avatarName: profile?.fullName ?? 'Mai Dung',
+    displayName: effectiveName,
+    avatarName: effectiveName,
     avatarUrl: profile?.avatarUrl,
   );
 }
@@ -1101,7 +1105,7 @@ class _HomeHeader extends ConsumerWidget {
               Semantics(
                 header: true,
                 child: Text(
-                  displayName ?? 'Mai Dung',
+                  displayName ?? 'Học viên',
                   style: textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w500,
                     letterSpacing: -0.3,

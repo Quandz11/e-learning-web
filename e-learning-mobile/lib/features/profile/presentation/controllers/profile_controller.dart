@@ -18,9 +18,11 @@ class ProfileController extends StateNotifier<ProfileState> {
       return;
     }
 
+    final cached = state.profile ?? await _repository.getCachedProfile();
+
     state = ProfileState(
       status: ProfileStatus.loading,
-      profile: refresh ? state.profile : null,
+      profile: cached,
     );
 
     try {
@@ -28,8 +30,8 @@ class ProfileController extends StateNotifier<ProfileState> {
       state = ProfileState(status: ProfileStatus.success, profile: profile);
     } catch (error) {
       state = ProfileState(
-        status: ProfileStatus.failure,
-        profile: state.profile,
+        status: cached != null ? ProfileStatus.success : ProfileStatus.failure,
+        profile: cached,
         message: error.toString(),
       );
     }

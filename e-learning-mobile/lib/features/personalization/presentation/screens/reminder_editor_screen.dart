@@ -437,13 +437,15 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
               // Switches card
               Container(
                 decoration: BoxDecoration(
-                  color: context.cardBg(),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                   border: Border.all(color: context.cardBorder(), width: 0.8),
                 ),
-                child: Column(
-                  children: [
-                    SwitchListTile.adaptive(
+                clipBehavior: Clip.antiAlias,
+                child: Material(
+                  color: context.cardBg(),
+                  child: Column(
+                    children: [
+                      SwitchListTile.adaptive(
                       title: Text(
                         'Âm thanh thông báo',
                         style: TextStyle(
@@ -482,7 +484,8 @@ class _ReminderEditorScreenState extends ConsumerState<ReminderEditorScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
+            ),
+            const SizedBox(height: AppSpacing.xl),
 
               // Save Button
               SizedBox(

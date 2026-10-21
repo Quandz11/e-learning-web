@@ -75,7 +75,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Chào buổi sáng'), findsOneWidget);
-    expect(find.text('Mai Dung'), findsWidgets);
+    expect(find.text('Học viên'), findsWidgets);
   });
 
   testWidgets('shows continue learning and navigates to learning', (

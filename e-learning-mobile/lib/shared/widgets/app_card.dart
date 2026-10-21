@@ -22,7 +22,6 @@ class AppCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? colorScheme.surfaceContainerLow : colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: selected
@@ -44,7 +43,7 @@ class AppCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Material(
-        color: Colors.transparent,
+        color: isDark ? colorScheme.surfaceContainerLow : colorScheme.surface,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),

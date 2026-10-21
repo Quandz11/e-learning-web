@@ -1,4 +1,5 @@
 import 'package:e_learning_mobile/core/errors/app_failure.dart';
+import 'package:e_learning_mobile/core/services/home_widget_service.dart';
 import 'package:e_learning_mobile/features/home/data/home_repository.dart';
 import 'package:e_learning_mobile/features/home/presentation/controllers/home_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,6 +74,16 @@ class HomeController extends StateNotifier<HomeState> {
         articleIssue: result.articleIssue,
         testimonialIssue: result.testimonialIssue,
       );
+
+      final enrollment = result.continueLearning;
+      if (enrollment != null) {
+        try {
+          await HomeWidgetService.instance.syncFromUserData(
+            activeCourseTitle: enrollment.courseTitle,
+            activeCourseProgress: enrollment.progressPercentage,
+          );
+        } catch (_) {}
+      }
     } on AppFailure catch (failure) {
       if (!mounted) {
         return;

@@ -40,10 +40,10 @@ class MediumCourseWidgetProvider : HomeWidgetProvider() {
         appWidgetIds.forEach { widgetId ->
             try {
                 val views = RemoteViews(context.packageName, R.layout.widget_course_resume).apply {
-                    val streak = safeGetInt(widgetData, "widget_streak_days", 7)
-                    val courseProgress = safeGetInt(widgetData, "widget_active_course_progress", 65)
-                    val course = safeGetString(widgetData, "widget_active_course_title", "Khóa học Nhịn ăn Chữa lành SKVI")
-                    val nextLesson = safeGetString(widgetData, "widget_next_lesson_title", "Bài 5: Cơ chế Tự thực Autophagy & Re-feeding")
+                    val streak = safeGetInt(widgetData, "widget_streak_days", 0)
+                    val courseProgress = safeGetInt(widgetData, "widget_active_course_progress", 0)
+                    val course = safeGetString(widgetData, "widget_active_course_title", "Nhịn Ăn Chữa Lành")
+                    val nextLesson = safeGetString(widgetData, "widget_next_lesson_title", "Bắt đầu học hôm nay")
 
                     setTextViewText(R.id.tv_streak, "🔥 Chuỗi $streak ngày")
                     setTextViewText(R.id.tv_course, course)

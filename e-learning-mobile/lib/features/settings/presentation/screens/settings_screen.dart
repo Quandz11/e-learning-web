@@ -395,7 +395,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // 4. Red Logout Row
           Container(
             decoration: BoxDecoration(
-              color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: AppColors.error.withValues(alpha: 0.3),
@@ -409,34 +408,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
-            child: ListTile(
-              leading: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFDE8E8),
-                  borderRadius: BorderRadius.circular(10),
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: context.cardBg(),
+              child: ListTile(
+                leading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDE8E8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.logout_rounded,
+                    color: AppColors.error,
+                    size: 18,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.logout_rounded,
+                title: const Text(
+                  'Đăng xuất tài khoản',
+                  style: TextStyle(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right_rounded,
                   color: AppColors.error,
-                  size: 18,
+                  size: 20,
                 ),
+                onTap: _logout,
               ),
-              title: const Text(
-                'Đăng xuất tài khoản',
-                style: TextStyle(
-                  color: AppColors.error,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-              trailing: const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.error,
-                size: 20,
-              ),
-              onTap: _logout,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -463,7 +466,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildSettingContainer(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: context.cardBg(),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.cardBorder(), width: 0.8),
         boxShadow: context.isDark
@@ -476,7 +478,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
       ),
-      child: Column(children: children),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: context.cardBg(),
+        child: Column(children: children),
+      ),
     );
   }
 

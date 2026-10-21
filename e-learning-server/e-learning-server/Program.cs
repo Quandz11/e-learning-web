@@ -152,21 +152,38 @@ builder.Services.AddHttpClient<IPhoneOtpSender, ZaloOtpService>((sp, client) =>
 // Firebase Admin SDK Initialization
 try
 {
+    var firebaseJson = builder.Configuration["Firebase:CredentialJson"]
+                       ?? Environment.GetEnvironmentVariable("FIREBASE_CREDENTIAL_JSON")
+                       ?? Environment.GetEnvironmentVariable("FIREBASE_SERVICE_ACCOUNT_JSON");
     var firebaseCredPath = builder.Configuration["Firebase:CredentialFilePath"] ?? "firebase-service-account.json";
-    if (File.Exists(firebaseCredPath))
+
+    Google.Apis.Auth.OAuth2.GoogleCredential? credential = null;
+
+    if (!string.IsNullOrWhiteSpace(firebaseJson))
+    {
+        credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromJson(firebaseJson);
+        Console.WriteLine("[Firebase] Admin SDK initialized successfully from environment variable (JSON string).");
+    }
+    else if (File.Exists(firebaseCredPath))
+    {
+        credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromFile(firebaseCredPath);
+        Console.WriteLine($"[Firebase] Admin SDK initialized successfully from file: '{firebaseCredPath}'.");
+    }
+
+    if (credential != null)
     {
         if (FirebaseAdmin.FirebaseApp.DefaultInstance == null)
         {
             FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions
             {
-                Credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromFile(firebaseCredPath)
+                Credential = credential
             });
-            Console.WriteLine("[Firebase] Admin SDK initialized successfully.");
+            Console.WriteLine("[Firebase] Admin SDK instance created successfully.");
         }
     }
     else
     {
-        Console.WriteLine($"[Firebase] Credential file not found at '{firebaseCredPath}'. Push notifications via FCM will run in simulated mode.");
+        Console.WriteLine($"[Firebase] Credential not found (neither FIREBASE_CREDENTIAL_JSON env nor '{firebaseCredPath}' file). Push notifications via FCM will run in simulated mode.");
     }
 }
 catch (Exception ex)

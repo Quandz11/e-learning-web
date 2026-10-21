@@ -12,6 +12,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:e_learning_mobile/core/services/home_widget_service.dart';
 
 final hasSeenOnboardingProvider = StateProvider<bool>((ref) => true);
 
@@ -108,10 +109,11 @@ Future<ProviderContainer> bootstrap() async {
     ],
   );
 
-  // Restore session and ensure local notification service is ready
+  // Restore session and ensure local notification & home widget services are ready
   await Future.wait([
     container.read(sessionControllerProvider.notifier).restore(),
     localNotificationFuture,
+    HomeWidgetService.instance.initialize(),
   ]);
 
   return container;

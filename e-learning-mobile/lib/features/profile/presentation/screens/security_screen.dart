@@ -52,11 +52,13 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
           Container(
             margin: const EdgeInsets.only(bottom: AppSpacing.lg),
             decoration: BoxDecoration(
-              color: context.cardBg(),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: context.cardBorder(), width: 0.8),
             ),
-            child: ListTile(
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: context.cardBg(),
+              child: ListTile(
               leading: Container(
                 width: 36,
                 height: 36,
@@ -90,6 +92,7 @@ class _SecurityScreenState extends ConsumerState<SecurityScreen> {
               onTap: () => context.push('/app/profile/security/devices'),
             ),
           ),
+        ),
           AppSectionHeader(
             title: 'Xác thực hai lớp',
             subtitle: isEnabled

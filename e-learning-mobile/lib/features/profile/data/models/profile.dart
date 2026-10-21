@@ -86,6 +86,21 @@ class Profile {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'email': email,
+    'fullName': fullName,
+    'phone': phone,
+    'role': role,
+    'status': status,
+    'avatarUrl': avatarUrl,
+    'isEmailVerified': isEmailVerified,
+    'isPhoneVerified': isPhoneVerified,
+    'isTwoFactorEnabled': isTwoFactorEnabled,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
+
   Profile copyWith({
     String? id,
     String? email,

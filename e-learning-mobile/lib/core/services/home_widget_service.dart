@@ -143,14 +143,20 @@ class HomeWidgetService {
 
         await HomeWidget.updateWidget(
           androidName: 'LearningWidgetProvider',
+          qualifiedAndroidName:
+              'vn.nhinanchualanh.e_learning_mobile.LearningWidgetProvider',
           iOSName: iOSWidgetName,
         );
         await HomeWidget.updateWidget(
           androidName: 'MediumCourseWidgetProvider',
+          qualifiedAndroidName:
+              'vn.nhinanchualanh.e_learning_mobile.MediumCourseWidgetProvider',
           iOSName: iOSWidgetName,
         );
         await HomeWidget.updateWidget(
           androidName: 'LargeDashboardWidgetProvider',
+          qualifiedAndroidName:
+              'vn.nhinanchualanh.e_learning_mobile.LargeDashboardWidgetProvider',
           iOSName: iOSWidgetName,
         );
 
@@ -177,20 +183,46 @@ class HomeWidgetService {
     }
   }
 
+  /// Đồng bộ dữ liệu học tập thực tế từ app/API ra Widget native
+  Future<void> syncFromUserData({
+    int? streakDays,
+    int? targetMinutes,
+    int? learnedMinutes,
+    String? activeCourseTitle,
+    int? activeCourseProgress,
+    String? nextLessonTitle,
+    String? nextReminderTime,
+  }) async {
+    final current = await getWidgetData();
+    await updateWidgetData(
+      streakDays: streakDays ?? (current['streakDays'] as int? ?? 0),
+      targetMinutes: targetMinutes ?? (current['targetMinutes'] as int? ?? 30),
+      learnedMinutes: learnedMinutes ?? (current['learnedMinutes'] as int? ?? 0),
+      activeCourseTitle: activeCourseTitle ??
+          (current['activeCourseTitle'] as String? ?? 'Nhịn Ăn Chữa Lành'),
+      activeCourseProgress: activeCourseProgress ??
+          (current['activeCourseProgress'] as int? ?? 0),
+      nextLessonTitle: nextLessonTitle ??
+          (current['nextLessonTitle'] as String? ?? 'Bắt đầu học hôm nay'),
+      nextReminderTime: nextReminderTime ??
+          (current['nextReminderTime'] as String? ?? '20:00'),
+    );
+  }
+
   /// Đọc dữ liệu Widget hiện tại từ bộ nhớ
   Future<Map<String, dynamic>> getWidgetData() async {
     final prefs = await SharedPreferences.getInstance();
     return {
-      'streakDays': prefs.getInt(keyStreakDays) ?? 7,
+      'streakDays': prefs.getInt(keyStreakDays) ?? 0,
       'targetMinutes': prefs.getInt(keyTargetMinutes) ?? 30,
-      'learnedMinutes': prefs.getInt(keyLearnedMinutes) ?? 25,
+      'learnedMinutes': prefs.getInt(keyLearnedMinutes) ?? 0,
       'activeCourseTitle':
           prefs.getString(keyActiveCourseTitle) ??
-          'Khóa học Nhịn ăn Chữa lành SKVI',
-      'activeCourseProgress': prefs.getInt(keyActiveCourseProgress) ?? 65,
+          'Nhịn Ăn Chữa Lành',
+      'activeCourseProgress': prefs.getInt(keyActiveCourseProgress) ?? 0,
       'nextLessonTitle':
           prefs.getString(keyNextLessonTitle) ??
-          'Bài 5: Cơ chế Tự thực Autophagy & Re-feeding',
+          'Bắt đầu học hôm nay',
       'nextReminderTime': prefs.getString(keyNextReminderTime) ?? '20:00',
       'lastUpdated':
           prefs.getString(keyLastUpdated) ?? DateTime.now().toIso8601String(),

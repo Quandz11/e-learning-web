@@ -443,57 +443,51 @@ class _DeviceSessionsScreenState extends ConsumerState<DeviceSessionsScreen> {
           const SizedBox(height: AppSpacing.sm),
           Divider(height: 1, color: context.cardBorder()),
           const SizedBox(height: AppSpacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (row.ip.isNotEmpty)
-                      Text(
-                        'IP: ${row.ip}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.textSecondary(),
-                          fontFamily: 'monospace',
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Hoạt động: ${format.format(row.lastActiveAt.toLocal())}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: context.textMuted(),
-                      ),
-                    ),
-                  ],
-                ),
+          // Info row: IP + last activity
+          if (row.ip.isNotEmpty)
+            Text(
+              'IP: ${row.ip}',
+              style: TextStyle(
+                fontSize: 12,
+                color: context.textSecondary(),
+                fontFamily: 'monospace',
               ),
-              if (!row.isCurrent)
-                OutlinedButton.icon(
-                  onPressed: _busy ? null : () => _revoke(row),
-                  icon: const Icon(Icons.logout_rounded, size: 14),
-                  label: const Text('Đăng xuất'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: BorderSide(
-                      color: AppColors.error.withValues(alpha: 0.3),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                    ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          if (row.ip.isNotEmpty) const SizedBox(height: 2),
+          Text(
+            'Hoạt động: ${format.format(row.lastActiveAt.toLocal())}',
+            style: TextStyle(
+              fontSize: 11,
+              color: context.textMuted(),
+            ),
+          ),
+          if (!row.isCurrent) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton.icon(
+                onPressed: _busy ? null : () => _revoke(row),
+                icon: const Icon(Icons.logout_rounded, size: 14),
+                label: const Text('Đăng xuất'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.error,
+                  side: BorderSide(
+                    color: AppColors.error.withValues(alpha: 0.3),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                 ),
-            ],
-          ),
+              ),
+            ),
+          ],
         ],
       ),
     );

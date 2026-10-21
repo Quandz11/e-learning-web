@@ -654,7 +654,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Trung tâm trợ giúp'),
         content: const Text(
-          'Mọi thắc mắc về phương pháp nhịn ăn khoa học hoặc lỗi ứng dụng, vui lòng liên hệ hotline: 1900 6868 hoặc email support@nhinanchualanh.vn',
+          'Mọi thắc mắc về phương pháp nhịn ăn khoa học hoặc lỗi ứng dụng, vui lòng liên hệ hotline: +84 974 278 842 hoặc email contact@nhinanchualanh.vn',
         ),
         actions: [
           TextButton(

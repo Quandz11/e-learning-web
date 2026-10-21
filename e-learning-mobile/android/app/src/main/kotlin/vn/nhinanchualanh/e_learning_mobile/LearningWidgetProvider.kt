@@ -40,11 +40,11 @@ class LearningWidgetProvider : HomeWidgetProvider() {
         appWidgetIds.forEach { widgetId ->
             try {
                 val views = RemoteViews(context.packageName, R.layout.widget_learning_streak).apply {
-                    val streak = safeGetInt(widgetData, "widget_streak_days", 7)
-                    val learned = safeGetInt(widgetData, "widget_learned_minutes", 25)
+                    val streak = safeGetInt(widgetData, "widget_streak_days", 0)
+                    val learned = safeGetInt(widgetData, "widget_learned_minutes", 0)
                     val target = safeGetInt(widgetData, "widget_target_minutes", 30)
-                    val course = safeGetString(widgetData, "widget_active_course_title", "Khóa học Nhịn ăn SKVI")
-                    val nextLesson = safeGetString(widgetData, "widget_next_lesson_title", "Bài 5: Autophagy tế bào")
+                    val course = safeGetString(widgetData, "widget_active_course_title", "Nhịn Ăn Chữa Lành")
+                    val nextLesson = safeGetString(widgetData, "widget_next_lesson_title", "Bắt đầu học hôm nay")
 
                     val percent = if (target > 0) ((learned.toDouble() / target.toDouble()) * 100).toInt().coerceIn(0, 100) else 100
 

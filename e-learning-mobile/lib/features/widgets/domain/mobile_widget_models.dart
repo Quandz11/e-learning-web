@@ -31,16 +31,16 @@ class MobileWidgetStateData {
 
   factory MobileWidgetStateData.fromMap(Map<String, dynamic> map) {
     return MobileWidgetStateData(
-      streakDays: map['streakDays'] as int? ?? 7,
+      streakDays: map['streakDays'] as int? ?? 0,
       targetMinutes: map['targetMinutes'] as int? ?? 30,
-      learnedMinutes: map['learnedMinutes'] as int? ?? 25,
+      learnedMinutes: map['learnedMinutes'] as int? ?? 0,
       activeCourseTitle:
           map['activeCourseTitle'] as String? ??
-          'Khóa học Nhịn ăn Chữa lành SKVI',
-      activeCourseProgress: map['activeCourseProgress'] as int? ?? 65,
+          'Nhịn Ăn Chữa Lành',
+      activeCourseProgress: map['activeCourseProgress'] as int? ?? 0,
       nextLessonTitle:
           map['nextLessonTitle'] as String? ??
-          'Bài 5: Cơ chế Tự thực Autophagy & Re-feeding',
+          'Bắt đầu học hôm nay',
       nextReminderTime: map['nextReminderTime'] as String? ?? '20:00',
     );
   }

@@ -23,7 +23,14 @@
 # Use dotnet user-secrets, Azure Key Vault, or env vars for production
 appsettings.Production.json
 appsettings.*.local.json
-firebase-service-account.json
+*firebase-service-account*.json
+*firebase-adminsdk*.json
+*serviceAccountKey*.json
+*service-account*.json
+**/firebase-service-account*.json
+**/firebase-adminsdk*.json
+**/*service-account*.json
+**/*serviceAccountKey*.json
 **/assets/env/.env.prod
 **/assets/env/.env.staging
 *.jks

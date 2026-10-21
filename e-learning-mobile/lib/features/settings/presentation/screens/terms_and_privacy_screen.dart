@@ -295,9 +295,9 @@ class _PrivacyPolicyTab extends StatelessWidget {
           title: '4. Liên hệ bộ phận bảo mật',
           content:
               'Nếu bạn có bất kỳ thắc mắc hoặc góp ý nào về chính sách bảo mật, vui lòng liên hệ:\n\n'
-              '• Email: hotro@nhinanchualanh.vn\n'
+              '• Email: contact@nhinanchualanh.vn\n'
               '• Website: https://nhinanchualanh.vn\n'
-              '• Hotline: 1900 6868',
+              '• Hotline: +84 974 278 842',
         ),
         const SizedBox(height: AppSpacing.lg),
         Center(

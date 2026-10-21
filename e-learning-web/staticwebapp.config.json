@@ -6,7 +6,10 @@
             "/images/*",
             "/css/*",
             "/js/*",
-            "/*.{js,css,json,ico,png,jpg,gif,svg,webp,woff,woff2,ttf,eot,map}"
+            "/robots.txt",
+            "/sitemap.xml",
+            "/google*.html",
+            "/*.{js,css,json,ico,png,jpg,gif,svg,webp,woff,woff2,ttf,eot,map,xml,txt,html}"
         ]
     },
     "routes": [
@@ -32,6 +35,8 @@
     "mimeTypes": {
         ".json": "application/json",
         ".js": "text/javascript",
-        ".css": "text/css"
+        ".css": "text/css",
+        ".xml": "application/xml",
+        ".txt": "text/plain"
     }
 }

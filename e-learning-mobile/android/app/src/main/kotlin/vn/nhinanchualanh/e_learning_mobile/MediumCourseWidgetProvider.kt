@@ -45,7 +45,7 @@ class MediumCourseWidgetProvider : HomeWidgetProvider() {
                     val course = safeGetString(widgetData, "widget_active_course_title", "Nhịn Ăn Chữa Lành")
                     val nextLesson = safeGetString(widgetData, "widget_next_lesson_title", "Bắt đầu học hôm nay")
 
-                    setTextViewText(R.id.tv_streak, "🔥 Chuỗi $streak ngày")
+                    setTextViewText(R.id.tv_streak, "🔥 $streak ngày")
                     setTextViewText(R.id.tv_course, course)
                     setTextViewText(R.id.tv_next_lesson, nextLesson)
                     setTextViewText(R.id.tv_course_percent, "$courseProgress%")

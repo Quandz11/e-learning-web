@@ -4,39 +4,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="12dp"
     android:background="@drawable/widget_background">
 
-    <RelativeLayout
+    <!-- Header: Title and Streak (Zero overlap via horizontal LinearLayout) -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <TextView
             android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="🎓 Bảng tin học tập SKVI"
+            android:layout_weight="1"
+            android:text="🎓 Học tập SKVI"
             android:textColor="#16251E"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/tv_streak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:text="🔥 7 ngày"
+            android:layout_marginStart="8dp"
+            android:text="🔥 0 ngày"
             android:textColor="#E65100"
             android:textSize="12sp"
             android:textStyle="bold" />
-    </RelativeLayout>
+    </LinearLayout>
 
+    <!-- 3 Stat Metrics -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="12dp"
-        android:padding="10dp"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
         android:background="@drawable/widget_background">
 
         <LinearLayout
@@ -50,9 +57,9 @@
                 android:id="@+id/tv_learned_val"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="25p"
+                android:text="0p"
                 android:textColor="#0F623F"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -76,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:text="30p"
                 android:textColor="#16251E"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -98,9 +105,9 @@
                 android:id="@+id/tv_goal_percent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="83%"
+                android:text="0%"
                 android:textColor="#0F623F"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -112,64 +119,74 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Active Course Title -->
     <TextView
         android:id="@+id/tv_course"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:text="Khóa học Nhịn ăn Chữa lành SKVI"
+        android:layout_marginTop="8dp"
+        android:text="Tập thở Nauli"
         android:textColor="#16251E"
-        android:textSize="14sp"
+        android:textSize="13sp"
         android:textStyle="bold"
-        android:maxLines="1"
+        android:singleLine="true"
         android:ellipsize="end" />
 
+    <!-- Next Lesson Title -->
     <TextView
         android:id="@+id/tv_next_lesson"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Bài 5: Cơ chế Tự thực Autophagy &amp; Re-feeding"
+        android:text="Bắt đầu học hôm nay"
         android:textColor="#55645B"
-        android:textSize="12sp"
-        android:maxLines="1"
+        android:textSize="11sp"
+        android:singleLine="true"
         android:ellipsize="end" />
 
+    <!-- Course Progress Bar -->
     <ProgressBar
         android:id="@+id/pb_course"
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="5dp"
+        android:layout_marginTop="6dp"
         android:indeterminate="false"
         android:max="100"
-        android:progress="65" />
+        android:progress="0" />
 
+    <!-- Spacer -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <RelativeLayout
+    <!-- Footer: Reminder and Action Button -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="4dp">
 
         <TextView
             android:id="@+id/tv_reminder"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="⏰ Lịch nhắc học: 20:00"
+            android:layout_weight="1"
+            android:text="⏰ Nhắc: 20:00"
             android:textColor="#55645B"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textSize="11sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:layout_marginStart="6dp"
             android:text="HỌC NGAY ▶"
             android:textColor="#0F623F"
             android:textSize="11sp"
             android:textStyle="bold" />
-    </RelativeLayout>
+    </LinearLayout>
 </LinearLayout>

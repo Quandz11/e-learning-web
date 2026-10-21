@@ -56,7 +56,7 @@ class LargeDashboardWidgetProvider : HomeWidgetProvider() {
                     setTextViewText(R.id.tv_goal_percent, "$percent%")
                     setTextViewText(R.id.tv_course, course)
                     setTextViewText(R.id.tv_next_lesson, nextLesson)
-                    setTextViewText(R.id.tv_reminder, "⏰ Lịch nhắc học: $reminderTime")
+                    setTextViewText(R.id.tv_reminder, "⏰ Nhắc: $reminderTime")
                     setProgressBar(R.id.pb_course, 100, courseProgress.coerceIn(0, 100), false)
 
                     val pendingIntent = HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)

@@ -77,16 +77,22 @@ Future<void> bootstrapAndRun({
 }
 
 Future<ProviderContainer> bootstrap() async {
-  // Run Firebase init in parallel with config loading — both are independent
-  final firebaseFuture = Firebase.initializeApp()
+  // Local notification setup runs independently of Firebase (reliable offline/dev)
+  final localNotificationFuture = LocalNotificationService.instance
+      .initialize()
+      .catchError((Object e) {
+        debugPrint('Local notifications init warning: $e');
+      });
+
+  // Run Firebase init asynchronously without blocking UI startup if credentials missing
+  Firebase.initializeApp()
       .then((_) async {
         await NotificationService.instance.initialize();
         await NotificationService.instance.setupFirebaseMessaging();
-        await LocalNotificationService.instance.initialize();
       })
       .catchError((Object e) {
         debugPrint(
-          'Firebase/Notification init warning (safe to ignore in test/offline): $e',
+          'Firebase Messaging init skipped (google-services.json missing or offline): $e',
         );
       });
 
@@ -102,10 +108,10 @@ Future<ProviderContainer> bootstrap() async {
     ],
   );
 
-  // Restore session and let Firebase finish concurrently
+  // Restore session and ensure local notification service is ready
   await Future.wait([
     container.read(sessionControllerProvider.notifier).restore(),
-    firebaseFuture,
+    localNotificationFuture,
   ]);
 
   return container;

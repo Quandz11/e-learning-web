@@ -10,7 +10,14 @@ class SessionStorageKeys {
 }
 
 final flutterSecureStorageProvider = Provider<FlutterSecureStorage>((_) {
-  return const FlutterSecureStorage();
+  return const FlutterSecureStorage(
+    aOptions: AndroidOptions(
+      resetOnError: true,
+    ),
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock,
+    ),
+  );
 });
 
 final sessionStorageProvider = Provider<SessionStorage>((ref) {

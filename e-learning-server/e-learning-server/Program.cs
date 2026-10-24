@@ -37,7 +37,10 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserSessionService>();
 builder.Services.AddSingleton<SessionConnections>();
-builder.Services.AddHostedService(sp => sp.GetRequiredService<SessionConnections>());
+if (builder.Configuration.GetValue<bool>("Features:EnableSessionHostedService", true))
+{
+    builder.Services.AddHostedService(sp => sp.GetRequiredService<SessionConnections>());
+}
 builder.Services.Configure<HubOptions>(options => options.AddFilter<SessionConnections>());
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -84,7 +87,10 @@ builder.Services.AddScoped<IStudyPlanService, StudyPlanService>();
 builder.Services.AddSingleton<IGuestConversationService, GuestConversationService>();
 
 // Background Services
-builder.Services.AddHostedService<SKVI.Infrastructure.BackgroundServices.GuestConversationCleanupService>();
+if (builder.Configuration.GetValue<bool>("Features:EnableGuestCleanup", true))
+{
+    builder.Services.AddHostedService<SKVI.Infrastructure.BackgroundServices.GuestConversationCleanupService>();
+}
 
 // Configure Background Service Exception Behavior
 builder.Services.Configure<HostOptions>(options =>
@@ -107,7 +113,10 @@ builder.Services.AddHangfire(configuration => configuration
         PrepareSchemaIfNecessary = true
     }));
 
-builder.Services.AddHangfireServer();
+if (builder.Configuration.GetValue<bool>("Features:EnableHangfireWorker", true))
+{
+    builder.Services.AddHangfireServer();
+}
 
 // Application Insights
 var appInsightsConnStr = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
@@ -409,7 +418,10 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();
+        if (app.Configuration.GetValue<bool>("Features:EnableAutoMigration", true))
+        {
+            context.Database.Migrate();
+        }
         Console.WriteLine("Database migrated successfully.");
     }
     catch (Exception ex)

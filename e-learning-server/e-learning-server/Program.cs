@@ -411,6 +411,13 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "healthy",
+    service = "skvi-api"
+})).AllowAnonymous();
+
+
 // Configure the HTTP request pipeline.
 using (var scope = app.Services.CreateScope())
 {

@@ -14,7 +14,7 @@ import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
 import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
-import 'package:e_learning_mobile/shared/widgets/app_loading_view.dart';
+import 'package:e_learning_mobile/shared/widgets/app_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -107,7 +107,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
       ),
       body: SafeArea(
         child: state.isInitialLoading
-            ? const AppLoadingView(label: 'Đang tải video...')
+            ? const _MediaPlayerSkeleton()
             : state.status == LessonStatus.failure || state.detail == null
             ? AppErrorView(
                 message: learningFailureMessage(
@@ -1140,27 +1140,23 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                 detail.part.playbackUrl ??
                 detail.part.embedUrl ??
                 '';
-            if (rawUrl.isEmpty &&
-                detail.part.videoId != null &&
+            if (detail.part.videoId != null &&
                 detail.part.videoId!.isNotEmpty) {
-              final fetchedUri = await ref
-                  .read(learningApiProvider)
-                  .getVideoEmbedUrl(detail.part.videoId!);
-              if (fetchedUri != null) {
-                rawUrl = fetchedUri.toString();
-              }
-            }
-            if (rawUrl.contains('mediadelivery.net')) {
-              final match = RegExp(
-                r'(?:embed|play)\/([^\/]+)\/([^\/\?]+)',
-              ).firstMatch(rawUrl);
-              if (match != null) {
-                final libId = match.group(1);
-                final vId = match.group(2);
-                rawUrl =
-                    'https://video.mediadelivery.net/play/$libId/$vId/720p/video.mp4';
-              } else if (rawUrl.contains('/embed/')) {
-                rawUrl = rawUrl.replaceAll('/embed/', '/play/');
+              try {
+                final source = await ref
+                    .read(learningApiProvider)
+                    .getVideoPlayback(detail.part.videoId!);
+                final embed = source['embedUrl']?.toString();
+                if (embed != null && embed.isNotEmpty) {
+                  rawUrl = embed;
+                }
+              } catch (_) {
+                final fetchedUri = await ref
+                    .read(learningApiProvider)
+                    .getVideoEmbedUrl(detail.part.videoId!);
+                if (fetchedUri != null) {
+                  rawUrl = fetchedUri.toString();
+                }
               }
             }
             if (rawUrl.isEmpty) {
@@ -1288,4 +1284,163 @@ bool _isValidId(String value) {
   return RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
   ).hasMatch(value);
+}
+
+class _MediaPlayerSkeleton extends StatelessWidget {
+  const _MediaPlayerSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: AppSizes.contentMaxWidth,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. Video Player Placeholder (16:9)
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  color: Colors.black87,
+                  child: Center(
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white.withValues(alpha: 0.4),
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 2. Video Title & Metadata Card Skeleton
+                    AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const AppSkeleton(width: 140, height: 16),
+                          const SizedBox(height: AppSpacing.sm),
+                          const AppSkeleton(width: double.infinity, height: 22),
+                          const SizedBox(height: AppSpacing.xs),
+                          const AppSkeleton(width: 200, height: 22),
+                          const SizedBox(height: AppSpacing.md),
+                          const Row(
+                            children: [
+                              AppSkeleton(width: 100, height: 18),
+                              SizedBox(width: AppSpacing.sm),
+                              AppSkeleton(width: 90, height: 18),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // 3. Segmented Tabs Skeleton
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: context.isDark
+                            ? context.colorScheme.surfaceContainerHighest
+                            : const Color(0xFFEFF5F1),
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: context.cardBg(),
+                                borderRadius: BorderRadius.circular(AppRadius.pill),
+                              ),
+                              child: const Center(
+                                child: AppSkeleton(width: 70, height: 14),
+                              ),
+                            ),
+                          ),
+                          const Expanded(
+                            child: Center(
+                              child: AppSkeleton(width: 50, height: 14),
+                            ),
+                          ),
+                          const Expanded(
+                            child: Center(
+                              child: AppSkeleton(width: 60, height: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // 4. Content Card Skeleton
+                    const AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppSkeleton(width: 120, height: 18),
+                          SizedBox(height: AppSpacing.md),
+                          AppSkeleton(width: double.infinity, height: 14),
+                          SizedBox(height: AppSpacing.xs),
+                          AppSkeleton(width: double.infinity, height: 14),
+                          SizedBox(height: AppSpacing.xs),
+                          AppSkeleton(width: 220, height: 14),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // 5. Parts List Skeleton
+                    AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const AppSkeleton(width: 150, height: 18),
+                          const SizedBox(height: AppSpacing.md),
+                          for (int i = 0; i < 3; i++) ...[
+                            if (i > 0) const Divider(height: AppSpacing.lg),
+                            const Row(
+                              children: [
+                                AppSkeleton(width: 24, height: 24, isCircle: true),
+                                SizedBox(width: AppSpacing.sm),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      AppSkeleton(width: double.infinity, height: 16),
+                                      SizedBox(height: AppSpacing.xs),
+                                      AppSkeleton(width: 80, height: 12),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 final learningMediaPlayerBuilderProvider = Provider<LearningMediaPlayerBuilder>(
   (ref) =>
@@ -182,6 +183,10 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
       setState(() {});
     } catch (e) {
       if (!mounted || _controller != c) return;
+      if (widget.embedUrl != null) {
+        setState(() => _error = e);
+        return;
+      }
       await _recover(e);
     }
   }
@@ -215,6 +220,11 @@ class _LearningMediaPlayerState extends ConsumerState<LearningMediaPlayer> {
         if (!mounted) return;
         _refreshedUrl = Uri.tryParse(source['playbackUrl']?.toString() ?? '');
         _refreshedEmbed = Uri.tryParse(source['embedUrl']?.toString() ?? '');
+        if (_refreshedEmbed != null) {
+          _recovering = false;
+          if (mounted) setState(() => _error = error);
+          return;
+        }
         _recovering = false;
         await _initialize();
         return;
@@ -686,16 +696,37 @@ class _LearningVideoEmbedPlayerState
   @override
   void initState() {
     super.initState();
-    _wvc = WebViewController()
+
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    _wvc = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.black)
-      ..setUserAgent(
+      ..setBackgroundColor(Colors.black);
+
+    if (Platform.isIOS) {
+      _wvc.setUserAgent(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+      );
+    } else {
+      _wvc.setUserAgent(
         'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
       );
+    }
 
     if (_wvc.platform is AndroidWebViewController) {
       (_wvc.platform as AndroidWebViewController)
           .setMediaPlaybackRequiresUserGesture(false);
+    } else if (_wvc.platform is WebKitWebViewController) {
+      final webkit = _wvc.platform as WebKitWebViewController;
+      webkit.setAllowsBackForwardNavigationGestures(false);
     }
 
     _wvc
@@ -734,11 +765,27 @@ class _LearningVideoEmbedPlayerState
     _startHideTimer();
   }
 
+  @override
+  void didUpdateWidget(covariant LearningVideoEmbedPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.url != widget.url) {
+      _wvc.loadRequest(
+        _buildUri(widget.url),
+        headers: const <String, String>{
+          'Referer': 'https://iframe.mediadelivery.net/',
+          'Origin': 'https://iframe.mediadelivery.net',
+        },
+      );
+    }
+  }
+
   static Uri _buildUri(Uri uri) {
     final p = Map<String, String>.from(uri.queryParameters)
       ..['controls'] = 'false'
       ..['responsive'] = 'true'
-      ..['autoplay'] = 'true';
+      ..['autoplay'] = 'true'
+      ..['playsinline'] = 'true'
+      ..['preload'] = 'true';
     return uri.replace(queryParameters: p);
   }
 
@@ -798,6 +845,10 @@ class _LearningVideoEmbedPlayerState
     }
     if (v._flutter) return;
     v._flutter = true;
+    v.setAttribute('playsinline', 'true');
+    v.setAttribute('webkit-playsinline', 'true');
+    v.setAttribute('x5-playsinline', 'true');
+    v.playsInline = true;
     var initial = window.flutterInitial;
     v.autoplay = initial.playing;
     v.volume = initial.volume;
@@ -2150,8 +2201,11 @@ class LearningVideoEmbedFallback extends ConsumerWidget {
         onRetry: () => ref.invalidate(_videoEmbedUrlProvider(videoId)),
       ),
       data: (source) {
-        final direct = Uri.tryParse(source['playbackUrl']?.toString() ?? '');
         final embed = Uri.tryParse(source['embedUrl']?.toString() ?? '');
+        if (embed != null && _isSupportedNetworkUrl(embed)) {
+          return LearningVideoEmbedPlayer(url: embed, title: title);
+        }
+        final direct = Uri.tryParse(source['playbackUrl']?.toString() ?? '');
         if (direct != null && _isSupportedNetworkUrl(direct)) {
           return LearningMediaPlayer(
             url: direct,
@@ -2161,10 +2215,7 @@ class LearningVideoEmbedFallback extends ConsumerWidget {
             videoId: videoId,
           );
         }
-        if (embed == null || !_isSupportedNetworkUrl(embed)) {
-          return const _InvalidMediaUrlCard();
-        }
-        return LearningVideoEmbedPlayer(url: embed, title: title);
+        return const _InvalidMediaUrlCard();
       },
     );
   }

@@ -85,8 +85,33 @@ class OfflineDownloadService {
           'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     };
 
+    var downloadUrl = remoteUrl;
+    if (type == OfflineDownloadType.video &&
+        remoteUrl.contains('mediadelivery.net')) {
+      try {
+        final res = await _dio.get<String>(
+          remoteUrl,
+          options: Options(
+            headers: headers,
+            responseType: ResponseType.plain,
+            sendTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 15),
+          ),
+        );
+        final html = res.data ?? '';
+        final match =
+            RegExp(r'content="([^"]+\/play_[^"]+\.mp4[^"]*)"').firstMatch(html) ??
+            RegExp(r'content="([^"]+\.mp4[^"]*)"').firstMatch(html);
+        if (match != null && match.group(1) != null) {
+          downloadUrl = match.group(1)!;
+        }
+      } catch (_) {
+        // Fallback to original remoteUrl
+      }
+    }
+
     await _dio.download(
-      remoteUrl,
+      downloadUrl,
       savePath,
       options: Options(headers: headers),
       onReceiveProgress: (received, total) {

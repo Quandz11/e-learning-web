@@ -232,7 +232,7 @@ const AdminHomeSectionPage: React.FC = () => {
                             {form.videoType === 'bunny' && (
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Upload file video</label>
-                                    
+
                                     {/* Current video indicator */}
                                     {form.videoId && (
                                         <div className="mb-3 flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">

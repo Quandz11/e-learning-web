@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { enrollmentApi, type EnrollmentResponse } from '../services/enrollmentApi';
+import { getAssetUrl } from '../services/apiConfig';
 
 const MyCoursesPage: React.FC = () => {
     const { t } = useTranslation();
@@ -10,19 +11,11 @@ const MyCoursesPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [brokenThumbnails, setBrokenThumbnails] = useState<Record<string, boolean>>({});
 
-    const apiBase = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
-    const rootUrl = apiBase.replace(/\/api\/?$/, '');
-
     const getThumbnailUrl = (url?: string) => {
         if (!url) {
             return null;
         }
-
-        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
-            return url;
-        }
-
-        return `${rootUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+        return getAssetUrl(url);
     };
 
     useEffect(() => {

@@ -3,7 +3,25 @@ export { ApiError };
 import { tokenService } from './tokenService';
 import { authUtils } from './authUtils';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://skvi-api.azurewebsites.net/api';
+import {
+    PRIMARY_API_URL,
+    FALLBACK_API_URL,
+    getActiveApiBaseUrl,
+    getRootUrl,
+    getAssetUrl,
+    fetchWithFallback,
+} from './apiConfig';
+
+export {
+    PRIMARY_API_URL,
+    FALLBACK_API_URL,
+    getActiveApiBaseUrl,
+    getRootUrl,
+    getAssetUrl,
+    fetchWithFallback,
+};
+
+export const API_BASE_URL = PRIMARY_API_URL;
 
 interface RequestConfig extends RequestInit {
     _retry?: boolean;
@@ -31,8 +49,6 @@ const processQueue = (error: any, token: string | null = null) => {
 const DEFAULT_TIMEOUT_MS = 60_000;
 
 export const apiClient = async <T = any>(endpoint: string, options: RequestConfig = {}): Promise<T> => {
-    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-
     const getHeaders = () => {
         const headers = new Headers(options.headers || {});
         // Only set Content-Type if body is not FormData
@@ -56,22 +72,11 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
         config.credentials = 'include';
     }
 
-    const controller = new AbortController();
-    if (!config.signal) {
-        const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
-        config.signal = controller.signal;
-        const originalSignal = options.signal;
-        if (originalSignal) {
-            originalSignal.addEventListener('abort', () => controller.abort());
-        }
-        // Clear timeout when the request completes via the response handling below
-        (config as any)._timeoutId = timeoutId;
-    }
-
     const generation = tokenService.getGeneration();
-    try {
-        const response = await fetch(url, config);
-        clearTimeout((config as any)._timeoutId);
+    const response = await fetchWithFallback(endpoint, {
+        ...config,
+        timeoutMs: DEFAULT_TIMEOUT_MS,
+    });
         if (generation !== tokenService.getGeneration()) throw new ApiError('Session changed', 401);
         if (response.status === 401) {
             const body = await response.clone().json().catch(() => null);
@@ -158,8 +163,4 @@ export const apiClient = async <T = any>(endpoint: string, options: RequestConfi
         } catch (e) {
             return (await response.text()) as unknown as T;
         }
-    } catch (error) {
-        clearTimeout((config as any)._timeoutId);
-        throw error;
-    }
 };

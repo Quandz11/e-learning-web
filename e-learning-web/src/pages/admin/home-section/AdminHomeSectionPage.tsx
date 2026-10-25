@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { homeSectionApi, type UpdateHomeVideoSectionDto } from '../../../services/homeSectionApi';
-import { authApi } from '../../../services/authApi';
+import { apiClient } from '../../../services/apiClient';
 
 interface VideoUploadResponse {
     videoId: string;
@@ -69,17 +69,10 @@ const AdminHomeSectionPage: React.FC = () => {
             formData.append('file', file);
             formData.append('title', file.name);
 
-            const token = authApi.getAccessToken();
-            const apiBase = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
-            const response = await fetch(`${apiBase}/videos/upload`, {
+            const result = await apiClient<VideoUploadResponse>('/videos/upload', {
                 method: 'POST',
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-                credentials: 'include',
                 body: formData,
             });
-
-            if (!response.ok) throw new Error('Upload failed');
-            const result: VideoUploadResponse = await response.json();
 
             setUploadProgress(100);
             setForm(prev => ({

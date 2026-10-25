@@ -1,5 +1,6 @@
 import { tokenService, sessionId } from '../services/tokenService';
 import { apiClient } from '../services/apiClient';
+import { getHubUrl } from '../services/apiConfig';
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { useSelector } from 'react-redux';
@@ -57,11 +58,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     useEffect(() => {
         if (!user || !token) return;
 
-        // Derive Hub URL from API URL or default
-        // VITE_API_URL usually is '.../api', we need root for hubs
-        const apiBase = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
-        const hubBase = apiBase.replace('/api', '');
-        const hubUrl = `${hubBase}/hubs/notification`;
+        const hubUrl = getHubUrl('notification');
 
         const newConnection = new HubConnectionBuilder()
             .withUrl(hubUrl, {

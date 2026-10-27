@@ -76,6 +76,34 @@ class RunningHistoryItem extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFFDE68A)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.bolt, size: 11, color: Color(0xFFD97706)),
+                    const SizedBox(width: 2),
+                    Text(
+                      '+${activity.effectiveEnergy} E',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFFB45309),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (activity.badgesEarned.isNotEmpty) ...[
+                const SizedBox(width: 4),
+                const Icon(Icons.local_florist, size: 14, color: AppColors.primary),
+              ],
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

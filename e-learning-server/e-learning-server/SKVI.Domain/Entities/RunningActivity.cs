@@ -32,6 +32,13 @@ public class RunningActivity
     [MaxLength(32)]
     public string TrackingMode { get; set; } = "GPS"; // "GPS" | "MANUAL"
 
+    public int EnergyEarned { get; set; }
+
+    [MaxLength(512)]
+    public string? BadgesEarnedJson { get; set; }
+
+    public Guid? LinkedGoalId { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [ForeignKey(nameof(UserId))]

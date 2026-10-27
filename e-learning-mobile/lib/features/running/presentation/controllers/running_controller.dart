@@ -8,6 +8,12 @@ class RunningState {
     this.summary = const RunningSummary(),
     this.activities = const [],
     this.totalCount = 0,
+    this.availableGoals = const [
+      RunningGoal(id: 'goal_health_2026', title: 'Sức khỏe 2026', activitiesCount: 3),
+      RunningGoal(id: 'goal_change_21_days', title: '21 ngày thay đổi', activitiesCount: 5),
+      RunningGoal(id: 'goal_balanced_living', title: 'Sống cân bằng', activitiesCount: 2),
+    ],
+    this.selectedGoalId,
     this.errorMessage,
   });
 
@@ -15,13 +21,54 @@ class RunningState {
   final RunningSummary summary;
   final List<RunningActivity> activities;
   final int totalCount;
+  final List<RunningGoal> availableGoals;
+  final String? selectedGoalId;
   final String? errorMessage;
+
+  RunningGoal? get selectedGoal {
+    for (final g in availableGoals) {
+      if (g.id == selectedGoalId) return g;
+    }
+    return null;
+  }
+
+  List<RunningBadge> get badges {
+    final unlocked = summary.unlockedBadges.toSet();
+    // Count per badge from activities
+    final counts = <String, int>{};
+    for (final act in activities) {
+      for (final b in act.badgesEarned) {
+        counts[b] = (counts[b] ?? 0) + 1;
+      }
+    }
+    // Energy heart count
+    if (summary.effectiveTotalEnergy > 0) {
+      counts['badge_heart_energy'] = summary.effectiveTotalEnergy;
+      unlocked.add('badge_heart_energy');
+    }
+    // Runs count
+    if (summary.totalRunsCount >= 5) {
+      counts['badge_silver'] = summary.totalRunsCount ~/ 5;
+      unlocked.add('badge_silver');
+    }
+    if (summary.totalRunsCount >= 10) {
+      counts['badge_gold'] = summary.totalRunsCount ~/ 10;
+      unlocked.add('badge_gold');
+    }
+
+    return RunningBadgeCatalog.getAllBadges(
+      unlockedIds: unlocked,
+      counts: counts,
+    );
+  }
 
   RunningState copyWith({
     bool? isLoading,
     RunningSummary? summary,
     List<RunningActivity>? activities,
     int? totalCount,
+    List<RunningGoal>? availableGoals,
+    String? selectedGoalId,
     String? errorMessage,
   }) {
     return RunningState(
@@ -29,6 +76,8 @@ class RunningState {
       summary: summary ?? this.summary,
       activities: activities ?? this.activities,
       totalCount: totalCount ?? this.totalCount,
+      availableGoals: availableGoals ?? this.availableGoals,
+      selectedGoalId: selectedGoalId ?? this.selectedGoalId,
       errorMessage: errorMessage,
     );
   }
@@ -86,6 +135,24 @@ class RunningController extends StateNotifier<RunningState> {
 
   Future<void> refresh() => load();
 
+  void selectGoal(String? goalId) {
+    state = state.copyWith(selectedGoalId: goalId);
+  }
+
+  void addGoal(String title) {
+    if (title.trim().isEmpty) return;
+    final newGoal = RunningGoal(
+      id: 'goal_custom_${DateTime.now().millisecondsSinceEpoch}',
+      title: title.trim(),
+      activitiesCount: 0,
+    );
+    final updated = List<RunningGoal>.from(state.availableGoals)..add(newGoal);
+    state = state.copyWith(
+      availableGoals: updated,
+      selectedGoalId: newGoal.id,
+    );
+  }
+
   Future<bool> logManualRun({
     required double distanceKm,
     required int durationSeconds,
@@ -103,6 +170,8 @@ class RunningController extends StateNotifier<RunningState> {
         title: title ?? 'Chạy bộ',
         notes: notes,
         trackingMode: 'MANUAL',
+        energyEarned: distanceKm.floor(),
+        linkedGoalId: state.selectedGoalId,
       );
       await repo.createActivity(dto);
       await load();

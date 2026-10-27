@@ -23,6 +23,8 @@ class LiveRunState {
     this.currentPaceMinPerKm,
     this.currentPaceFormatted = '--',
     this.caloriesBurned = 0,
+    this.waypoints = const [],
+    this.linkedGoalId,
     this.errorMessage,
     this.isSaving = false,
   });
@@ -34,8 +36,12 @@ class LiveRunState {
   final double? currentPaceMinPerKm;
   final String currentPaceFormatted;
   final int caloriesBurned;
+  final List<({double latitude, double longitude})> waypoints;
+  final String? linkedGoalId;
   final String? errorMessage;
   final bool isSaving;
+
+  int get energyEarned => distanceKm.floor();
 
   bool get isRunning => status == LiveRunStatus.running;
   bool get isPaused => status == LiveRunStatus.paused;
@@ -59,6 +65,8 @@ class LiveRunState {
     double? currentPaceMinPerKm,
     String? currentPaceFormatted,
     int? caloriesBurned,
+    List<({double latitude, double longitude})>? waypoints,
+    String? linkedGoalId,
     String? errorMessage,
     bool? isSaving,
   }) {
@@ -70,6 +78,8 @@ class LiveRunState {
       currentPaceMinPerKm: currentPaceMinPerKm ?? this.currentPaceMinPerKm,
       currentPaceFormatted: currentPaceFormatted ?? this.currentPaceFormatted,
       caloriesBurned: caloriesBurned ?? this.caloriesBurned,
+      waypoints: waypoints ?? this.waypoints,
+      linkedGoalId: linkedGoalId ?? this.linkedGoalId,
       errorMessage: errorMessage,
       isSaving: isSaving ?? this.isSaving,
     );
@@ -169,9 +179,15 @@ class LiveGpsController extends StateNotifier<LiveRunState> {
           final newMeters = state.distanceMeters + dist;
           final newKm = double.parse((newMeters / 1000.0).toStringAsFixed(3));
           _lastPosition = position;
-          _updatePaceAndCalories(state.elapsedSeconds, newKm, meters: newMeters);
+          final newPoints = List<({double latitude, double longitude})>.from(state.waypoints)
+            ..add((latitude: position.latitude, longitude: position.longitude));
+          _updatePaceAndCalories(state.elapsedSeconds, newKm, meters: newMeters, waypoints: newPoints);
           return;
         }
+      } else {
+        final newPoints = List<({double latitude, double longitude})>.from(state.waypoints)
+          ..add((latitude: position.latitude, longitude: position.longitude));
+        state = state.copyWith(waypoints: newPoints);
       }
 
       _lastPosition = position;
@@ -180,7 +196,11 @@ class LiveGpsController extends StateNotifier<LiveRunState> {
     });
   }
 
-  void _updatePaceAndCalories(int seconds, double km, {double? meters}) {
+  void setLinkedGoal(String? goalId) {
+    state = state.copyWith(linkedGoalId: goalId);
+  }
+
+  void _updatePaceAndCalories(int seconds, double km, {double? meters, List<({double latitude, double longitude})>? waypoints}) {
     double? pace;
     String paceStr = '--';
 
@@ -206,6 +226,7 @@ class LiveGpsController extends StateNotifier<LiveRunState> {
       currentPaceMinPerKm: pace,
       currentPaceFormatted: paceStr,
       caloriesBurned: cal,
+      waypoints: waypoints ?? state.waypoints,
     );
   }
 
@@ -223,14 +244,14 @@ class LiveGpsController extends StateNotifier<LiveRunState> {
     }
   }
 
-  Future<bool> finishAndSave({String? title, String? notes}) async {
+  Future<RunningActivity?> finishAndSave({String? title, String? notes}) async {
     _timer?.cancel();
     _positionSub?.cancel();
 
     // Must have at least 0.01 km or 5 seconds
     if (state.distanceKm <= 0.005 && state.elapsedSeconds < 5) {
       reset();
-      return true;
+      return null;
     }
 
     state = state.copyWith(isSaving: true);
@@ -245,22 +266,24 @@ class LiveGpsController extends StateNotifier<LiveRunState> {
         title: title ?? 'Chạy bộ ngoài trời',
         notes: notes,
         trackingMode: 'GPS',
+        energyEarned: state.energyEarned,
+        linkedGoalId: state.linkedGoalId,
       );
 
-      await repo.createActivity(dto);
+      final created = await repo.createActivity(dto);
       _ref.read(runningControllerProvider.notifier).refresh();
 
       state = state.copyWith(
         status: LiveRunStatus.completed,
         isSaving: false,
       );
-      return true;
+      return created;
     } catch (e) {
       state = state.copyWith(
         isSaving: false,
         errorMessage: 'Không thể lưu buổi chạy: $e',
       );
-      return false;
+      return null;
     }
   }
 

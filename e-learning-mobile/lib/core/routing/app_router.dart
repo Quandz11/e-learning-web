@@ -52,6 +52,9 @@ import 'package:e_learning_mobile/features/settings/presentation/screens/terms_a
 import 'package:e_learning_mobile/features/widgets/presentation/screens/widget_preview_gallery_screen.dart';
 import 'package:e_learning_mobile/features/running/presentation/screens/running_screen.dart';
 import 'package:e_learning_mobile/features/running/presentation/screens/live_run_screen.dart';
+import 'package:e_learning_mobile/features/running/presentation/screens/activity_detail_screen.dart';
+import 'package:e_learning_mobile/features/running/presentation/screens/pre_run_screen.dart';
+import 'package:e_learning_mobile/features/running/presentation/screens/rewards_inventory_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -316,6 +319,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.running,
         builder: (_, __) => const RunningScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.runningDetail,
+        builder: (_, __) => const ActivityDetailScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.runningLaunchpad,
+        builder: (_, __) => const PreRunScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.runningRewards,
+        builder: (_, __) => const RewardsInventoryScreen(),
       ),
       GoRoute(
         path: AppRoutes.liveRun,

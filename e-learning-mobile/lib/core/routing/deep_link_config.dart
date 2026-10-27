@@ -99,6 +99,9 @@ abstract final class AppRoutes {
   static const paymentReturn = '/payment-return';
   static const paymentCancel = '/payment-cancel';
   static const running = '/running';
+  static const runningDetail = '/running/detail';
+  static const runningLaunchpad = '/running/launchpad';
+  static const runningRewards = '/running/rewards';
   static const liveRun = '/running/live';
 
   static const shellDestinations = <String>[

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SKVI.Application.DTOs.Running;
 using SKVI.Application.Interfaces;
@@ -53,6 +54,17 @@ public class RunningService : IRunningService
 
         var activityDate = request.ActivityDate ?? DateTime.UtcNow;
 
+        var energy = request.EnergyEarned.HasValue && request.EnergyEarned.Value > 0
+            ? request.EnergyEarned.Value
+            : (int)Math.Floor(distance);
+
+        var badges = new List<string>();
+        if (distance >= 3.0m) badges.Add("badge_flower_bronze_3k");
+        if (distance >= 5.0m) badges.Add("badge_flower_blue_5k");
+        if (distance >= 10.0m) badges.Add("badge_flower_red_10k");
+        if (distance >= 21.0m) badges.Add("badge_flower_purple_21k");
+        if (distance >= 42.0m) badges.Add("badge_crown_gold_42k");
+
         var activity = new RunningActivity
         {
             Id = Guid.NewGuid(),
@@ -67,6 +79,9 @@ public class RunningService : IRunningService
                 : request.Title.Trim(),
             Notes = request.Notes?.Trim(),
             TrackingMode = string.IsNullOrWhiteSpace(request.TrackingMode) ? "GPS" : request.TrackingMode.Trim().ToUpperInvariant(),
+            EnergyEarned = energy,
+            BadgesEarnedJson = badges.Count > 0 ? JsonSerializer.Serialize(badges) : null,
+            LinkedGoalId = request.LinkedGoalId,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -191,6 +206,41 @@ public class RunningService : IRunningService
             checkDate = checkDate.AddDays(-1);
         }
 
+        var totalEnergy = await userRuns.SumAsync(r => r.EnergyEarned, cancellationToken);
+        if (totalEnergy == 0 && totalDistance > 0)
+        {
+            totalEnergy = (int)Math.Floor(totalDistance);
+        }
+
+        var unlockedBadges = new HashSet<string>();
+        var badgeJsons = await userRuns
+            .Where(r => !string.IsNullOrEmpty(r.BadgesEarnedJson))
+            .Select(r => r.BadgesEarnedJson!)
+            .ToListAsync(cancellationToken);
+
+        foreach (var json in badgeJsons)
+        {
+            try
+            {
+                var parsed = JsonSerializer.Deserialize<List<string>>(json);
+                if (parsed != null)
+                {
+                    foreach (var b in parsed) unlockedBadges.Add(b);
+                }
+            }
+            catch { }
+        }
+
+        if (longestRun >= 3.0m) unlockedBadges.Add("badge_flower_bronze_3k");
+        if (longestRun >= 5.0m) unlockedBadges.Add("badge_flower_blue_5k");
+        if (longestRun >= 10.0m) unlockedBadges.Add("badge_flower_red_10k");
+        if (longestRun >= 21.0m) unlockedBadges.Add("badge_flower_purple_21k");
+        if (longestRun >= 42.0m) unlockedBadges.Add("badge_crown_gold_42k");
+
+        if (streak >= 7) unlockedBadges.Add("badge_streak_7");
+        if (streak >= 14) unlockedBadges.Add("badge_streak_14");
+        if (streak >= 28) unlockedBadges.Add("badge_streak_28");
+
         return new RunningSummaryDto
         {
             TotalDistanceKm = totalDistance,
@@ -202,12 +252,35 @@ public class RunningService : IRunningService
             AveragePaceMinPerKm = avgPace,
             AveragePaceFormatted = avgPaceFormatted,
             LongestRunKm = longestRun,
-            CurrentStreakDays = streak
+            CurrentStreakDays = streak,
+            TotalEnergyEarned = totalEnergy,
+            UnlockedBadges = unlockedBadges.ToList()
         };
     }
 
     private static RunningActivityDto MapToDto(RunningActivity activity)
     {
+        var badges = new List<string>();
+        if (!string.IsNullOrEmpty(activity.BadgesEarnedJson))
+        {
+            try
+            {
+                badges = JsonSerializer.Deserialize<List<string>>(activity.BadgesEarnedJson) ?? [];
+            }
+            catch { }
+        }
+
+        if (badges.Count == 0 && activity.DistanceKm >= 3.0m)
+        {
+            if (activity.DistanceKm >= 3.0m) badges.Add("badge_flower_bronze_3k");
+            if (activity.DistanceKm >= 5.0m) badges.Add("badge_flower_blue_5k");
+            if (activity.DistanceKm >= 10.0m) badges.Add("badge_flower_red_10k");
+            if (activity.DistanceKm >= 21.0m) badges.Add("badge_flower_purple_21k");
+            if (activity.DistanceKm >= 42.0m) badges.Add("badge_crown_gold_42k");
+        }
+
+        var energy = activity.EnergyEarned > 0 ? activity.EnergyEarned : (int)Math.Floor(activity.DistanceKm);
+
         return new RunningActivityDto
         {
             Id = activity.Id,
@@ -221,6 +294,10 @@ public class RunningService : IRunningService
             Title = activity.Title,
             Notes = activity.Notes,
             TrackingMode = activity.TrackingMode,
+            EnergyEarned = energy,
+            BadgesEarnedJson = activity.BadgesEarnedJson,
+            BadgesEarned = badges,
+            LinkedGoalId = activity.LinkedGoalId,
             CreatedAt = activity.CreatedAt
         };
     }

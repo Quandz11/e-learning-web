@@ -22,6 +22,10 @@ public class CreateRunningActivityRequest
 
     [MaxLength(32)]
     public string TrackingMode { get; set; } = "GPS"; // "GPS" | "MANUAL"
+
+    public int? EnergyEarned { get; set; }
+
+    public Guid? LinkedGoalId { get; set; }
 }
 
 public class RunningActivityDto
@@ -37,6 +41,10 @@ public class RunningActivityDto
     public string Title { get; set; } = string.Empty;
     public string? Notes { get; set; }
     public string TrackingMode { get; set; } = "GPS";
+    public int EnergyEarned { get; set; }
+    public string? BadgesEarnedJson { get; set; }
+    public List<string> BadgesEarned { get; set; } = [];
+    public Guid? LinkedGoalId { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -52,6 +60,8 @@ public class RunningSummaryDto
     public string AveragePaceFormatted { get; set; } = string.Empty;
     public decimal LongestRunKm { get; set; }
     public int CurrentStreakDays { get; set; }
+    public int TotalEnergyEarned { get; set; }
+    public List<string> UnlockedBadges { get; set; } = [];
 }
 
 public class PaginatedRunningActivitiesDto

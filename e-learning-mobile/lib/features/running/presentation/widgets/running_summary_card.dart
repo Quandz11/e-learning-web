@@ -76,7 +76,7 @@ class _RunningSummaryCardState extends ConsumerState<RunningSummaryCard> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => context.push(AppRoutes.running),
+        onTap: () => context.push(AppRoutes.runningDetail),
         borderRadius: BorderRadius.circular(AppRadius.md),
         child: Container(
           padding: const EdgeInsets.symmetric(
@@ -176,7 +176,7 @@ class _RunningSummaryCardState extends ConsumerState<RunningSummaryCard> {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: InkWell(
-                  onTap: () => context.push(AppRoutes.liveRun),
+                  onTap: () => context.push(AppRoutes.runningLaunchpad),
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                   child: Container(
                     padding: const EdgeInsets.symmetric(

@@ -75,6 +75,26 @@ void main() {
 
       expect(activity.isGps, isFalse);
     });
+
+    test('calculates effective energy and awards milestone badges', () {
+      final act = RunningActivity(
+        id: 'act-gamified',
+        userId: 'u-1',
+        distanceKm: 8.5,
+        durationSeconds: 2700,
+        paceFormatted: "5'18\"/km",
+        caloriesBurned: 520,
+        activityDate: DateTime.now(),
+        title: 'Chạy bộ',
+        trackingMode: 'GPS',
+        badgesEarned: const ['badge_flower_bronze_3k', 'badge_flower_blue_5k'],
+        createdAt: DateTime.now(),
+      );
+
+      expect(act.effectiveEnergy, 8);
+      expect(act.badgesEarned.length, 2);
+      expect(act.badgesEarned, contains('badge_flower_blue_5k'));
+    });
   });
 
   group('RunningSummary', () {
@@ -90,6 +110,8 @@ void main() {
         'averagePaceFormatted': "5'57\"/km",
         'longestRunKm': 10.2,
         'currentStreakDays': 4,
+        'totalEnergyEarned': 48,
+        'unlockedBadges': ['badge_flower_bronze_3k', 'badge_flower_blue_5k'],
       };
 
       final summary = RunningSummary.fromJson(json);
@@ -103,6 +125,8 @@ void main() {
       expect(summary.averagePaceFormatted, "5'57\"/km");
       expect(summary.longestRunKm, 10.2);
       expect(summary.currentStreakDays, 4);
+      expect(summary.effectiveTotalEnergy, 48);
+      expect(summary.unlockedBadges.length, 2);
       expect(summary.totalDurationFormatted, '4h 51m');
     });
 
@@ -116,7 +140,35 @@ void main() {
       expect(summary.monthDistanceKm, 0.0);
       expect(summary.longestRunKm, 0.0);
       expect(summary.currentStreakDays, 0);
+      expect(summary.effectiveTotalEnergy, 0);
       expect(summary.totalDurationFormatted, '0 phút');
+    });
+  });
+
+  group('RunningBadgeCatalog & Goals', () {
+    test('generates all badges with unlocked and count state', () {
+      final badges = RunningBadgeCatalog.getAllBadges(
+        unlockedIds: {'badge_flower_blue_5k', 'badge_streak_7'},
+        counts: {'badge_flower_blue_5k': 3, 'badge_streak_7': 1},
+      );
+
+      final blueFlower = badges.firstWhere((b) => b.id == 'badge_flower_blue_5k');
+      expect(blueFlower.isUnlocked, isTrue);
+      expect(blueFlower.count, 3);
+
+      final redFlower = badges.firstWhere((b) => b.id == 'badge_flower_red_10k');
+      expect(redFlower.isUnlocked, isFalse);
+      expect(redFlower.count, 0);
+    });
+
+    test('RunningGoal model copies with updated selection and counts', () {
+      const goal = RunningGoal(id: 'g-1', title: 'Sức khỏe 2026', activitiesCount: 3);
+      expect(goal.isSelected, isFalse);
+
+      final selectedGoal = goal.copyWith(isSelected: true, activitiesCount: 4);
+      expect(selectedGoal.isSelected, isTrue);
+      expect(selectedGoal.activitiesCount, 4);
+      expect(selectedGoal.title, 'Sức khỏe 2026');
     });
   });
 
@@ -130,6 +182,8 @@ void main() {
         title: 'Morning Run',
         notes: 'Good pace',
         trackingMode: 'GPS',
+        energyEarned: 5,
+        linkedGoalId: 'g-123',
       );
 
       final json = dto.toJson();
@@ -139,6 +193,8 @@ void main() {
       expect(json['title'], 'Morning Run');
       expect(json['notes'], 'Good pace');
       expect(json['trackingMode'], 'GPS');
+      expect(json['energyEarned'], 5);
+      expect(json['linkedGoalId'], 'g-123');
     });
   });
 }

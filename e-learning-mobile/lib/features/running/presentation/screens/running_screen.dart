@@ -1,6 +1,8 @@
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
 import 'package:e_learning_mobile/features/running/data/models/running_models.dart';
 import 'package:e_learning_mobile/features/running/presentation/controllers/running_controller.dart';
+import 'package:e_learning_mobile/features/running/presentation/screens/activity_detail_screen.dart';
+import 'package:e_learning_mobile/features/running/presentation/screens/rewards_inventory_screen.dart';
 import 'package:e_learning_mobile/features/running/presentation/widgets/log_manual_run_sheet.dart';
 import 'package:e_learning_mobile/features/running/presentation/widgets/running_history_item.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
@@ -22,6 +24,8 @@ class RunningScreen extends ConsumerStatefulWidget {
 }
 
 class _RunningScreenState extends ConsumerState<RunningScreen> {
+  int _historyFilterIndex = 0; // 0: Tất cả, 1: Chạy bộ, 2: Tuần, 3: Tháng
+
   @override
   void initState() {
     super.initState();
@@ -50,9 +54,26 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_rounded),
-            tooltip: 'Nhập buổi chạy',
-            onPressed: () => LogManualRunSheet.show(context),
+            icon: const Icon(Icons.card_giftcard),
+            tooltip: 'Kho phần thưởng',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const RewardsInventoryScreen(),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'Chi tiết Activity',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ActivityDetailScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -239,38 +260,101 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
 
-                      // History list
-                      if (state.activities.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
-                          child: AppEmptyView(
-                            message: 'Chưa có dữ liệu chạy bộ.',
-                          ),
-                        )
-                      else
-                        ...state.activities.map(
-                          (act) => Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: AppSpacing.sm,
-                            ),
-                            child: RunningHistoryItem(
-                              activity: act,
-                              onDelete: () async {
-                                final ok = await controller.deleteRun(act.id);
-                                if (ok && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Đã xóa buổi chạy.'),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                          ),
+                      // Filter chips row
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildHistoryFilterChip(0, 'Tất cả'),
+                            const SizedBox(width: 8),
+                            _buildHistoryFilterChip(1, 'Chạy bộ GPS'),
+                            const SizedBox(width: 8),
+                            _buildHistoryFilterChip(2, 'Tuần'),
+                            const SizedBox(width: 8),
+                            _buildHistoryFilterChip(3, 'Tháng'),
+                          ],
                         ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      // Filtered activities list
+                      Builder(
+                        builder: (context) {
+                          final now = DateTime.now();
+                          final filteredActivities = state.activities.where((act) {
+                            if (_historyFilterIndex == 1) return act.isGps;
+                            if (_historyFilterIndex == 2) {
+                              return act.activityDate.isAfter(now.subtract(const Duration(days: 7)));
+                            }
+                            if (_historyFilterIndex == 3) {
+                              return act.activityDate.month == now.month &&
+                                  act.activityDate.year == now.year;
+                            }
+                            return true;
+                          }).toList();
+
+                          if (filteredActivities.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 32),
+                              child: AppEmptyView(
+                                message: 'Chưa có dữ liệu phù hợp với bộ lọc.',
+                              ),
+                            );
+                          }
+
+                          return Column(
+                            children: filteredActivities.map(
+                              (act) => Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.sm,
+                                ),
+                                child: RunningHistoryItem(
+                                  activity: act,
+                                  onDelete: () async {
+                                    final ok = await controller.deleteRun(act.id);
+                                    if (ok && context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Đã xóa buổi chạy.'),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ).toList(),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
+    );
+  }
+
+  Widget _buildHistoryFilterChip(int index, String label) {
+    final isSelected = _historyFilterIndex == index;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      selectedColor: AppColors.primary,
+      backgroundColor: Colors.white,
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        color: isSelected ? Colors.white : AppColors.textPrimary,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isSelected ? AppColors.primary : AppColors.border,
+        ),
+      ),
+      onSelected: (val) {
+        if (val) {
+          setState(() => _historyFilterIndex = index);
+        }
+      },
     );
   }
 
@@ -370,7 +454,7 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                           ),
                           const SizedBox(width: 2),
                           Text(
-                            '${summary.currentStreakDays} ngày liên tiếp',
+                            '+${summary.effectiveTotalEnergy} E • ${summary.currentStreakDays} ngày',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 11,

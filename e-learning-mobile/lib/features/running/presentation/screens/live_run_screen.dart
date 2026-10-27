@@ -30,19 +30,19 @@ class _LiveRunScreenState extends ConsumerState<LiveRunScreen> {
       final discard = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Buổi chạy quá ngắn'),
+          title: const Text('Kết thúc buổi chạy'),
           content: const Text(
-            'Quãng đường chạy chưa đủ để lưu lại. Bạn có muốn thoát không?',
+            'Quãng đường chưa đủ để ghi nhận. Bạn có muốn thoát không?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Tiếp tục chạy'),
+              child: const Text('Tiếp tục'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text(
-                'Bỏ qua',
+                'Thoát',
                 style: TextStyle(color: Colors.redAccent),
               ),
             ),
@@ -60,19 +60,14 @@ class _LiveRunScreenState extends ConsumerState<LiveRunScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Hoàn tất buổi chạy 🎉'),
+        title: const Text('Lưu buổi chạy'),
         content: Text(
-          'Chúc mừng bạn đã hoàn thành:\n'
-          '• Quãng đường: ${distanceKm.toStringAsFixed(2)} km\n'
-          '• Thời gian: ${liveState.durationFormatted}\n'
-          '• Tốc độ Pace: ${liveState.currentPaceFormatted}\n'
-          '• Calo: ${liveState.caloriesBurned} kcal\n\n'
-          'Lưu buổi chạy này vào hồ sơ học viên?',
+          'Quãng đường: ${distanceKm.toStringAsFixed(2)} km trong ${liveState.durationFormatted}.\nBạn có muốn lưu kết quả này không?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Tiếp tục chạy'),
+            child: const Text('Tiếp tục'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -83,7 +78,7 @@ class _LiveRunScreenState extends ConsumerState<LiveRunScreen> {
                 borderRadius: BorderRadius.circular(AppRadius.pill),
               ),
             ),
-            child: const Text('Lưu Buổi Chạy'),
+            child: const Text('Lưu'),
           ),
         ],
       ),
@@ -97,8 +92,7 @@ class _LiveRunScreenState extends ConsumerState<LiveRunScreen> {
           context.pop();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('✅ Đã lưu buổi chạy vào hồ sơ thành công!'),
-              backgroundColor: AppColors.primary,
+              content: Text('Đã lưu buổi chạy.'),
             ),
           );
         } else {

@@ -53,13 +53,13 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
     if (!_formKey.currentState!.validate()) return;
     if (_distance <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập quãng đường lớn hơn 0')),
+        const SnackBar(content: Text('Vui lòng nhập quãng đường.')),
       );
       return;
     }
     if (_minutes <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập thời gian lớn hơn 0')),
+        const SnackBar(content: Text('Vui lòng nhập thời gian.')),
       );
       return;
     }
@@ -84,8 +84,7 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('✅ Đã ghi nhận buổi chạy thành công!'),
-            backgroundColor: AppColors.primary,
+            content: Text('Đã lưu buổi chạy.'),
           ),
         );
       } else {

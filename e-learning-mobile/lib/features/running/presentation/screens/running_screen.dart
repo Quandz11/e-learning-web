@@ -244,8 +244,7 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: AppEmptyView(
-                            message:
-                                'Chưa có buổi chạy nào.\nHãy bắt đầu buổi chạy GPS hoặc nhập số km để theo dõi hành trình!',
+                            message: 'Chưa có dữ liệu chạy bộ.',
                           ),
                         )
                       else
@@ -256,7 +255,16 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                             ),
                             child: RunningHistoryItem(
                               activity: act,
-                              onDelete: () => controller.deleteRun(act.id),
+                              onDelete: () async {
+                                final ok = await controller.deleteRun(act.id);
+                                if (ok && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Đã xóa buổi chạy.'),
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           ),
                         ),

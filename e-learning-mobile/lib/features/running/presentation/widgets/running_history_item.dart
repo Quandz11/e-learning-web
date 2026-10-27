@@ -101,9 +101,9 @@ class RunningHistoryItem extends StatelessWidget {
                   showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Xác nhận xóa'),
+                      title: const Text('Xóa buổi chạy'),
                       content: const Text(
-                        'Bạn có chắc chắn muốn xóa bản ghi buổi chạy này?',
+                        'Bạn có chắc muốn xóa bản ghi này không?',
                       ),
                       actions: [
                         TextButton(

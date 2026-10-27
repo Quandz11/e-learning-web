@@ -43,7 +43,7 @@ public sealed class ZaloTokenManager
         await AcquireLockAsync(cancellationToken);
 
         var token = await _db.ZaloOAuthTokens
-            .SingleOrDefaultAsync(x => x.Id == 1, cancellationToken);
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (token == null)
         {

@@ -23,6 +23,8 @@ import 'package:e_learning_mobile/features/profile/presentation/controllers/prof
 import 'package:e_learning_mobile/features/profile/presentation/controllers/profile_state.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme.dart';
 import 'package:e_learning_mobile/shared/widgets/app_avatar.dart';
+import 'package:e_learning_mobile/features/running/data/models/running_models.dart';
+import 'package:e_learning_mobile/features/running/data/running_repository.dart';
 import 'package:e_learning_mobile/shared/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -249,6 +251,38 @@ void main() {
   });
 }
 
+class _FakeRunningRepository implements RunningRepository {
+  @override
+  Future<RunningSummary> getSummary() async => const RunningSummary();
+
+  @override
+  Future<({List<RunningActivity> items, int totalCount})> getActivities({
+    int page = 1,
+    int pageSize = 20,
+    int? month,
+    int? year,
+  }) async => (items: const <RunningActivity>[], totalCount: 0);
+
+  @override
+  Future<RunningActivity> createActivity(CreateRunningActivityDto dto) async {
+    return RunningActivity(
+      id: 'r-1',
+      userId: 'student-1',
+      distanceKm: dto.distanceKm,
+      durationSeconds: dto.durationSeconds,
+      paceFormatted: "5'00\"/km",
+      caloriesBurned: 100,
+      activityDate: dto.activityDate ?? DateTime.now(),
+      createdAt: DateTime.now(),
+      title: dto.title ?? 'Chạy bộ',
+      trackingMode: dto.trackingMode,
+    );
+  }
+
+  @override
+  Future<bool> deleteActivity(String id) async => true;
+}
+
 _HomeHarness _buildHarness({
   FakeHomeRepository? repository,
   ProfileState? profileState,
@@ -280,6 +314,7 @@ _HomeHarness _buildHarness({
         repository ?? FakeHomeRepository(),
       ),
       learningRepositoryProvider.overrideWithValue(FakeLearningRepository()),
+      runningRepositoryProvider.overrideWithValue(_FakeRunningRepository()),
       profileControllerProvider.overrideWith(
         (ref) => _TestProfileController(
           profileState ??

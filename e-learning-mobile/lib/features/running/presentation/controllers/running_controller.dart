@@ -36,21 +36,36 @@ class RunningState {
 
 final runningControllerProvider =
     StateNotifierProvider<RunningController, RunningState>((ref) {
-  return RunningController(ref.read(runningRepositoryProvider));
+  RunningRepository? repo;
+  try {
+    repo = ref.watch(runningRepositoryProvider);
+  } catch (_) {
+    // In tests or offline without app config initialized
+  }
+  return RunningController(repo);
 });
 
 class RunningController extends StateNotifier<RunningState> {
-  RunningController(this._repository) : super(const RunningState()) {
-    load();
+  RunningController([this._repository]) : super(const RunningState());
+
+  final RunningRepository? _repository;
+  bool _hasLoaded = false;
+
+  Future<void> ensureLoaded() async {
+    if (!_hasLoaded && _repository != null) {
+      _hasLoaded = true;
+      await load();
+    }
   }
 
-  final RunningRepository _repository;
-
   Future<void> load() async {
+    final repo = _repository;
+    if (repo == null) return;
+
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final summaryFuture = _repository.getSummary();
-      final activitiesFuture = _repository.getActivities(page: 1, pageSize: 30);
+      final summaryFuture = repo.getSummary();
+      final activitiesFuture = repo.getActivities(page: 1, pageSize: 30);
 
       final summary = await summaryFuture;
       final activitiesResult = await activitiesFuture;
@@ -78,6 +93,8 @@ class RunningController extends StateNotifier<RunningState> {
     String? title,
     String? notes,
   }) async {
+    final repo = _repository;
+    if (repo == null) return false;
     try {
       final dto = CreateRunningActivityDto(
         distanceKm: distanceKm,
@@ -87,7 +104,7 @@ class RunningController extends StateNotifier<RunningState> {
         notes: notes,
         trackingMode: 'MANUAL',
       );
-      await _repository.createActivity(dto);
+      await repo.createActivity(dto);
       await load();
       return true;
     } catch (_) {
@@ -96,8 +113,10 @@ class RunningController extends StateNotifier<RunningState> {
   }
 
   Future<bool> deleteRun(String id) async {
+    final repo = _repository;
+    if (repo == null) return false;
     try {
-      final success = await _repository.deleteActivity(id);
+      final success = await repo.deleteActivity(id);
       if (success) {
         await load();
       }

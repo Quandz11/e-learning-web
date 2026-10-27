@@ -73,7 +73,7 @@ void main() {
 
   group('RunningController', () {
     test('loads summary and activities on initialization', () async {
-      await Future<void>.delayed(Duration.zero);
+      await controller.ensureLoaded();
 
       expect(controller.state.isLoading, isFalse);
       expect(controller.state.summary.totalDistanceKm, 25.0);

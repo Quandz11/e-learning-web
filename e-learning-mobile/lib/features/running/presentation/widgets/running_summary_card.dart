@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class RunningSummaryCard extends ConsumerWidget {
+class RunningSummaryCard extends ConsumerStatefulWidget {
   const RunningSummaryCard({
     this.compact = false,
     super.key,
@@ -17,7 +17,22 @@ class RunningSummaryCard extends ConsumerWidget {
   final bool compact;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RunningSummaryCard> createState() => _RunningSummaryCardState();
+}
+
+class _RunningSummaryCardState extends ConsumerState<RunningSummaryCard> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(runningControllerProvider.notifier).ensureLoaded();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(runningControllerProvider);
     final summary = state.summary;
     final isDark = context.isDark;
@@ -85,30 +100,30 @@ class RunningSummaryCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: () => context.push(AppRoutes.running),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  visualDensity: VisualDensity.compact,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Chi tiết',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+              InkWell(
+                onTap: () => context.push(AppRoutes.running),
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Chi tiết',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
                         color: colorScheme.primary,
                       ),
-                    ),
-                    const SizedBox(width: 2),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 16,
-                      color: colorScheme.primary,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -141,40 +156,53 @@ class RunningSummaryCard extends ConsumerWidget {
                         color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF047857),
                       ),
                     ),
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: weekKm.toStringAsFixed(1),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : const Color(0xFF065F46),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: weekKm.toStringAsFixed(1),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white : const Color(0xFF065F46),
+                              ),
                             ),
-                          ),
-                          TextSpan(
-                            text: ' / ${targetWeekKm.toInt()} km mục tiêu',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: context.textMuted(),
+                            TextSpan(
+                              text: ' / ${targetWeekKm.toInt()} km mục tiêu',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: context.textMuted(),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        textAlign: TextAlign.end,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 7,
-                    backgroundColor: isDark
+                Container(
+                  height: 7,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: isDark
                         ? Colors.white.withValues(alpha: 0.08)
                         : const Color(0xFFD1FAE5),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color(0xFF10B981),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: progress,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981),
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
                     ),
                   ),
                 ),
@@ -190,9 +218,13 @@ class RunningSummaryCard extends ConsumerWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => context.push(AppRoutes.running),
                   icon: const Icon(Icons.history_rounded, size: 16),
-                  label: const Text('Lịch sử'),
+                  label: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Lịch sử'),
+                  ),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                    minimumSize: Size.zero,
                     side: BorderSide(
                       color: isDark ? Colors.white24 : Colors.black12,
                     ),
@@ -208,14 +240,18 @@ class RunningSummaryCard extends ConsumerWidget {
                 child: ElevatedButton.icon(
                   onPressed: () => context.push(AppRoutes.liveRun),
                   icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                  label: const Text(
-                    'Chạy ngay (GPS)',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                  label: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Chạy ngay (GPS)',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF10B981),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    minimumSize: Size.zero,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.pill),

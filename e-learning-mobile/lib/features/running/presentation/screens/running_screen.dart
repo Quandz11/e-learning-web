@@ -12,11 +12,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class RunningScreen extends ConsumerWidget {
+class RunningScreen extends ConsumerStatefulWidget {
   const RunningScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RunningScreen> createState() => _RunningScreenState();
+}
+
+class _RunningScreenState extends ConsumerState<RunningScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(runningControllerProvider.notifier).load();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(runningControllerProvider);
     final controller = ref.read(runningControllerProvider.notifier);
     final summary = state.summary;

@@ -275,8 +275,8 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
                     style: TextStyle(fontSize: 13, color: context.textPrimary()),
                   ),
                   const Spacer(),
-                  TextButton(
-                    onPressed: () async {
+                  InkWell(
+                    onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
                         initialDate: _selectedDate,
@@ -287,7 +287,18 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
                         setState(() => _selectedDate = picked);
                       }
                     },
-                    child: const Text('Đổi ngày'),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      child: Text(
+                        'Đổi ngày',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

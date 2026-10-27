@@ -1,0 +1,38 @@
+# robots.txt for https://nhinanchualanh.vn
+
+User-agent: *
+Allow: /
+Allow: /courses
+Allow: /articles
+Allow: /testimonials
+Allow: /forum
+Allow: /pricing
+Allow: /ambassador
+Allow: /challenge-10-days
+Allow: /mission-vision
+Allow: /contact
+Allow: /chinh-sach-bao-mat
+Allow: /privacy-policy
+
+# Disallow authenticated portals and internal paths
+Disallow: /admin/
+Disallow: /care/
+Disallow: /agent/
+Disallow: /lecturer/
+Disallow: /profile
+Disallow: /my-courses
+Disallow: /my-learning-plan
+Disallow: /wellness-upgrade
+Disallow: /checkout
+Disallow: /payment/
+Disallow: /my-orders
+Disallow: /courses/*/learn
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /otp-verify
+Disallow: /delete-account
+Disallow: /xoa-tai-khoan
+
+# Sitemap location
+Sitemap: https://nhinanchualanh.vn/sitemap.xml

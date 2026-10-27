@@ -1,5 +1,5 @@
 import { tokenService } from './tokenService';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://skvi-api.azurewebsites.net/api';
+import { fetchWithFallback } from './apiConfig';
 
 export interface AuthResponse {
   accessToken: string;
@@ -24,7 +24,7 @@ export const authUtils = {
     const generation = tokenService.getGeneration();
     const run = async () => {
       if (generation !== tokenService.getGeneration()) throw new Error('Session changed');
-      const response = await fetch(`${API_BASE_URL}/auth/refresh`, { method: 'POST', credentials: 'include' });
+      const response = await fetchWithFallback('/auth/refresh', { method: 'POST', credentials: 'include' });
       if (generation !== tokenService.getGeneration()) throw new Error('Session changed');
       if (!response.ok) {
         if (response.status === 401) tokenService.clearToken();

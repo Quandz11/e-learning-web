@@ -78,6 +78,8 @@ class OfflineDownloadService {
     final ext = type == OfflineDownloadType.video ? 'mp4' : 'pdf';
     final savePath = '$baseDir/${type.name}_$id.$ext';
 
+    final tempPath = '$savePath.tmp';
+
     final headers = <String, String>{
       'Referer': 'https://iframe.mediadelivery.net/',
       'Origin': 'https://iframe.mediadelivery.net',
@@ -85,45 +87,97 @@ class OfflineDownloadService {
           'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
     };
 
-    await _dio.download(
-      remoteUrl,
-      savePath,
-      options: Options(headers: headers),
-      onReceiveProgress: (received, total) {
-        if (total > 0 && onProgress != null) {
-          onProgress(received / total);
+    var downloadUrl = remoteUrl;
+    if (type == OfflineDownloadType.video &&
+        remoteUrl.contains('mediadelivery.net')) {
+      try {
+        final res = await _dio.get<String>(
+          remoteUrl,
+          options: Options(
+            headers: headers,
+            responseType: ResponseType.plain,
+            sendTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 15),
+          ),
+        );
+        final html = res.data ?? '';
+        final match =
+            RegExp(r'content="([^"]*play_[0-9]+p\.mp4[^"]*)"').firstMatch(html) ??
+            RegExp(r'content="([^"]*\.mp4[^"]*)"').firstMatch(html) ??
+            RegExp(r'''https:\/\/[^"'\s<>]+\/play_[0-9]+p\.mp4[^"'\s<>]*''').firstMatch(html) ??
+            RegExp(r'''https:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*''').firstMatch(html);
+        if (match != null) {
+          final matchedText = match.group(1) ?? match.group(0);
+          if (matchedText != null && matchedText.isNotEmpty) {
+            downloadUrl = matchedText.replaceAll('&amp;', '&');
+          }
         }
-      },
-    );
-
-    final file = File(savePath);
-    final size = await file.length();
-
-    if (type == OfflineDownloadType.video && size < 50000) {
-      if (await file.exists()) await file.delete();
-      throw Exception(
-        'Nội dung video này là trình phát trực tuyến, không hỗ trợ lưu tệp offline.',
-      );
+      } catch (_) {
+        // Fallback to original remoteUrl
+      }
     }
 
-    final newItem = OfflineDownloadItem(
-      id: id,
-      courseId: courseId,
-      courseTitle: courseTitle,
-      title: title,
-      type: type,
-      remoteUrl: remoteUrl,
-      localPath: savePath,
-      fileSizeBytes: size,
-      downloadedAt: DateTime.now(),
-    );
+    final tempFile = File(tempPath);
+    if (await tempFile.exists()) {
+      try {
+        await tempFile.delete();
+      } catch (_) {}
+    }
 
-    final currentItems = await getDownloadedItems();
-    final updated = currentItems.where((i) => i.id != id).toList()
-      ..add(newItem);
-    await _saveRegistry(updated);
+    try {
+      await _dio.download(
+        downloadUrl,
+        tempPath,
+        options: Options(headers: headers),
+        onReceiveProgress: (received, total) {
+          if (total > 0 && onProgress != null) {
+            onProgress(received / total);
+          }
+        },
+      );
 
-    return newItem;
+      final file = File(tempPath);
+      final size = await file.length();
+
+      if (type == OfflineDownloadType.video && size < 50000) {
+        if (await file.exists()) await file.delete();
+        throw Exception(
+          'Nội dung video này là trình phát trực tuyến, không hỗ trợ lưu tệp offline.',
+        );
+      }
+
+      final finalFile = File(savePath);
+      if (await finalFile.exists()) {
+        await finalFile.delete();
+      }
+      await file.rename(savePath);
+
+      final newItem = OfflineDownloadItem(
+        id: id,
+        courseId: courseId,
+        courseTitle: courseTitle,
+        title: title,
+        type: type,
+        remoteUrl: remoteUrl,
+        localPath: savePath,
+        fileSizeBytes: size,
+        downloadedAt: DateTime.now(),
+      );
+
+      final currentItems = await getDownloadedItems();
+      final updated = currentItems.where((i) => i.id != id).toList()
+        ..add(newItem);
+      await _saveRegistry(updated);
+
+      return newItem;
+    } catch (_) {
+      if (await tempFile.exists()) {
+        try {
+          await tempFile.delete();
+        } catch (_) {}
+      }
+      rethrow;
+    }
   }
 
   Future<void> deleteDownload(String id) async {

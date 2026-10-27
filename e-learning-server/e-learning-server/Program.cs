@@ -48,6 +48,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPhoneAuthService, PhoneAuthService>();
 builder.Services.AddScoped<IWellnessService, WellnessService>();
+builder.Services.AddScoped<IRunningService, RunningService>();
 builder.Services.AddScoped<IWellnessAccessService, WellnessAccessService>();
 builder.Services.AddScoped<IWellnessSettingsService, WellnessSettingsService>();
 builder.Services.AddSingleton<IWellnessRateLimiter, WellnessRateLimiter>();

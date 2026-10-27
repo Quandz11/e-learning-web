@@ -10,6 +10,7 @@ import 'package:e_learning_mobile/features/personalization/presentation/widgets/
 import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_stats_summary.dart';
 import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_water_tracker_card.dart';
 import 'package:e_learning_mobile/features/personalization/presentation/widgets/planner_workout_hero_card.dart';
+import 'package:e_learning_mobile/features/running/presentation/widgets/running_summary_card.dart';
 import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
@@ -262,6 +263,10 @@ class _PersonalizationScreenState extends ConsumerState<PersonalizationScreen> {
                             .logWorkout(mins, workoutTitle);
                       },
                     ),
+                    const SizedBox(height: 16),
+
+                    // Running & GPS Activity Tracker Card
+                    const RunningSummaryCard(),
                     const SizedBox(height: 16),
 
                     // 6. Eating Window Timeline & Real Meal Logging

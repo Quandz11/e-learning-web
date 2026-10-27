@@ -98,6 +98,8 @@ abstract final class AppRoutes {
   static const protectedHome = appRoot;
   static const paymentReturn = '/payment-return';
   static const paymentCancel = '/payment-cancel';
+  static const running = '/running';
+  static const liveRun = '/running/live';
 
   static const shellDestinations = <String>[
     appHome,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { homeSectionApi, type UpdateHomeVideoSectionDto } from '../../../services/homeSectionApi';
-import { authApi } from '../../../services/authApi';
+import { apiClient } from '../../../services/apiClient';
 
 interface VideoUploadResponse {
     videoId: string;
@@ -69,17 +69,10 @@ const AdminHomeSectionPage: React.FC = () => {
             formData.append('file', file);
             formData.append('title', file.name);
 
-            const token = authApi.getAccessToken();
-            const apiBase = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
-            const response = await fetch(`${apiBase}/videos/upload`, {
+            const result = await apiClient<VideoUploadResponse>('/videos/upload', {
                 method: 'POST',
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-                credentials: 'include',
                 body: formData,
             });
-
-            if (!response.ok) throw new Error('Upload failed');
-            const result: VideoUploadResponse = await response.json();
 
             setUploadProgress(100);
             setForm(prev => ({
@@ -239,7 +232,7 @@ const AdminHomeSectionPage: React.FC = () => {
                             {form.videoType === 'bunny' && (
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Upload file video</label>
-                                    
+
                                     {/* Current video indicator */}
                                     {form.videoId && (
                                         <div className="mb-3 flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">

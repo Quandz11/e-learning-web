@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAssetUrl } from '../services/apiConfig';
 
 interface PdfViewerProps {
     documentUrl: string;
@@ -11,13 +12,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ documentUrl, className = '' }) =>
 
     const getFullUrl = (url: string) => {
         if (!url) return '';
-        if (url.startsWith('http') || url.startsWith('blob:')) return url;
-
-        // Get base URL from env or default, strip /api if present since uploads are usually at root
-        const apiBase = import.meta.env.VITE_API_URL || 'https://localhost:7145/api';
-        const rootUrl = apiBase.replace(/\/api\/?$/, '');
-
-        return `${rootUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+        return getAssetUrl(url);
     };
 
     const handleLoad = () => {

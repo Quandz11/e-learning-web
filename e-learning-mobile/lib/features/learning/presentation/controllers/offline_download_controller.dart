@@ -1,5 +1,6 @@
 import 'package:e_learning_mobile/features/learning/data/models/offline_download_model.dart';
 import 'package:e_learning_mobile/features/learning/data/services/offline_download_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class OfflineDownloadState {
@@ -75,6 +76,7 @@ class OfflineDownloadController extends StateNotifier<OfflineDownloadState> {
     updatedProgress[id] = 0.0;
     state = state.copyWith(downloadProgress: updatedProgress);
 
+    var lastReported = 0.0;
     try {
       await _service.download(
         id: id,
@@ -84,9 +86,12 @@ class OfflineDownloadController extends StateNotifier<OfflineDownloadState> {
         type: type,
         remoteUrl: remoteUrl,
         onProgress: (prog) {
-          final pMap = Map<String, double>.from(state.downloadProgress);
-          pMap[id] = prog;
-          state = state.copyWith(downloadProgress: pMap);
+          if ((prog - lastReported).abs() >= 0.01 || prog >= 1.0) {
+            lastReported = prog;
+            final pMap = Map<String, double>.from(state.downloadProgress);
+            pMap[id] = prog;
+            state = state.copyWith(downloadProgress: pMap);
+          }
         },
       );
 
@@ -94,7 +99,8 @@ class OfflineDownloadController extends StateNotifier<OfflineDownloadState> {
       state = state.copyWith(downloadProgress: pMap);
       await load();
       return true;
-    } catch (_) {
+    } catch (e, stack) {
+      debugPrint('[OfflineDownload] Download error: $e\n$stack');
       final pMap = Map<String, double>.from(state.downloadProgress)..remove(id);
       state = state.copyWith(downloadProgress: pMap);
       return false;

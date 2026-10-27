@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- Trang chủ -->
+    <url>
+        <loc>https://nhinanchualanh.vn/</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+
+    <!-- Khóa học -->
+    <url>
+        <loc>https://nhinanchualanh.vn/courses</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Bài viết / Kiến thức -->
+    <url>
+        <loc>https://nhinanchualanh.vn/articles</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Thử thách 10 ngày -->
+    <url>
+        <loc>https://nhinanchualanh.vn/challenge-10-days</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Diễn đàn cộng đồng -->
+    <url>
+        <loc>https://nhinanchualanh.vn/forum</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Cảm nhận học viên -->
+    <url>
+        <loc>https://nhinanchualanh.vn/testimonials</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Bảng giá gói học / Hội viên -->
+    <url>
+        <loc>https://nhinanchualanh.vn/pricing</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Sứ mệnh & Tầm nhìn -->
+    <url>
+        <loc>https://nhinanchualanh.vn/mission-vision</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Đại sứ lan tỏa -->
+    <url>
+        <loc>https://nhinanchualanh.vn/ambassador</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Liên hệ hỗ trợ -->
+    <url>
+        <loc>https://nhinanchualanh.vn/contact</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Chính sách bảo mật -->
+    <url>
+        <loc>https://nhinanchualanh.vn/chinh-sach-bao-mat</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+
+    <url>
+        <loc>https://nhinanchualanh.vn/privacy-policy</loc>
+        <lastmod>2026-10-21</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+    </url>
+
+</urlset>

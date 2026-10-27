@@ -18,6 +18,7 @@ import 'package:e_learning_mobile/shared/widgets/app_card.dart';
 import 'package:e_learning_mobile/shared/widgets/app_empty_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_error_view.dart';
 import 'package:e_learning_mobile/shared/widgets/app_skeleton.dart';
+import 'package:e_learning_mobile/features/running/presentation/widgets/running_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -352,6 +353,8 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
             ),
             const SizedBox(height: AppSpacing.lg),
           ],
+          const RunningSummaryCard(),
+          const SizedBox(height: AppSpacing.lg),
         ],
 
         // Filtered results or full list

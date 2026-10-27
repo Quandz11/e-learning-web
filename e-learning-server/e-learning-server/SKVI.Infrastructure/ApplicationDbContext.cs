@@ -107,6 +107,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<WellnessPackageLesson> WellnessPackageLessons { get; set; }
     public DbSet<WellnessDailyTask> WellnessDailyTasks { get; set; }
     public DbSet<UserReminder> UserReminders { get; set; }
+    public DbSet<RunningActivity> RunningActivities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -730,6 +731,21 @@ public class ApplicationDbContext : DbContext
             .HasOne(t => t.WellnessPlan)
             .WithMany(p => p.DailyTasks)
             .HasForeignKey(t => t.WellnessPlanId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RunningActivity>()
+            .HasIndex(r => r.UserId);
+
+        modelBuilder.Entity<RunningActivity>()
+            .HasIndex(r => r.ActivityDate);
+
+        modelBuilder.Entity<RunningActivity>()
+            .HasIndex(r => new { r.UserId, r.ActivityDate });
+
+        modelBuilder.Entity<RunningActivity>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
             
         // Relationships are automatically configured by EF Core conventions based on navigation properties,

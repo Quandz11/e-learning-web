@@ -50,6 +50,8 @@ import 'package:e_learning_mobile/features/settings/presentation/screens/offline
 import 'package:e_learning_mobile/features/settings/presentation/screens/settings_screen.dart';
 import 'package:e_learning_mobile/features/settings/presentation/screens/terms_and_privacy_screen.dart';
 import 'package:e_learning_mobile/features/widgets/presentation/screens/widget_preview_gallery_screen.dart';
+import 'package:e_learning_mobile/features/running/presentation/screens/running_screen.dart';
+import 'package:e_learning_mobile/features/running/presentation/screens/live_run_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -310,6 +312,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.paymentCancel,
         builder: (_, state) => PaymentCancelPlaceholderScreen(uri: state.uri),
+      ),
+      GoRoute(
+        path: AppRoutes.running,
+        builder: (_, __) => const RunningScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.liveRun,
+        builder: (_, __) => const LiveRunScreen(),
       ),
     ],
     errorBuilder: (_, state) => UnknownRouteScreen(uri: state.uri),

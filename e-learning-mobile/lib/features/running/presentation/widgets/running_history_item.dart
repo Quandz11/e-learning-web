@@ -1,4 +1,5 @@
 import 'package:e_learning_mobile/features/running/data/models/running_models.dart';
+import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
@@ -19,7 +20,8 @@ class RunningHistoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDark;
-    final dateStr = DateFormat('dd/MM/yyyy HH:mm').format(activity.activityDate.toLocal());
+    final dateStr =
+        DateFormat('dd/MM/yyyy HH:mm').format(activity.activityDate.toLocal());
 
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -32,12 +34,18 @@ class RunningHistoryItem extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: activity.isGps
-                      ? (isDark ? const Color(0xFF132B20) : const Color(0xFFE8F5E9))
-                      : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+                      ? (isDark
+                          ? const Color(0xFF132B20)
+                          : AppColors.mint)
+                      : (isDark
+                          ? const Color(0xFF1E293B)
+                          : AppColors.warmSurface),
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                   border: Border.all(
                     color: activity.isGps
-                        ? const Color(0xFF10B981).withValues(alpha: 0.3)
+                        ? (isDark
+                            ? AppColors.primary.withValues(alpha: 0.4)
+                            : AppColors.primaryLight)
                         : Colors.transparent,
                     width: 0.8,
                   ),
@@ -46,9 +54,13 @@ class RunningHistoryItem extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      activity.isGps ? Icons.gps_fixed_rounded : Icons.edit_note_rounded,
+                      activity.isGps
+                          ? Icons.gps_fixed_rounded
+                          : Icons.edit_note_rounded,
                       size: 12,
-                      color: activity.isGps ? const Color(0xFF10B981) : context.textMuted(),
+                      color: activity.isGps
+                          ? AppColors.primary
+                          : context.textMuted(),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -56,7 +68,9 @@ class RunningHistoryItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: activity.isGps ? const Color(0xFF10B981) : context.textMuted(),
+                        color: activity.isGps
+                            ? AppColors.primary
+                            : context.textMuted(),
                       ),
                     ),
                   ],
@@ -70,6 +84,8 @@ class RunningHistoryItem extends StatelessWidget {
                     fontSize: 12,
                     color: context.textMuted(),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               IconButton(
@@ -78,13 +94,17 @@ class RunningHistoryItem extends StatelessWidget {
                   size: 18,
                   color: context.textMuted(),
                 ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 tooltip: 'Xóa buổi chạy',
                 onPressed: () {
                   showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: const Text('Xác nhận xóa'),
-                      content: const Text('Bạn có chắc chắn muốn xóa bản ghi buổi chạy này?'),
+                      content: const Text(
+                        'Bạn có chắc chắn muốn xóa bản ghi buổi chạy này?',
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
@@ -95,7 +115,10 @@ class RunningHistoryItem extends StatelessWidget {
                             Navigator.pop(ctx, true);
                             onDelete();
                           },
-                          child: const Text('Xóa', style: TextStyle(color: Colors.redAccent)),
+                          child: const Text(
+                            'Xóa',
+                            style: TextStyle(color: Colors.redAccent),
+                          ),
                         ),
                       ],
                     ),
@@ -112,6 +135,8 @@ class RunningHistoryItem extends StatelessWidget {
               fontWeight: FontWeight.w700,
               color: context.textPrimary(),
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           if (activity.notes != null && activity.notes!.isNotEmpty) ...[
             const SizedBox(height: 2),
@@ -122,28 +147,37 @@ class RunningHistoryItem extends StatelessWidget {
                 color: context.textMuted(),
                 fontStyle: FontStyle.italic,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
           const SizedBox(height: AppSpacing.md),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _MetricColumn(
-                label: 'Quãng đường',
-                value: '${activity.distanceKm.toStringAsFixed(2)} km',
-                highlight: true,
+              Expanded(
+                child: _MetricColumn(
+                  label: 'Quãng đường',
+                  value: '${activity.distanceKm.toStringAsFixed(2)} km',
+                  highlight: true,
+                ),
               ),
-              _MetricColumn(
-                label: 'Thời gian',
-                value: activity.durationFormatted,
+              Expanded(
+                child: _MetricColumn(
+                  label: 'Thời gian',
+                  value: activity.durationFormatted,
+                ),
               ),
-              _MetricColumn(
-                label: 'Pace TB',
-                value: activity.paceFormatted,
+              Expanded(
+                child: _MetricColumn(
+                  label: 'Pace TB',
+                  value: activity.paceFormatted,
+                ),
               ),
-              _MetricColumn(
-                label: 'Calo',
-                value: '${activity.caloriesBurned} kcal',
+              Expanded(
+                child: _MetricColumn(
+                  label: 'Calo',
+                  value: '${activity.caloriesBurned} kcal',
+                ),
               ),
             ],
           ),
@@ -175,14 +209,20 @@ class _MetricColumn extends StatelessWidget {
             fontSize: 11,
             color: context.textMuted(),
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: highlight ? 16 : 14,
-            fontWeight: highlight ? FontWeight.w800 : FontWeight.w600,
-            color: highlight ? const Color(0xFF10B981) : context.textPrimary(),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: highlight ? 15 : 13,
+              fontWeight: highlight ? FontWeight.w800 : FontWeight.w600,
+              color: highlight ? AppColors.primary : context.textPrimary(),
+            ),
           ),
         ),
       ],

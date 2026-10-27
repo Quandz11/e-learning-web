@@ -328,11 +328,6 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
           const SizedBox(height: AppSpacing.md),
         ],
 
-        if (!_hasActiveFilters) ...[
-          const _EditorialBanner(),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-
         if (widget.state.refreshFailure != null) ...[
           _SectionErrorCard(
             message: _toVietnameseMessage(
@@ -346,6 +341,8 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
 
         if (!_hasActiveFilters) ...[
           const _QuickActionsSection(),
+          const SizedBox(height: AppSpacing.md),
+          const RunningSummaryCard(compact: true),
           const SizedBox(height: AppSpacing.lg),
           if (widget.state.continueLearning != null) ...[
             _ContinueLearningSection(
@@ -353,8 +350,6 @@ class _HomeContentState extends ConsumerState<_HomeContent> {
             ),
             const SizedBox(height: AppSpacing.lg),
           ],
-          const RunningSummaryCard(),
-          const SizedBox(height: AppSpacing.lg),
         ],
 
         // Filtered results or full list
@@ -909,114 +904,6 @@ class _HomeFilterBottomSheetState extends State<_HomeFilterBottomSheet> {
   }
 }
 
-class _EditorialBanner extends StatelessWidget {
-  const _EditorialBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0F623F), Color(0xFF1B8A5A)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0F623F).withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -20,
-            bottom: -30,
-            child: Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.08),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 40,
-            top: -20,
-            child: Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.06),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(18),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.eco_rounded,
-                    color: Colors.white,
-                    size: 26,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                const Expanded(
-                  child: Text(
-                    'Kiến thức hôm nay cho một phiên bản tốt hơn của chính mình',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 14,
-                      height: 1.4,
-                      letterSpacing: -0.1,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.25),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => context.go(AppRoutes.appLearning),
-                    icon: const Icon(
-                      Icons.chevron_right_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _GreetingData {
   const _GreetingData({

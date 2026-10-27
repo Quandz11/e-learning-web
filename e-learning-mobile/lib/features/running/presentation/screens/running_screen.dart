@@ -1,7 +1,9 @@
 import 'package:e_learning_mobile/core/routing/deep_link_config.dart';
+import 'package:e_learning_mobile/features/running/data/models/running_models.dart';
 import 'package:e_learning_mobile/features/running/presentation/controllers/running_controller.dart';
 import 'package:e_learning_mobile/features/running/presentation/widgets/log_manual_run_sheet.dart';
 import 'package:e_learning_mobile/features/running/presentation/widgets/running_history_item.dart';
+import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
@@ -39,9 +41,12 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
     final colorScheme = context.colorScheme;
 
     return Scaffold(
-      backgroundColor: isDark ? colorScheme.surface : const Color(0xFFF8FAF9),
+      backgroundColor: isDark ? colorScheme.surface : AppColors.background,
       appBar: AppBar(
-        title: const Text('Hoạt động Chạy bộ'),
+        title: const Text(
+          'Hoạt động Chạy bộ',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -52,13 +57,16 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
         ],
       ),
       body: state.isLoading && state.activities.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : state.errorMessage != null && state.activities.isEmpty
               ? AppErrorView(
                   message: state.errorMessage!,
                   onRetry: controller.load,
                 )
               : RefreshIndicator(
+                  color: AppColors.primary,
                   onRefresh: controller.refresh,
                   child: ListView(
                     padding: const EdgeInsets.all(AppSpacing.md),
@@ -73,18 +81,20 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                           Expanded(
                             child: _StatCard(
                               label: 'Tuần này',
-                              value: '${summary.weekDistanceKm.toStringAsFixed(1)} km',
+                              value:
+                                  '${summary.weekDistanceKm.toStringAsFixed(1)} km',
                               icon: Icons.calendar_view_week_rounded,
-                              iconColor: const Color(0xFF10B981),
+                              iconColor: AppColors.primary,
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: _StatCard(
                               label: 'Tháng này',
-                              value: '${summary.monthDistanceKm.toStringAsFixed(1)} km',
+                              value:
+                                  '${summary.monthDistanceKm.toStringAsFixed(1)} km',
                               icon: Icons.calendar_month_rounded,
-                              iconColor: const Color(0xFF3B82F6),
+                              iconColor: const Color(0xFF2980B9),
                             ),
                           ),
                         ],
@@ -97,7 +107,7 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                               label: 'Số buổi chạy',
                               value: '${summary.totalRunsCount}',
                               icon: Icons.repeat_rounded,
-                              iconColor: const Color(0xFFF59E0B),
+                              iconColor: const Color(0xFFD99B26),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
@@ -120,18 +130,32 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                             flex: 3,
                             child: ElevatedButton.icon(
                               onPressed: () => context.push(AppRoutes.liveRun),
-                              icon: const Icon(Icons.play_arrow_rounded, size: 22),
-                              label: const Text(
-                                'Bắt đầu chạy GPS',
-                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                              icon: const Icon(
+                                Icons.play_arrow_rounded,
+                                size: 22,
+                              ),
+                              label: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'Bắt đầu chạy GPS',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF10B981),
+                                backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 12,
+                                ),
+                                minimumSize: Size.zero,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.pill),
                                 ),
                               ),
                             ),
@@ -141,15 +165,35 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                             flex: 2,
                             child: OutlinedButton.icon(
                               onPressed: () => LogManualRunSheet.show(context),
-                              icon: const Icon(Icons.edit_note_rounded, size: 20),
-                              label: const Text('Nhập km'),
+                              icon: const Icon(
+                                Icons.edit_note_rounded,
+                                size: 18,
+                                color: AppColors.primary,
+                              ),
+                              label: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'Nhập km',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 8,
+                                ),
+                                minimumSize: Size.zero,
                                 side: BorderSide(
-                                  color: colorScheme.primary.withValues(alpha: 0.5),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.4,
+                                  ),
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.pill),
                                 ),
                               ),
                             ),
@@ -170,11 +214,25 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                               color: context.textPrimary(),
                             ),
                           ),
-                          Text(
-                            '${state.totalCount} buổi',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: context.textMuted(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? AppColors.primaryDark
+                                  : AppColors.primaryLight,
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.pill),
+                            ),
+                            child: Text(
+                              '${state.totalCount} buổi',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
                             ),
                           ),
                         ],
@@ -186,13 +244,16 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 32),
                           child: AppEmptyView(
-                            message: 'Chưa có buổi chạy nào.\nHãy bắt đầu buổi chạy GPS hoặc nhập số km để theo dõi hành trình!',
+                            message:
+                                'Chưa có buổi chạy nào.\nHãy bắt đầu buổi chạy GPS hoặc nhập số km để theo dõi hành trình!',
                           ),
                         )
                       else
                         ...state.activities.map(
                           (act) => Padding(
-                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.sm,
+                            ),
                             child: RunningHistoryItem(
                               activity: act,
                               onDelete: () => controller.deleteRun(act.id),
@@ -205,108 +266,176 @@ class _RunningScreenState extends ConsumerState<RunningScreen> {
     );
   }
 
-  Widget _buildAccumulatedHeroCard(BuildContext context, dynamic summary, bool isDark) {
-    final totalKm = summary.totalDistanceKm as double;
-    final longestKm = summary.longestRunKm as double;
-    final totalCal = summary.totalCalories as int;
+  Widget _buildAccumulatedHeroCard(
+    BuildContext context,
+    RunningSummary summary,
+    bool isDark,
+  ) {
+    final totalKm = summary.totalDistanceKm;
+    final longestKm = summary.longestRunKm;
+    final totalCal = summary.totalCalories;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF064E3B), const Color(0xFF0F766E)]
-              : [const Color(0xFF059669), const Color(0xFF10B981)],
+              ? const [Color(0xFF072719), AppColors.primary]
+              : const [AppColors.primary, Color(0xFF1B8A5A)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF059669).withValues(alpha: 0.25),
+            color: AppColors.primary.withValues(alpha: 0.25),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'TỔNG QUÃNG ĐƯỜNG TÍCH LŨY',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
-                ),
+          // Subtle decorative circles matching app aesthetic
+          Positioned(
+            right: -20,
+            bottom: -30,
+            child: Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.07),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+            ),
+          ),
+          Positioned(
+            right: 50,
+            top: -20,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(Icons.bolt_rounded, size: 13, color: Colors.amberAccent),
-                    const SizedBox(width: 2),
-                    Text(
-                      '${summary.currentStreakDays} ngày liên tiếp',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                    const Flexible(
+                      child: Text(
+                        'TỔNG TÍCH LŨY',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.0,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.bolt_rounded,
+                            size: 13,
+                            color: Colors.amberAccent,
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            '${summary.currentStreakDays} ngày liên tiếp',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                totalKm.toStringAsFixed(1),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 48,
-                  fontWeight: FontWeight.w900,
+                const SizedBox(height: 8),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        totalKm.toStringAsFixed(1),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 44,
+                          fontWeight: FontWeight.w900,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'km',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              const Text(
-                'km',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                const SizedBox(height: 10),
+                Container(
+                  height: 1,
+                  color: Colors.white.withValues(alpha: 0.15),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(height: 1, color: Colors.white.withValues(alpha: 0.15)),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Kỷ lục xa nhất: ${longestKm.toStringAsFixed(1)} km',
-                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
-              ),
-              Text(
-                'Đã đốt: $totalCal kcal',
-                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
-              ),
-            ],
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Kỷ lục xa nhất: ${longestKm.toStringAsFixed(1)} km',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Đã đốt: $totalCal kcal',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -330,21 +459,25 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm + 4,
+        vertical: AppSpacing.sm + 2,
+      ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: Icon(icon, color: iconColor, size: 18),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   label,
@@ -352,14 +485,20 @@ class _StatCard extends StatelessWidget {
                     fontSize: 11,
                     color: context.textMuted(),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: context.textPrimary(),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: context.textPrimary(),
+                    ),
                   ),
                 ),
               ],

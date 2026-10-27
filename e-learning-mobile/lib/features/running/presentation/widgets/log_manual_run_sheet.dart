@@ -1,4 +1,5 @@
 import 'package:e_learning_mobile/features/running/presentation/controllers/running_controller.dart';
+import 'package:e_learning_mobile/shared/theme/app_colors.dart';
 import 'package:e_learning_mobile/shared/theme/app_radius.dart';
 import 'package:e_learning_mobile/shared/theme/app_spacing.dart';
 import 'package:e_learning_mobile/shared/theme/app_theme_extensions.dart';
@@ -26,12 +27,13 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
   final _formKey = GlobalKey<FormState>();
   final _distanceController = TextEditingController(text: '5.0');
   final _minutesController = TextEditingController(text: '30');
-  final _titleController = TextEditingController(text: 'Chạy máy trong nhà');
+  final _titleController = TextEditingController(text: 'Chạy bộ ngoài trời');
   final _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
 
-  double get _distance => double.tryParse(_distanceController.text.replaceAll(',', '.')) ?? 0.0;
+  double get _distance =>
+      double.tryParse(_distanceController.text.replaceAll(',', '.')) ?? 0.0;
   int get _minutes => int.tryParse(_minutesController.text) ?? 0;
 
   String get _calculatedPace {
@@ -63,13 +65,18 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
     }
 
     setState(() => _isLoading = true);
-    final success = await ref.read(runningControllerProvider.notifier).logManualRun(
-      distanceKm: _distance,
-      durationSeconds: _minutes * 60,
-      activityDate: _selectedDate,
-      title: _titleController.text.trim().isEmpty ? 'Chạy bộ' : _titleController.text.trim(),
-      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-    );
+    final success =
+        await ref.read(runningControllerProvider.notifier).logManualRun(
+              distanceKm: _distance,
+              durationSeconds: _minutes * 60,
+              activityDate: _selectedDate,
+              title: _titleController.text.trim().isEmpty
+                  ? 'Chạy bộ'
+                  : _titleController.text.trim(),
+              notes: _notesController.text.trim().isEmpty
+                  ? null
+                  : _notesController.text.trim(),
+            );
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -78,12 +85,14 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ Đã ghi nhận buổi chạy thành công!'),
-            backgroundColor: Color(0xFF10B981),
+            backgroundColor: AppColors.primary,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không thể lưu buổi chạy. Vui lòng thử lại.')),
+          const SnackBar(
+            content: Text('Không thể lưu buổi chạy. Vui lòng thử lại.'),
+          ),
         );
       }
     }
@@ -97,9 +106,15 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       ),
-      padding: EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg + bottomInset),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.lg + bottomInset,
+      ),
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -109,7 +124,7 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
             children: [
               Center(
                 child: Container(
-                  width: 40,
+                  width: 36,
                   height: 4,
                   decoration: BoxDecoration(
                     color: context.textMuted().withValues(alpha: 0.3),
@@ -144,21 +159,48 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Quãng đường (km)', style: TextStyle(fontSize: 12, color: context.textMuted())),
-                        const SizedBox(height: 4),
+                        Text(
+                          'Quãng đường (km)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: context.textMuted(),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         TextFormField(
                           controller: _distanceController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
                             hintText: '5.0',
                             suffixText: 'km',
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.md),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.md),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
+                            ),
                           ),
                           validator: (v) {
                             if (v == null || v.isEmpty) return 'Bắt buộc';
-                            final val = double.tryParse(v.replaceAll(',', '.'));
+                            final val =
+                                double.tryParse(v.replaceAll(',', '.'));
                             if (val == null || val <= 0) return 'Hợp lệ > 0';
                             return null;
                           },
@@ -171,8 +213,15 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Thời gian (phút)', style: TextStyle(fontSize: 12, color: context.textMuted())),
-                        const SizedBox(height: 4),
+                        Text(
+                          'Thời gian (phút)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: context.textMuted(),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         TextFormField(
                           controller: _minutesController,
                           keyboardType: TextInputType.number,
@@ -180,8 +229,25 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
                           decoration: InputDecoration(
                             hintText: '30',
                             suffixText: 'phút',
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.md),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.md),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
+                            ),
                           ),
                           validator: (v) {
                             if (v == null || v.isEmpty) return 'Bắt buộc';
@@ -197,19 +263,68 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              // Presets chips
+              // Presets chips styled nicely
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _presetKmChip(3.0),
-                    _presetKmChip(5.0),
-                    _presetKmChip(10.0),
+                    _presetChip(
+                      label: '3 km',
+                      onTap: () {
+                        _distanceController.text = '3.0';
+                        setState(() {});
+                      },
+                    ),
+                    _presetChip(
+                      label: '5 km',
+                      onTap: () {
+                        _distanceController.text = '5.0';
+                        setState(() {});
+                      },
+                    ),
+                    _presetChip(
+                      label: '10 km',
+                      onTap: () {
+                        _distanceController.text = '10.0';
+                        setState(() {});
+                      },
+                    ),
+                    _presetChip(
+                      label: '21 km',
+                      onTap: () {
+                        _distanceController.text = '21.0';
+                        setState(() {});
+                      },
+                    ),
                     const SizedBox(width: 8),
-                    _presetMinChip(20),
-                    _presetMinChip(30),
-                    _presetMinChip(45),
-                    _presetMinChip(60),
+                    _presetChip(
+                      label: '20 phút',
+                      onTap: () {
+                        _minutesController.text = '20';
+                        setState(() {});
+                      },
+                    ),
+                    _presetChip(
+                      label: '30 phút',
+                      onTap: () {
+                        _minutesController.text = '30';
+                        setState(() {});
+                      },
+                    ),
+                    _presetChip(
+                      label: '45 phút',
+                      onTap: () {
+                        _minutesController.text = '45';
+                        setState(() {});
+                      },
+                    ),
+                    _presetChip(
+                      label: '60 phút',
+                      onTap: () {
+                        _minutesController.text = '60';
+                        setState(() {});
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -217,33 +332,67 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
 
               // Calculated info preview
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF132B20) : const Color(0xFFF0FDF4),
+                  color: isDark
+                      ? const Color(0xFF132B20)
+                      : AppColors.mint,
                   borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.primary.withValues(alpha: 0.3)
+                        : AppColors.primaryLight,
+                    width: 0.8,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Column(
                       children: [
-                        Text('Tốc độ Pace', style: TextStyle(fontSize: 11, color: context.textMuted())),
+                        Text(
+                          'Tốc độ Pace',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: context.textMuted(),
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           _calculatedPace,
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF10B981)),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ],
                     ),
-                    Container(height: 24, width: 1, color: context.textMuted().withValues(alpha: 0.2)),
+                    Container(
+                      height: 24,
+                      width: 1,
+                      color: context.textMuted().withValues(alpha: 0.2),
+                    ),
                     Column(
                       children: [
-                        Text('Calo ước tính', style: TextStyle(fontSize: 11, color: context.textMuted())),
+                        Text(
+                          'Calo ước tính',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: context.textMuted(),
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           '$_calculatedCalories kcal',
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF10B981)),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ],
                     ),
@@ -253,14 +402,34 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
               const SizedBox(height: AppSpacing.md),
 
               // Title input
-              Text('Tiêu đề buổi chạy', style: TextStyle(fontSize: 12, color: context.textMuted())),
-              const SizedBox(height: 4),
+              Text(
+                'Tiêu đề buổi chạy',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: context.textMuted(),
+                ),
+              ),
+              const SizedBox(height: 6),
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
                   hintText: 'Ví dụ: Chạy sáng, Chạy máy...',
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.5,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -268,11 +437,19 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
               // Date picker row
               Row(
                 children: [
-                  Icon(Icons.calendar_today_rounded, size: 16, color: context.textMuted()),
+                  const Icon(
+                    Icons.calendar_today_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Ngày chạy: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
-                    style: TextStyle(fontSize: 13, color: context.textPrimary()),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: context.textPrimary(),
+                    ),
                   ),
                   const Spacer(),
                   InkWell(
@@ -280,16 +457,20 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
                       final picked = await showDatePicker(
                         context: context,
                         initialDate: _selectedDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                        firstDate:
+                            DateTime.now().subtract(const Duration(days: 365)),
                         lastDate: DateTime.now(),
                       );
                       if (picked != null) {
                         setState(() => _selectedDate = picked);
                       }
                     },
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       child: Text(
                         'Đổi ngày',
                         style: TextStyle(
@@ -310,20 +491,29 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.pill)),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
                   ),
                   child: _isLoading
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text(
                           'Lưu Buổi Chạy',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                 ),
               ),
@@ -334,32 +524,31 @@ class _LogManualRunSheetState extends ConsumerState<LogManualRunSheet> {
     );
   }
 
-  Widget _presetKmChip(double km) {
+  Widget _presetChip({required String label, required VoidCallback onTap}) {
     return Padding(
       padding: const EdgeInsets.only(right: 6),
-      child: ActionChip(
-        label: Text('${km.toStringAsFixed(0)} km'),
-        onPressed: () {
-          _distanceController.text = km.toString();
-          setState(() {});
-        },
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        labelStyle: const TextStyle(fontSize: 11),
-      ),
-    );
-  }
-
-  Widget _presetMinChip(int min) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: ActionChip(
-        label: Text('$min phút'),
-        onPressed: () {
-          _minutesController.text = min.toString();
-          setState(() {});
-        },
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        labelStyle: const TextStyle(fontSize: 11),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: AppColors.mint,
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            border: Border.all(
+              color: AppColors.primaryLight,
+              width: 0.8,
+            ),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
       ),
     );
   }

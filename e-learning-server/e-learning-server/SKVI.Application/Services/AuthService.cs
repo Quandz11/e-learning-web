@@ -255,7 +255,7 @@ public class AuthService : IAuthService
         
         // Send OTP Email
         string subject = "Xác thực tài khoản của bạn - SKVI E-Learning";
-        string body = $"<h3>Chào mừng bạn đến với SKVI!</h3><p>Mã xác thực tài khoản của bạn là: <strong>{otp}</strong></p><p>Mã này có hiệu lực trong 10 phút.</p>";
+        string body = EmailTemplateService.RegistrationOtp(otp);
         
         await Task.Run(() => BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body)));
         
@@ -322,7 +322,7 @@ public class AuthService : IAuthService
 
         // Send OTP Email
         string subject = "Gửi lại mã xác thực - SKVI E-Learning";
-        string body = $"<h3>Mã xác thực tài khoản</h3><p>Mã xác thực mới của bạn là: <strong>{otp}</strong></p><p>Mã này có hiệu lực trong 10 phút.</p>";
+        string body = EmailTemplateService.ResendRegistrationOtp(otp);
         
         BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body));
 
@@ -473,7 +473,7 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync(cancellationToken);
 
         string subject = "Mã xác thực đặt lại mật khẩu - SKVI E-Learning";
-        string body = $"<h3>Yêu cầu đặt lại mật khẩu</h3><p>Mã OTP của bạn là: <strong>{otp}</strong></p><p>Mã này có hiệu lực trong 10 phút.</p>";
+        string body = EmailTemplateService.ForgotPasswordOtp(otp);
 
         await Task.Run(() => BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body)), cancellationToken);
     }

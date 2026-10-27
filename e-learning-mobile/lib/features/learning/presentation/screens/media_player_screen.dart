@@ -1085,11 +1085,11 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
 
     final isResolving = _resolvingUrls.contains(partId);
 
-    if (isResolving || isDownloading) {
-      final progVal = isResolving ? null : (progress > 0 ? progress : null);
-      final labelText = isResolving
-          ? 'Đang chuẩn bị...'
-          : 'Đang tải ${(progress * 100).toInt()}%';
+    if (isDownloading) {
+      final progVal = progress > 0 ? progress : null;
+      final labelText = progress > 0
+          ? 'Đang tải ${(progress * 100).toInt()}%'
+          : 'Đang tải...';
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
@@ -1128,19 +1128,58 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
       );
     }
 
+    if (isResolving) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: context.isDark
+              ? const Color(0xFF1C2D24)
+              : const Color(0xFFF0FDF4),
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(
+            color: context.colorScheme.primary.withValues(alpha: 0.3),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                value: null,
+                strokeWidth: 2.0,
+                color: context.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Đang chuẩn bị...',
+              style: TextStyle(
+                color: context.colorScheme.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () async {
-          if (_resolvingUrls.contains(partId)) return;
+          if (_resolvingUrls.contains(partId) ||
+              offlineState.isDownloading(partId)) {
+            return;
+          }
           setState(() => _resolvingUrls.add(partId));
           try {
-            var rawUrl =
-                resolveDirectPlaybackUri(detail.part)?.toString() ??
-                detail.part.playbackUrl ??
-                detail.part.embedUrl ??
-                '';
-            if (detail.part.videoId != null &&
+            var rawUrl = detail.part.embedUrl?.trim() ?? '';
+            if (rawUrl.isEmpty &&
+                detail.part.videoId != null &&
                 detail.part.videoId!.isNotEmpty) {
               try {
                 final source = await ref
@@ -1160,6 +1199,11 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
               }
             }
             if (rawUrl.isEmpty) {
+              rawUrl = resolveDirectPlaybackUri(detail.part)?.toString() ??
+                  detail.part.playbackUrl ??
+                  '';
+            }
+            if (rawUrl.isEmpty) {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -1168,6 +1212,11 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
                 );
               }
               return;
+            }
+
+            // Finished resolving URL - clear resolving state before starting the actual download!
+            if (mounted) {
+              setState(() => _resolvingUrls.remove(partId));
             }
 
             final success = await offlineController.startDownload(
@@ -1198,7 +1247,7 @@ class _MediaPlayerScreenState extends ConsumerState<MediaPlayerScreen> {
               }
             }
           } finally {
-            if (mounted) {
+            if (mounted && _resolvingUrls.contains(partId)) {
               setState(() => _resolvingUrls.remove(partId));
             }
           }

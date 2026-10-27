@@ -752,7 +752,12 @@ class _LearningVideoEmbedPlayerState
         },
       )
       ..setNavigationDelegate(
-        NavigationDelegate(onPageFinished: (_) => _injectJS()),
+        NavigationDelegate(
+          onPageFinished: (_) => _injectJS(),
+          onWebResourceError: (error) {
+            // Silently ignore non-fatal subresource loading errors
+          },
+        ),
       )
       ..loadRequest(
         _buildUri(widget.url),

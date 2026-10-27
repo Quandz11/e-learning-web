@@ -78,6 +78,8 @@ class OfflineDownloadService {
     final ext = type == OfflineDownloadType.video ? 'mp4' : 'pdf';
     final savePath = '$baseDir/${type.name}_$id.$ext';
 
+    final tempPath = '$savePath.tmp';
+
     final headers = <String, String>{
       'Referer': 'https://iframe.mediadelivery.net/',
       'Origin': 'https://iframe.mediadelivery.net',
@@ -100,55 +102,82 @@ class OfflineDownloadService {
         );
         final html = res.data ?? '';
         final match =
-            RegExp(r'content="([^"]+\/play_[^"]+\.mp4[^"]*)"').firstMatch(html) ??
-            RegExp(r'content="([^"]+\.mp4[^"]*)"').firstMatch(html);
-        if (match != null && match.group(1) != null) {
-          downloadUrl = match.group(1)!;
+            RegExp(r'content="([^"]*play_[0-9]+p\.mp4[^"]*)"').firstMatch(html) ??
+            RegExp(r'content="([^"]*\.mp4[^"]*)"').firstMatch(html) ??
+            RegExp(r'''https:\/\/[^"'\s<>]+\/play_[0-9]+p\.mp4[^"'\s<>]*''').firstMatch(html) ??
+            RegExp(r'''https:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*''').firstMatch(html);
+        if (match != null) {
+          final matchedText = match.group(1) ?? match.group(0);
+          if (matchedText != null && matchedText.isNotEmpty) {
+            downloadUrl = matchedText.replaceAll('&amp;', '&');
+          }
         }
       } catch (_) {
         // Fallback to original remoteUrl
       }
     }
 
-    await _dio.download(
-      downloadUrl,
-      savePath,
-      options: Options(headers: headers),
-      onReceiveProgress: (received, total) {
-        if (total > 0 && onProgress != null) {
-          onProgress(received / total);
-        }
-      },
-    );
-
-    final file = File(savePath);
-    final size = await file.length();
-
-    if (type == OfflineDownloadType.video && size < 50000) {
-      if (await file.exists()) await file.delete();
-      throw Exception(
-        'Nội dung video này là trình phát trực tuyến, không hỗ trợ lưu tệp offline.',
-      );
+    final tempFile = File(tempPath);
+    if (await tempFile.exists()) {
+      try {
+        await tempFile.delete();
+      } catch (_) {}
     }
 
-    final newItem = OfflineDownloadItem(
-      id: id,
-      courseId: courseId,
-      courseTitle: courseTitle,
-      title: title,
-      type: type,
-      remoteUrl: remoteUrl,
-      localPath: savePath,
-      fileSizeBytes: size,
-      downloadedAt: DateTime.now(),
-    );
+    try {
+      await _dio.download(
+        downloadUrl,
+        tempPath,
+        options: Options(headers: headers),
+        onReceiveProgress: (received, total) {
+          if (total > 0 && onProgress != null) {
+            onProgress(received / total);
+          }
+        },
+      );
 
-    final currentItems = await getDownloadedItems();
-    final updated = currentItems.where((i) => i.id != id).toList()
-      ..add(newItem);
-    await _saveRegistry(updated);
+      final file = File(tempPath);
+      final size = await file.length();
 
-    return newItem;
+      if (type == OfflineDownloadType.video && size < 50000) {
+        if (await file.exists()) await file.delete();
+        throw Exception(
+          'Nội dung video này là trình phát trực tuyến, không hỗ trợ lưu tệp offline.',
+        );
+      }
+
+      final finalFile = File(savePath);
+      if (await finalFile.exists()) {
+        await finalFile.delete();
+      }
+      await file.rename(savePath);
+
+      final newItem = OfflineDownloadItem(
+        id: id,
+        courseId: courseId,
+        courseTitle: courseTitle,
+        title: title,
+        type: type,
+        remoteUrl: remoteUrl,
+        localPath: savePath,
+        fileSizeBytes: size,
+        downloadedAt: DateTime.now(),
+      );
+
+      final currentItems = await getDownloadedItems();
+      final updated = currentItems.where((i) => i.id != id).toList()
+        ..add(newItem);
+      await _saveRegistry(updated);
+
+      return newItem;
+    } catch (_) {
+      if (await tempFile.exists()) {
+        try {
+          await tempFile.delete();
+        } catch (_) {}
+      }
+      rethrow;
+    }
   }
 
   Future<void> deleteDownload(String id) async {

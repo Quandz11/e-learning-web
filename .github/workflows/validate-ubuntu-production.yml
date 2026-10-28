@@ -1,0 +1,50 @@
+name: Validate Ubuntu Production
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'e-learning-server/**'
+      - 'e-learning-web/**'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-backend:
+    name: Validate Backend Docker Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./e-learning-server/e-learning-server
+          file: ./e-learning-server/e-learning-server/Dockerfile
+          push: false
+
+  validate-frontend:
+    name: Validate Frontend Docker Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build Frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./e-learning-web
+          file: ./e-learning-web/Dockerfile
+          push: false
+          build-args: |
+            VITE_API_URL=https://api.cabinthaidoc.com/api
+            VITE_API_PRIMARY_URL=https://api.cabinthaidoc.com/api
+            VITE_API_FALLBACK_URL=https://api.cabinthaidoc.com/api

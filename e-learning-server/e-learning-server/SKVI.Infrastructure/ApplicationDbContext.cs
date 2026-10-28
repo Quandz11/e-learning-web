@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<UserSession> UserSessions { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<ZaloOAuthToken> ZaloOAuthTokens { get; set; }
     public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
     public DbSet<UserReferral> UserReferrals { get; set; }
     public DbSet<ReferralTransaction> ReferralTransactions { get; set; }
@@ -112,6 +113,29 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+	modelBuilder.Entity<ZaloOAuthToken>(entity =>
+{
+    entity.ToTable("ZaloOAuthTokens");
+
+    entity.HasKey(x => x.Id);
+
+    entity.Property(x => x.AccessTokenEncrypted)
+        .IsRequired()
+        .HasColumnType("nvarchar(max)");
+
+    entity.Property(x => x.RefreshTokenEncrypted)
+        .IsRequired()
+        .HasColumnType("nvarchar(max)");
+
+    entity.Property(x => x.AccessTokenExpiresAtUtc)
+        .HasColumnType("datetime2");
+
+    entity.Property(x => x.UpdatedAtUtc)
+        .HasColumnType("datetime2");
+
+    entity.Property(x => x.RowVersion)
+        .IsRowVersion();
+});
         modelBuilder.Entity<Message>().HasIndex(m => new { m.SenderId, m.ConversationId, m.ClientMessageId })
             .IsUnique().HasFilter("[ClientMessageId] IS NOT NULL");
         modelBuilder.Entity<UserSession>().HasIndex(s => new { s.UserId, s.RevokedAt });

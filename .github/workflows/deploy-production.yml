@@ -1,0 +1,199 @@
+name: Ubuntu Production CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'e-learning-server/**'
+      - 'e-learning-web/**'
+      - '.github/workflows/deploy-production.yml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skvi-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'e-learning-server/**'
+              - '.github/workflows/deploy-production.yml'
+            frontend:
+              - 'e-learning-web/**'
+              - '.github/workflows/deploy-production.yml'
+
+  build-backend:
+    name: Build Backend
+    needs: changes
+
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        needs.changes.outputs.backend == 'true'
+      }}
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push API
+        uses: docker/build-push-action@v6
+        with:
+          context: ./e-learning-server/e-learning-server
+          file: ./e-learning-server/e-learning-server/Dockerfile
+          push: true
+          tags: ghcr.io/quandz11/e-learning-server:prod-${{ github.sha }}
+
+  build-frontend:
+    name: Build Frontend
+    needs: changes
+
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        needs.changes.outputs.frontend == 'true'
+      }}
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Web
+        uses: docker/build-push-action@v6
+        with:
+          context: ./e-learning-web
+          file: ./e-learning-web/Dockerfile
+          push: true
+          build-args: |
+            VITE_API_URL=https://api.cabinthaidoc.com/api
+            VITE_API_PRIMARY_URL=https://api.cabinthaidoc.com/api
+            VITE_API_FALLBACK_URL=https://api.cabinthaidoc.com/api
+          tags: ghcr.io/quandz11/e-learning-web:prod-${{ github.sha }}
+
+  deploy:
+    name: Deploy Ubuntu Production
+
+    needs:
+      - changes
+      - build-backend
+      - build-frontend
+
+    if: >-
+      ${{
+        always() &&
+        vars.ENABLE_UBUNTU_PRODUCTION_DEPLOY == 'true' &&
+        github.ref == 'refs/heads/main' &&
+        needs.changes.result == 'success' &&
+        (
+          needs.build-backend.result == 'success' ||
+          needs.build-backend.result == 'skipped'
+        ) &&
+        (
+          needs.build-frontend.result == 'success' ||
+          needs.build-frontend.result == 'skipped'
+        ) &&
+        (
+          needs.build-backend.result == 'success' ||
+          needs.build-frontend.result == 'success'
+        )
+      }}
+
+    runs-on: [self-hosted, Linux, X64]
+
+    environment: production
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Deploy API
+        if: >-
+          ${{
+            github.event_name == 'workflow_dispatch' ||
+            needs.changes.outputs.backend == 'true'
+          }}
+        run: |
+          sudo -n /usr/local/sbin/skvi-deploy-api-prod "${GITHUB_SHA}"
+
+      - name: Verify API
+        if: >-
+          ${{
+            github.event_name == 'workflow_dispatch' ||
+            needs.changes.outputs.backend == 'true'
+          }}
+        run: |
+          curl --fail --silent --show-error \
+            http://127.0.0.1:8080/health
+
+      - name: Deploy Web
+        if: >-
+          ${{
+            github.event_name == 'workflow_dispatch' ||
+            needs.changes.outputs.frontend == 'true'
+          }}
+        run: |
+          sudo -n /usr/local/sbin/skvi-deploy-web "${GITHUB_SHA}"
+
+      - name: Verify Web
+        if: >-
+          ${{
+            github.event_name == 'workflow_dispatch' ||
+            needs.changes.outputs.frontend == 'true'
+          }}
+        run: |
+          curl --fail --silent --show-error \
+            http://127.0.0.1:8081/health

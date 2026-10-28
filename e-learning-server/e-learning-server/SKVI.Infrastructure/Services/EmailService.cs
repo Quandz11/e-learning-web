@@ -15,37 +15,49 @@ public class EmailService : IEmailService
         _smtpSettings = smtpSettings.Value;
     }
 
-    public async Task SendEmailAsync(string to, string subject, string body)
+    public async Task SendEmailAsync(
+        string to,
+        string subject,
+        string body)
     {
         var email = new MimeMessage();
-        email.From.Add(new MailboxAddress(_smtpSettings.SenderName, _smtpSettings.SenderEmail));
+
+        email.From.Add(new MailboxAddress(
+            _smtpSettings.SenderName,
+            _smtpSettings.SenderEmail
+        ));
+
         email.To.Add(MailboxAddress.Parse(to));
         email.Subject = subject;
 
-        var builder = new BodyBuilder
+        email.Body = new BodyBuilder
         {
             HtmlBody = body
-        };
-        email.Body = builder.ToMessageBody();
+        }.ToMessageBody();
 
         using var smtp = new SmtpClient();
+
         try
         {
-            await smtp.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password);
+            await smtp.ConnectAsync(
+                _smtpSettings.Server,
+                _smtpSettings.Port,
+                SecureSocketOptions.Auto
+            );
+
+            await smtp.AuthenticateAsync(
+                _smtpSettings.Username,
+                _smtpSettings.Password
+            );
+
             await smtp.SendAsync(email);
-        }
-        catch (Exception ex)
-        {
-            // Log exception or rethrow
-            Console.WriteLine($"Error sending email: {ex.Message}");
-            // For dev/test capability without real SMTP, we might want to suppress error or just log it.
-            // But for production, it should fail.
-            // Given the user instructions, I'll allow it to fail or just log.
         }
         finally
         {
-            await smtp.DisconnectAsync(true);
+            if (smtp.IsConnected)
+            {
+                await smtp.DisconnectAsync(true);
+            }
         }
     }
 }

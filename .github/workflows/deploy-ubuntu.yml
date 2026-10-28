@@ -1,15 +1,21 @@
-
 name: Ubuntu Staging CI/CD
 
 on:
   push:
     branches:
-      - main
       - ubuntu-staging
+    paths:
+      - 'e-learning-server/e-learning-server/**'
+      - '.github/workflows/deploy-ubuntu.yml'
+
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ubuntu-staging-deploy
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -42,3 +48,24 @@ jobs:
           push: true
           tags: ghcr.io/quandz11/e-learning-server:staging-${{ github.sha }}
 
+  deploy:
+    name: Deploy Ubuntu Staging
+    needs: build
+    runs-on: [self-hosted, Linux, X64]
+
+    environment: ubuntu-staging
+
+    permissions:
+      contents: read
+
+    if: github.ref == 'refs/heads/ubuntu-staging'
+
+    steps:
+      - name: Deploy API
+        run: |
+          sudo -n /usr/local/sbin/skvi-deploy-api "${GITHUB_SHA}"
+
+      - name: Verify API
+        run: |
+          curl --fail --silent --show-error \
+            http://127.0.0.1:8080/health

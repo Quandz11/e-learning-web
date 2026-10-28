@@ -56,7 +56,7 @@ public sealed class ZaloTokenManager
 
             token = new ZaloOAuthToken
             {
-          
+
                 AccessTokenEncrypted = _encryption.Encrypt(
                     _settings.AccessToken.Trim()),
                 RefreshTokenEncrypted = _encryption.Encrypt(

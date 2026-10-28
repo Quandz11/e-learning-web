@@ -520,6 +520,8 @@ namespace e_learning_server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IsPublished");
+
                     b.HasIndex("LecturerId");
 
                     b.ToTable("Courses");
@@ -1180,6 +1182,8 @@ namespace e_learning_server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId", "IsRead");
+
                     b.ToTable("Notifications");
                 });
 
@@ -1710,7 +1714,7 @@ namespace e_learning_server.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
@@ -1738,7 +1742,7 @@ namespace e_learning_server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid?>("ReferredByUserId")
                         .HasColumnType("uniqueidentifier");
@@ -1758,6 +1762,13 @@ namespace e_learning_server.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
+
+                    b.HasIndex("Phone")
+                        .HasFilter("[Phone] IS NOT NULL");
 
                     b.HasIndex("ReferredByUserId");
 
@@ -2612,6 +2623,39 @@ namespace e_learning_server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WhyChooseUsItems");
+                });
+
+            modelBuilder.Entity("SKVI.Domain.Entities.ZaloOAuthToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccessTokenEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("AccessTokenExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RefreshTokenEncrypted")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ZaloOAuthTokens", (string)null);
                 });
 
             modelBuilder.Entity("SKVI.Domain.Entities.AiChatMessage", b =>
